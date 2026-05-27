@@ -91,9 +91,9 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Face Harmony</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Show us your face.</h1>
-              <p className="mt-2 text-muted-foreground">We analyze symmetry & expressiveness. Used for compatibility — never for ranking.</p>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Sensory layer</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, gently.</h1>
+              <p className="mt-2 text-muted-foreground">We read soft harmony cues for compatibility — never for ranking, never visible to others without your consent.</p>
             </div>
             <div className="flex flex-col items-center gap-6 rounded-3xl border border-dashed border-border bg-card p-12">
               {!faceUploaded ? (
@@ -109,7 +109,7 @@ function Onboarding() {
                   <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow">
                     <span className="font-display text-4xl font-bold text-primary-foreground">{faceHarmony}%</span>
                   </div>
-                  <div className="text-sm text-muted-foreground">Face Harmony detected</div>
+                  <div className="text-sm text-muted-foreground">Sensory harmony noted (private)</div>
                 </div>
               )}
             </div>
@@ -146,8 +146,9 @@ function Onboarding() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Character DNA</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Six sliders. Be honest.</h1>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Emotional DNA</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">Six dimensions. Be honest.</h1>
+              <p className="mt-2 text-muted-foreground">These shape your archetype. You can always shift them later — people evolve.</p>
             </div>
             <div className="space-y-5 rounded-3xl border border-border bg-card p-6">
               {TRAITS.map((t) => (
@@ -190,7 +191,7 @@ function Onboarding() {
               onClick={finish}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
             >
-              Start the Mind Game <ArrowRight className="h-4 w-4" />
+              Discover your resonance <ArrowRight className="h-4 w-4" />
             </button>
           )}
         </div>

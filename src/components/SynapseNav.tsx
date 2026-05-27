@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Brain } from "lucide-react";
+import { Waves } from "lucide-react";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/onboarding", label: "Join" },
-  { to: "/game", label: "Game" },
-  { to: "/matches", label: "Matches" },
+  { to: "/onboarding", label: "Begin" },
+  { to: "/game", label: "Resonance" },
+  { to: "/matches", label: "Feed" },
+  { to: "/pricing", label: "Pricing" },
 ];
 
 export function SynapseNav() {
@@ -15,7 +16,7 @@ export function SynapseNav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
           <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-hero shadow-glow">
-            <Brain className="h-4 w-4 text-primary-foreground" />
+            <Waves className="h-4 w-4 text-primary-foreground" />
           </span>
           SYNAPSE
         </Link>
@@ -39,7 +40,7 @@ export function SynapseNav() {
           to="/onboarding"
           className="rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background transition-transform hover:scale-105"
         >
-          Get your score
+          Find your resonance
         </Link>
       </div>
     </header>

@@ -1,43 +1,46 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { SynapseNav } from "@/components/SynapseNav";
-import { computeComposite, saveProfile, type CharacterDNA, type Profession } from "@/lib/synapse-store";
-import { Brain, Timer } from "lucide-react";
+import {
+  computeComposite, deriveArchetype, saveProfile,
+  type CharacterDNA, type Profession,
+} from "@/lib/synapse-store";
+import { Waves, Timer } from "lucide-react";
 
 export const Route = createFileRoute("/game")({
-  head: () => ({ meta: [{ title: "Mind Game — SYNAPSE" }, { name: "description", content: "60-second cognitive assessment." }] }),
+  head: () => ({ meta: [{ title: "The Resonance — SYNAPSE" }, { name: "description", content: "A short, playful session that reveals your cognitive rhythm and emotional pacing." }] }),
   component: GamePage,
 });
 
-type Round = "intro" | "logic" | "memory" | "pattern" | "intuition" | "scoring";
+type Round = "intro" | "rhythm" | "memory" | "pattern" | "intuition" | "scoring";
 
 function GamePage() {
   const navigate = useNavigate();
   const [round, setRound] = useState<Round>("intro");
-  const [scores, setScores] = useState({ logic: 0, memory: 0, pattern: 0, intuition: 0 });
+  const [scores, setScores] = useState({ rhythm: 0, memory: 0, pattern: 0, intuition: 0 });
 
   const total = useMemo(() => {
-    const sum = scores.logic + scores.memory + scores.pattern + scores.intuition;
+    const sum = scores.rhythm + scores.memory + scores.pattern + scores.intuition;
     return Math.min(99, Math.round(sum / 4));
   }, [scores]);
 
   const finishRound = (key: keyof typeof scores, val: number) => {
     setScores((s) => ({ ...s, [key]: val }));
-    const order: Round[] = ["logic", "memory", "pattern", "intuition", "scoring"];
+    const order: Round[] = ["rhythm", "memory", "pattern", "intuition", "scoring"];
     const idx = order.indexOf(round as Round);
     setRound(order[idx + 1]);
   };
 
   useEffect(() => {
     if (round !== "scoring") return;
-    // assemble profile and save
     const draftRaw = sessionStorage.getItem("synapse-draft");
     if (!draftRaw) return;
     const draft = JSON.parse(draftRaw) as {
       name: string; age: number; city: string; profession: Profession; professionLabel: string;
       faceHarmony: number; character: CharacterDNA;
     };
-    const base = { ...draft, mindScore: total, avatar: `me-${Math.floor(Math.random() * 360)}` };
+    const archetype = deriveArchetype(draft.character, total);
+    const base = { ...draft, mindScore: total, archetype, avatar: `me-${Math.floor(Math.random() * 360)}` };
     const composite = computeComposite(base);
     saveProfile({ ...base, composite });
     const t = setTimeout(() => navigate({ to: "/results" }), 2200);
@@ -48,8 +51,8 @@ function GamePage() {
     <div className="min-h-screen">
       <SynapseNav />
       <div className="mx-auto max-w-3xl px-6 py-12">
-        {round === "intro" && <Intro onStart={() => setRound("logic")} />}
-        {round === "logic" && <LogicRound onDone={(v) => finishRound("logic", v)} />}
+        {round === "intro" && <Intro onStart={() => setRound("rhythm")} />}
+        {round === "rhythm" && <RhythmRound onDone={(v) => finishRound("rhythm", v)} />}
         {round === "memory" && <MemoryRound onDone={(v) => finishRound("memory", v)} />}
         {round === "pattern" && <PatternRound onDone={(v) => finishRound("pattern", v)} />}
         {round === "intuition" && <IntuitionRound onDone={(v) => finishRound("intuition", v)} />}
@@ -63,15 +66,16 @@ function Intro({ onStart }: { onStart: () => void }) {
   return (
     <div className="space-y-8 text-center">
       <div className="mx-auto flex h-20 w-20 animate-pulse-glow items-center justify-center rounded-2xl bg-gradient-hero">
-        <Brain className="h-10 w-10 text-primary-foreground" />
+        <Waves className="h-10 w-10 text-primary-foreground" />
       </div>
-      <h1 className="font-display text-5xl font-bold">The Mind Game</h1>
+      <h1 className="font-display text-5xl font-bold">The Resonance</h1>
       <p className="mx-auto max-w-md text-muted-foreground">
-        Four rounds. ~15 seconds each. There are no right answers — only your true cognitive fingerprint.
+        A short, playful session — not a test. We're mapping your cognitive rhythm, curiosity,
+        and emotional pacing. There are no right answers and nothing to win.
       </p>
       <div className="mx-auto grid max-w-md grid-cols-2 gap-3 text-left">
         {[
-          { n: "01", t: "Logic" }, { n: "02", t: "Memory" }, { n: "03", t: "Pattern" }, { n: "04", t: "Intuition" },
+          { n: "01", t: "Rhythm" }, { n: "02", t: "Memory" }, { n: "03", t: "Pattern" }, { n: "04", t: "Intuition" },
         ].map((x) => (
           <div key={x.n} className="rounded-xl border border-border bg-card p-4">
             <div className="font-mono text-xs text-muted-foreground">{x.n}</div>
@@ -80,19 +84,20 @@ function Intro({ onStart }: { onStart: () => void }) {
         ))}
       </div>
       <button onClick={onStart} className="rounded-full bg-gradient-hero px-8 py-4 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">
-        Begin
+        Begin softly
       </button>
     </div>
   );
 }
 
-function RoundShell({ title, n, children, time }: { title: string; n: string; children: React.ReactNode; time: number }) {
+function RoundShell({ title, n, children, time, sub }: { title: string; n: string; children: React.ReactNode; time: number; sub?: string }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Round {n}</div>
           <h2 className="font-display text-3xl font-bold">{title}</h2>
+          {sub && <div className="mt-1 text-sm text-muted-foreground">{sub}</div>}
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 font-mono text-sm">
           <Timer className="h-4 w-4 text-accent" />
@@ -114,22 +119,21 @@ function useCountdown(start: number, onZero: () => void) {
   return t;
 }
 
-// ---- LOGIC ROUND: sequence completion ----
-function LogicRound({ onDone }: { onDone: (v: number) => void }) {
-  // sequence: 2, 4, 8, 16, ? -> 32 ; alternatives: 24, 30, 32, 18
+// ---- RHYTHM ROUND: complete the flow (was Logic) ----
+function RhythmRound({ onDone }: { onDone: (v: number) => void }) {
   const [answered, setAnswered] = useState<number | null>(null);
-  const time = useCountdown(15, () => !answered && onDone(40));
+  const time = useCountdown(15, () => !answered && onDone(60));
   const choices = [24, 30, 32, 18];
   const correct = 32;
   const handle = (v: number) => {
     setAnswered(v);
     const elapsed = 15 - time;
-    const accuracy = v === correct ? 1 : 0;
-    const score = Math.round(accuracy * (90 - elapsed * 2) + 20);
-    setTimeout(() => onDone(Math.max(20, Math.min(99, score))), 600);
+    const accuracy = v === correct ? 1 : 0.55;
+    const score = Math.round(accuracy * (88 - elapsed * 1.5) + 25);
+    setTimeout(() => onDone(Math.max(40, Math.min(99, score))), 600);
   };
   return (
-    <RoundShell title="Complete the sequence" n="01" time={time}>
+    <RoundShell title="Feel the flow" n="01" time={time} sub="Which number continues this rhythm naturally?">
       <div className="mb-8 flex items-center justify-center gap-4 font-mono text-4xl">
         {[2, 4, 8, 16].map((n) => (
           <span key={n} className="rounded-xl bg-surface-2 px-5 py-3">{n}</span>
@@ -149,7 +153,7 @@ function LogicRound({ onDone }: { onDone: (v: number) => void }) {
                 answered === null
                   ? "border-border bg-surface hover:border-primary"
                   : isPicked
-                    ? isCorrect ? "border-neon bg-neon/20" : "border-destructive bg-destructive/20"
+                    ? isCorrect ? "border-neon bg-neon/20" : "border-accent bg-accent/10"
                     : isCorrect ? "border-neon/50 bg-neon/10" : "border-border bg-surface opacity-50"
               }`}
             >
@@ -162,7 +166,7 @@ function LogicRound({ onDone }: { onDone: (v: number) => void }) {
   );
 }
 
-// ---- MEMORY ROUND: remember the dots ----
+// ---- MEMORY ROUND ----
 function MemoryRound({ onDone }: { onDone: (v: number) => void }) {
   const [phase, setPhase] = useState<"show" | "input" | "done">("show");
   const target = useMemo(() => {
@@ -181,7 +185,7 @@ function MemoryRound({ onDone }: { onDone: (v: number) => void }) {
     setPhase("done");
     const correct = [...picks].filter((p) => target.has(p)).length;
     const wrong = [...picks].filter((p) => !target.has(p)).length;
-    const score = Math.max(20, Math.min(99, 20 + correct * 14 - wrong * 8));
+    const score = Math.max(40, Math.min(99, 35 + correct * 12 - wrong * 5));
     setTimeout(() => onDone(score), 600);
   };
 
@@ -193,7 +197,11 @@ function MemoryRound({ onDone }: { onDone: (v: number) => void }) {
   };
 
   return (
-    <RoundShell title={phase === "show" ? "Memorize the dots" : "Tap what you saw"} n="02" time={time}>
+    <RoundShell
+      title={phase === "show" ? "Hold the constellation" : "Where were the lights?"}
+      n="02" time={time}
+      sub={phase === "show" ? "Just notice. Don't try to memorize." : "Tap what you remember."}
+    >
       <div className="mx-auto grid w-fit grid-cols-4 gap-3">
         {Array.from({ length: 16 }).map((_, i) => {
           const lit = phase === "show" && target.has(i);
@@ -213,18 +221,17 @@ function MemoryRound({ onDone }: { onDone: (v: number) => void }) {
       </div>
       {phase === "input" && (
         <button onClick={submit} className="mx-auto mt-6 block rounded-full bg-foreground px-6 py-2 text-sm font-medium text-background">
-          Submit
+          Done
         </button>
       )}
     </RoundShell>
   );
 }
 
-// ---- PATTERN ROUND: odd one out ----
+// ---- PATTERN ROUND ----
 function PatternRound({ onDone }: { onDone: (v: number) => void }) {
   const [answered, setAnswered] = useState<number | null>(null);
-  const time = useCountdown(15, () => !answered && onDone(40));
-  // Three same-color rotated, one different
+  const time = useCountdown(15, () => !answered && onDone(55));
   const correct = 2;
   const tiles = [
     { rot: 0, color: "var(--cyan)" },
@@ -235,11 +242,11 @@ function PatternRound({ onDone }: { onDone: (v: number) => void }) {
   const handle = (i: number) => {
     setAnswered(i);
     const elapsed = 15 - time;
-    const score = i === correct ? Math.max(40, 95 - elapsed * 2) : 35;
+    const score = i === correct ? Math.max(55, 95 - elapsed * 2) : 50;
     setTimeout(() => onDone(score), 600);
   };
   return (
-    <RoundShell title="Spot the odd one" n="03" time={time}>
+    <RoundShell title="Which one hums differently?" n="03" time={time} sub="Trust the part of you that already knows.">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {tiles.map((t, i) => {
           const isPicked = answered === i;
@@ -252,7 +259,7 @@ function PatternRound({ onDone }: { onDone: (v: number) => void }) {
               className={`flex aspect-square items-center justify-center rounded-2xl border transition-all ${
                 answered === null ? "border-border bg-surface hover:border-primary" :
                 isPicked && isCorrect ? "border-neon" :
-                isPicked ? "border-destructive" :
+                isPicked ? "border-accent" :
                 isCorrect ? "border-neon/50" : "border-border opacity-50"
               }`}
             >
@@ -268,7 +275,7 @@ function PatternRound({ onDone }: { onDone: (v: number) => void }) {
   );
 }
 
-// ---- INTUITION ROUND: snap decision ----
+// ---- INTUITION ROUND ----
 function IntuitionRound({ onDone }: { onDone: (v: number) => void }) {
   const [step, setStep] = useState(0);
   const [picks, setPicks] = useState<string[]>([]);
@@ -278,16 +285,16 @@ function IntuitionRound({ onDone }: { onDone: (v: number) => void }) {
     { q: "Conflict.", a: "Talk it through", b: "Sleep on it" },
     { q: "Risk.", a: "Calculate", b: "Leap" },
   ];
-  const time = useCountdown(15, () => onDone(50 + picks.length * 8));
+  const time = useCountdown(15, () => onDone(60 + picks.length * 6));
   const pick = (choice: string) => {
     const next = [...picks, choice];
     setPicks(next);
-    if (step >= prompts.length - 1) onDone(60 + next.length * 8);
+    if (step >= prompts.length - 1) onDone(70 + next.length * 4);
     else setStep(step + 1);
   };
   const p = prompts[step];
   return (
-    <RoundShell title={p.q} n="04" time={time}>
+    <RoundShell title={p.q} n="04" time={time} sub="Whichever your body reaches for first.">
       <div className="grid gap-4 md:grid-cols-2">
         {[p.a, p.b].map((choice) => (
           <button
@@ -309,11 +316,11 @@ function IntuitionRound({ onDone }: { onDone: (v: number) => void }) {
 function Scoring({ total }: { total: number }) {
   return (
     <div className="space-y-8 text-center">
-      <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Computing your Mind Score</div>
+      <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Composing your signature</div>
       <div className="mx-auto flex h-48 w-48 animate-pulse-glow items-center justify-center rounded-full bg-gradient-hero">
         <span className="font-display text-6xl font-bold text-primary-foreground">{total}</span>
       </div>
-      <p className="text-muted-foreground">Calibrating against the SYNAPSE pool…</p>
+      <p className="text-muted-foreground">Mapping your rhythm to the SYNAPSE ecosystem…</p>
     </div>
   );
 }
