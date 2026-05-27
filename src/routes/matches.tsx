@@ -1,12 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SynapseNav } from "@/components/SynapseNav";
-import { generateMatches, useProfile, type SynapseProfile } from "@/lib/synapse-store";
+import {
+  generateMatches, useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
+  type SynapseProfile,
+} from "@/lib/synapse-store";
 import { Avatar } from "@/components/Avatar";
-import { Heart, X, ArrowRight, MapPin, Briefcase } from "lucide-react";
+import {
+  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles,
+} from "lucide-react";
 
 export const Route = createFileRoute("/matches")({
-  head: () => ({ meta: [{ title: "Matches — SYNAPSE" }, { name: "description", content: "People within your ±5 cognitive band." }] }),
+  head: () => ({ meta: [{ title: "Your band — SYNAPSE" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
   component: Matches,
 });
 
@@ -25,10 +30,10 @@ function Matches() {
       <div className="min-h-screen">
         <SynapseNav />
         <div className="mx-auto max-w-md p-12 text-center">
-          <h1 className="font-display text-3xl font-bold">Take the test first.</h1>
-          <p className="mt-2 text-muted-foreground">You'll need a Composite score to see your band.</p>
+          <h1 className="font-display text-3xl font-bold">Discover your resonance first.</h1>
+          <p className="mt-2 text-muted-foreground">Your band reveals once your signature is composed.</p>
           <Link to="/onboarding" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
-            Start <ArrowRight className="h-4 w-4" />
+            Begin <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -41,10 +46,15 @@ function Matches() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your composite · {profile.composite}</div>
+            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Your resonance · {profile.composite} · {ARCHETYPES[profile.archetype].name}
+            </div>
             <h1 className="mt-2 font-display text-4xl font-bold">
-              {visible.length} matches in your <span className="text-gradient-hero">±5 band</span>
+              {visible.length} minds in your <span className="text-gradient-hero">±5 band</span>
             </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Photos and details reveal as mutual engagement deepens. No swiping.
+            </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
             <button onClick={() => setTab("band")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "band" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
@@ -57,34 +67,54 @@ function Matches() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visible.map((m, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(m)}
-              className="group text-left rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
-            >
-              <div className="flex items-start justify-between">
-                <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
-                <div className="text-right">
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Composite</div>
-                  <div className="font-display text-2xl font-bold text-gradient-hero">{m.composite}</div>
+          {visible.map((m, i) => {
+            const arch = ARCHETYPES[m.archetype];
+            const presence = m.presence ? PRESENCE_LABELS[m.presence] : null;
+            return (
+              <button
+                key={i}
+                onClick={() => setActive(m)}
+                className="group text-left rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
+              >
+                <div className="flex items-start justify-between">
+                  {/* Blurred avatar — Stage 1 */}
+                  <div className="relative">
+                    <div style={{ filter: "blur(8px)" }}>
+                      <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
+                      <Lock className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Resonance</div>
+                    <div className="font-display text-2xl font-bold text-gradient-hero">{m.composite}</div>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 font-display text-lg font-bold">{m.name}, {m.age}</div>
-              <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{m.city}</span>
-                <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <Mini label="Mind" value={m.mindScore} />
-                <Mini label="Face" value={m.faceHarmony} />
-                <Mini label="Char" value={Math.round((m.character.warmth + m.character.curiosity + m.character.humor) / 3)} />
-              </div>
-              <div className="mt-3 font-mono text-[11px] text-muted-foreground">
-                Δ {Math.abs(m.composite - profile.composite)} pts from you
-              </div>
-            </button>
-          ))}
+
+                <div className="mt-4">
+                  <div className="font-display text-lg font-bold" style={{ color: arch.hue as string }}>{arch.name}</div>
+                  <div className="text-xs italic text-muted-foreground">"{arch.tagline}"</div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{m.city}</span>
+                  <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
+                </div>
+
+                {presence && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-2.5 py-1 text-[11px]">
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: presence.hue }} />
+                    {presence.label}
+                  </div>
+                )}
+
+                <div className="mt-3 font-mono text-[11px] text-muted-foreground">
+                  Δ {Math.abs(m.composite - profile.composite)} pts · within your band
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {visible.length === 0 && (
@@ -99,44 +129,160 @@ function Matches() {
   );
 }
 
-function Mini({ label, value }: { label: string; value: number }) {
+type Stage = 1 | 2 | 3;
+
+function MatchSheet({ match, you, onClose }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void }) {
+  // Progressive reveal — earned, not timed.
+  const [stage, setStage] = useState<Stage>(1);
+  const arch = ARCHETYPES[match.archetype];
+  const presence = match.presence ? PRESENCE_LABELS[match.presence] : null;
+  const chem = chemistryFor(match.name + match.city);
+  const matchPercent = Math.max(60, 100 - Math.abs(you.composite - match.composite) * 4);
+
+  const blur = stage === 1 ? "blur(14px)" : stage === 2 ? "blur(4px)" : "none";
+
   return (
-    <div className="rounded-lg bg-surface-2 py-1.5">
-      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="font-display text-sm font-bold">{value}</div>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-md md:items-center" onClick={onClose}>
+      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-glow" onClick={(e) => e.stopPropagation()}>
+        {/* Aura header */}
+        <div className="relative p-8 pb-6" style={{ background: `radial-gradient(120% 80% at 20% 0%, ${arch.hue} 0%, transparent 60%)` }}>
+          <div className="flex items-center gap-4">
+            <div style={{ filter: blur, transition: "filter 0.6s ease" }}>
+              <Avatar seed={match.avatar ?? "0-180"} size={72} label={match.name} />
+            </div>
+            <div className="flex-1">
+              <div className="font-display text-xs uppercase tracking-wider opacity-80" style={{ color: arch.hue as string }}>
+                {arch.name}
+              </div>
+              <div className="font-display text-2xl font-bold">
+                {stage >= 3 ? `${match.name}, ${match.age}` : "Identity revealed at Stage 3"}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {stage >= 2 ? `${match.city} · ${match.professionLabel}` : "City revealed at Stage 2"}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Resonance</div>
+              <div className="font-display text-3xl font-bold text-gradient-hero">{matchPercent}%</div>
+            </div>
+          </div>
+
+          {presence && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1 text-xs">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: presence.hue }} />
+              {presence.label} · <span className="text-muted-foreground">{presence.hint}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Stage indicator */}
+        <div className="flex items-center gap-3 px-8 pb-2">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex flex-1 items-center gap-2">
+              <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
+                stage >= s ? "bg-gradient-hero text-primary-foreground" : "bg-surface-2 text-muted-foreground"
+              }`}>{s}</span>
+              <div className={`h-0.5 flex-1 rounded-full ${stage >= s ? "bg-gradient-hero" : "bg-surface-2"}`} />
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-5 p-8 pt-4">
+          {stage === 1 && (
+            <>
+              <p className="text-sm italic text-foreground/85">"{arch.tagline}"</p>
+              <p className="text-sm text-muted-foreground">{arch.essence}</p>
+              <VoicePrompt label="Voice prompt · 18s" text="A small ritual that makes my day feel like mine." />
+              <VoicePrompt label="Voice prompt · 22s" text="The last idea that kept me up — and why." />
+            </>
+          )}
+
+          {stage === 2 && (
+            <>
+              <p className="text-sm italic text-foreground/85">"{match.bio}"</p>
+              <div className="space-y-2">
+                <ChemRing label="Conversational reciprocity" value={chem.reciprocity} />
+                <ChemRing label="Humor synchronization" value={chem.humorSync} />
+                <ChemRing label="Curiosity alignment" value={chem.curiosityAlign} />
+                <ChemRing label="Emotional pacing" value={chem.pacing} />
+              </div>
+              <div className="rounded-2xl border border-border bg-surface/60 p-4 text-xs text-muted-foreground">
+                <Sparkles className="mb-1 inline h-3 w-3 text-accent" /> Your conversational synchronicity is rising.
+                Curiosity alignment is unusually high.
+              </div>
+            </>
+          )}
+
+          {stage === 3 && (
+            <>
+              <p className="text-sm italic text-foreground/85">"{match.bio}"</p>
+              <div className="space-y-3">
+                {(["warmth", "curiosity", "adventure", "loyalty", "humor", "ambition"] as const).map((k) => (
+                  <CompareBar key={k} label={k} you={you.character[k]} them={match.character[k]} />
+                ))}
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl border border-neon/40 bg-neon/5 p-4 text-xs">
+                <Unlock className="h-4 w-4 text-neon" />
+                Intentional meetup is unlocked. Decide together when you're ready.
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-border bg-background/40 p-6">
+          {stage < 3 ? (
+            <button
+              onClick={() => setStage((s) => (s + 1) as Stage)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]"
+            >
+              <Unlock className="h-4 w-4" />
+              Engage to unlock Stage {stage + 1}
+            </button>
+          ) : (
+            <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]">
+              <Heart className="h-4 w-4" /> Propose a meetup
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button onClick={onClose} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
+              <X className="h-4 w-4" /> Step back
+            </button>
+            <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
+              <MessageCircle className="h-4 w-4" /> Send a thought
+            </button>
+          </div>
+          <p className="mt-1 text-center text-[11px] text-muted-foreground">
+            <Eye className="mr-1 inline h-3 w-3" /> Reveals are mutual. Nothing is shared without consent.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function MatchSheet({ match, you, onClose }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void }) {
+function VoicePrompt({ label, text }: { label: string; text: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-md md:items-center" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-8 shadow-glow" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-4">
-          <Avatar seed={match.avatar ?? "0-180"} size={72} label={match.name} />
-          <div className="flex-1">
-            <div className="font-display text-2xl font-bold">{match.name}, {match.age}</div>
-            <div className="text-sm text-muted-foreground">{match.city} · {match.professionLabel}</div>
-          </div>
-          <div className="text-right">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Match</div>
-            <div className="font-display text-3xl font-bold text-gradient-hero">{Math.max(50, 100 - Math.abs(you.composite - match.composite) * 4)}%</div>
-          </div>
-        </div>
-        <p className="mt-5 text-sm italic text-muted-foreground">"{match.bio}"</p>
-        <div className="mt-6 space-y-3">
-          {(["warmth", "curiosity", "adventure", "loyalty", "humor", "ambition"] as const).map((k) => (
-            <CompareBar key={k} label={k} you={you.character[k]} them={match.character[k]} />
-          ))}
-        </div>
-        <div className="mt-8 flex gap-3">
-          <button onClick={onClose} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 hover:bg-surface">
-            <X className="h-4 w-4" /> Skip
-          </button>
-          <button className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">
-            <Heart className="h-4 w-4" /> Synapse
-          </button>
-        </div>
+    <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface/60 p-3">
+      <button className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground shadow-glow">
+        <Mic className="h-4 w-4" />
+      </button>
+      <div className="min-w-0">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="truncate text-sm">{text}</div>
+      </div>
+    </div>
+  );
+}
+
+function ChemRing({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <div className="mb-1 flex justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        <span>{label}</span>
+        <span>{value}%</span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+        <div className="h-full bg-gradient-hero" style={{ width: `${value}%` }} />
       </div>
     </div>
   );
