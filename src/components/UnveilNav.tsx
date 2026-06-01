@@ -6,11 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 const links = [
   { to: "/", label: "Home" },
   { to: "/onboarding", label: "Begin" },
-  { to: "/game", label: "Discovery" },
+  { to: "/game", label: "Lounge" },
   { to: "/matches", label: "Matches" },
+  { to: "/challenges", label: "Challenges" },
+  { to: "/passport", label: "Passport" },
   { to: "/chat", label: "Threads" },
   { to: "/premium", label: "Premium" },
-  { to: "/safety", label: "Safety" },
 ] as const;
 
 export function UnveilNav() {

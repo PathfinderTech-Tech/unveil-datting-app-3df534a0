@@ -98,19 +98,32 @@ function Results() {
         </div>
 
         <div className="mt-4 rounded-3xl border border-border bg-card p-8">
-          <h3 className="mb-4 font-display text-xl font-bold">Emotional DNA</h3>
+          <h3 className="mb-2 font-display text-xl font-bold">Your Discovery Profile</h3>
+          {profile.bio && (
+            <p className="mb-5 max-w-2xl text-sm italic text-foreground/85">"{profile.bio}"</p>
+          )}
           <div className="grid gap-3 md:grid-cols-2">
-            {Object.entries(profile.character).map(([k, v]) => (
-              <div key={k}>
-                <div className="mb-1 flex justify-between text-xs">
-                  <span className="font-mono uppercase text-muted-foreground">{k}</span>
-                  <span className="font-mono">{v}</span>
+            {([
+              ["warmth", "Connection style", "Slow-warming", "Quick-to-connect"],
+              ["curiosity", "Communication style", "Light & easy", "Deep talker"],
+              ["ambition", "Dating energy", "Steady & calm", "High-energy"],
+              ["adventure", "Adventure level", "Homebody", "Explorer"],
+              ["loyalty", "Relationship pace", "Open & easy", "Long-term"],
+              ["humor", "Humor style", "Dry wit", "Playful"],
+            ] as const).map(([k, label, low, high]) => {
+              const v = profile.character[k];
+              return (
+                <div key={k}>
+                  <div className="mb-1 flex justify-between text-xs">
+                    <span className="font-mono uppercase tracking-wider text-muted-foreground">{label}</span>
+                    <span className="font-mono text-foreground/70">{v >= 55 ? high : low}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+                    <div className="h-full bg-gradient-hero" style={{ width: `${v}%` }} />
+                  </div>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-                  <div className="h-full bg-gradient-hero" style={{ width: `${v}%` }} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

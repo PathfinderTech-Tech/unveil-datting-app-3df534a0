@@ -1,23 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { PROFESSIONS, type CharacterDNA, type Profession } from "@/lib/synapse-store";
+import {
+  PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
+  type DiscoveryProfile, type Profession,
+} from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, ArrowRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Set up your cognitive dating profile." }] }),
+  head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "A few playful questions to shape your Discovery Profile." }] }),
   component: Onboarding,
 });
-
-const TRAITS: { key: keyof CharacterDNA; label: string; left: string; right: string }[] = [
-  { key: "warmth", label: "Warmth", left: "Reserved", right: "Effusive" },
-  { key: "curiosity", label: "Curiosity", left: "Focused", right: "Wide-open" },
-  { key: "adventure", label: "Adventure", left: "Homebody", right: "Wanderer" },
-  { key: "loyalty", label: "Loyalty", left: "Independent", right: "Devoted" },
-  { key: "humor", label: "Humor", left: "Dry", right: "Playful" },
-  { key: "ambition", label: "Ambition", left: "Easeful", right: "Driven" },
-];
 
 function Onboarding() {
   const navigate = useNavigate();
@@ -28,9 +22,11 @@ function Onboarding() {
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
-  const [character, setCharacter] = useState<CharacterDNA>({
-    warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50,
-  });
+  const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
+  const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
+  const character = allAnswered
+    ? discoveryToCharacter(discovery as DiscoveryProfile)
+    : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
 
   const simulateFace = () => {
     setFaceUploaded(true);
@@ -46,7 +42,8 @@ function Onboarding() {
 
   const finish = async () => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
-    const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character };
+    const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
+    const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character, discovery, summary };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -55,11 +52,12 @@ function Onboarding() {
           first_name: name, age, city,
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
+          bio: summary || null,
           onboarding_complete: true,
         }).eq("id", user.id);
         await supabase.from("onboarding_answers").upsert({
           user_id: user.id,
-          answers: { profession, professionLabel: profObj.label, faceHarmony, character },
+          answers: { profession, professionLabel: profObj.label, faceHarmony, character, discovery, summary },
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
@@ -70,7 +68,7 @@ function Onboarding() {
     name.length > 1 && city.length > 1,
     faceUploaded && faceHarmony > 0,
     profession !== null,
-    true,
+    allAnswered,
   ][step];
 
   return (
@@ -162,26 +160,44 @@ function Onboarding() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Emotional DNA</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Six dimensions. Be honest.</h1>
-              <p className="mt-2 text-muted-foreground">These shape your archetype. You can always shift them later — people evolve.</p>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Discovery Profile</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">Six quick questions.</h1>
+              <p className="mt-2 text-muted-foreground">No right answers. Just pick what sounds more like you.</p>
             </div>
-            <div className="space-y-5 rounded-3xl border border-border bg-card p-6">
-              {TRAITS.map((t) => (
-                <div key={t.key}>
-                  <div className="mb-2 flex items-center justify-between text-xs">
-                    <span className="font-mono uppercase tracking-wider text-muted-foreground">{t.left}</span>
-                    <span className="font-display font-bold">{t.label}</span>
-                    <span className="font-mono uppercase tracking-wider text-muted-foreground">{t.right}</span>
+            <div className="space-y-4">
+              {DISCOVERY_QUESTIONS.map((q, i) => {
+                const picked = discovery[q.key];
+                return (
+                  <div key={q.key} className="rounded-3xl border border-border bg-card p-5">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-display text-base font-medium">{q.prompt}</span>
+                    </div>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      {(["a", "b"] as const).map((opt) => {
+                        const active = picked === opt;
+                        return (
+                          <button
+                            key={opt}
+                            onClick={() => setDiscovery({ ...discovery, [q.key]: opt })}
+                            className={`rounded-2xl border p-4 text-left text-sm transition-all ${
+                              active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                            }`}
+                          >
+                            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{opt === "a" ? q.aLabel : q.bLabel}</div>
+                            <div className="mt-1">{opt === "a" ? q.a : q.b}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <input
-                    type="range" min={0} max={100}
-                    value={character[t.key]}
-                    onChange={(e) => setCharacter({ ...character, [t.key]: +e.target.value })}
-                    className="w-full accent-[var(--primary)]"
-                  />
+                );
+              })}
+              {allAnswered && (
+                <div className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-sm italic text-foreground/85">
+                  {discoverySummary(discovery as DiscoveryProfile)}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
