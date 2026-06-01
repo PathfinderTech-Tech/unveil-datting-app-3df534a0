@@ -5,11 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/discovery", label: "Discovery" },
+  { to: "/onboarding", label: "Begin" },
+  { to: "/game", label: "Discovery" },
   { to: "/matches", label: "Matches" },
   { to: "/premium", label: "Premium" },
   { to: "/safety", label: "Safety" },
-];
+] as const;
 
 export function UnveilNav() {
   const { location } = useRouterState();
