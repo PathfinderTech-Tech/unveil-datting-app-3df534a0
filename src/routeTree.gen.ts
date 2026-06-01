@@ -9,21 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MatchesRouteImport } from './routes/matches'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as GameRouteImport } from './routes/game'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SafetyRoute = SafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -36,9 +68,19 @@ const MatchesRoute = MatchesRouteImport.update({
   path: '/matches',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,61 +91,137 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/game': typeof GameRoute
+  '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
+  '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/game': typeof GameRoute
+  '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
+  '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/game': typeof GameRoute
+  '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
+  '/safety': typeof SafetyRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/game'
+    | '/login'
     | '/matches'
     | '/onboarding'
+    | '/premium'
     | '/pricing'
+    | '/reset-password'
     | '/results'
+    | '/safety'
+    | '/signup'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/game' | '/matches' | '/onboarding' | '/pricing' | '/results'
+  to:
+    | '/'
+    | '/admin'
+    | '/game'
+    | '/login'
+    | '/matches'
+    | '/onboarding'
+    | '/premium'
+    | '/pricing'
+    | '/reset-password'
+    | '/results'
+    | '/safety'
+    | '/signup'
+    | '/terms'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/game'
+    | '/login'
     | '/matches'
     | '/onboarding'
+    | '/premium'
     | '/pricing'
+    | '/reset-password'
     | '/results'
+    | '/safety'
+    | '/signup'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   GameRoute: typeof GameRoute
+  LoginRoute: typeof LoginRoute
   MatchesRoute: typeof MatchesRoute
   OnboardingRoute: typeof OnboardingRoute
+  PremiumRoute: typeof PremiumRoute
   PricingRoute: typeof PricingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
+  SafetyRoute: typeof SafetyRoute
+  SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/safety': {
+      id: '/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
@@ -111,11 +229,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -132,11 +264,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game': {
       id: '/game'
       path: '/game'
       fullPath: '/game'
       preLoaderRoute: typeof GameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -151,12 +297,29 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   GameRoute: GameRoute,
+  LoginRoute: LoginRoute,
   MatchesRoute: MatchesRoute,
   OnboardingRoute: OnboardingRoute,
+  PremiumRoute: PremiumRoute,
   PricingRoute: PricingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
+  SafetyRoute: SafetyRoute,
+  SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
