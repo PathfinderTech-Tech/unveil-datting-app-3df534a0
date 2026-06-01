@@ -8,6 +8,7 @@ const links = [
   { to: "/onboarding", label: "Begin" },
   { to: "/game", label: "Discovery" },
   { to: "/matches", label: "Matches" },
+  { to: "/chat", label: "Threads" },
   { to: "/premium", label: "Premium" },
   { to: "/safety", label: "Safety" },
 ] as const;
