@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import {
   computeComposite, deriveArchetype, saveProfile,
-  WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS,
+  WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS, TWO_TRUTHS_PROMPTS,
   type CharacterDNA, type Profession,
 } from "@/lib/synapse-store";
 import { Sparkles, Heart, Flag, Brain, Trophy } from "lucide-react";
