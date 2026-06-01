@@ -122,7 +122,7 @@ function Results() {
             Meet your band <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            to="/pricing"
+            to="/premium"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-4 text-sm hover:bg-surface-2"
           >
             Explore UNVEIL+
