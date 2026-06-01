@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { SynapseNav } from "@/components/SynapseNav";
+import { UnveilNav } from "@/components/UnveilNav";
 import { PROFESSIONS, type CharacterDNA, type Profession } from "@/lib/synapse-store";
 import { Camera, ArrowRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Join SYNAPSE" }, { name: "description", content: "Set up your cognitive dating profile." }] }),
+  head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Set up your cognitive dating profile." }] }),
   component: Onboarding,
 });
 
@@ -46,7 +46,7 @@ function Onboarding() {
   const finish = () => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character };
-    sessionStorage.setItem("synapse-draft", JSON.stringify(draft));
+    sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     navigate({ to: "/game" });
   };
 
@@ -59,7 +59,7 @@ function Onboarding() {
 
   return (
     <div className="min-h-screen">
-      <SynapseNav />
+      <UnveilNav />
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* progress */}
         <div className="mb-10 flex items-center gap-2">

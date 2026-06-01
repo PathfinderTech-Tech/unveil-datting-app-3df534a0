@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { SynapseNav } from "@/components/SynapseNav";
+import { UnveilNav } from "@/components/UnveilNav";
 import {
   computeComposite, deriveArchetype, saveProfile,
   type CharacterDNA, type Profession,
@@ -8,7 +8,7 @@ import {
 import { Waves, Timer } from "lucide-react";
 
 export const Route = createFileRoute("/game")({
-  head: () => ({ meta: [{ title: "The Resonance — SYNAPSE" }, { name: "description", content: "A short, playful session that reveals your cognitive rhythm and emotional pacing." }] }),
+  head: () => ({ meta: [{ title: "The Resonance — UNVEIL" }, { name: "description", content: "A short, playful session that reveals your cognitive rhythm and emotional pacing." }] }),
   component: GamePage,
 });
 
@@ -33,7 +33,7 @@ function GamePage() {
 
   useEffect(() => {
     if (round !== "scoring") return;
-    const draftRaw = sessionStorage.getItem("synapse-draft");
+    const draftRaw = sessionStorage.getItem("unveil-draft");
     if (!draftRaw) return;
     const draft = JSON.parse(draftRaw) as {
       name: string; age: number; city: string; profession: Profession; professionLabel: string;
@@ -49,7 +49,7 @@ function GamePage() {
 
   return (
     <div className="min-h-screen">
-      <SynapseNav />
+      <UnveilNav />
       <div className="mx-auto max-w-3xl px-6 py-12">
         {round === "intro" && <Intro onStart={() => setRound("rhythm")} />}
         {round === "rhythm" && <RhythmRound onDone={(v) => finishRound("rhythm", v)} />}
@@ -320,7 +320,7 @@ function Scoring({ total }: { total: number }) {
       <div className="mx-auto flex h-48 w-48 animate-pulse-glow items-center justify-center rounded-full bg-gradient-hero">
         <span className="font-display text-6xl font-bold text-primary-foreground">{total}</span>
       </div>
-      <p className="text-muted-foreground">Mapping your rhythm to the SYNAPSE ecosystem…</p>
+      <p className="text-muted-foreground">Mapping your rhythm to the UNVEIL ecosystem…</p>
     </div>
   );
 }
