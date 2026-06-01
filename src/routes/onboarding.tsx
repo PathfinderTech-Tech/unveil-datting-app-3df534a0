@@ -1,23 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { PROFESSIONS, type CharacterDNA, type Profession } from "@/lib/synapse-store";
+import {
+  PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
+  type DiscoveryProfile, type Profession,
+} from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, ArrowRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Set up your cognitive dating profile." }] }),
+  head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "A few playful questions to shape your Discovery Profile." }] }),
   component: Onboarding,
 });
-
-const TRAITS: { key: keyof CharacterDNA; label: string; left: string; right: string }[] = [
-  { key: "warmth", label: "Warmth", left: "Reserved", right: "Effusive" },
-  { key: "curiosity", label: "Curiosity", left: "Focused", right: "Wide-open" },
-  { key: "adventure", label: "Adventure", left: "Homebody", right: "Wanderer" },
-  { key: "loyalty", label: "Loyalty", left: "Independent", right: "Devoted" },
-  { key: "humor", label: "Humor", left: "Dry", right: "Playful" },
-  { key: "ambition", label: "Ambition", left: "Easeful", right: "Driven" },
-];
 
 function Onboarding() {
   const navigate = useNavigate();
