@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { SynapseNav } from "@/components/SynapseNav";
+import { UnveilNav } from "@/components/UnveilNav";
 import { ARCHETYPES, useProfile } from "@/lib/synapse-store";
 import { Avatar } from "@/components/Avatar";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/results")({
-  head: () => ({ meta: [{ title: "Your Signature — SYNAPSE" }, { name: "description", content: "Your emotional archetype and resonance signature." }] }),
+  head: () => ({ meta: [{ title: "Your Signature — UNVEIL" }, { name: "description", content: "Your emotional archetype and resonance signature." }] }),
   component: Results,
 });
 
@@ -26,7 +26,7 @@ function Results() {
   if (!profile) {
     return (
       <div className="min-h-screen">
-        <SynapseNav />
+        <UnveilNav />
         <div className="p-12 text-center text-muted-foreground">Composing your signature…</div>
       </div>
     );
@@ -40,7 +40,7 @@ function Results() {
 
   return (
     <div className="min-h-screen">
-      <SynapseNav />
+      <UnveilNav />
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your signature</div>
@@ -122,10 +122,10 @@ function Results() {
             Meet your band <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            to="/pricing"
+            to="/premium"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-4 text-sm hover:bg-surface-2"
           >
-            Explore SYNAPSE+
+            Explore UNVEIL+
           </Link>
         </div>
       </div>

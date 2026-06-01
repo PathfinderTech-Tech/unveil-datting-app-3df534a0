@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { SynapseNav } from "@/components/SynapseNav";
+import { UnveilNav } from "@/components/UnveilNav";
 import {
   generateMatches, useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/matches")({
-  head: () => ({ meta: [{ title: "Your band — SYNAPSE" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
+  head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
   component: Matches,
 });
 
@@ -28,7 +28,7 @@ function Matches() {
   if (!profile) {
     return (
       <div className="min-h-screen">
-        <SynapseNav />
+        <UnveilNav />
         <div className="mx-auto max-w-md p-12 text-center">
           <h1 className="font-display text-3xl font-bold">Discover your resonance first.</h1>
           <p className="mt-2 text-muted-foreground">Your band reveals once your signature is composed.</p>
@@ -42,7 +42,7 @@ function Matches() {
 
   return (
     <div className="min-h-screen">
-      <SynapseNav />
+      <UnveilNav />
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
