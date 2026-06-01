@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { supabase } from "@/integrations/supabase/client";
 import {
   computeComposite, deriveArchetype, saveProfile,
   type CharacterDNA, type Profession,
