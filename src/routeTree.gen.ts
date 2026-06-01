@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PuzzlesRouteImport } from './routes/puzzles'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -29,6 +31,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SparkRoute = SparkRouteImport.update({
+  id: '/spark',
+  path: '/spark',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -49,6 +56,11 @@ const ResultsRoute = ResultsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PuzzlesRoute = PuzzlesRouteImport.update({
+  id: '/puzzles',
+  path: '/puzzles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiumRoute = PremiumRouteImport.update({
@@ -119,10 +131,12 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/premium': typeof PremiumRoute
+  '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
@@ -137,10 +151,12 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/premium': typeof PremiumRoute
+  '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
@@ -156,10 +172,12 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/premium': typeof PremiumRoute
+  '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/signup': typeof SignupRoute
+  '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
@@ -176,10 +194,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/premium'
+    | '/puzzles'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/signup'
+    | '/spark'
     | '/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -194,10 +214,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/premium'
+    | '/puzzles'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/signup'
+    | '/spark'
     | '/terms'
   id:
     | '__root__'
@@ -212,10 +234,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/premium'
+    | '/puzzles'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/signup'
+    | '/spark'
     | '/terms'
   fileRoutesById: FileRoutesById
 }
@@ -231,10 +255,12 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
   PremiumRoute: typeof PremiumRoute
+  PuzzlesRoute: typeof PuzzlesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SafetyRoute: typeof SafetyRoute
   SignupRoute: typeof SignupRoute
+  SparkRoute: typeof SparkRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -245,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spark': {
+      id: '/spark'
+      path: '/spark'
+      fullPath: '/spark'
+      preLoaderRoute: typeof SparkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -273,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/puzzles': {
+      id: '/puzzles'
+      path: '/puzzles'
+      fullPath: '/puzzles'
+      preLoaderRoute: typeof PuzzlesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -367,10 +407,12 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
   PremiumRoute: PremiumRoute,
+  PuzzlesRoute: PuzzlesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SafetyRoute: SafetyRoute,
   SignupRoute: SignupRoute,
+  SparkRoute: SparkRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
