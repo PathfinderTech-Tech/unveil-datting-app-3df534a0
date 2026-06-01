@@ -19,6 +19,7 @@ import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
@@ -75,6 +76,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/game': typeof GameRoute
+  '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/game': typeof GameRoute
+  '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/game': typeof GameRoute
+  '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/game'
+    | '/games'
     | '/login'
     | '/matches'
     | '/onboarding'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/game'
+    | '/games'
     | '/login'
     | '/matches'
     | '/onboarding'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/game'
+    | '/games'
     | '/login'
     | '/matches'
     | '/onboarding'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
   GameRoute: typeof GameRoute
+  GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
   MatchesRoute: typeof MatchesRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game': {
       id: '/game'
       path: '/game'
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
   GameRoute: GameRoute,
+  GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
   MatchesRoute: MatchesRoute,
   OnboardingRoute: OnboardingRoute,
