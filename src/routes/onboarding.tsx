@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { PROFESSIONS, type CharacterDNA, type Profession } from "@/lib/synapse-store";
+import { supabase } from "@/integrations/supabase/client";
 import { Camera, ArrowRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
