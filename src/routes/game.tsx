@@ -43,9 +43,37 @@ function GamePage() {
     const base = { ...draft, mindScore: total, archetype, avatar: `me-${Math.floor(Math.random() * 360)}` };
     const composite = computeComposite(base);
     saveProfile({ ...base, composite });
+
+    // Persist to UNVEIL Cloud if signed in (best-effort, non-blocking)
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase.from("game_results").insert({
+          user_id: user.id,
+          logic_score: scores.rhythm,
+          memory_score: scores.memory,
+          pattern_score: scores.pattern,
+          emotional_score: scores.intuition,
+          total_score: total,
+          archetype,
+        });
+        await supabase.from("profiles").update({
+          first_name: draft.name,
+          age: draft.age,
+          city: draft.city,
+          archetype,
+          compatibility_score: composite,
+          curiosity_level: draft.character.curiosity,
+          emotional_rhythm: draft.character as unknown as Record<string, number>,
+          game_complete: true,
+        }).eq("id", user.id);
+      } catch (e) { console.warn("[unveil] db save skipped", e); }
+    })();
+
     const t = setTimeout(() => navigate({ to: "/results" }), 2200);
     return () => clearTimeout(t);
-  }, [round, total, navigate]);
+  }, [round, total, navigate, scores]);
 
   return (
     <div className="min-h-screen">
