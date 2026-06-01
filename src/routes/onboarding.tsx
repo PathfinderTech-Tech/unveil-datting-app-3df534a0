@@ -160,26 +160,44 @@ function Onboarding() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Emotional DNA</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Six dimensions. Be honest.</h1>
-              <p className="mt-2 text-muted-foreground">These shape your archetype. You can always shift them later — people evolve.</p>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Discovery Profile</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">Six quick questions.</h1>
+              <p className="mt-2 text-muted-foreground">No right answers. Just pick what sounds more like you.</p>
             </div>
-            <div className="space-y-5 rounded-3xl border border-border bg-card p-6">
-              {TRAITS.map((t) => (
-                <div key={t.key}>
-                  <div className="mb-2 flex items-center justify-between text-xs">
-                    <span className="font-mono uppercase tracking-wider text-muted-foreground">{t.left}</span>
-                    <span className="font-display font-bold">{t.label}</span>
-                    <span className="font-mono uppercase tracking-wider text-muted-foreground">{t.right}</span>
+            <div className="space-y-4">
+              {DISCOVERY_QUESTIONS.map((q, i) => {
+                const picked = discovery[q.key];
+                return (
+                  <div key={q.key} className="rounded-3xl border border-border bg-card p-5">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-display text-base font-medium">{q.prompt}</span>
+                    </div>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      {(["a", "b"] as const).map((opt) => {
+                        const active = picked === opt;
+                        return (
+                          <button
+                            key={opt}
+                            onClick={() => setDiscovery({ ...discovery, [q.key]: opt })}
+                            className={`rounded-2xl border p-4 text-left text-sm transition-all ${
+                              active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                            }`}
+                          >
+                            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{opt === "a" ? q.aLabel : q.bLabel}</div>
+                            <div className="mt-1">{opt === "a" ? q.a : q.b}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <input
-                    type="range" min={0} max={100}
-                    value={character[t.key]}
-                    onChange={(e) => setCharacter({ ...character, [t.key]: +e.target.value })}
-                    className="w-full accent-[var(--primary)]"
-                  />
+                );
+              })}
+              {allAnswered && (
+                <div className="rounded-2xl border border-accent/40 bg-accent/5 p-4 text-sm italic text-foreground/85">
+                  {discoverySummary(discovery as DiscoveryProfile)}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
