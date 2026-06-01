@@ -22,9 +22,11 @@ function Onboarding() {
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
-  const [character, setCharacter] = useState<CharacterDNA>({
-    warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50,
-  });
+  const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
+  const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
+  const character = allAnswered
+    ? discoveryToCharacter(discovery as DiscoveryProfile)
+    : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
 
   const simulateFace = () => {
     setFaceUploaded(true);
