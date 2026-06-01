@@ -120,6 +120,134 @@ export function deriveArchetype(c: CharacterDNA, mind: number): Archetype {
   return "signal";
 }
 
+// ---- DISCOVERY PROFILE — simple A/B questions ----
+// Each question maps a CharacterDNA dimension to a friendly label.
+// Picking A = 30, picking B = 80 — keeps downstream archetype math intact.
+export type DiscoveryKey =
+  | "connection" | "communication" | "energy" | "adventure" | "pace" | "humor";
+
+export const DISCOVERY_QUESTIONS: {
+  key: DiscoveryKey;
+  // which CharacterDNA field it feeds
+  field: keyof CharacterDNA;
+  prompt: string;
+  a: string; b: string;
+  aLabel: string; bLabel: string;
+}[] = [
+  { key: "connection", field: "warmth",
+    prompt: "Which sounds more like you?",
+    a: "I like getting to know people slowly.", b: "I usually connect with people quickly.",
+    aLabel: "Slow-warming", bLabel: "Quick-to-connect" },
+  { key: "communication", field: "curiosity",
+    prompt: "On a great first date, you mostly…",
+    a: "Keep it light, joke around, see what clicks.", b: "Trade real stories and bigger questions.",
+    aLabel: "Light & easy", bLabel: "Deep talker" },
+  { key: "energy", field: "ambition",
+    prompt: "Most weeks, you…",
+    a: "Protect your calm — fewer plans, deeper ones.", b: "Run hot — lots going on, lots of people.",
+    aLabel: "Steady & calm", bLabel: "High-energy" },
+  { key: "adventure", field: "adventure",
+    prompt: "Which sounds more like you?",
+    a: "I prefer a quiet night at home.", b: "I enjoy going out and exploring.",
+    aLabel: "Homebody", bLabel: "Explorer" },
+  { key: "pace", field: "loyalty",
+    prompt: "What are you actually looking for?",
+    a: "Something easy — see where it goes.", b: "Someone serious — a real relationship.",
+    aLabel: "Open & easy", bLabel: "Long-term" },
+  { key: "humor", field: "humor",
+    prompt: "Which sounds more like you?",
+    a: "Dry, observational, a little sharp.", b: "Goofy, playful, laughs easily.",
+    aLabel: "Dry wit", bLabel: "Playful" },
+];
+
+export type DiscoveryProfile = Record<DiscoveryKey, "a" | "b">;
+
+export function discoveryToCharacter(d: DiscoveryProfile): CharacterDNA {
+  const v = (k: DiscoveryKey) => (d[k] === "b" ? 80 : 30);
+  return {
+    warmth: v("connection"),
+    curiosity: v("communication"),
+    adventure: v("adventure"),
+    loyalty: v("pace"),
+    humor: v("humor"),
+    ambition: v("energy"),
+  };
+}
+
+export function discoverySummary(d: DiscoveryProfile): string {
+  const parts: string[] = [];
+  parts.push(d.connection === "a" ? "You build trust slowly" : "You connect with people quickly");
+  parts.push(d.communication === "a" ? "keep things light and easy" : "love meaningful conversations");
+  parts.push(d.adventure === "a" ? "prefer cozy nights in" : "enjoy getting out and exploring");
+  parts.push(d.energy === "a" ? "move at a calm, steady pace" : "carry a high-energy rhythm");
+  parts.push(d.pace === "a" ? "stay open about where things go" : "are looking for a real relationship");
+  parts.push(d.humor === "a" ? "have a dry, sharp humor" : "love to laugh and play");
+  return parts.join(", ") + ".";
+}
+
+// ---- BADGES — UNVEIL Passport ----
+export type Badge = {
+  id: string; name: string; icon: string; description: string; rarity: "common" | "rare" | "elite";
+};
+export const BADGES: Badge[] = [
+  { id: "adventurer", name: "Adventurer", icon: "🧭", description: "Said yes to the unknown.", rarity: "common" },
+  { id: "romantic", name: "Romantic", icon: "🌹", description: "Spoke from the heart, often.", rarity: "common" },
+  { id: "explorer", name: "Explorer", icon: "🗺️", description: "Curious across worlds.", rarity: "common" },
+  { id: "deep-thinker", name: "Deep Thinker", icon: "🧠", description: "Always one layer down.", rarity: "rare" },
+  { id: "great-listener", name: "Great Listener", icon: "👂", description: "Reflects people back to themselves.", rarity: "rare" },
+  { id: "storyteller", name: "Storyteller", icon: "📖", description: "Turns moments into worlds.", rarity: "rare" },
+  { id: "challenge-champion", name: "Challenge Champion", icon: "🏆", description: "Won three challenges.", rarity: "elite" },
+  { id: "conversation-master", name: "Conversation Master", icon: "💬", description: "Held a 100-message thread that mattered.", rarity: "elite" },
+];
+
+// ---- CHALLENGE GAMES — Challenge Before The Date ----
+export const WOULD_YOU_RATHER = [
+  { a: "Travel the world for a year — alone.", b: "Travel for a year — with the right partner." },
+  { a: "Cook a long dinner together at home.", b: "Discover a new restaurant every weekend." },
+  { a: "Always say what you feel, immediately.", b: "Always wait until you really mean it." },
+  { a: "Beach sunrise, no phones.", b: "Mountain hike, music in your ears." },
+  { a: "Plan every weekend a month ahead.", b: "Decide Friday afternoon, every time." },
+];
+
+export const RED_FLAGS = [
+  "Doesn't have any close long-term friends.",
+  "Talks badly about every ex.",
+  "Always 'too busy' to make plans.",
+  "Can never apologize first.",
+  "Phone face-down on every dinner.",
+];
+export const GREEN_FLAGS = [
+  "Remembers small details you mentioned weeks ago.",
+  "Has hobbies that have nothing to do with you.",
+  "Apologizes specifically, not vaguely.",
+  "Friends with their exes — without weirdness.",
+  "Asks the second question, not just the first.",
+];
+
+// ---- FIRST DATE SIMULATOR — scenario alignment ----
+export const FIRST_DATE_SCENARIOS = [
+  {
+    q: "You're both late to dinner. What do you do?",
+    options: ["Call ahead, charm the host.", "Ditch it — find a wine bar instead.", "Walk fast and laugh about it."],
+  },
+  {
+    q: "Your vacation gets canceled last minute. Backup plan?",
+    options: ["Hometown staycation, every restaurant.", "Drive somewhere random within 4 hours.", "Stay in, cook, watch everything."],
+  },
+  {
+    q: "You win $1,000 unexpectedly. How do you spend it?",
+    options: ["Save half, treat yourself with half.", "One incredible weekend trip.", "Something thoughtful for someone else."],
+  },
+  {
+    q: "First fight, six months in. You usually…",
+    options: ["Talk it through tonight, even if late.", "Sleep on it, return in the morning.", "Write it down before you say it."],
+  },
+  {
+    q: "Sunday morning together looks like…",
+    options: ["Slow breakfast, no agenda.", "Out the door by 9 — market, walk, café.", "One of you reads, one of you cooks."],
+  },
+];
+
 export const PROFESSIONS: { id: Profession; label: string; icon: string; hue: string }[] = [
   { id: "analytical", label: "Analytical", icon: "⚙️", hue: "var(--cyan)" },
   { id: "creative", label: "Creative", icon: "🎨", hue: "var(--magenta)" },
