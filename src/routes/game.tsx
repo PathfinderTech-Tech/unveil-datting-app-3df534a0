@@ -164,16 +164,33 @@ function TwoTruths({ onDone }: { onDone: (v: number) => void }) {
   const [statements, setStatements] = useState(["", "", ""]);
   const [lieIdx, setLieIdx] = useState<number | null>(null);
   const ready = statements.every((s) => s.trim().length > 2) && lieIdx !== null;
+  const shuffled = useMemo(() => [...TWO_TRUTHS_PROMPTS].sort(() => Math.random() - 0.5).slice(0, 6), []);
+  const usePrompt = (i: number, p: string) =>
+    setStatements(statements.map((v, j) => (j === i ? p : v)));
   return (
-    <RoundShell title="Two truths & a lie" n="02" sub="Three things about you — pick which one is the lie.">
+    <RoundShell title="Two truths & a lie" n="02" sub="Write three things about you — then pick which one is the lie.">
+      <div className="mb-4 rounded-2xl border border-dashed border-border bg-surface/40 p-3">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Need ideas? Tap a prompt to drop it into a row.</div>
+        <div className="flex flex-wrap gap-1.5">
+          {shuffled.map((p) => (
+            <button key={p} onClick={() => {
+              const emptyIdx = statements.findIndex((s) => !s.trim());
+              usePrompt(emptyIdx === -1 ? 0 : emptyIdx, p);
+            }}
+              className="rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground hover:border-primary hover:text-foreground">
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="space-y-3">
         {statements.map((s, i) => (
           <div key={i} className={`rounded-2xl border p-3 transition-colors ${lieIdx === i ? "border-accent bg-accent/10" : "border-border bg-surface"}`}>
             <input
               value={s}
               onChange={(e) => setStatements(statements.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder={`Statement ${i + 1}`}
-              className="w-full bg-transparent text-sm outline-none"
+              placeholder={`Statement ${i + 1} — e.g. ${shuffled[i] ?? "something true (or not)"}`}
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
             />
             <button onClick={() => setLieIdx(i)}
               className={`mt-1 text-[10px] font-mono uppercase tracking-wider ${lieIdx === i ? "text-accent" : "text-muted-foreground hover:text-foreground"}`}>
