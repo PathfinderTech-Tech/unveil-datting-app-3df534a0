@@ -42,7 +42,8 @@ function Onboarding() {
 
   const finish = async () => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
-    const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character };
+    const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
+    const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character, discovery, summary };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -51,11 +52,12 @@ function Onboarding() {
           first_name: name, age, city,
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
+          bio: summary || null,
           onboarding_complete: true,
         }).eq("id", user.id);
         await supabase.from("onboarding_answers").upsert({
           user_id: user.id,
-          answers: { profession, professionLabel: profObj.label, faceHarmony, character },
+          answers: { profession, professionLabel: profObj.label, faceHarmony, character, discovery, summary },
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
@@ -66,7 +68,7 @@ function Onboarding() {
     name.length > 1 && city.length > 1,
     faceUploaded && faceHarmony > 0,
     profession !== null,
-    true,
+    allAnswered,
   ][step];
 
   return (
