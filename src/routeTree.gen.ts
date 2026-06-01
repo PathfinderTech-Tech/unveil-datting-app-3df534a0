@@ -14,7 +14,6 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MatchesRouteImport } from './routes/matches'
@@ -46,11 +45,6 @@ const ResultsRoute = ResultsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiumRoute = PremiumRouteImport.update({
@@ -97,7 +91,6 @@ export interface FileRoutesByFullPath {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
-  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
@@ -112,7 +105,6 @@ export interface FileRoutesByTo {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
-  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
@@ -128,7 +120,6 @@ export interface FileRoutesById {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
-  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/premium'
-    | '/pricing'
     | '/reset-password'
     | '/results'
     | '/safety'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/premium'
-    | '/pricing'
     | '/reset-password'
     | '/results'
     | '/safety'
@@ -175,7 +164,6 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/premium'
-    | '/pricing'
     | '/reset-password'
     | '/results'
     | '/safety'
@@ -191,7 +179,6 @@ export interface RootRouteChildren {
   MatchesRoute: typeof MatchesRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
-  PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SafetyRoute: typeof SafetyRoute
@@ -234,13 +221,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -303,7 +283,6 @@ const rootRouteChildren: RootRouteChildren = {
   MatchesRoute: MatchesRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
-  PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SafetyRoute: SafetyRoute,
@@ -313,3 +292,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
