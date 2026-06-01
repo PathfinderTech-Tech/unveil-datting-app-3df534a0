@@ -6,11 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 const links = [
   { to: "/", label: "Home" },
   { to: "/onboarding", label: "Begin" },
+  { to: "/games", label: "Games" },
   { to: "/game", label: "Lounge" },
   { to: "/matches", label: "Matches" },
   { to: "/challenges", label: "Challenges" },
   { to: "/passport", label: "Passport" },
-  { to: "/chat", label: "Threads" },
   { to: "/premium", label: "Premium" },
 ] as const;
 
@@ -48,12 +48,20 @@ export function UnveilNav() {
             Sign out
           </button>
         ) : (
-          <Link
-            to="/login"
-            className="rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
-          >
-            Enter
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/login"
+              className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface"
+            >
+              Log in
+            </Link>
+            <Link
+              to="/signup"
+              className="rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+            >
+              Sign up
+            </Link>
+          </div>
         )}
       </div>
     </header>
