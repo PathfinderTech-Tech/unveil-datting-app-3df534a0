@@ -44,10 +44,25 @@ function Onboarding() {
     }, 30);
   };
 
-  const finish = () => {
+  const finish = async () => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({
+          first_name: name, age, city,
+          curiosity_level: character.curiosity,
+          emotional_rhythm: character as unknown as Record<string, number>,
+          onboarding_complete: true,
+        }).eq("id", user.id);
+        await supabase.from("onboarding_answers").upsert({
+          user_id: user.id,
+          answers: { profession, professionLabel: profObj.label, faceHarmony, character },
+        }, { onConflict: "user_id" });
+      }
+    } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
     navigate({ to: "/game" });
   };
 
