@@ -248,6 +248,31 @@ export const FIRST_DATE_SCENARIOS = [
   },
 ];
 
+// ---- TWO TRUTHS & A LIE — prompts to help users get started ----
+export const TWO_TRUTHS_PROMPTS = [
+  "I've lived in ___ countries.",
+  "I once met ___ in person.",
+  "My most embarrassing job was ___.",
+  "I can ___ surprisingly well.",
+  "I have never ___.",
+  "The strangest food I've eaten is ___.",
+  "I once spent a whole night ___.",
+  "I'm secretly really into ___.",
+  "I broke a bone doing ___.",
+  "I have a tattoo of ___.",
+];
+
+// ---- DESERT ISLAND CHALLENGE ----
+export const DESERT_ISLAND = {
+  items: [
+    "A knife", "A lighter", "A guitar", "A solar charger", "A hammock",
+    "A satellite phone", "A book of poems", "A fishing rod", "A camera",
+    "A deck of cards", "A journal & pen", "A blanket",
+  ],
+  luxuries: ["Espresso machine", "Vinyl player", "Hot tub", "Telescope", "Library", "Surfboard"],
+  people: ["A childhood best friend", "A famous chef", "A doctor", "A comedian", "Your favorite author", "Your future partner"],
+};
+
 export const PROFESSIONS: { id: Profession; label: string; icon: string; hue: string }[] = [
   { id: "analytical", label: "Analytical", icon: "⚙️", hue: "var(--cyan)" },
   { id: "creative", label: "Creative", icon: "🎨", hue: "var(--magenta)" },
