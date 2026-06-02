@@ -78,10 +78,10 @@ function Onboarding() {
     }, 30);
   };
 
-  const finish = async () => {
+  const finish = async (skipGames = false) => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
-    const draft = { name, age, gender, country, stateRegion, city, intent, email, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
+    const draft = { name, age, gender, country, stateRegion, city, intent, email, connectionStyle, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -95,11 +95,13 @@ function Onboarding() {
         }).eq("id", user.id);
         await supabase.from("onboarding_answers").upsert({
           user_id: user.id,
-          answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, character, discovery, summary, email },
+          answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, connectionStyle, character, discovery, summary, email },
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
-    navigate({ to: "/game" });
+    // Quick Connect or explicit skip → straight to people. Others → Spark first.
+    if (skipGames || connectionStyle === "quick") navigate({ to: "/matches" });
+    else navigate({ to: "/spark" });
   };
 
   const isUS = country === "United States";
@@ -108,11 +110,13 @@ function Onboarding() {
   const canNext = [
     // Step 0: identity — name, age, gender, country (required), intent, email
     name.length > 1 && !!gender && !!country && !!intent && /\S+@\S+\.\S+/.test(email),
-    // Step 1: face + avatar style
+    // Step 1: connection style
+    !!connectionStyle,
+    // Step 2: face + avatar style
     faceUploaded && faceHarmony > 0 && !!avatarStyle,
-    // Step 2: profession
+    // Step 3: profession
     profession !== null,
-    // Step 3: discovery
+    // Step 4: discovery
     allAnswered,
   ][step];
 
