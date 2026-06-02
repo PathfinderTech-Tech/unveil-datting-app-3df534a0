@@ -163,7 +163,7 @@ export async function loadRealMatches(filters: DiscoverFilters | number = 40): P
     _intent: f.intent ?? null,
     _age_min: f.ageMin ?? null,
     _age_max: f.ageMax ?? null,
-  });
+  } as never);
   if (error) {
     console.warn("[unveil] discover_profiles failed", error);
     return [];

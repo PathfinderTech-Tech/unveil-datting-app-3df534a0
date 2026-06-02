@@ -52,7 +52,7 @@ export function NearbyDiscoverySettings() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update(patch).eq("id", u.user.id);
+    const { error } = await supabase.from("profiles").update(patch as never).eq("id", u.user.id);
     setSaving(false);
     if (error) toast.error(error.message);
   }
