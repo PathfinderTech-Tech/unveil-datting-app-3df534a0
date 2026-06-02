@@ -2,6 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Camera, IdCard, Image as ImageIcon, ShieldCheck, Check, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/verify")({
