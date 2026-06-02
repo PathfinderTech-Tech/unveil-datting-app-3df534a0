@@ -32,6 +32,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const VerifyRoute = VerifyRouteImport.update({
@@ -149,6 +150,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -161,7 +167,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -187,7 +194,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -214,7 +222,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -321,7 +333,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactShareRoute: typeof ContactShareRoute
   DatePlanRoute: typeof DatePlanRoute
   GameRoute: typeof GameRoute
@@ -506,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -516,12 +535,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CheckoutRouteChildren {
+  CheckoutReturnRoute: typeof CheckoutReturnRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutReturnRoute: CheckoutReturnRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   ContactShareRoute: ContactShareRoute,
   DatePlanRoute: DatePlanRoute,
   GameRoute: GameRoute,
