@@ -4,6 +4,7 @@ import { BADGES, useProfile } from "@/lib/synapse-store";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { loadBadges, useUserId } from "@/lib/games-api";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
