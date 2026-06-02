@@ -25,6 +25,8 @@ import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscrip
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
+import { Route as DatePlanRouteImport } from './routes/date-plan'
+import { Route as ContactShareRouteImport } from './routes/contact-share'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
@@ -111,6 +113,16 @@ const GameRoute = GameRouteImport.update({
   path: '/game',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DatePlanRoute = DatePlanRouteImport.update({
+  id: '/date-plan',
+  path: '/date-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactShareRoute = ContactShareRouteImport.update({
+  id: '/contact-share',
+  path: '/contact-share',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -143,6 +155,8 @@ export interface FileRoutesByFullPath {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/contact-share': typeof ContactShareRoute
+  '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -166,6 +180,8 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/contact-share': typeof ContactShareRoute
+  '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -190,6 +206,8 @@ export interface FileRoutesById {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/contact-share': typeof ContactShareRoute
+  '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -215,6 +233,8 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/contact-share'
+    | '/date-plan'
     | '/game'
     | '/games'
     | '/login'
@@ -238,6 +258,8 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/contact-share'
+    | '/date-plan'
     | '/game'
     | '/games'
     | '/login'
@@ -261,6 +283,8 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/contact-share'
+    | '/date-plan'
     | '/game'
     | '/games'
     | '/login'
@@ -285,6 +309,8 @@ export interface RootRouteChildren {
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRoute
+  ContactShareRoute: typeof ContactShareRoute
+  DatePlanRoute: typeof DatePlanRoute
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
@@ -417,6 +443,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/date-plan': {
+      id: '/date-plan'
+      path: '/date-plan'
+      fullPath: '/date-plan'
+      preLoaderRoute: typeof DatePlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact-share': {
+      id: '/contact-share'
+      path: '/contact-share'
+      fullPath: '/contact-share'
+      preLoaderRoute: typeof ContactShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout': {
       id: '/checkout'
       path: '/checkout'
@@ -461,6 +501,8 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRoute,
+  ContactShareRoute: ContactShareRoute,
+  DatePlanRoute: DatePlanRoute,
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
@@ -481,3 +523,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
