@@ -80,18 +80,18 @@ function Matches() {
               Your resonance · {profile.composite} · {ARCHETYPES[profile.archetype].name}
             </div>
             <h1 className="mt-2 font-display text-4xl font-bold">
-              {visible.length} minds in your <span className="text-gradient-hero">±5 band</span>
+              {loading ? "Loading minds…" : `${visible.length} ${visible.length === 1 ? "person" : "people"} to discover`}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Photos and details reveal as mutual engagement deepens. No swiping.
             </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
-            <button onClick={() => setTab("band")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "band" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              In band
-            </button>
             <button onClick={() => setTab("all")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "all" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              Extended
+              All
+            </button>
+            <button onClick={() => setTab("band")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "band" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+              In band ±10
             </button>
           </div>
         </div>
