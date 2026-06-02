@@ -153,8 +153,16 @@ function PuzzleRunner({ type, onBack, onScore }: { type: PuzzleType; onBack: () 
       <BackBtn onClick={onBack} />
       <div className="rounded-3xl border border-border bg-card p-7">
         <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span>{PUZZLE_TYPE_META[type].title}</span>
-          <span>{i + 1} / {items.length}</span>
+          <span className="flex items-center gap-2">
+            {PUZZLE_TYPE_META[type].title}
+            <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-[9px]">
+              {"●".repeat(Math.max(1, Math.min(3, q.difficulty)))}
+            </span>
+          </span>
+          <span>{i + 1} / {items.length} · {correctCount} correct</span>
+        </div>
+        <div className="mb-4 h-1 w-full overflow-hidden rounded-full bg-surface">
+          <div className="h-full bg-gradient-hero transition-all" style={{ width: `${((i + (picked ? 1 : 0)) / items.length) * 100}%` }} />
         </div>
         <h2 className="mt-2 font-display text-2xl font-light leading-snug md:text-3xl">{q.prompt}</h2>
         <div className="mt-6 grid gap-2 md:grid-cols-2">
@@ -180,13 +188,21 @@ function PuzzleRunner({ type, onBack, onScore }: { type: PuzzleType; onBack: () 
           })}
         </div>
         {picked !== null && (
-          <div className="mt-5 flex items-center justify-between">
+          <div className="mt-5 space-y-3">
             <div className={`text-sm ${isCorrect ? "text-neon" : "text-muted-foreground"}`}>
               {isCorrect ? "Nice — that's it." : `Answer: ${q.answer}`}
             </div>
-            <button onClick={next} className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-sm text-primary-foreground shadow-glow">
-              {i + 1 >= items.length ? "See result" : "Next"} <ArrowRight className="h-4 w-4" />
-            </button>
+            {typeof q.meta.hint === "string" && (
+              <div className="rounded-2xl border border-border bg-surface/60 p-3 text-xs text-muted-foreground">
+                <span className="font-mono uppercase tracking-wider text-[9px] text-accent">Insight</span>
+                <div className="mt-1">{q.meta.hint as string}</div>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button onClick={next} className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-sm text-primary-foreground shadow-glow">
+                {i + 1 >= items.length ? "See result" : "Next"} <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>
