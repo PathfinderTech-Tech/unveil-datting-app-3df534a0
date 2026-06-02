@@ -107,9 +107,15 @@ function Matches() {
           </div>
         </div>
 
+        <MatchFilters value={filters} onChange={setFilters} />
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((m) => {
             const arch = ARCHETYPES[m.archetype];
+            const dist = distanceLabel(m.distanceKm);
+            const cityLabel = m.locationPrivacy === "country" ? (m.country || "—")
+              : m.locationPrivacy === "hidden" ? "Location hidden"
+              : m.city;
             return (
               <button
                 key={m.userId}
@@ -137,9 +143,20 @@ function Matches() {
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{m.city}</span>
+                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{cityLabel}</span>
                   <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
                 </div>
+
+                {(m.tags.length > 0 || dist) && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {dist && (
+                      <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{dist}</span>
+                    )}
+                    {m.tags.slice(0, 3).map((t) => (
+                      <span key={t} className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] text-muted-foreground">{t}</span>
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-3 font-mono text-[11px] text-muted-foreground">
                   Δ {Math.abs(m.composite - profile.composite)} pts
@@ -148,6 +165,7 @@ function Matches() {
             );
           })}
         </div>
+
 
         {!loading && visible.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
