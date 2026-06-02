@@ -47,8 +47,15 @@ function Passport() {
             </div>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/20">
-            <div className="h-full bg-primary-foreground/80" style={{ width: `${(unlocked.size / BADGES.length) * 100}%` }} />
+        </div>
+
+        {uid && (
+          <div className="mb-6 grid gap-3 md:grid-cols-2">
+            <VoiceRecorder userId={uid} prompt="A small ritual that makes my day feel like mine." />
+            <VoiceRecorder userId={uid} prompt="The last idea that kept me up — and why." />
           </div>
+        )}
+
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
