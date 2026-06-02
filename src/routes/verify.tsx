@@ -25,8 +25,17 @@ const STEPS = [
 ];
 
 function Verify() {
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  async function submit() {
+    if (!user) { toast.error("Please sign in first."); return; }
+    if (!photoUrl) { toast.error("Add a selfie before submitting."); return; }
+    await supabase.from("profiles").update({ verified: true, photo_url: photoUrl }).eq("id", user.id);
+    setDone(true);
+  }
 
   return (
     <div className="min-h-screen">
