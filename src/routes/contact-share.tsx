@@ -17,11 +17,18 @@ export const Route = createFileRoute("/contact-share")({
 type Channel = "phone" | "whatsapp" | "instagram" | "telegram";
 
 function ContactShare() {
-  // Gating prerequisites — illustrative; in production these come from match state.
   const [matched] = useState(true);
-  const [challengeDone] = useState(true);
-  const [meetIntent, setMeetIntent] = useState<"yes" | "not_yet" | null>(null);
-  const [partnerIntent] = useState<"yes" | "not_yet">("yes"); // mock partner state
+  // Five independent paths — completing ANY one is enough.
+  const [paths, setPaths] = useState({
+    spark: true,          // Completed Spark Questions together
+    challenge: true,      // Completed a Couple Challenge
+    messages: false,      // Exchanged meaningful messages
+    voice: false,         // Completed a voice chat
+    meet: false,          // Mutual agreement to meet
+  });
+  const [partnerMeet] = useState(true); // mock — partner also said yes
+  const togglePath = (k: keyof typeof paths) => setPaths((p) => ({ ...p, [k]: !p[k] }));
+
   const [youApprove, setYouApprove] = useState<Record<Channel, boolean>>({
     phone: false, whatsapp: false, instagram: false, telegram: false,
   });
@@ -29,8 +36,12 @@ function ContactShare() {
     phone: true, whatsapp: true, instagram: false, telegram: false,
   });
 
-  const mutualMeet = meetIntent === "yes" && partnerIntent === "yes";
-  const canShare = matched && challengeDone && mutualMeet;
+  const completedPaths = Object.values(paths).filter(Boolean).length;
+  // Mutual meet only counts if both said yes.
+  const mutualMeet = paths.meet && partnerMeet;
+  // Unlock if matched AND at least one non-meet path is done, OR mutual meet.
+  const nonMeetDone = paths.spark || paths.challenge || paths.messages || paths.voice;
+  const canShare = matched && (mutualMeet || nonMeetDone);
 
   const toggle = (c: Channel) => setYouApprove((s) => ({ ...s, [c]: !s[c] }));
 
@@ -39,6 +50,14 @@ function ContactShare() {
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare, placeholder: "Hidden until mutual consent" },
     { id: "instagram", label: "Instagram", icon: Instagram, placeholder: "@hidden" },
     { id: "telegram", label: "Telegram", icon: Send, placeholder: "@hidden" },
+  ];
+
+  const pathList: { key: keyof typeof paths; label: string; hint: string }[] = [
+    { key: "spark",     label: "Completed Spark Questions",     hint: "You've answered together." },
+    { key: "challenge", label: "Completed a Couple Challenge",  hint: "Played one playful round." },
+    { key: "messages",  label: "Exchanged meaningful messages", hint: "Real back-and-forth, not just hellos." },
+    { key: "voice",     label: "Completed a voice chat",        hint: "Heard each other's voice." },
+    { key: "meet",      label: "Mutual agreement to meet",      hint: "You both said yes to a real date." },
   ];
 
   return (
