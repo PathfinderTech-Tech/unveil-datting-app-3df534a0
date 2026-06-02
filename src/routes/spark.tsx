@@ -129,9 +129,9 @@ function SparkPage() {
               rows={3}
               className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
             <div className="mt-4 flex items-center gap-2">
-              <button onClick={save} disabled={!answer.trim()}
+              <button onClick={save} disabled={!answer.trim() || saving}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-40">
-                <Send className="h-4 w-4" /> Save answer
+                <Send className="h-4 w-4" /> {saving ? "Saving…" : "Save answer"}
               </button>
               <button onClick={next}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
