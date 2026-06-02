@@ -67,7 +67,19 @@ function Verify() {
                 />
               ))}
             </div>
-            <Step icon={STEPS[step].icon} title={STEPS[step].title} body={STEPS[step].body} index={step} />
+            <Step icon={STEPS[step].icon} title={STEPS[step].title} body={STEPS[step].body} index={step}>
+              {step === 0 && user && (
+                <PhotoUpload userId={user.id} initialUrl={photoUrl} onUploaded={setPhotoUrl} label="Take selfie" />
+              )}
+              {step === 0 && !user && (
+                <div className="text-xs text-muted-foreground">Please <Link to="/login" className="text-primary">sign in</Link> to upload your selfie.</div>
+              )}
+              {step > 0 && (
+                <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-dashed border-border bg-surface text-xs text-muted-foreground">
+                  Coming soon — ID & comparison review
+                </div>
+              )}
+            </Step>
 
             <div className="mt-8 flex items-center justify-between">
               <button
@@ -78,7 +90,7 @@ function Verify() {
                 ← Back
               </button>
               <button
-                onClick={() => (step < STEPS.length - 1 ? setStep(step + 1) : setDone(true))}
+                onClick={() => (step < STEPS.length - 1 ? setStep(step + 1) : submit())}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow"
               >
                 {step < STEPS.length - 1 ? "Continue" : "Submit verification"}
