@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { ArrowRight, Brain, Eye, Sparkles, Trophy, Wand2, Puzzle, Hash, Layers } from "lucide-react";
+import { savePuzzleScore, loadPuzzleScores, useUserId, awardBadge } from "@/lib/games-api";
 
 export const Route = createFileRoute("/puzzles")({
   head: () => ({
@@ -29,16 +30,32 @@ const PUZZLES: { id: PuzzleId; title: string; tagline: string; icon: any; hue: s
 ];
 
 function Puzzles() {
+  const uid = useUserId();
   const [active, setActive] = useState<PuzzleId | null>(null);
   const [scores, setScores] = useState<Record<PuzzleId, number>>({
     dots: 0, spot: 0, memory: 0, pattern: 0, missing: 0, logic: 0,
   });
 
+  // Hydrate saved best scores from DB
+  useEffect(() => {
+    if (!uid) return;
+    loadPuzzleScores().then((rows) => {
+      setScores((s) => ({ ...s, ...(rows as Record<PuzzleId, number>) }));
+    });
+  }, [uid]);
+
   const award = (id: PuzzleId, pts: number) => {
     setScores((s) => {
-      const next = { ...s, [id]: Math.max(s[id], pts) };
+      const best = Math.max(s[id], pts);
+      const next = { ...s, [id]: best };
+      // Persist best score
+      if (uid) {
+        savePuzzleScore(id, best);
+        // Award badge once 3+ puzzles played
+        const played = Object.values(next).filter((v) => v > 0).length;
+        if (played >= 3) awardBadge("deep-thinker");
+      }
       const idx = PUZZLES.findIndex((p) => p.id === id);
-      // Smoothly flow to the next unplayed puzzle.
       setTimeout(() => {
         const upcoming = PUZZLES.slice(idx + 1).find((p) => next[p.id] === 0);
         setActive(upcoming ? upcoming.id : null);
