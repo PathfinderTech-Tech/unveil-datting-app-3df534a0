@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, ArrowRight, Check, Sparkles } from "lucide-react";
+import { Camera, ArrowRight, Check, Sparkles, Upload, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "A few playful questions to shape your Discovery Profile." }] }),
