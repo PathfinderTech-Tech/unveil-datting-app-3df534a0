@@ -348,7 +348,7 @@ function Onboarding() {
           >
             ← Back
           </button>
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canNext}
@@ -357,12 +357,20 @@ function Onboarding() {
               Continue <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
-            <button
-              onClick={finish}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
-            >
-              Discover your resonance <ArrowRight className="h-4 w-4" />
-            </button>
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+              <button
+                onClick={() => finish(true)}
+                className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Skip games — just let me chat
+              </button>
+              <button
+                onClick={() => finish(false)}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+              >
+                Discover your resonance <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           )}
         </div>
       </div>
