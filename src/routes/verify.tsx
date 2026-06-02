@@ -153,11 +153,13 @@ function Step({
   title,
   body,
   index,
+  children,
 }: {
   icon: any;
   title: string;
   body: string;
   index: number;
+  children?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center text-center">
@@ -169,9 +171,7 @@ function Step({
       </div>
       <h3 className="mt-2 font-display text-2xl">{title}</h3>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
-      <div className="mt-6 flex h-48 w-full items-center justify-center rounded-2xl border border-dashed border-border bg-surface text-xs text-muted-foreground">
-        Camera / upload area
-      </div>
+      <div className="mt-6 w-full">{children}</div>
     </div>
   );
 }
