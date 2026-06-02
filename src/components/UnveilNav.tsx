@@ -12,7 +12,8 @@ const links = [
   { to: "/matches", label: "Matches" },
   { to: "/challenges", label: "Challenges" },
   { to: "/passport", label: "Passport" },
-  { to: "/premium", label: "Premium" },
+  { to: "/verify", label: "Verify" },
+  { to: "/premium", label: "Membership" },
 ] as const;
 
 

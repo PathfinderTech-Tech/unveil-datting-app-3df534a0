@@ -33,7 +33,20 @@ function Puzzles() {
   const [scores, setScores] = useState<Record<PuzzleId, number>>({
     dots: 0, spot: 0, memory: 0, pattern: 0, missing: 0, logic: 0,
   });
-  const award = (id: PuzzleId, pts: number) => setScores((s) => ({ ...s, [id]: Math.max(s[id], pts) }));
+
+  const award = (id: PuzzleId, pts: number) => {
+    setScores((s) => {
+      const next = { ...s, [id]: Math.max(s[id], pts) };
+      const idx = PUZZLES.findIndex((p) => p.id === id);
+      // Smoothly flow to the next unplayed puzzle.
+      setTimeout(() => {
+        const upcoming = PUZZLES.slice(idx + 1).find((p) => next[p.id] === 0);
+        setActive(upcoming ? upcoming.id : null);
+      }, 1400);
+      return next;
+    });
+  };
+
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
 
   // Map style from highest-scoring puzzles — playful, not an IQ.

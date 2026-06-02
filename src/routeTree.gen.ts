@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -20,14 +21,21 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MatchesRouteImport } from './routes/matches'
+import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -83,6 +91,11 @@ const MatchesRoute = MatchesRouteImport.update({
   path: '/matches',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManageSubscriptionRoute = ManageSubscriptionRouteImport.update({
+  id: '/manage-subscription',
+  path: '/manage-subscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -96,6 +109,11 @@ const GamesRoute = GamesRouteImport.update({
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -124,9 +142,11 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
+  '/checkout': typeof CheckoutRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -138,15 +158,18 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
+  '/verify': typeof VerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
+  '/checkout': typeof CheckoutRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -158,6 +181,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
+  '/verify': typeof VerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -165,9 +189,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
+  '/checkout': typeof CheckoutRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -179,6 +205,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
+  '/verify': typeof VerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -187,9 +214,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/challenges'
     | '/chat'
+    | '/checkout'
     | '/game'
     | '/games'
     | '/login'
+    | '/manage-subscription'
     | '/matches'
     | '/onboarding'
     | '/passport'
@@ -201,15 +230,18 @@ export interface FileRouteTypes {
     | '/signup'
     | '/spark'
     | '/terms'
+    | '/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/challenges'
     | '/chat'
+    | '/checkout'
     | '/game'
     | '/games'
     | '/login'
+    | '/manage-subscription'
     | '/matches'
     | '/onboarding'
     | '/passport'
@@ -221,15 +253,18 @@ export interface FileRouteTypes {
     | '/signup'
     | '/spark'
     | '/terms'
+    | '/verify'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/challenges'
     | '/chat'
+    | '/checkout'
     | '/game'
     | '/games'
     | '/login'
+    | '/manage-subscription'
     | '/matches'
     | '/onboarding'
     | '/passport'
@@ -241,6 +276,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/spark'
     | '/terms'
+    | '/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -248,9 +284,11 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
+  CheckoutRoute: typeof CheckoutRoute
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
+  ManageSubscriptionRoute: typeof ManageSubscriptionRoute
   MatchesRoute: typeof MatchesRoute
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
@@ -262,10 +300,18 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SparkRoute: typeof SparkRoute
   TermsRoute: typeof TermsRoute
+  VerifyRoute: typeof VerifyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -343,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manage-subscription': {
+      id: '/manage-subscription'
+      path: '/manage-subscription'
+      fullPath: '/manage-subscription'
+      preLoaderRoute: typeof ManageSubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -362,6 +415,13 @@ declare module '@tanstack/react-router' {
       path: '/game'
       fullPath: '/game'
       preLoaderRoute: typeof GameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -400,9 +460,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
+  CheckoutRoute: CheckoutRoute,
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
+  ManageSubscriptionRoute: ManageSubscriptionRoute,
   MatchesRoute: MatchesRoute,
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
@@ -414,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SparkRoute: SparkRoute,
   TermsRoute: TermsRoute,
+  VerifyRoute: VerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
