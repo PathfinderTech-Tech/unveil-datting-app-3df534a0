@@ -169,7 +169,17 @@ function SparkPage() {
             </div>
           </div>
         )}
+
+        <div className="mt-12 flex items-center justify-between border-t border-border pt-6">
+          <Link to="/puzzles" className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="h-3 w-3" /> Back: Puzzles
+          </Link>
+          <Link to="/challenges" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
+            Next: Challenges <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
+
     </div>
   );
 }
