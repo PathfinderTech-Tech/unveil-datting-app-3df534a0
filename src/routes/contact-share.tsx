@@ -76,43 +76,43 @@ function ContactShare() {
 
         <SafetyReminder />
 
-        {/* Gate checklist */}
+        {/* Multi-path unlock — any ONE path is enough */}
         <div className="mt-6 rounded-3xl border border-border bg-card p-6">
-          <div className="mb-4 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Unlock progress</div>
-          <ul className="space-y-3 text-sm">
-            <Gate done={matched} label="You're matched" />
-            <Gate done={challengeDone} label="You've completed a Couple Challenge or Spark Duel"
-              link={{ to: "/challenges", label: "Open challenges" }} />
-            <Gate done={meetIntent === "yes"} label="You've said you'd like to meet" />
-            <Gate done={partnerIntent === "yes"} label="Your match has said they'd like to meet" />
-          </ul>
-        </div>
-
-        {/* Meet intent */}
-        {!mutualMeet && (
-          <div className="mt-6 rounded-3xl border border-border bg-card p-6">
-            <div className="font-display text-xl">Would you like to explore a real date together?</div>
-            <p className="mt-1 text-sm text-muted-foreground">Both of you must answer yes to unlock contact sharing.</p>
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setMeetIntent("yes")}
-                className={`flex-1 rounded-full px-5 py-3 text-sm font-medium transition-colors ${
-                  meetIntent === "yes" ? "bg-gradient-hero text-primary-foreground shadow-glow" : "border border-border bg-surface hover:border-primary"
-                }`}
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setMeetIntent("not_yet")}
-                className={`flex-1 rounded-full px-5 py-3 text-sm transition-colors ${
-                  meetIntent === "not_yet" ? "border border-primary bg-primary/10" : "border border-border bg-surface hover:border-foreground/40"
-                }`}
-              >
-                Not yet
-              </button>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Unlock paths</div>
+            <div className="font-mono text-[10px] text-muted-foreground">
+              {completedPaths}/5 complete · need any 1
             </div>
           </div>
-        )}
+          <p className="mb-4 text-xs text-muted-foreground">
+            Different people connect differently. Complete any single path below to unlock contact sharing — games and challenges are never required.
+          </p>
+          <ul className="space-y-2 text-sm">
+            <Gate done={matched} label="You're matched" />
+            {pathList.map((p) => (
+              <li key={p.key} className="flex items-center gap-3 rounded-2xl border border-border bg-surface/40 p-3">
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full ${paths[p.key] ? "bg-neon/20 text-neon" : "bg-surface text-muted-foreground"}`}>
+                  {paths[p.key] ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className={paths[p.key] ? "text-foreground" : "text-muted-foreground"}>{p.label}</div>
+                  <div className="text-[11px] text-muted-foreground">{p.hint}</div>
+                </div>
+                <button
+                  onClick={() => togglePath(p.key)}
+                  className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+                    paths[p.key] ? "border border-neon/40 bg-neon/10 text-foreground" : "border border-border bg-card hover:border-primary"
+                  }`}
+                >
+                  {paths[p.key] ? "Done" : "Mark done"}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {paths.meet && !partnerMeet && (
+            <p className="mt-3 text-[11px] text-amber-400">Waiting on your match to also say yes to meeting.</p>
+          )}
+        </div>
 
         {/* Channels */}
         <div className="mt-6 rounded-3xl border border-border bg-card p-6">
