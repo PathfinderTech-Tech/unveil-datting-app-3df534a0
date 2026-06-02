@@ -21,13 +21,14 @@ export const PUZZLE_TYPE_META: Record<PuzzleType, { title: string; tagline: stri
 };
 
 export async function loadPuzzlesByType(type: PuzzleType, limit = 5): Promise<PuzzleItem[]> {
+  // Pull a larger pool then shuffle client-side so each round feels fresh.
   const { data, error } = await supabase
     .from("puzzle_content")
     .select("id, puzzle_type, prompt, options, answer, difficulty, meta")
     .eq("puzzle_type", type)
-    .limit(limit);
+    .limit(50);
   if (error || !data) return [];
-  return data.map((r) => ({
+  const mapped: PuzzleItem[] = data.map((r) => ({
     id: r.id,
     type: r.puzzle_type as PuzzleType,
     prompt: r.prompt,
@@ -36,6 +37,7 @@ export async function loadPuzzlesByType(type: PuzzleType, limit = 5): Promise<Pu
     difficulty: r.difficulty ?? 1,
     meta: (r.meta as Record<string, unknown>) ?? {},
   }));
+  return mapped.sort(() => Math.random() - 0.5).slice(0, limit);
 }
 
 export async function loadPuzzleTypeCounts(): Promise<Record<PuzzleType, number>> {
