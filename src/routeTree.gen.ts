@@ -13,6 +13,7 @@ import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -53,6 +54,11 @@ const SparkRoute = SparkRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SafetyRoute = SafetyRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SafetyRoute: typeof SafetyRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SparkRoute: typeof SparkRoute
   TermsRoute: typeof TermsRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/safety': {
@@ -567,6 +587,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SafetyRoute: SafetyRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SparkRoute: SparkRoute,
   TermsRoute: TermsRoute,
@@ -576,3 +597,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

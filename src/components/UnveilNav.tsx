@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { LogoMark, LogoWordmark } from "./LogoHeader";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X } from "lucide-react";
@@ -49,6 +50,7 @@ export function UnveilNav() {
           })}
         </nav>
         <div className="flex items-center gap-2">
+          <div className="hidden md:block"><LanguageSwitcher variant="compact" /></div>
           {user ? (
             <button
               onClick={() => supabase.auth.signOut()}
