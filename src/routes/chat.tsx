@@ -7,6 +7,7 @@ import { MessageCircle, ArrowRight, Send } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Conversations — UNVEIL" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ c: typeof s.c === "string" ? s.c : undefined }),
   component: Chat,
 });
 
@@ -16,6 +17,7 @@ type Msg = { id: string; sender_id: string; content: string; created_at: string 
 function Chat() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { c: wantId } = Route.useSearch();
   const [convs, setConvs] = useState<Conv[]>([]);
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -26,8 +28,15 @@ function Chat() {
   useEffect(() => {
     if (!user) return;
     supabase.from("conversations").select("*").order("last_message_at", { ascending: false })
-      .then(({ data }) => setConvs(data ?? []));
-  }, [user]);
+      .then(({ data }) => {
+        const list = data ?? [];
+        setConvs(list);
+        if (wantId && !active) {
+          const found = list.find((c) => c.id === wantId);
+          if (found) setActive(found);
+        }
+      });
+  }, [user, wantId, active]);
 
   useEffect(() => {
     if (!active) return;
