@@ -39,6 +39,12 @@ const AVATAR_STYLES = [
   { id: "artistic",   label: "Artistic Illustration", hint: "Watercolor, soft." },
 ];
 
+const CONNECTION_STYLES = [
+  { id: "quick",     label: "Quick Connect",  hint: "I prefer chatting naturally.",            tone: "Skip games. Jump into messages." },
+  { id: "discovery", label: "Discovery Mode", hint: "I enjoy questions and interactive experiences.", tone: "Spark, puzzles, challenges — the works." },
+  { id: "slow",      label: "Slow Burn",      hint: "I like building trust before meeting.",    tone: "Take your time. Voice, words, then a date." },
+];
+
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
