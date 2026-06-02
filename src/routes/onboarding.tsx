@@ -56,6 +56,7 @@ function Onboarding() {
   const [city, setCity] = useState("");
   const [intent, setIntent] = useState("");
   const [email, setEmail] = useState("");
+  const [connectionStyle, setConnectionStyle] = useState<string>("");
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
