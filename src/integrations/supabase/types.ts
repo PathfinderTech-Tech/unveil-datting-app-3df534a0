@@ -35,6 +35,39 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_results: {
+        Row: {
+          both_agree: boolean
+          created_at: string
+          id: string
+          partner_id: string | null
+          payment: string | null
+          picks: Json
+          reward: string | null
+          user_id: string
+        }
+        Insert: {
+          both_agree?: boolean
+          created_at?: string
+          id?: string
+          partner_id?: string | null
+          payment?: string | null
+          picks?: Json
+          reward?: string | null
+          user_id: string
+        }
+        Update: {
+          both_agree?: boolean
+          created_at?: string
+          id?: string
+          partner_id?: string | null
+          payment?: string | null
+          picks?: Json
+          reward?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -281,6 +314,30 @@ export type Database = {
         }
         Relationships: []
       }
+      puzzle_scores: {
+        Row: {
+          id: string
+          puzzle_id: string
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          puzzle_id: string
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          puzzle_id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -308,6 +365,33 @@ export type Database = {
           reported_user_id?: string
           reporter_id?: string
           status?: Database["public"]["Enums"]["report_status"] | null
+        }
+        Relationships: []
+      }
+      spark_answers: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          question: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string
+          id?: string
+          question: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          question?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -343,6 +427,27 @@ export type Database = {
           stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["subscription_tier"] | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
           user_id?: string
         }
         Relationships: []
