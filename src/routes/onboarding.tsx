@@ -275,24 +275,93 @@ function Onboarding() {
               <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
               <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
             </div>
-            <div className="flex flex-col items-center gap-6 rounded-3xl border border-dashed border-border bg-card p-10">
-              {!faceUploaded ? (
-                <button onClick={simulateFace} className="flex flex-col items-center gap-4 text-center">
-                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow transition-transform hover:scale-105">
-                    <Camera className="h-12 w-12 text-primary-foreground" />
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) handlePhotoFile(f);
+              }}
+              className={`flex flex-col items-center gap-6 rounded-3xl border-2 border-dashed p-8 transition-colors ${
+                dragActive ? "border-primary bg-primary/5" : "border-border bg-card"
+              }`}
+            >
+              <input
+                ref={selfieInputRef}
+                type="file"
+                accept="image/*"
+                capture="user"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }}
+              />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }}
+              />
+
+              <div className="relative h-40 w-40 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Your selfie" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Camera className="h-14 w-14 text-primary-foreground/90" />
                   </div>
-                  <span className="font-medium">Tap to capture (demo)</span>
-                  <span className="text-xs text-muted-foreground">We never share your raw selfie.</span>
+                )}
+                {photoUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  </div>
+                )}
+                {faceUploaded && !photoUploading && (
+                  <div className="absolute bottom-1 right-1 rounded-full bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold text-primary shadow">
+                    {faceHarmony}%
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => selfieInputRef.current?.click()}
+                  disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105 disabled:opacity-50"
+                >
+                  <Camera className="h-4 w-4" /> {photoUrl ? "Retake selfie" : "Take selfie"}
                 </button>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow">
-                    <span className="font-display text-4xl font-bold text-primary-foreground">{faceHarmony}%</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">Sensory harmony noted (private)</div>
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium hover:border-foreground/30 disabled:opacity-50"
+                >
+                  <Upload className="h-4 w-4" /> Upload photo
+                </button>
+                {photoUrl && (
+                  <button
+                    type="button"
+                    onClick={clearPhoto}
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" /> Remove
+                  </button>
+                )}
+              </div>
+
+              <div className="text-center">
+                <div className="text-sm text-foreground/85">
+                  {faceUploaded ? "Sensory harmony noted — kept private." : "Drag & drop, take a selfie, or upload from your library."}
                 </div>
-              )}
+                <div className="mt-1 text-xs text-muted-foreground">
+                  JPG or PNG · up to 8MB · we never share your raw selfie.
+                </div>
+              </div>
             </div>
+
 
             {faceUploaded && (
               <div>
