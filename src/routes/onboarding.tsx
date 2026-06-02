@@ -217,7 +217,7 @@ function Onboarding() {
         {step === 2 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Your face & avatar</div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 03 — Your face & avatar</div>
               <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
               <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
             </div>
