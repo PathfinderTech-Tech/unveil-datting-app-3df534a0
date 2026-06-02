@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "発見", "matches": "マッチ", "chat": "チャット", "puzzles": "パズル", "games": "ゲーム", "challenges": "チャレンジ", "passport": "パスポート", "spark": "スパーク", "datePlan": "デート計画", "safety": "安全", "premium": "プレミアム", "settings": "設定", "signOut": "ログアウト", "signIn": "ログイン", "signUp": "登録" },
+  "common": { "continue": "続ける", "back": "戻る", "next": "次へ", "save": "保存", "cancel": "キャンセル", "submit": "送信", "loading": "読み込み中…", "send": "送信", "skip": "スキップ", "done": "完了", "yes": "はい", "no": "いいえ", "search": "検索", "language": "言語", "country": "国", "error": "問題が発生しました", "retry": "再試行", "delete": "削除", "edit": "編集", "close": "閉じる", "settings": "設定" },
+  "auth": { "email": "メール", "password": "パスワード", "signIn": "ログイン", "signUp": "アカウント作成", "forgotPassword": "パスワードをお忘れ？", "noAccount": "アカウントをお持ちでない？", "haveAccount": "すでにアカウントをお持ち？", "welcome": "UNVEILへようこそ", "welcomeBack": "おかえりなさい" },
+  "onboarding": { "title": "あなたについて教えてください", "firstName": "名前", "age": "年齢", "city": "都市", "country": "国", "language": "優先言語", "gender": "性別", "interestedIn": "興味の対象", "intention": "つながりの意図", "bio": "自己紹介", "complete": "プロフィール完成" },
+  "spark": { "title": "スパーク質問", "subtitle": "回答してマッチを深めましょう", "answer": "あなたの答え" },
+  "puzzles": { "title": "発見パズル", "subtitle": "プレイして個性を明らかに", "start": "開始" },
+  "matches": { "title": "あなたのマッチ", "empty": "まだマッチがありません。", "compatibility": "相性", "sendInterest": "興味を示す", "mutualMatch": "マッチ成立！", "openChat": "チャットを開く" },
+  "chat": { "title": "チャット", "placeholder": "メッセージを入力…", "send": "送信", "noConversations": "会話なし" },
+  "safety": { "title": "安全センター", "report": "報告", "block": "ブロック", "tips": "安全のヒント" },
+  "premium": { "title": "メンバーシップ", "free": "無料", "upgrade": "プレミアムにアップグレード", "getVerified": "認証を取得", "manageSubscription": "サブスクリプション管理", "perMonth": "/月" },
+  "datePlan": { "title": "デートプランナー", "create": "デートを計画" },
+  "passport": { "title": "パスポート", "subtitle": "あなたの物語、あなたの声" },
+  "checkout": { "title": "セキュアチェックアウト", "preparing": "準備中…", "complete": "完了", "back": "プランに戻る" },
+  "errors": { "generic": "問題が発生しました。", "network": "ネットワークエラー。", "unauthorized": "ログインしてください。", "notFound": "見つかりません" },
+  "legal": { "terms": "利用規約", "privacy": "プライバシー" }
+}

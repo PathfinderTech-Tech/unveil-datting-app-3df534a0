@@ -13,6 +13,7 @@ import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -32,6 +33,8 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -51,6 +54,11 @@ const SparkRoute = SparkRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SafetyRoute = SafetyRouteImport.update({
@@ -148,13 +156,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -169,17 +188,20 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -194,10 +216,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -205,7 +230,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
   '/game': typeof GameRoute
@@ -220,10 +245,13 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/checkout/return': typeof CheckoutReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,10 +275,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -272,10 +303,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -297,10 +331,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/results'
     | '/safety'
+    | '/settings'
     | '/signup'
     | '/spark'
     | '/terms'
     | '/verify'
+    | '/checkout/return'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -308,7 +345,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactShareRoute: typeof ContactShareRoute
   DatePlanRoute: typeof DatePlanRoute
   GameRoute: typeof GameRoute
@@ -323,10 +360,12 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SafetyRoute: typeof SafetyRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SparkRoute: typeof SparkRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -357,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/safety': {
@@ -492,15 +538,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface CheckoutRouteChildren {
+  CheckoutReturnRoute: typeof CheckoutReturnRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutReturnRoute: CheckoutReturnRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   ContactShareRoute: ContactShareRoute,
   DatePlanRoute: DatePlanRoute,
   GameRoute: GameRoute,
@@ -515,10 +587,12 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SafetyRoute: SafetyRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SparkRoute: SparkRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

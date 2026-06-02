@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "اكتشف", "matches": "التطابقات", "chat": "الدردشة", "puzzles": "الألغاز", "games": "الألعاب", "challenges": "التحديات", "passport": "جواز السفر", "spark": "الشرارة", "datePlan": "خطة موعد", "safety": "الأمان", "premium": "بريميوم", "settings": "الإعدادات", "signOut": "تسجيل الخروج", "signIn": "تسجيل الدخول", "signUp": "إنشاء حساب" },
+  "common": { "continue": "متابعة", "back": "رجوع", "next": "التالي", "save": "حفظ", "cancel": "إلغاء", "submit": "إرسال", "loading": "جار التحميل…", "send": "إرسال", "skip": "تخطي", "done": "تم", "yes": "نعم", "no": "لا", "search": "بحث", "language": "اللغة", "country": "البلد", "error": "حدث خطأ ما", "retry": "إعادة المحاولة", "delete": "حذف", "edit": "تعديل", "close": "إغلاق", "settings": "الإعدادات" },
+  "auth": { "email": "البريد الإلكتروني", "password": "كلمة المرور", "signIn": "تسجيل الدخول", "signUp": "إنشاء حساب", "forgotPassword": "نسيت كلمة المرور؟", "noAccount": "ليس لديك حساب؟", "haveAccount": "لديك حساب بالفعل؟", "welcome": "مرحباً بك في UNVEIL", "welcomeBack": "مرحباً بعودتك" },
+  "onboarding": { "title": "أخبرنا عن نفسك", "firstName": "الاسم الأول", "age": "العمر", "city": "المدينة", "country": "البلد", "language": "اللغة المفضلة", "gender": "الجنس", "interestedIn": "مهتم بـ", "intention": "نية التواصل", "bio": "عنك", "complete": "إكمال الملف الشخصي" },
+  "spark": { "title": "أسئلة الشرارة", "subtitle": "أجب لتعميق تطابقاتك", "answer": "إجابتك" },
+  "puzzles": { "title": "ألغاز الاكتشاف", "subtitle": "العب لكشف الشخصية", "start": "ابدأ" },
+  "matches": { "title": "تطابقاتك", "empty": "لا توجد تطابقات بعد.", "compatibility": "التوافق", "sendInterest": "إظهار الاهتمام", "mutualMatch": "إنه تطابق!", "openChat": "فتح الدردشة" },
+  "chat": { "title": "الدردشة", "placeholder": "اكتب رسالة…", "send": "إرسال", "noConversations": "لا توجد محادثات" },
+  "safety": { "title": "مركز الأمان", "report": "إبلاغ", "block": "حظر", "tips": "نصائح الأمان" },
+  "premium": { "title": "العضوية", "free": "مجاني", "upgrade": "الترقية إلى بريميوم", "getVerified": "التحقق", "manageSubscription": "إدارة الاشتراك", "perMonth": "/شهر" },
+  "datePlan": { "title": "مخطط المواعيد", "create": "خطط لموعد" },
+  "passport": { "title": "جواز السفر", "subtitle": "قصتك، صوتك" },
+  "checkout": { "title": "دفع آمن", "preparing": "جار التحضير…", "complete": "تم كل شيء", "back": "العودة إلى الخطط" },
+  "errors": { "generic": "حدث خطأ ما.", "network": "خطأ في الشبكة.", "unauthorized": "يرجى تسجيل الدخول.", "notFound": "غير موجود" },
+  "legal": { "terms": "الشروط", "privacy": "الخصوصية" }
+}

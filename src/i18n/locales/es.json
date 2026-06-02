@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "Descubrir", "matches": "Conexiones", "chat": "Mensajes", "puzzles": "Acertijos", "games": "Juegos", "challenges": "Retos", "passport": "Pasaporte", "spark": "Chispa", "datePlan": "Plan de cita", "safety": "Seguridad", "premium": "Premium", "settings": "Ajustes", "signOut": "Cerrar sesión", "signIn": "Iniciar sesión", "signUp": "Registrarse" },
+  "common": { "continue": "Continuar", "back": "Atrás", "next": "Siguiente", "save": "Guardar", "cancel": "Cancelar", "submit": "Enviar", "loading": "Cargando…", "send": "Enviar", "skip": "Omitir", "done": "Hecho", "yes": "Sí", "no": "No", "search": "Buscar", "language": "Idioma", "country": "País", "error": "Algo salió mal", "retry": "Reintentar", "delete": "Eliminar", "edit": "Editar", "close": "Cerrar", "settings": "Ajustes" },
+  "auth": { "email": "Correo", "password": "Contraseña", "signIn": "Iniciar sesión", "signUp": "Crear cuenta", "forgotPassword": "¿Olvidaste tu contraseña?", "noAccount": "¿No tienes cuenta?", "haveAccount": "¿Ya tienes cuenta?", "welcome": "Bienvenido a UNVEIL", "welcomeBack": "Bienvenido de nuevo" },
+  "onboarding": { "title": "Cuéntanos sobre ti", "firstName": "Nombre", "age": "Edad", "city": "Ciudad", "country": "País", "language": "Idioma preferido", "gender": "Género", "interestedIn": "Interesado en", "intention": "Intención de conexión", "bio": "Sobre ti", "complete": "Completar perfil" },
+  "spark": { "title": "Preguntas Chispa", "subtitle": "Responde para profundizar tus conexiones", "answer": "Tu respuesta" },
+  "puzzles": { "title": "Acertijos de descubrimiento", "subtitle": "Juega para revelar tu personalidad", "start": "Comenzar" },
+  "matches": { "title": "Tus conexiones", "empty": "Aún no hay conexiones. Completa tu perfil para descubrir personas.", "compatibility": "Compatibilidad", "sendInterest": "Mostrar interés", "mutualMatch": "¡Es una conexión!", "openChat": "Abrir chat" },
+  "chat": { "title": "Mensajes", "placeholder": "Escribe un mensaje…", "send": "Enviar", "noConversations": "Sin conversaciones" },
+  "safety": { "title": "Centro de seguridad", "report": "Reportar", "block": "Bloquear", "tips": "Consejos de seguridad" },
+  "premium": { "title": "Membresía", "free": "Gratis", "upgrade": "Mejorar a Premium", "getVerified": "Verificarme", "manageSubscription": "Gestionar suscripción", "perMonth": "/mes" },
+  "datePlan": { "title": "Planificador de citas", "create": "Planear una cita" },
+  "passport": { "title": "Pasaporte", "subtitle": "Tu historia, tu voz" },
+  "checkout": { "title": "Pago seguro", "preparing": "Preparando…", "complete": "Listo", "back": "Volver a los planes" },
+  "errors": { "generic": "Algo salió mal. Intenta de nuevo.", "network": "Error de red.", "unauthorized": "Inicia sesión para continuar.", "notFound": "No encontrado" },
+  "legal": { "terms": "Términos", "privacy": "Privacidad" }
+}
