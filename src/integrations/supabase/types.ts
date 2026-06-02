@@ -413,6 +413,7 @@ export type Database = {
           country: string | null
           created_at: string
           curiosity_level: number | null
+          discovery_radius_km: number
           email: string | null
           emotional_rhythm: Json | null
           first_name: string | null
@@ -422,6 +423,11 @@ export type Database = {
           intention: string | null
           interested_in: string | null
           interests: string[] | null
+          lat_approx: number | null
+          lng_approx: number | null
+          location_enabled: boolean
+          location_privacy: string
+          location_updated_at: string | null
           onboarding_complete: boolean | null
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           photo_url: string | null
@@ -448,6 +454,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           curiosity_level?: number | null
+          discovery_radius_km?: number
           email?: string | null
           emotional_rhythm?: Json | null
           first_name?: string | null
@@ -457,6 +464,11 @@ export type Database = {
           intention?: string | null
           interested_in?: string | null
           interests?: string[] | null
+          lat_approx?: number | null
+          lng_approx?: number | null
+          location_enabled?: boolean
+          location_privacy?: string
+          location_updated_at?: string | null
           onboarding_complete?: boolean | null
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
@@ -485,6 +497,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           curiosity_level?: number | null
+          discovery_radius_km?: number
           email?: string | null
           emotional_rhythm?: Json | null
           first_name?: string | null
@@ -494,6 +507,11 @@ export type Database = {
           intention?: string | null
           interested_in?: string | null
           interests?: string[] | null
+          lat_approx?: number | null
+          lng_approx?: number | null
+          location_enabled?: boolean
+          location_privacy?: string
+          location_updated_at?: string | null
           onboarding_complete?: boolean | null
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
@@ -814,22 +832,39 @@ export type Database = {
         }[]
       }
       discover_profiles: {
-        Args: { _limit?: number }
+        Args: {
+          _age_max?: number
+          _age_min?: number
+          _country?: string
+          _intent?: string
+          _language?: string
+          _limit?: number
+          _nearby_only?: boolean
+          _radius_km?: number
+        }
         Returns: {
           age: number
           archetype: string
           bio: string
           city: string
           compatibility_score: number
+          country: string
           curiosity_level: number
+          distance_km: number
           emotional_rhythm: Json
           first_name: string
           gender: string
           id: string
           intention: string
           interested_in: string
+          lat_approx: number
+          lng_approx: number
+          location_enabled: boolean
+          location_privacy: string
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"]
           photo_url: string
+          preferred_language: string
+          relationship_intent: string
           verified: boolean
         }[]
       }
