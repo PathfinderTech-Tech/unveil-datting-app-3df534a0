@@ -192,6 +192,31 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Connection Style</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">How do you prefer to connect?</h1>
+              <p className="mt-2 text-muted-foreground">Pick the pace that fits you. You can change this anytime — and games are always optional.</p>
+            </div>
+            <div className="grid gap-3">
+              {CONNECTION_STYLES.map((s) => {
+                const active = connectionStyle === s.id;
+                return (
+                  <button key={s.id} type="button" onClick={() => setConnectionStyle(s.id)}
+                    className={`flex flex-col items-start gap-1 rounded-2xl border p-5 text-left transition-all ${
+                      active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                    }`}>
+                    <div className="font-display text-lg font-medium">{s.label}</div>
+                    <div className="text-sm text-foreground/80">{s.hint}</div>
+                    <div className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{s.tone}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-6">
+            <div>
               <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Your face & avatar</div>
               <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
               <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
