@@ -103,8 +103,24 @@
       radial-gradient(at 50% 50%, oklch(0.55 0.20 270 / 0.08) 0px, transparent 60%);
     background-attachment: fixed;
     min-height: 100vh;
+    position: relative;
   }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("/__l5e/assets-v1/fc47f23b-c33c-4bdb-adce-2c00fe4a4f02/unveil-logo-v2.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: min(70vmin, 720px);
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(1px);
+  }
+  body > * { position: relative; z-index: 1; }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
+
 }
 
 @layer utilities {
