@@ -4,6 +4,7 @@ import { BADGES, useProfile } from "@/lib/synapse-store";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { loadBadges, useUserId } from "@/lib/games-api";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
@@ -49,6 +50,14 @@ function Passport() {
             <div className="h-full bg-primary-foreground/80" style={{ width: `${(unlocked.size / BADGES.length) * 100}%` }} />
           </div>
         </div>
+
+        {uid && (
+          <div className="mb-6 grid gap-3 md:grid-cols-2">
+            <VoiceRecorder userId={uid} prompt="A small ritual that makes my day feel like mine." />
+            <VoiceRecorder userId={uid} prompt="The last idea that kept me up — and why." />
+          </div>
+        )}
+
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {BADGES.map((b) => {
