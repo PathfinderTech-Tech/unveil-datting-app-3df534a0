@@ -97,17 +97,15 @@ function Matches() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visible.map((m, i) => {
+          {visible.map((m) => {
             const arch = ARCHETYPES[m.archetype];
-            const presence = m.presence ? PRESENCE_LABELS[m.presence] : null;
             return (
               <button
-                key={i}
+                key={m.userId}
                 onClick={() => setActive(m)}
                 className="group text-left rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
               >
                 <div className="flex items-start justify-between">
-                  {/* Blurred avatar — Stage 1 */}
                   <div className="relative">
                     <div style={{ filter: "blur(8px)" }}>
                       <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
@@ -132,29 +130,22 @@ function Matches() {
                   <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
                 </div>
 
-                {presence && (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-2.5 py-1 text-[11px]">
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: presence.hue }} />
-                    {presence.label}
-                  </div>
-                )}
-
                 <div className="mt-3 font-mono text-[11px] text-muted-foreground">
-                  Δ {Math.abs(m.composite - profile.composite)} pts · within your band
+                  Δ {Math.abs(m.composite - profile.composite)} pts
                 </div>
               </button>
             );
           })}
         </div>
 
-        {visible.length === 0 && (
+        {!loading && visible.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
-            No one in your band yet. Try the extended view.
+            No one to discover yet. As more people complete onboarding, they'll appear here.
           </div>
         )}
       </div>
 
-      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} />}
+      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} onLike={() => handleLike(active)} />}
     </div>
   );
 }
