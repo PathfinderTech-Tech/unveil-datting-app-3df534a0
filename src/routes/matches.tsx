@@ -1,11 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
-  generateMatches, useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
+  useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
+import { loadRealMatches, likeProfile, type RealMatch } from "@/lib/matching-api";
 import { Avatar } from "@/components/Avatar";
+import { toast } from "sonner";
 import {
   Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles,
 } from "lucide-react";
@@ -18,12 +20,27 @@ export const Route = createFileRoute("/matches")({
 function Matches() {
   const [profile] = useProfile();
   const baseScore = profile?.composite ?? 70;
-  const matches = useMemo(() => generateMatches(baseScore, 14), [baseScore]);
-  const [tab, setTab] = useState<"band" | "all">("band");
-  const visible = tab === "band"
-    ? matches.filter((m) => Math.abs(m.composite - baseScore) <= 5)
-    : matches;
-  const [active, setActive] = useState<SynapseProfile | null>(null);
+  const [matches, setMatches] = useState<RealMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"band" | "all">("all");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    loadRealMatches(40).then((rows) => {
+      if (!alive) return;
+      setMatches(rows);
+      setLoading(false);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const visible = useMemo(() => {
+    if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
+    return matches;
+  }, [matches, tab, baseScore]);
+  const [active, setActive] = useState<RealMatch | null>(null);
 
   if (!profile) {
     return (
@@ -38,6 +55,19 @@ function Matches() {
         </div>
       </div>
     );
+  }
+
+  async function handleLike(m: RealMatch) {
+    const res = await likeProfile(m.userId);
+    if (res.error) { toast.error(res.error); return; }
+    if (res.mutual) {
+      toast.success(`It's mutual with ${m.name} — a conversation is open.`);
+      if (res.conversationId) navigate({ to: "/chat", search: { c: res.conversationId } as never });
+    } else {
+      toast.success("Interest sent. They'll see you on their side.");
+    }
+    setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
+    setActive(null);
   }
 
   return (
