@@ -480,7 +480,6 @@ export type Database = {
           created_at: string
           curiosity_level: number | null
           discovery_radius_km: number
-          email: string | null
           emotional_rhythm: Json | null
           first_name: string | null
           game_complete: boolean | null
@@ -521,7 +520,6 @@ export type Database = {
           created_at?: string
           curiosity_level?: number | null
           discovery_radius_km?: number
-          email?: string | null
           emotional_rhythm?: Json | null
           first_name?: string | null
           game_complete?: boolean | null
@@ -564,7 +562,6 @@ export type Database = {
           created_at?: string
           curiosity_level?: number | null
           discovery_radius_km?: number
-          email?: string | null
           emotional_rhythm?: Json | null
           first_name?: string | null
           game_complete?: boolean | null
@@ -921,7 +918,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      puzzle_content_public: {
+        Row: {
+          created_at: string | null
+          difficulty: number | null
+          id: string | null
+          meta: Json | null
+          options: Json | null
+          prompt: string | null
+          puzzle_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty?: number | null
+          id?: string | null
+          meta?: Json | null
+          options?: Json | null
+          prompt?: string | null
+          puzzle_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          difficulty?: number | null
+          id?: string | null
+          meta?: Json | null
+          options?: Json | null
+          prompt?: string | null
+          puzzle_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       consent_share_contact: {
