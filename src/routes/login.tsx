@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
+import { OAuthButtons } from "@/components/OAuthButtons";
 import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -35,7 +36,7 @@ function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Link to="/" className="mb-10 flex flex-col items-center gap-3">
         <LogoMark size={64} />
         <LogoWordmark size={16} />
@@ -43,7 +44,12 @@ function Login() {
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card/80 p-8 backdrop-blur">
         <h1 className="font-display text-3xl font-light">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">Continue your discovery.</p>
-        <form onSubmit={submit} className="mt-6 space-y-3">
+
+        <div className="mt-6">
+          <OAuthButtons mode="signin" />
+        </div>
+
+        <form onSubmit={submit} className="space-y-3">
           <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
           <input type="password" required placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
           {err && <p className="text-xs text-destructive">{err}</p>}

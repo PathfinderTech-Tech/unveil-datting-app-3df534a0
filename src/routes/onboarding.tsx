@@ -6,22 +6,54 @@ import {
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, ArrowRight, Check } from "lucide-react";
+import { Camera, ArrowRight, Check, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "A few playful questions to shape your Discovery Profile." }] }),
   component: Onboarding,
 });
 
+const COUNTRIES = [
+  "United States","United Kingdom","Canada","Australia","Ireland","New Zealand",
+  "Germany","France","Spain","Italy","Portugal","Netherlands","Belgium","Switzerland","Austria","Sweden","Norway","Denmark","Finland","Poland",
+  "Brazil","Mexico","Argentina","Chile","Colombia",
+  "Japan","South Korea","Singapore","Hong Kong","India","Indonesia","Philippines","Thailand","Vietnam",
+  "UAE","Saudi Arabia","Israel","Turkey",
+  "South Africa","Nigeria","Kenya","Egypt","Morocco",
+  "Other",
+];
+
+const GENDERS = ["Woman", "Man", "Non-binary", "Prefer not to say"];
+const INTENTS = [
+  { id: "serious", label: "A serious relationship" },
+  { id: "open", label: "Open to where it goes" },
+  { id: "friendship", label: "Friendship first" },
+  { id: "exploring", label: "Just exploring" },
+];
+
+const AVATAR_STYLES = [
+  { id: "real",       label: "Real Photo",          hint: "Show the actual you." },
+  { id: "anime",      label: "Anime Avatar",        hint: "Stylized, playful." },
+  { id: "stylized",   label: "Stylized Avatar",     hint: "Graphic, modern." },
+  { id: "realistic",  label: "Realistic AI Portrait", hint: "Painted, lifelike." },
+  { id: "artistic",   label: "Artistic Illustration", hint: "Watercolor, soft." },
+];
+
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [age, setAge] = useState(28);
+  const [gender, setGender] = useState("");
+  const [country, setCountry] = useState("");
+  const [stateRegion, setStateRegion] = useState("");
   const [city, setCity] = useState("");
+  const [intent, setIntent] = useState("");
+  const [email, setEmail] = useState("");
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
+  const [avatarStyle, setAvatarStyle] = useState<string>("real");
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allAnswered
@@ -30,7 +62,6 @@ function Onboarding() {
 
   const simulateFace = () => {
     setFaceUploaded(true);
-    // Animated harmony reveal
     let v = 0;
     const target = 72 + Math.floor(Math.random() * 22);
     const tick = setInterval(() => {
@@ -43,13 +74,13 @@ function Onboarding() {
   const finish = async () => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
-    const draft = { name, age, city, profession: profession!, professionLabel: profObj.label, faceHarmony, character, discovery, summary };
+    const draft = { name, age, gender, country, stateRegion, city, intent, email, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from("profiles").update({
-          first_name: name, age, city,
+          first_name: name, age, city, gender, intention: intent,
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
           bio: summary || null,
@@ -57,17 +88,24 @@ function Onboarding() {
         }).eq("id", user.id);
         await supabase.from("onboarding_answers").upsert({
           user_id: user.id,
-          answers: { profession, professionLabel: profObj.label, faceHarmony, character, discovery, summary },
+          answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, character, discovery, summary, email },
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
     navigate({ to: "/game" });
   };
 
+  const isUS = country === "United States";
+  const stateRequired = !!country && !isUS && country !== "Other";
+
   const canNext = [
-    name.length > 1 && city.length > 1,
-    faceUploaded && faceHarmony > 0,
+    // Step 0: identity — name, age, gender, country (required), intent, email
+    name.length > 1 && !!gender && !!country && !!intent && /\S+@\S+\.\S+/.test(email),
+    // Step 1: face + avatar style
+    faceUploaded && faceHarmony > 0 && !!avatarStyle,
+    // Step 2: profession
     profession !== null,
+    // Step 3: discovery
     allAnswered,
   ][step];
 
@@ -86,18 +124,56 @@ function Onboarding() {
           <div className="space-y-6">
             <div>
               <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 01 — Identity</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Who's behind the score?</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">Tell us who you are.</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Phone number is never required.</p>
             </div>
-            <div className="space-y-4">
-              <Field label="First name">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="First name *">
                 <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" className={inputCls} />
               </Field>
-              <Field label="Age">
-                <input type="number" value={age} onChange={(e) => setAge(+e.target.value)} className={inputCls} />
+              <Field label="Age *">
+                <input type="number" min={18} value={age} onChange={(e) => setAge(+e.target.value)} className={inputCls} />
               </Field>
-              <Field label="City">
+              <Field label="Gender *">
+                <select value={gender} onChange={(e) => setGender(e.target.value)} className={inputCls}>
+                  <option value="">Select…</option>
+                  {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </Field>
+              <Field label="Country *">
+                <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputCls}>
+                  <option value="">Select your country…</option>
+                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label={`State / Province ${stateRequired ? "(optional)" : isUS ? "(optional — you can add later)" : "(optional)"}`}>
+                <input value={stateRegion} onChange={(e) => setStateRegion(e.target.value)} placeholder="Optional" className={inputCls} />
+              </Field>
+              <Field label="City (optional)">
                 <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Lisbon" className={inputCls} />
               </Field>
+              <div className="md:col-span-2">
+                <Field label="Email *">
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
+                </Field>
+              </div>
+              <div className="md:col-span-2">
+                <Field label="What are you here for? *">
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {INTENTS.map((it) => {
+                      const active = intent === it.id;
+                      return (
+                        <button key={it.id} type="button" onClick={() => setIntent(it.id)}
+                          className={`rounded-2xl border p-3 text-left text-sm transition-all ${
+                            active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                          }`}>
+                          {it.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+              </div>
             </div>
           </div>
         )}
@@ -105,18 +181,18 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Sensory layer</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, gently.</h1>
-              <p className="mt-2 text-muted-foreground">We read soft harmony cues for compatibility — never for ranking, never visible to others without your consent.</p>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Your face & avatar</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
+              <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
             </div>
-            <div className="flex flex-col items-center gap-6 rounded-3xl border border-dashed border-border bg-card p-12">
+            <div className="flex flex-col items-center gap-6 rounded-3xl border border-dashed border-border bg-card p-10">
               {!faceUploaded ? (
                 <button onClick={simulateFace} className="flex flex-col items-center gap-4 text-center">
                   <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow transition-transform hover:scale-105">
                     <Camera className="h-12 w-12 text-primary-foreground" />
                   </div>
                   <span className="font-medium">Tap to capture (demo)</span>
-                  <span className="text-xs text-muted-foreground">Prototype simulates analysis</span>
+                  <span className="text-xs text-muted-foreground">We never share your raw selfie.</span>
                 </button>
               ) : (
                 <div className="flex flex-col items-center gap-3">
@@ -127,6 +203,32 @@ function Onboarding() {
                 </div>
               )}
             </div>
+
+            {faceUploaded && (
+              <div>
+                <div className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <Sparkles className="h-3 w-3 text-accent" /> Compatibility Avatar System
+                </div>
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                  {AVATAR_STYLES.map((s) => {
+                    const active = avatarStyle === s.id;
+                    return (
+                      <button key={s.id} type="button" onClick={() => setAvatarStyle(s.id)}
+                        className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${
+                          active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                        }`}>
+                        <div className="font-display text-sm font-medium">{s.label}</div>
+                        <div className="text-xs text-muted-foreground">{s.hint}</div>
+                        {active && <Check className="ml-auto h-4 w-4 text-primary" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  You can switch between your real photo and your generated avatar at any time.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
