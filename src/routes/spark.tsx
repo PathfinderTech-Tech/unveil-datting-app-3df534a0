@@ -130,18 +130,30 @@ function SparkPage() {
               placeholder="Type your answer… honesty travels farthest."
               rows={3}
               className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button onClick={prev}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                <ChevronLeft className="h-3 w-3" /> Previous
+              </button>
               <button onClick={save} disabled={!answer.trim() || saving}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-40">
-                <Send className="h-4 w-4" /> {saving ? "Saving…" : "Save answer"}
+                <Send className="h-4 w-4" /> {saving ? "Saving…" : "Save & next"}
               </button>
               <button onClick={next}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
                 <RefreshCcw className="h-3 w-3" /> Skip
               </button>
+              <button onClick={next}
+                className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                Next <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              Question {(idx % pool.length) + 1} of {pool.length}
             </div>
           </div>
         </div>
+
 
         {answered.length > 0 && (
           <div className="mt-10">
