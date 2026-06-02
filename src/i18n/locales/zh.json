@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "发现", "matches": "匹配", "chat": "聊天", "puzzles": "谜题", "games": "游戏", "challenges": "挑战", "passport": "护照", "spark": "火花", "datePlan": "约会计划", "safety": "安全", "premium": "高级会员", "settings": "设置", "signOut": "退出", "signIn": "登录", "signUp": "注册" },
+  "common": { "continue": "继续", "back": "返回", "next": "下一步", "save": "保存", "cancel": "取消", "submit": "提交", "loading": "加载中…", "send": "发送", "skip": "跳过", "done": "完成", "yes": "是", "no": "否", "search": "搜索", "language": "语言", "country": "国家", "error": "出错了", "retry": "重试", "delete": "删除", "edit": "编辑", "close": "关闭", "settings": "设置" },
+  "auth": { "email": "邮箱", "password": "密码", "signIn": "登录", "signUp": "创建账户", "forgotPassword": "忘记密码？", "noAccount": "还没有账户？", "haveAccount": "已有账户？", "welcome": "欢迎来到 UNVEIL", "welcomeBack": "欢迎回来" },
+  "onboarding": { "title": "告诉我们关于你", "firstName": "名字", "age": "年龄", "city": "城市", "country": "国家", "language": "首选语言", "gender": "性别", "interestedIn": "感兴趣的对象", "intention": "联系意向", "bio": "关于你", "complete": "完成资料" },
+  "spark": { "title": "火花问题", "subtitle": "回答以深化你的匹配", "answer": "你的回答" },
+  "puzzles": { "title": "发现谜题", "subtitle": "通过游戏揭示个性", "start": "开始" },
+  "matches": { "title": "你的匹配", "empty": "还没有匹配。完成资料以发现更多人。", "compatibility": "契合度", "sendInterest": "表达兴趣", "mutualMatch": "匹配成功！", "openChat": "打开聊天" },
+  "chat": { "title": "聊天", "placeholder": "输入消息…", "send": "发送", "noConversations": "暂无对话" },
+  "safety": { "title": "安全中心", "report": "举报", "block": "屏蔽", "tips": "安全提示" },
+  "premium": { "title": "会员", "free": "免费", "upgrade": "升级到高级会员", "getVerified": "认证账户", "manageSubscription": "管理订阅", "perMonth": "/月" },
+  "datePlan": { "title": "约会规划", "create": "策划约会" },
+  "passport": { "title": "护照", "subtitle": "你的故事，你的声音" },
+  "checkout": { "title": "安全结账", "preparing": "准备中…", "complete": "一切就绪", "back": "返回套餐" },
+  "errors": { "generic": "出错了，请重试。", "network": "网络错误。", "unauthorized": "请登录以继续。", "notFound": "未找到" },
+  "legal": { "terms": "条款", "privacy": "隐私" }
+}

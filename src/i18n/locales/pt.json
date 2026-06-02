@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "Descobrir", "matches": "Conexões", "chat": "Mensagens", "puzzles": "Enigmas", "games": "Jogos", "challenges": "Desafios", "passport": "Passaporte", "spark": "Faísca", "datePlan": "Plano de encontro", "safety": "Segurança", "premium": "Premium", "settings": "Configurações", "signOut": "Sair", "signIn": "Entrar", "signUp": "Cadastrar" },
+  "common": { "continue": "Continuar", "back": "Voltar", "next": "Próximo", "save": "Salvar", "cancel": "Cancelar", "submit": "Enviar", "loading": "Carregando…", "send": "Enviar", "skip": "Pular", "done": "Concluído", "yes": "Sim", "no": "Não", "search": "Buscar", "language": "Idioma", "country": "País", "error": "Algo deu errado", "retry": "Tentar novamente", "delete": "Excluir", "edit": "Editar", "close": "Fechar", "settings": "Configurações" },
+  "auth": { "email": "E-mail", "password": "Senha", "signIn": "Entrar", "signUp": "Criar conta", "forgotPassword": "Esqueceu a senha?", "noAccount": "Ainda não tem conta?", "haveAccount": "Já tem conta?", "welcome": "Bem-vindo ao UNVEIL", "welcomeBack": "Bem-vindo de volta" },
+  "onboarding": { "title": "Conte-nos sobre você", "firstName": "Nome", "age": "Idade", "city": "Cidade", "country": "País", "language": "Idioma preferido", "gender": "Gênero", "interestedIn": "Interessado em", "intention": "Intenção de conexão", "bio": "Sobre você", "complete": "Completar perfil" },
+  "spark": { "title": "Perguntas Faísca", "subtitle": "Responda para aprofundar suas conexões", "answer": "Sua resposta" },
+  "puzzles": { "title": "Enigmas de descoberta", "subtitle": "Jogue para revelar sua personalidade", "start": "Começar" },
+  "matches": { "title": "Suas conexões", "empty": "Ainda sem conexões. Complete seu perfil para descobrir pessoas.", "compatibility": "Compatibilidade", "sendInterest": "Demonstrar interesse", "mutualMatch": "É uma conexão!", "openChat": "Abrir conversa" },
+  "chat": { "title": "Mensagens", "placeholder": "Digite uma mensagem…", "send": "Enviar", "noConversations": "Sem conversas" },
+  "safety": { "title": "Central de segurança", "report": "Denunciar", "block": "Bloquear", "tips": "Dicas de segurança" },
+  "premium": { "title": "Assinatura", "free": "Grátis", "upgrade": "Atualizar para Premium", "getVerified": "Verificar perfil", "manageSubscription": "Gerenciar assinatura", "perMonth": "/mês" },
+  "datePlan": { "title": "Planejador de encontros", "create": "Planejar um encontro" },
+  "passport": { "title": "Passaporte", "subtitle": "Sua história, sua voz" },
+  "checkout": { "title": "Pagamento seguro", "preparing": "Preparando…", "complete": "Tudo pronto", "back": "Voltar aos planos" },
+  "errors": { "generic": "Algo deu errado. Tente novamente.", "network": "Erro de rede.", "unauthorized": "Entre para continuar.", "notFound": "Não encontrado" },
+  "legal": { "terms": "Termos", "privacy": "Privacidade" }
+}

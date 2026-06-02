@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "discover": "Discover",
+    "matches": "Matches",
+    "chat": "Chat",
+    "puzzles": "Puzzles",
+    "games": "Games",
+    "challenges": "Challenges",
+    "passport": "Passport",
+    "spark": "Spark",
+    "datePlan": "Date Plan",
+    "safety": "Safety",
+    "premium": "Premium",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "loading": "Loading…",
+    "send": "Send",
+    "skip": "Skip",
+    "done": "Done",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "language": "Language",
+    "country": "Country",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "settings": "Settings"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "welcome": "Welcome to UNVEIL",
+    "welcomeBack": "Welcome back"
+  },
+  "onboarding": {
+    "title": "Tell us about you",
+    "firstName": "First name",
+    "age": "Age",
+    "city": "City",
+    "country": "Country",
+    "language": "Preferred language",
+    "gender": "Gender",
+    "interestedIn": "Interested in",
+    "intention": "Connection intent",
+    "bio": "About you",
+    "complete": "Complete profile"
+  },
+  "spark": {
+    "title": "Spark Questions",
+    "subtitle": "Answer to deepen your matches",
+    "answer": "Your answer"
+  },
+  "puzzles": {
+    "title": "Discovery Puzzles",
+    "subtitle": "Play to reveal personality",
+    "start": "Start puzzle"
+  },
+  "matches": {
+    "title": "Your Matches",
+    "empty": "No matches yet. Complete your profile to discover people.",
+    "compatibility": "Compatibility",
+    "sendInterest": "Send interest",
+    "mutualMatch": "It's a match!",
+    "openChat": "Open chat"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "noConversations": "No conversations yet"
+  },
+  "safety": {
+    "title": "Safety Center",
+    "report": "Report user",
+    "block": "Block user",
+    "tips": "Safety tips"
+  },
+  "premium": {
+    "title": "Membership",
+    "free": "Free",
+    "upgrade": "Upgrade to Premium",
+    "getVerified": "Get Verified",
+    "manageSubscription": "Manage subscription",
+    "perMonth": "/month"
+  },
+  "datePlan": {
+    "title": "Date Planner",
+    "create": "Plan a date"
+  },
+  "passport": {
+    "title": "Date Passport",
+    "subtitle": "Your story, in your voice"
+  },
+  "checkout": {
+    "title": "Secure Checkout",
+    "preparing": "Preparing checkout…",
+    "complete": "You're all set",
+    "back": "Back to plans"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection.",
+    "unauthorized": "Please sign in to continue.",
+    "notFound": "Not found"
+  },
+  "legal": {
+    "terms": "Terms",
+    "privacy": "Privacy"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "nav": { "discover": "발견", "matches": "매치", "chat": "채팅", "puzzles": "퍼즐", "games": "게임", "challenges": "챌린지", "passport": "패스포트", "spark": "스파크", "datePlan": "데이트 계획", "safety": "안전", "premium": "프리미엄", "settings": "설정", "signOut": "로그아웃", "signIn": "로그인", "signUp": "가입" },
+  "common": { "continue": "계속", "back": "뒤로", "next": "다음", "save": "저장", "cancel": "취소", "submit": "제출", "loading": "로딩 중…", "send": "보내기", "skip": "건너뛰기", "done": "완료", "yes": "예", "no": "아니오", "search": "검색", "language": "언어", "country": "국가", "error": "문제가 발생했습니다", "retry": "다시 시도", "delete": "삭제", "edit": "편집", "close": "닫기", "settings": "설정" },
+  "auth": { "email": "이메일", "password": "비밀번호", "signIn": "로그인", "signUp": "계정 만들기", "forgotPassword": "비밀번호를 잊으셨나요?", "noAccount": "계정이 없으신가요?", "haveAccount": "이미 계정이 있으신가요?", "welcome": "UNVEIL에 오신 것을 환영합니다", "welcomeBack": "다시 오신 것을 환영합니다" },
+  "onboarding": { "title": "당신에 대해 알려주세요", "firstName": "이름", "age": "나이", "city": "도시", "country": "국가", "language": "선호 언어", "gender": "성별", "interestedIn": "관심 대상", "intention": "관계 의도", "bio": "자기소개", "complete": "프로필 완성" },
+  "spark": { "title": "스파크 질문", "subtitle": "답변하여 매치를 깊이 있게", "answer": "당신의 답변" },
+  "puzzles": { "title": "발견 퍼즐", "subtitle": "플레이하여 성격을 드러내세요", "start": "시작" },
+  "matches": { "title": "당신의 매치", "empty": "아직 매치가 없습니다.", "compatibility": "호환성", "sendInterest": "관심 보내기", "mutualMatch": "매치 성공!", "openChat": "채팅 열기" },
+  "chat": { "title": "채팅", "placeholder": "메시지 입력…", "send": "보내기", "noConversations": "대화 없음" },
+  "safety": { "title": "안전 센터", "report": "신고", "block": "차단", "tips": "안전 팁" },
+  "premium": { "title": "멤버십", "free": "무료", "upgrade": "프리미엄 업그레이드", "getVerified": "인증받기", "manageSubscription": "구독 관리", "perMonth": "/월" },
+  "datePlan": { "title": "데이트 플래너", "create": "데이트 계획하기" },
+  "passport": { "title": "패스포트", "subtitle": "당신의 이야기, 당신의 목소리" },
+  "checkout": { "title": "안전한 결제", "preparing": "준비 중…", "complete": "완료", "back": "플랜으로 돌아가기" },
+  "errors": { "generic": "문제가 발생했습니다.", "network": "네트워크 오류.", "unauthorized": "로그인하세요.", "notFound": "찾을 수 없음" },
+  "legal": { "terms": "약관", "privacy": "개인정보" }
+}

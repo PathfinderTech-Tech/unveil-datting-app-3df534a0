@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "discover": "Découvrir",
+    "matches": "Affinités",
+    "chat": "Messages",
+    "puzzles": "Énigmes",
+    "games": "Jeux",
+    "challenges": "Défis",
+    "passport": "Passeport",
+    "spark": "Étincelle",
+    "datePlan": "Plan de rendez-vous",
+    "safety": "Sécurité",
+    "premium": "Premium",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter",
+    "signIn": "Connexion",
+    "signUp": "S'inscrire"
+  },
+  "common": {
+    "continue": "Continuer", "back": "Retour", "next": "Suivant", "save": "Enregistrer",
+    "cancel": "Annuler", "submit": "Envoyer", "loading": "Chargement…", "send": "Envoyer",
+    "skip": "Passer", "done": "Terminé", "yes": "Oui", "no": "Non", "search": "Rechercher",
+    "language": "Langue", "country": "Pays", "error": "Une erreur est survenue",
+    "retry": "Réessayer", "delete": "Supprimer", "edit": "Modifier", "close": "Fermer",
+    "settings": "Paramètres"
+  },
+  "auth": {
+    "email": "E-mail", "password": "Mot de passe", "signIn": "Se connecter",
+    "signUp": "Créer un compte", "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?", "haveAccount": "Vous avez déjà un compte ?",
+    "welcome": "Bienvenue sur UNVEIL", "welcomeBack": "Bon retour"
+  },
+  "onboarding": {
+    "title": "Parlez-nous de vous", "firstName": "Prénom", "age": "Âge",
+    "city": "Ville", "country": "Pays", "language": "Langue préférée",
+    "gender": "Genre", "interestedIn": "Intéressé(e) par",
+    "intention": "Intention de connexion", "bio": "À propos de vous",
+    "complete": "Compléter le profil"
+  },
+  "spark": { "title": "Questions Étincelle", "subtitle": "Répondez pour approfondir vos affinités", "answer": "Votre réponse" },
+  "puzzles": { "title": "Énigmes de découverte", "subtitle": "Jouez pour révéler votre personnalité", "start": "Commencer" },
+  "matches": {
+    "title": "Vos affinités", "empty": "Pas encore d'affinités. Complétez votre profil pour découvrir des personnes.",
+    "compatibility": "Compatibilité", "sendInterest": "Manifester de l'intérêt",
+    "mutualMatch": "C'est une affinité !", "openChat": "Ouvrir la conversation"
+  },
+  "chat": { "title": "Messages", "placeholder": "Écrivez un message…", "send": "Envoyer", "noConversations": "Aucune conversation" },
+  "safety": { "title": "Centre de sécurité", "report": "Signaler", "block": "Bloquer", "tips": "Conseils de sécurité" },
+  "premium": { "title": "Abonnement", "free": "Gratuit", "upgrade": "Passer à Premium", "getVerified": "Vérifier mon profil", "manageSubscription": "Gérer l'abonnement", "perMonth": "/mois" },
+  "datePlan": { "title": "Planificateur de rendez-vous", "create": "Planifier un rendez-vous" },
+  "passport": { "title": "Passeport", "subtitle": "Votre histoire, votre voix" },
+  "checkout": { "title": "Paiement sécurisé", "preparing": "Préparation…", "complete": "C'est fait", "back": "Retour aux offres" },
+  "errors": { "generic": "Une erreur est survenue. Veuillez réessayer.", "network": "Erreur réseau.", "unauthorized": "Veuillez vous connecter.", "notFound": "Introuvable" },
+  "legal": { "terms": "Conditions", "privacy": "Confidentialité" }
+}
