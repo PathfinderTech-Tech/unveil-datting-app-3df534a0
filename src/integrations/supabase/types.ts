@@ -157,6 +157,72 @@ export type Database = {
         }
         Relationships: []
       }
+      challenges: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          difficulty: number
+          explanation: string | null
+          id: string
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          question: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          question: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          question?: string
+        }
+        Relationships: []
+      }
+      content_completions: {
+        Row: {
+          answer: string | null
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -583,6 +649,39 @@ export type Database = {
           score?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      puzzles: {
+        Row: {
+          active: boolean
+          answer: string
+          category: string
+          created_at: string
+          difficulty: number
+          explanation: string | null
+          id: string
+          puzzle: string
+        }
+        Insert: {
+          active?: boolean
+          answer: string
+          category: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          puzzle: string
+        }
+        Update: {
+          active?: boolean
+          answer?: string
+          category?: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          puzzle?: string
         }
         Relationships: []
       }
