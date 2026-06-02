@@ -152,7 +152,7 @@ function Matches() {
 
 type Stage = 1 | 2 | 3;
 
-function MatchSheet({ match, you, onClose }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void }) {
+function MatchSheet({ match, you, onClose, onLike }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void }) {
   // Progressive reveal — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
   const arch = ARCHETYPES[match.archetype];
