@@ -1,11 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
-  generateMatches, useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
+  useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
+import { loadRealMatches, likeProfile, type RealMatch } from "@/lib/matching-api";
 import { Avatar } from "@/components/Avatar";
+import { toast } from "sonner";
 import {
   Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles,
 } from "lucide-react";
@@ -18,12 +20,27 @@ export const Route = createFileRoute("/matches")({
 function Matches() {
   const [profile] = useProfile();
   const baseScore = profile?.composite ?? 70;
-  const matches = useMemo(() => generateMatches(baseScore, 14), [baseScore]);
-  const [tab, setTab] = useState<"band" | "all">("band");
-  const visible = tab === "band"
-    ? matches.filter((m) => Math.abs(m.composite - baseScore) <= 5)
-    : matches;
-  const [active, setActive] = useState<SynapseProfile | null>(null);
+  const [matches, setMatches] = useState<RealMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"band" | "all">("all");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    loadRealMatches(40).then((rows) => {
+      if (!alive) return;
+      setMatches(rows);
+      setLoading(false);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const visible = useMemo(() => {
+    if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
+    return matches;
+  }, [matches, tab, baseScore]);
+  const [active, setActive] = useState<RealMatch | null>(null);
 
   if (!profile) {
     return (
@@ -40,6 +57,19 @@ function Matches() {
     );
   }
 
+  async function handleLike(m: RealMatch) {
+    const res = await likeProfile(m.userId);
+    if (res.error) { toast.error(res.error); return; }
+    if (res.mutual) {
+      toast.success(`It's mutual with ${m.name} — a conversation is open.`);
+      if (res.conversationId) navigate({ to: "/chat", search: { c: res.conversationId } as never });
+    } else {
+      toast.success("Interest sent. They'll see you on their side.");
+    }
+    setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
+    setActive(null);
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
@@ -50,34 +80,32 @@ function Matches() {
               Your resonance · {profile.composite} · {ARCHETYPES[profile.archetype].name}
             </div>
             <h1 className="mt-2 font-display text-4xl font-bold">
-              {visible.length} minds in your <span className="text-gradient-hero">±5 band</span>
+              {loading ? "Loading minds…" : `${visible.length} ${visible.length === 1 ? "person" : "people"} to discover`}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Photos and details reveal as mutual engagement deepens. No swiping.
             </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
-            <button onClick={() => setTab("band")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "band" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              In band
-            </button>
             <button onClick={() => setTab("all")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "all" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              Extended
+              All
+            </button>
+            <button onClick={() => setTab("band")} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "band" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+              In band ±10
             </button>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visible.map((m, i) => {
+          {visible.map((m) => {
             const arch = ARCHETYPES[m.archetype];
-            const presence = m.presence ? PRESENCE_LABELS[m.presence] : null;
             return (
               <button
-                key={i}
+                key={m.userId}
                 onClick={() => setActive(m)}
                 className="group text-left rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
               >
                 <div className="flex items-start justify-between">
-                  {/* Blurred avatar — Stage 1 */}
                   <div className="relative">
                     <div style={{ filter: "blur(8px)" }}>
                       <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
@@ -102,36 +130,29 @@ function Matches() {
                   <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
                 </div>
 
-                {presence && (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-2.5 py-1 text-[11px]">
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: presence.hue }} />
-                    {presence.label}
-                  </div>
-                )}
-
                 <div className="mt-3 font-mono text-[11px] text-muted-foreground">
-                  Δ {Math.abs(m.composite - profile.composite)} pts · within your band
+                  Δ {Math.abs(m.composite - profile.composite)} pts
                 </div>
               </button>
             );
           })}
         </div>
 
-        {visible.length === 0 && (
+        {!loading && visible.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
-            No one in your band yet. Try the extended view.
+            No one to discover yet. As more people complete onboarding, they'll appear here.
           </div>
         )}
       </div>
 
-      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} />}
+      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} onLike={() => handleLike(active)} />}
     </div>
   );
 }
 
 type Stage = 1 | 2 | 3;
 
-function MatchSheet({ match, you, onClose }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void }) {
+function MatchSheet({ match, you, onClose, onLike }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void }) {
   // Progressive reveal — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
   const arch = ARCHETYPES[match.archetype];
@@ -239,8 +260,8 @@ function MatchSheet({ match, you, onClose }: { match: SynapseProfile; you: Synap
               Engage to unlock Stage {stage + 1}
             </button>
           ) : (
-            <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]">
-              <Heart className="h-4 w-4" /> Propose a meetup
+            <button onClick={onLike} className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]">
+              <Heart className="h-4 w-4" /> Send interest — open conversation if mutual
             </button>
           )}
           <div className="flex gap-2">

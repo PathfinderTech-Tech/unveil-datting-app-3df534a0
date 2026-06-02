@@ -526,12 +526,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      discover_profiles: {
+        Args: { _limit?: number }
+        Returns: {
+          age: number
+          archetype: string
+          bio: string
+          city: string
+          compatibility_score: number
+          curiosity_level: number
+          emotional_rhythm: Json
+          first_name: string
+          gender: string
+          id: string
+          intention: string
+          interested_in: string
+          photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"]
+          photo_url: string
+          verified: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      like_profile: {
+        Args: { _target: string }
+        Returns: {
+          conversation_id: string
+          match_id: string
+          mutual: boolean
+        }[]
       }
     }
     Enums: {
