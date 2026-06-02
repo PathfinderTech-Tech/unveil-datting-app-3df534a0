@@ -87,3 +87,62 @@ export async function loadChallengeQuestions(packId: string, limit = 5): Promise
     meta: (r.meta as Record<string, unknown>) ?? {},
   }));
 }
+
+/* New large-content tables (challenges + puzzles) with daily rotation. */
+
+export type ChallengeRow = {
+  id: string; category: string; question: string;
+  option_a: string | null; option_b: string | null; option_c: string | null;
+  explanation: string | null; difficulty: number;
+};
+export type PuzzleRow = {
+  id: string; category: string; puzzle: string; answer: string;
+  explanation: string | null; difficulty: number;
+};
+
+function dailySeed() {
+  const d = new Date();
+  return Number(`${d.getUTCFullYear()}${d.getUTCMonth() + 1}${d.getUTCDate()}`);
+}
+function shuffleSeeded<T>(arr: T[], seed: number): T[] {
+  const a = arr.slice();
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export async function loadDailyChallenges(limit = 10, category?: string): Promise<ChallengeRow[]> {
+  let q = supabase.from("challenges").select("*").eq("active", true).limit(200);
+  if (category) q = q.eq("category", category);
+  const { data } = await q;
+  return shuffleSeeded((data ?? []) as ChallengeRow[], dailySeed()).slice(0, limit);
+}
+
+export async function loadDailyPuzzles(limit = 5, category?: string): Promise<PuzzleRow[]> {
+  let q = supabase.from("puzzles").select("*").eq("active", true).limit(200);
+  if (category) q = q.eq("category", category);
+  const { data } = await q;
+  return shuffleSeeded((data ?? []) as PuzzleRow[], dailySeed() + 1).slice(0, limit);
+}
+
+export async function markCompleted(contentType: "challenge" | "puzzle", contentId: string, answer?: string) {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return;
+  await supabase.from("content_completions").insert({
+    user_id: u.user.id, content_type: contentType, content_id: contentId, answer: answer ?? null,
+  });
+}
+
+export const CHALLENGE_CATEGORIES = [
+  "guess_my_answer","this_or_that","would_you_rather","dating_scenarios",
+  "finish_the_sentence","red_flag_green_flag","future_vision","build_a_story",
+] as const;
+export const PUZZLE_CATEGORIES = [
+  "who_said_this","finish_the_quote","missing_word","guess_the_country",
+  "what_do_you_see_first","connect_the_dots","love_and_philosophy",
+  "travel_dreams","name_around_the_world",
+] as const;
