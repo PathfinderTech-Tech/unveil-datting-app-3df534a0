@@ -268,10 +268,10 @@ function Onboarding() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 03 — Profession Axis</div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Profession Axis</div>
               <h1 className="mt-2 font-display text-4xl font-bold">How do you spend your hours?</h1>
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
