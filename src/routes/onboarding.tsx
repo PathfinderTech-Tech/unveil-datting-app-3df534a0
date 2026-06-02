@@ -86,8 +86,13 @@ function Onboarding() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        const lang = (typeof navigator !== "undefined" ? navigator.language?.slice(0, 2) : "en") || "en";
         await supabase.from("profiles").update({
           first_name: name, age, city, gender, intention: intent,
+          country, state_region: stateRegion || null,
+          preferred_language: lang,
+          relationship_intent: intent,
+          avatar_style: avatarStyle,
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
           bio: summary || null,
@@ -99,10 +104,10 @@ function Onboarding() {
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
-    // Quick Connect or explicit skip → straight to people. Others → Spark first.
     if (skipGames || connectionStyle === "quick") navigate({ to: "/matches" });
     else navigate({ to: "/spark" });
   };
+
 
   const isUS = country === "United States";
   const stateRequired = !!country && !isUS && country !== "Other";
