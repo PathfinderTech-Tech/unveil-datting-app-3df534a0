@@ -22,8 +22,9 @@ export function createStripeClient(env: StripeEnv): Stripe {
 
   return new Stripe(connectionApiKey, {
     apiVersion: '2026-03-25.dahlia' as any,
-    httpClient: Stripe.createFetchHttpClient((url: string | URL, init?: RequestInit) => {
-      const gatewayUrl = url.toString().replace('https://api.stripe.com', GATEWAY_STRIPE_BASE);
+    httpClient: Stripe.createFetchHttpClient(((input: any, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : (input?.url ?? input?.toString?.() ?? '');
+      const gatewayUrl = url.replace('https://api.stripe.com', GATEWAY_STRIPE_BASE);
       return fetch(gatewayUrl, {
         ...init,
         headers: {
@@ -32,7 +33,7 @@ export function createStripeClient(env: StripeEnv): Stripe {
           'Lovable-API-Key': lovableApiKey,
         },
       });
-    }),
+    }) as any),
   });
 }
 
