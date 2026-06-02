@@ -1,40 +1,49 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, Lock } from "lucide-react";
+import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
-import { loadChallengePacks, loadChallengeQuestions, type ChallengePack, type ChallengeQuestion } from "@/lib/content-api";
+import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type ChallengeRow } from "@/lib/content-api";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type SearchParams = { u?: string; pack?: string };
+type SearchParams = { u?: string; cat?: string };
 
 export const Route = createFileRoute("/challenges")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     u: typeof s.u === "string" ? s.u : undefined,
-    pack: typeof s.pack === "string" ? s.pack : undefined,
+    cat: typeof s.cat === "string" ? s.cat : undefined,
   }),
   head: () => ({ meta: [{ title: "Challenges — UNVEIL" }, { name: "description", content: "Playful 2-player packs that spark chemistry before the date." }] }),
   component: Challenges,
 });
 
-const CATEGORY_ORDER = ["chemistry", "values", "discovery", "creative"];
+const CATEGORY_META: Record<string, { name: string; description: string; group: string }> = {
+  would_you_rather:     { name: "Would You Rather",     description: "Hypotheticals that reveal values",  group: "chemistry" },
+  this_or_that:         { name: "This or That",         description: "Quick-fire choices",                group: "chemistry" },
+  guess_my_answer:      { name: "Guess My Answer",      description: "Guess what your match would pick",  group: "discovery" },
+  finish_the_sentence:  { name: "Finish The Sentence",  description: "Complete the thought together",     group: "discovery" },
+  red_flag_green_flag:  { name: "Red Flag / Green Flag",description: "Spot the difference",               group: "values" },
+  dating_scenarios:     { name: "Dating Scenarios",     description: "What would you do?",                group: "values" },
+  future_vision:        { name: "Future Vision",        description: "Picture your future together",      group: "values" },
+  build_a_story:        { name: "Build A Story",        description: "Alternate sentences",               group: "creative" },
+};
+const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
   const search = useSearch({ from: "/challenges" }) as SearchParams;
-  const { partner, partners, partnerId, setPartnerId, loading } = usePartner(search.u);
-  const [packs, setPacks] = useState<ChallengePack[]>([]);
-  const [activePack, setActivePack] = useState<ChallengePack | null>(null);
+  const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+  const [active, setActive] = useState<string | null>(search.cat ?? null);
+  const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    loadChallengePacks().then((rows) => {
-      setPacks(rows);
-      if (search.pack) {
-        const found = rows.find((r) => r.id === search.pack);
-        if (found) setActivePack(found);
-      }
+    supabase.from("challenges").select("category").eq("active", true).then(({ data }) => {
+      const c: Record<string, number> = {};
+      (data ?? []).forEach((r: { category: string }) => { c[r.category] = (c[r.category] ?? 0) + 1; });
+      setCounts(c);
     });
-  }, [search.pack]);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -56,38 +65,43 @@ function Challenges() {
           )}
         </section>
 
-        {activePack
-          ? <PackRunner pack={activePack} partnerId={partnerId} onBack={() => setActivePack(null)} />
-          : <PackGrid packs={packs} onPick={setActivePack} />}
+        {active
+          ? <PackRunner category={active} partnerId={partnerId} onBack={() => setActive(null)} />
+          : <PackGrid counts={counts} onPick={setActive} />}
       </div>
     </div>
   );
 }
 
-function PackGrid({ packs, onPick }: { packs: ChallengePack[]; onPick: (p: ChallengePack) => void }) {
-  if (packs.length === 0) return <div className="rounded-3xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">Loading packs…</div>;
-  const grouped = CATEGORY_ORDER.map((c) => ({ category: c, packs: packs.filter((p) => p.category === c) })).filter((g) => g.packs.length);
+function PackGrid({ counts, onPick }: { counts: Record<string, number>; onPick: (c: string) => void }) {
   return (
     <div className="space-y-8">
-      {grouped.map((g) => (
-        <div key={g.category}>
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{g.category}</div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {g.packs.map((p) => (
-              <button key={p.id} onClick={() => onPick(p)}
-                className="group rounded-3xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow">
-                <div className="flex items-start justify-between">
-                  <Swords className="h-5 w-5 text-accent" />
-                  {p.premium && <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] uppercase text-accent"><Lock className="h-2.5 w-2.5" /> premium</span>}
-                </div>
-                <div className="mt-4 font-display text-xl">{p.name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{p.description}</div>
-                <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">Play <ArrowRight className="h-3 w-3" /></div>
-              </button>
-            ))}
+      {GROUP_ORDER.map((g) => {
+        const cats = CHALLENGE_CATEGORIES.filter((c) => CATEGORY_META[c]?.group === g);
+        if (cats.length === 0) return null;
+        return (
+          <div key={g}>
+            <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{g}</div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {cats.map((c) => {
+                const m = CATEGORY_META[c];
+                return (
+                  <button key={c} onClick={() => onPick(c)}
+                    className="group rounded-3xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow">
+                    <Swords className="h-5 w-5 text-accent" />
+                    <div className="mt-4 font-display text-xl">{m.name}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{m.description}</div>
+                    <div className="mt-4 flex items-center justify-between text-xs">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{counts[c] ?? 0} prompts</span>
+                      <span className="inline-flex items-center gap-1 text-primary">Play <ArrowRight className="h-3 w-3" /></span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -99,16 +113,16 @@ const REWARDS = [
 ];
 const PAYMENT_OPTIONS = ["Split the bill", "Winner pays", "Loser pays", "Alternate next time", "Decide on the night"];
 
-function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerId: string | null; onBack: () => void }) {
+function PackRunner({ category, partnerId, onBack }: { category: string; partnerId: string | null; onBack: () => void }) {
   const uid = useUserId();
-  const [questions, setQuestions] = useState<ChallengeQuestion[] | null>(null);
+  const [questions, setQuestions] = useState<ChallengeRow[] | null>(null);
   const [picks, setPicks] = useState<Record<string, string>>({});
   const [reward, setReward] = useState<string | null>(null);
   const [payment, setPayment] = useState<string | null>(null);
   const [bothAgree, setBothAgree] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { loadChallengeQuestions(pack.id, 5).then(setQuestions); }, [pack.id]);
+  useEffect(() => { loadDailyChallenges(5, category).then(setQuestions); }, [category]);
 
   const allAnswered = !!questions && questions.length > 0 && questions.every((q) => picks[q.id]);
 
@@ -116,6 +130,7 @@ function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerI
     if (!saved && allAnswered && reward && payment && bothAgree) {
       if (!uid) { toast.info("Sign in to save this to your passport."); setSaved(true); return; }
       const pickArray = questions!.map((q) => picks[q.id]);
+      questions!.forEach((q) => markCompleted("challenge", q.id, picks[q.id]));
       saveChallengeResult({
         picks: pickArray as never,
         reward, payment, both_agree: bothAgree,
@@ -131,17 +146,17 @@ function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerI
   if (!questions) return (
     <div className="space-y-4">
       <BackBtn onClick={onBack} />
-      <div className="rounded-3xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-        <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-      </div>
+      <div className="rounded-3xl border border-border bg-card p-8 text-center text-sm text-muted-foreground"><Loader2 className="mx-auto h-4 w-4 animate-spin" /></div>
     </div>
   );
   if (questions.length === 0) return (
     <div className="space-y-4">
       <BackBtn onClick={onBack} />
-      <div className="rounded-3xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">No questions yet for this pack.</div>
+      <div className="rounded-3xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">No prompts in this category yet.</div>
     </div>
   );
+
+  const meta = CATEGORY_META[category];
 
   return (
     <div className="space-y-6">
@@ -150,33 +165,39 @@ function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerI
       <div className="rounded-3xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center gap-2">
           <Swords className="h-4 w-4 text-accent" />
-          <span className="font-display text-lg font-bold">{pack.name}</span>
+          <span className="font-display text-lg font-bold">{meta?.name ?? category}</span>
         </div>
         <div className="space-y-4">
-          {questions.map((q, i) => (
-            <div key={q.id} className="rounded-2xl border border-border bg-surface p-4">
-              <div className="mb-2 font-mono text-xs text-muted-foreground">Question {i + 1}</div>
-              <div className="mb-3 font-display text-base">{q.prompt}</div>
-              <div className="grid gap-2 md:grid-cols-2">
-                {q.options.length === 0
-                  ? <input
-                      value={picks[q.id] ?? ""}
-                      onChange={(e) => setPicks((p) => ({ ...p, [q.id]: e.target.value }))}
-                      placeholder="Type your answer…"
-                      className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
-                    />
-                  : q.options.map((opt) => {
-                      const active = picks[q.id] === opt;
-                      return (
-                        <button key={opt} onClick={() => setPicks((p) => ({ ...p, [q.id]: opt }))}
-                          className={`rounded-xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-foreground/30"}`}>
-                          {opt}
-                        </button>
-                      );
-                    })}
+          {questions.map((q, i) => {
+            const opts = [q.option_a, q.option_b, q.option_c].filter((x): x is string => !!x && x.trim().length > 0);
+            return (
+              <div key={q.id} className="rounded-2xl border border-border bg-surface p-4">
+                <div className="mb-2 font-mono text-xs text-muted-foreground">Question {i + 1}</div>
+                <div className="mb-3 font-display text-base">{q.question}</div>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {opts.length === 0
+                    ? <input
+                        value={picks[q.id] ?? ""}
+                        onChange={(e) => setPicks((p) => ({ ...p, [q.id]: e.target.value }))}
+                        placeholder="Type your answer…"
+                        className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      />
+                    : opts.map((opt) => {
+                        const active = picks[q.id] === opt;
+                        return (
+                          <button key={opt} onClick={() => setPicks((p) => ({ ...p, [q.id]: opt }))}
+                            className={`rounded-xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-foreground/30"}`}>
+                            {opt}
+                          </button>
+                        );
+                      })}
+                </div>
+                {picks[q.id] && q.explanation && (
+                  <div className="mt-2 text-xs text-muted-foreground">{q.explanation}</div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -235,7 +256,7 @@ function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerI
 function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-2 text-xs hover:bg-surface">
-      <ArrowLeft className="h-3 w-3" /> All packs
+      <ArrowLeft className="h-3 w-3" /> All categories
     </button>
   );
 }
