@@ -126,7 +126,7 @@ function Onboarding() {
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* progress */}
         <div className="mb-10 flex items-center gap-2">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-border"}`} />
           ))}
         </div>
