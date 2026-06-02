@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { FIRST_DATE_SCENARIOS, WOULD_YOU_RATHER } from "@/lib/synapse-store";
 import { Swords, Sparkles, MapPin, Coffee } from "lucide-react";
+import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/challenges")({
   head: () => ({ meta: [{ title: "Challenge Before The Date — UNVEIL" }, { name: "description", content: "Playful challenges to spark chemistry before you meet." }] }),
@@ -54,12 +56,33 @@ function Challenges() {
 }
 
 function ChallengeFlow() {
+  const uid = useUserId();
   const items = WOULD_YOU_RATHER.slice(0, 3);
   const [picks, setPicks] = useState<("a" | "b" | null)[]>([null, null, null]);
   const [reward, setReward] = useState<string | null>(null);
   const [payment, setPayment] = useState<string | null>(null);
   const [bothAgree, setBothAgree] = useState(false);
+  const [saved, setSaved] = useState(false);
   const allPicked = picks.every(Boolean);
+
+  // When the challenge locks in, save it once.
+  useEffect(() => {
+    if (!saved && reward && payment && bothAgree && allPicked) {
+      if (!uid) {
+        toast.info("Sign in to save this challenge to your passport.");
+        setSaved(true);
+        return;
+      }
+      saveChallengeResult({ picks, reward, payment, both_agree: bothAgree }).then(({ error }) => {
+        if (error) toast.error("Couldn't save challenge", { description: error });
+        else {
+          toast.success("Challenge locked in ✨");
+          awardBadge("challenge-champion");
+        }
+        setSaved(true);
+      });
+    }
+  }, [reward, payment, bothAgree, allPicked, saved, uid, picks]);
 
   return (
     <div className="space-y-6">

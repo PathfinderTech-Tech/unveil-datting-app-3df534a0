@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { Sparkles, RefreshCcw, Send } from "lucide-react";
+import { saveSparkAnswer, loadSparkAnswers, useUserId, awardBadge } from "@/lib/games-api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/spark")({
   head: () => ({
@@ -43,6 +45,7 @@ const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
 };
 
 function SparkPage() {
+  const uid = useUserId();
   const [filter, setFilter] = useState<Category | "all">("all");
   const pool = useMemo(
     () => QUESTIONS.filter((q) => filter === "all" || q.category === filter),
@@ -51,12 +54,38 @@ function SparkPage() {
   const [idx, setIdx] = useState(0);
   const q = pool[idx % pool.length];
   const [answer, setAnswer] = useState("");
+  const [saving, setSaving] = useState(false);
   const [answered, setAnswered] = useState<{ q: string; a: string; cat: Category }[]>([]);
 
+  // Hydrate previously saved answers from the database.
+  useEffect(() => {
+    if (!uid) return;
+    loadSparkAnswers().then((rows) =>
+      setAnswered(
+        rows.map((r) => ({ q: r.question, a: r.answer, cat: r.category as Category })),
+      ),
+    );
+  }, [uid]);
+
   const next = () => { setIdx((i) => i + 1); setAnswer(""); };
-  const save = () => {
+  const save = async () => {
     if (!answer.trim()) return;
-    setAnswered((a) => [{ q: q.text, a: answer.trim(), cat: q.category }, ...a].slice(0, 12));
+    const entry = { q: q.text, a: answer.trim(), cat: q.category };
+    setAnswered((a) => [entry, ...a].slice(0, 50));
+    if (uid) {
+      setSaving(true);
+      const { error } = await saveSparkAnswer({
+        question: entry.q, answer: entry.a, category: entry.cat,
+      });
+      setSaving(false);
+      if (error) toast.error("Couldn't save answer", { description: error });
+      else {
+        // Earn a badge after 5 spark answers.
+        if (answered.length + 1 >= 5) await awardBadge("storyteller");
+      }
+    } else {
+      toast.info("Sign in to save your answers.");
+    }
     next();
   };
 
@@ -100,9 +129,9 @@ function SparkPage() {
               rows={3}
               className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
             <div className="mt-4 flex items-center gap-2">
-              <button onClick={save} disabled={!answer.trim()}
+              <button onClick={save} disabled={!answer.trim() || saving}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-40">
-                <Send className="h-4 w-4" /> Save answer
+                <Send className="h-4 w-4" /> {saving ? "Saving…" : "Save answer"}
               </button>
               <button onClick={next}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">

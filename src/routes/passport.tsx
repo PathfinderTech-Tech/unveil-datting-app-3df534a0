@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { BADGES, useProfile } from "@/lib/synapse-store";
 import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { loadBadges, useUserId } from "@/lib/games-api";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
@@ -10,9 +12,18 @@ export const Route = createFileRoute("/passport")({
 
 function Passport() {
   const [profile] = useProfile();
-  // Demo unlock logic — in production, derived from server-side events.
+  const uid = useUserId();
+  const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
+
+  // Load real earned badges from DB
+  useEffect(() => {
+    if (!uid) return;
+    loadBadges().then(setUnlockedIds);
+  }, [uid]);
+
+  // Fall back to a tiny demo set only when not signed in
   const unlocked = new Set<string>(
-    profile ? ["adventurer", "deep-thinker", "great-listener"] : []
+    uid ? unlockedIds : profile ? ["adventurer"] : []
   );
 
   return (
