@@ -260,8 +260,8 @@ function MatchSheet({ match, you, onClose, onLike }: { match: SynapseProfile; yo
               Engage to unlock Stage {stage + 1}
             </button>
           ) : (
-            <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]">
-              <Heart className="h-4 w-4" /> Propose a meetup
+            <button onClick={onLike} className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]">
+              <Heart className="h-4 w-4" /> Send interest — open conversation if mutual
             </button>
           )}
           <div className="flex gap-2">
