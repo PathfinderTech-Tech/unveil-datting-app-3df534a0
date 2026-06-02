@@ -57,8 +57,7 @@ function ContactShare() {
   );
 }
 
-function SharePanel({ partner, onRefresh }: { partner: ReturnType<typeof usePartner>["partner"]; onRefresh: () => Promise<unknown> }) {
-  if (!partner) return null;
+function SharePanel({ partner, onRefresh }: { partner: NonNullable<ReturnType<typeof usePartner>["partner"]>; onRefresh: () => Promise<unknown> }) {
   const [busy, setBusy] = useState(false);
   const [mine, setMine] = useState<Record<Channel, string>>({ phone: "", whatsapp: "", instagram: "", telegram: "" });
   const [theirs, setTheirs] = useState<Record<Channel, string | null> | null>(null);
