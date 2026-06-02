@@ -1,33 +1,41 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { FIRST_DATE_SCENARIOS, WOULD_YOU_RATHER } from "@/lib/synapse-store";
-import { Swords, Sparkles, MapPin, Coffee } from "lucide-react";
+import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, Lock } from "lucide-react";
 import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
+import { loadChallengePacks, loadChallengeQuestions, type ChallengePack, type ChallengeQuestion } from "@/lib/content-api";
+import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { toast } from "sonner";
 
+type SearchParams = { u?: string; pack?: string };
+
 export const Route = createFileRoute("/challenges")({
-  head: () => ({ meta: [{ title: "Challenge Before The Date — UNVEIL" }, { name: "description", content: "Playful challenges to spark chemistry before you meet." }] }),
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    u: typeof s.u === "string" ? s.u : undefined,
+    pack: typeof s.pack === "string" ? s.pack : undefined,
+  }),
+  head: () => ({ meta: [{ title: "Challenges — UNVEIL" }, { name: "description", content: "Playful 2-player packs that spark chemistry before the date." }] }),
   component: Challenges,
 });
 
-type Tab = "challenge" | "simulator";
-
-const REWARDS = [
-  { id: "venue", icon: MapPin, label: "Winner picks the venue" },
-  { id: "activity", icon: Coffee, label: "Winner picks the activity" },
-  { id: "theme", icon: Sparkles, label: "Winner picks the theme" },
-];
-const PAYMENT_OPTIONS = [
-  "Split the bill",
-  "Winner pays",
-  "Loser pays",
-  "Alternate next time",
-  "Decide on the night",
-];
+const CATEGORY_ORDER = ["chemistry", "values", "discovery", "creative"];
 
 function Challenges() {
-  const [tab, setTab] = useState<Tab>("challenge");
+  const search = useSearch({ from: "/challenges" }) as SearchParams;
+  const { partner, partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+  const [packs, setPacks] = useState<ChallengePack[]>([]);
+  const [activePack, setActivePack] = useState<ChallengePack | null>(null);
+
+  useEffect(() => {
+    loadChallengePacks().then((rows) => {
+      setPacks(rows);
+      if (search.pack) {
+        const found = rows.find((r) => r.id === search.pack);
+        if (found) setActivePack(found);
+      }
+    });
+  }, [search.pack]);
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
@@ -35,91 +43,150 @@ function Challenges() {
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Challenge Before The Date</div>
           <h1 className="mt-2 font-display text-5xl font-bold">Play first. Meet second.</h1>
-          <p className="mt-3 max-w-xl text-muted-foreground">
-            Lighthearted, flirty challenges that build chemistry — and a tiny ritual to settle the first date together.
-          </p>
+          <p className="mt-3 max-w-xl text-muted-foreground">Two-player packs that build chemistry — then a tiny ritual to settle the first date.</p>
         </div>
 
-        <div className="mb-8 inline-flex rounded-full border border-border bg-card p-1">
-          {(["challenge", "simulator"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`rounded-full px-5 py-2 text-sm transition-colors ${tab === t ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
-              {t === "challenge" ? "Duel" : "First-date simulator"}
-            </button>
-          ))}
-        </div>
+        <section className="mb-6 rounded-3xl border border-border bg-card p-6">
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Play with</div>
+          {loading
+            ? <div className="text-sm text-muted-foreground">Loading…</div>
+            : <PartnerPicker partners={partners} value={partnerId} onChange={setPartnerId} />}
+          {partners.length === 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">You can still preview a pack — your picks will save once you have a mutual match.</p>
+          )}
+        </section>
 
-        {tab === "challenge" ? <ChallengeFlow /> : <SimulatorFlow />}
+        {activePack
+          ? <PackRunner pack={activePack} partnerId={partnerId} onBack={() => setActivePack(null)} />
+          : <PackGrid packs={packs} onPick={setActivePack} />}
       </div>
     </div>
   );
 }
 
-function ChallengeFlow() {
+function PackGrid({ packs, onPick }: { packs: ChallengePack[]; onPick: (p: ChallengePack) => void }) {
+  if (packs.length === 0) return <div className="rounded-3xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">Loading packs…</div>;
+  const grouped = CATEGORY_ORDER.map((c) => ({ category: c, packs: packs.filter((p) => p.category === c) })).filter((g) => g.packs.length);
+  return (
+    <div className="space-y-8">
+      {grouped.map((g) => (
+        <div key={g.category}>
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{g.category}</div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {g.packs.map((p) => (
+              <button key={p.id} onClick={() => onPick(p)}
+                className="group rounded-3xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow">
+                <div className="flex items-start justify-between">
+                  <Swords className="h-5 w-5 text-accent" />
+                  {p.premium && <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] uppercase text-accent"><Lock className="h-2.5 w-2.5" /> premium</span>}
+                </div>
+                <div className="mt-4 font-display text-xl">{p.name}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{p.description}</div>
+                <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">Play <ArrowRight className="h-3 w-3" /></div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const REWARDS = [
+  { id: "venue", icon: MapPin, label: "Winner picks the venue" },
+  { id: "activity", icon: Coffee, label: "Winner picks the activity" },
+  { id: "theme", icon: Sparkles, label: "Winner picks the theme" },
+];
+const PAYMENT_OPTIONS = ["Split the bill", "Winner pays", "Loser pays", "Alternate next time", "Decide on the night"];
+
+function PackRunner({ pack, partnerId, onBack }: { pack: ChallengePack; partnerId: string | null; onBack: () => void }) {
   const uid = useUserId();
-  const items = WOULD_YOU_RATHER.slice(0, 3);
-  const [picks, setPicks] = useState<("a" | "b" | null)[]>([null, null, null]);
+  const [questions, setQuestions] = useState<ChallengeQuestion[] | null>(null);
+  const [picks, setPicks] = useState<Record<string, string>>({});
   const [reward, setReward] = useState<string | null>(null);
   const [payment, setPayment] = useState<string | null>(null);
   const [bothAgree, setBothAgree] = useState(false);
   const [saved, setSaved] = useState(false);
-  const allPicked = picks.every(Boolean);
 
-  // When the challenge locks in, save it once.
+  useEffect(() => { loadChallengeQuestions(pack.id, 5).then(setQuestions); }, [pack.id]);
+
+  const allAnswered = !!questions && questions.length > 0 && questions.every((q) => picks[q.id]);
+
   useEffect(() => {
-    if (!saved && reward && payment && bothAgree && allPicked) {
-      if (!uid) {
-        toast.info("Sign in to save this challenge to your passport.");
-        setSaved(true);
-        return;
-      }
-      saveChallengeResult({ picks, reward, payment, both_agree: bothAgree }).then(({ error }) => {
-        if (error) toast.error("Couldn't save challenge", { description: error });
-        else {
-          toast.success("Challenge locked in ✨");
-          awardBadge("challenge-champion");
-        }
+    if (!saved && allAnswered && reward && payment && bothAgree) {
+      if (!uid) { toast.info("Sign in to save this to your passport."); setSaved(true); return; }
+      const pickArray = questions!.map((q) => picks[q.id]);
+      saveChallengeResult({
+        picks: pickArray as never,
+        reward, payment, both_agree: bothAgree,
+        partner_id: partnerId ?? null,
+      }).then(({ error }) => {
+        if (error) toast.error("Couldn't save", { description: error });
+        else { toast.success("Challenge locked in ✨"); awardBadge("challenge-champion"); }
         setSaved(true);
       });
     }
-  }, [reward, payment, bothAgree, allPicked, saved, uid, picks]);
+  }, [saved, allAnswered, reward, payment, bothAgree, uid, partnerId, picks, questions]);
+
+  if (!questions) return (
+    <div className="space-y-4">
+      <BackBtn onClick={onBack} />
+      <div className="rounded-3xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+      </div>
+    </div>
+  );
+  if (questions.length === 0) return (
+    <div className="space-y-4">
+      <BackBtn onClick={onBack} />
+      <div className="rounded-3xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">No questions yet for this pack.</div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
+      <BackBtn onClick={onBack} />
+
       <div className="rounded-3xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center gap-2">
           <Swords className="h-4 w-4 text-accent" />
-          <span className="font-display text-lg font-bold">Rapid-fire round</span>
+          <span className="font-display text-lg font-bold">{pack.name}</span>
         </div>
-        <div className="space-y-3">
-          {items.map((it, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-surface p-4">
+        <div className="space-y-4">
+          {questions.map((q, i) => (
+            <div key={q.id} className="rounded-2xl border border-border bg-surface p-4">
               <div className="mb-2 font-mono text-xs text-muted-foreground">Question {i + 1}</div>
+              <div className="mb-3 font-display text-base">{q.prompt}</div>
               <div className="grid gap-2 md:grid-cols-2">
-                {(["a", "b"] as const).map((opt) => {
-                  const active = picks[i] === opt;
-                  return (
-                    <button key={opt}
-                      onClick={() => setPicks(picks.map((p, j) => (j === i ? opt : p)))}
-                      className={`rounded-xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-foreground/30"}`}>
-                      {opt === "a" ? it.a : it.b}
-                    </button>
-                  );
-                })}
+                {q.options.length === 0
+                  ? <input
+                      value={picks[q.id] ?? ""}
+                      onChange={(e) => setPicks((p) => ({ ...p, [q.id]: e.target.value }))}
+                      placeholder="Type your answer…"
+                      className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    />
+                  : q.options.map((opt) => {
+                      const active = picks[q.id] === opt;
+                      return (
+                        <button key={opt} onClick={() => setPicks((p) => ({ ...p, [q.id]: opt }))}
+                          className={`rounded-xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-foreground/30"}`}>
+                          {opt}
+                        </button>
+                      );
+                    })}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {allPicked && (
+      {allAnswered && (
         <>
           <div className="rounded-3xl border border-border bg-card p-6">
             <div className="mb-3 font-display text-lg font-bold">Winner's reward</div>
             <div className="grid gap-3 md:grid-cols-3">
               {REWARDS.map((r) => {
-                const Icon = r.icon;
-                const active = reward === r.id;
+                const Icon = r.icon; const active = reward === r.id;
                 return (
                   <button key={r.id} onClick={() => setReward(r.id)}
                     className={`flex flex-col items-start gap-2 rounded-2xl border p-4 text-left text-sm transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
@@ -133,7 +200,7 @@ function ChallengeFlow() {
 
           <div className="rounded-3xl border border-border bg-card p-6">
             <div className="mb-2 font-display text-lg font-bold">How do you handle the bill?</div>
-            <p className="mb-4 text-xs text-muted-foreground">No one is ever required to pay. Both of you must agree before the date.</p>
+            <p className="mb-4 text-xs text-muted-foreground">No one is required to pay. Both must agree.</p>
             <div className="flex flex-wrap gap-2">
               {PAYMENT_OPTIONS.map((p) => {
                 const active = payment === p;
@@ -153,9 +220,9 @@ function ChallengeFlow() {
 
           {reward && payment && bothAgree && (
             <div className="rounded-3xl border border-neon/40 bg-neon/5 p-6">
-              <div className="font-display text-xl font-bold text-foreground">✨ Challenge locked in.</div>
+              <div className="font-display text-xl font-bold">✨ Challenge locked in.</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                Winner: <span className="font-medium text-foreground">{REWARDS.find((r) => r.id === reward)!.label.toLowerCase()}</span>. Bill: <span className="font-medium text-foreground">{payment.toLowerCase()}</span>.
+                Winner: <span className="font-medium text-foreground">{REWARDS.find((r) => r.id === reward)!.label.toLowerCase()}</span> · Bill: <span className="font-medium text-foreground">{payment.toLowerCase()}</span>.
               </div>
             </div>
           )}
@@ -165,66 +232,10 @@ function ChallengeFlow() {
   );
 }
 
-function SimulatorFlow() {
-  const scenarios = useMemo(() => FIRST_DATE_SCENARIOS.slice(0, 4), []);
-  const [you, setYou] = useState<(number | null)[]>(Array(scenarios.length).fill(null));
-  // Simulated partner answers (in production these'd come from the matched user)
-  const them = useMemo(() => scenarios.map(() => Math.floor(Math.random() * 3)), [scenarios]);
-  const done = you.every((v) => v !== null);
-  const agreement = done ? you.filter((v, i) => v === them[i]).length : 0;
-
+function BackBtn({ onClick }: { onClick: () => void }) {
   return (
-    <div className="space-y-6">
-      <div className="rounded-3xl border border-border bg-card p-6">
-        <div className="mb-1 font-display text-lg font-bold">First Date Simulator</div>
-        <p className="mb-4 text-sm text-muted-foreground">A few scenarios you'd both face together. See where you click — and where you'll have something to talk about.</p>
-        <div className="space-y-5">
-          {scenarios.map((s, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-surface p-4">
-              <div className="mb-3 font-display">{s.q}</div>
-              <div className="grid gap-2">
-                {s.options.map((opt, oi) => {
-                  const active = you[i] === oi;
-                  return (
-                    <button key={oi} onClick={() => setYou(you.map((v, j) => (j === i ? oi : v)))}
-                      className={`rounded-xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-foreground/30"}`}>
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {done && (
-        <div className="overflow-hidden rounded-3xl border-2 border-primary bg-gradient-hero p-8 text-primary-foreground shadow-glow">
-          <div className="font-mono text-xs uppercase tracking-wider opacity-80">Simulated chemistry</div>
-          <div className="mt-2 font-display text-5xl font-bold">{agreement} / {scenarios.length}</div>
-          <p className="mt-2 max-w-xl text-sm opacity-90">
-            {agreement >= 3
-              ? "You'd glide through a first date — and still have plenty to argue about playfully."
-              : agreement === 2
-                ? "Enough overlap to feel easy, enough difference to keep it interesting."
-                : "Opposites, mostly — could be electric, could be friction. Worth finding out."}
-          </p>
-          <div className="mt-5 space-y-2 text-sm">
-            {scenarios.map((s, i) => {
-              const match = you[i] === them[i];
-              return (
-                <div key={i} className="flex items-start gap-2 rounded-2xl bg-black/15 p-3">
-                  <span>{match ? "🟢" : "🟡"}</span>
-                  <div>
-                    <div className="text-xs opacity-80">{s.q}</div>
-                    <div className="opacity-95">You: {s.options[you[i] as number]} · Them: {s.options[them[i]]}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+    <button onClick={onClick} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-2 text-xs hover:bg-surface">
+      <ArrowLeft className="h-3 w-3" /> All packs
+    </button>
   );
 }
