@@ -1,112 +1,206 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Check, Sparkles, Crown, Heart } from "lucide-react";
+import { Check, Sparkles, Heart, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/premium")({
-  head: () => ({ meta: [{ title: "Premium — UNVEIL" }] }),
-  component: Premium,
+  head: () => ({
+    meta: [
+      { title: "Membership — UNVEIL" },
+      { name: "description", content: "UNVEIL is free to use. Premium gives you deeper insights and a richer connection experience." },
+    ],
+  }),
+  component: Membership,
 });
 
-type Plan = "1" | "3" | "6" | "9" | "12";
-const PLUS: Record<Plan, string> = { "1": "$19.99", "3": "$49.99", "6": "$89.99", "9": "$119.99", "12": "$149.99" };
-const BLACK: Partial<Record<Plan, string>> = { "1": "$49.99", "3": "$129.99", "6": "$239.99", "12": "$399.99" };
+type Plan = "1" | "3" | "6" | "12";
+const PRICES: Record<Plan, { price: string; label: string; perMonth?: string }> = {
+  "1":  { price: "$19.99", label: "1 Month" },
+  "3":  { price: "$49.99", label: "3 Months", perMonth: "$16.66/mo" },
+  "6":  { price: "$89.99", label: "6 Months", perMonth: "$15.00/mo" },
+  "12": { price: "$149.99", label: "12 Months", perMonth: "$12.50/mo" },
+};
 
-function Premium() {
+const FREE_FEATURES = [
+  "Create your profile",
+  "Complete onboarding",
+  "Answer Spark Questions",
+  "Play discovery puzzles",
+  "Receive compatible matches",
+  "Chat with matches",
+  "Join Couple Challenges",
+  "Use Date Passport",
+  "Report and block users",
+  "Safety reminders",
+];
+
+const PREMIUM_FEATURES = [
+  "Deeper compatibility insights",
+  "Advanced chemistry meter",
+  "More Spark Questions",
+  "Extra Couple Challenge packs",
+  "Personalized connection reports",
+  "Advanced profile customization",
+  "Priority match discovery",
+  "Save favorite profiles",
+  "Date preparation insights",
+  "Communication tips",
+  "Premium profile badge",
+];
+
+function Membership() {
   const [plan, setPlan] = useState<Plan>("3");
+  const selected = PRICES[plan];
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
-      <section className="mx-auto max-w-6xl px-6 py-20">
+      <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
+        {/* Hero */}
         <div className="text-center">
           <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Membership</p>
-          <h1 className="mt-4 font-display text-5xl font-light md:text-6xl">
-            Pay for <span className="text-gradient-aura italic">clarity</span>.
+          <h1 className="mt-4 font-display text-4xl font-light leading-tight md:text-6xl">
+            Choose how you want to <span className="text-gradient-aura italic">discover</span>.
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            You are not paying for access to people. You are paying for emotional clarity and intentional connection.
+          <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
+            UNVEIL is free to use. Premium gives you deeper insights, more personalization,
+            and a richer connection experience.
           </p>
         </div>
 
-        <div className="mt-10 flex justify-center">
-          <div className="inline-flex rounded-full border border-border bg-card p-1">
-            {(["1","3","6","9","12"] as Plan[]).map((p) => (
-              <button key={p} onClick={() => setPlan(p)}
-                className={`rounded-full px-4 py-2 text-xs transition-colors ${plan === p ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
-                {p} {p === "1" ? "month" : "months"}
+        {/* Plan cards */}
+        <div className="mt-12 grid gap-5 lg:grid-cols-2">
+          {/* FREE */}
+          <div className="relative flex flex-col rounded-3xl border border-border bg-card p-7 md:p-9">
+            <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-accent">
+              <Heart className="h-5 w-5" />
+            </div>
+            <div className="font-display text-2xl font-light">Free</div>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="font-display text-5xl">$0</span>
+              <span className="text-sm text-muted-foreground">/ forever</span>
+            </div>
+            <p className="mt-3 max-w-md text-sm text-muted-foreground">
+              Everything you need to meet, connect, and build something meaningful.
+            </p>
+            <ul className="mt-6 flex-1 space-y-2.5 text-sm">
+              {FREE_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+                  <span className="text-foreground/85">{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/signup"
+              className="mt-8 inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-3 text-sm font-medium hover:bg-surface-2"
+            >
+              Continue Free
+            </Link>
+          </div>
+
+          {/* PREMIUM */}
+          <div className="relative flex flex-col rounded-3xl border border-primary bg-card p-7 shadow-glow md:p-9">
+            <div className="absolute -top-3 left-7 rounded-full bg-gradient-hero px-3 py-1 font-mono text-[10px] uppercase tracking-luxury text-primary-foreground shadow-glow">
+              Most chosen
+            </div>
+            <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-aura text-primary-foreground">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div className="font-display text-2xl font-light">UNVEIL Premium</div>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              For users who want deeper compatibility insight and a more personalized discovery experience.
+            </p>
+
+            {/* Duration selector */}
+            <div className="mt-6">
+              <div className="mb-3 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                Choose your duration
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {(Object.keys(PRICES) as Plan[]).map((p) => {
+                  const active = plan === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPlan(p)}
+                      className={`rounded-2xl border p-3 text-left transition-all ${
+                        active
+                          ? "border-primary bg-gradient-hero text-primary-foreground shadow-glow"
+                          : "border-border bg-surface hover:bg-surface-2"
+                      }`}
+                    >
+                      <div className="text-[11px] font-medium opacity-80">{PRICES[p].label}</div>
+                      <div className="mt-1 font-display text-xl">{PRICES[p].price}</div>
+                      {PRICES[p].perMonth && (
+                        <div className="mt-0.5 text-[10px] opacity-70">{PRICES[p].perMonth}</div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-baseline gap-2">
+              <span className="font-display text-4xl">{selected.price}</span>
+              <span className="text-sm text-muted-foreground">/ {selected.label.toLowerCase()}</span>
+            </div>
+
+            <ul className="mt-6 flex-1 space-y-2.5 text-sm">
+              {PREMIUM_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+                  <span className="text-foreground/85">{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 grid gap-2 sm:grid-cols-2">
+              <button
+                onClick={() => alert("Stripe checkout coming soon")}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-5 py-3 text-sm font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]"
+              >
+                Upgrade to Premium
               </button>
-            ))}
+              <button
+                onClick={() => alert("App Store / Google Play checkout coming soon")}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-3 text-sm font-medium hover:bg-surface-2"
+              >
+                Pay via App Store
+              </button>
+            </div>
+
+            <p className="mt-4 text-xs italic text-foreground/70">
+              Premium helps you discover more. It does not decide whether you can connect.
+            </p>
           </div>
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          <Tier icon={<Heart className="h-5 w-5" />} badge="Free" price="$0" cadence="forever"
-            blurb="Discover your archetype and feel the platform."
-            features={[
-              "Basic profile",
-              "Limited curated matches",
-              "Limited challenges",
-              "Spark Questions feed",
-              "Discovery Puzzles",
-            ]}
-            cta="Start free" />
-
-          <Tier highlight icon={<Sparkles className="h-5 w-5" />} badge="UNVEIL+" price={PLUS[plan]} cadence={`/ ${plan === "1" ? "month" : `${plan} months`}`}
-            blurb="The full emotional intelligence layer."
-            features={[
-              "Unlimited matches & challenges",
-              "Full Chemistry Meter insights",
-              "All Spark Questions categories",
-              "Couple Challenge Mode",
-              "Voice prompts & gradual reveals",
-              "Profile aura customization",
-            ]}
-            cta="Unlock UNVEIL+" />
-
-          <Tier black icon={<Crown className="h-5 w-5" />} badge="UNVEIL Black"
-            price={BLACK[plan] ?? "—"} cadence={BLACK[plan] ? `/ ${plan === "1" ? "month" : `${plan} months`}` : "not available at this term"}
-            blurb="A private, elite tier for the most intentional members."
-            features={[
-              "Everything in UNVEIL+",
-              "Private curated introductions",
-              "Premium identity & trust verification",
-              "First Date Simulator priority",
-              "Concierge date planning",
-              "Enhanced privacy controls",
-            ]}
-            cta="Request access" />
+        {/* Notices */}
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+              <Shield className="h-3.5 w-3.5 text-accent" /> No traps
+            </div>
+            <p className="mt-2 text-sm text-foreground/85">
+              Memberships do not trap users. When your membership ends, you can renew for 1, 3, 6,
+              or 12 months — or continue with the free version.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+              <Shield className="h-3.5 w-3.5 text-accent" /> Refunds
+            </div>
+            <p className="mt-2 text-sm text-foreground/85">
+              Payments are non-refundable except where required by law.
+            </p>
+          </div>
         </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          All subscriptions are non-refundable except where required by law. No casino mechanics. No urgency pop-ups.
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          You can continue using UNVEIL for free at any time.
         </p>
       </section>
-    </div>
-  );
-}
-
-function Tier({ icon, badge, price, cadence, blurb, features, cta, highlight, black }: {
-  icon: React.ReactNode; badge: string; price: string; cadence: string; blurb: string; features: string[]; cta: string;
-  highlight?: boolean; black?: boolean;
-}) {
-  const border = black ? "border-foreground/20 bg-[oklch(0.06_0.02_295)]" : highlight ? "border-primary bg-card shadow-glow" : "border-border bg-card";
-  return (
-    <div className={`relative flex flex-col rounded-3xl border p-8 ${border}`}>
-      {highlight && <div className="absolute -top-3 left-8 rounded-full bg-gradient-hero px-3 py-1 font-mono text-[10px] uppercase tracking-luxury text-primary-foreground shadow-glow">Most chosen</div>}
-      {black && <div className="absolute -top-3 left-8 rounded-full border border-foreground/30 bg-background px-3 py-1 font-mono text-[10px] uppercase tracking-luxury">Invite tier</div>}
-      <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-aura text-primary-foreground">{icon}</div>
-      <div className="font-display text-xl font-light">{badge}</div>
-      <div className="mt-2 flex items-baseline gap-1">
-        <span className="font-display text-5xl">{price}</span>
-        <span className="text-sm text-muted-foreground">{cadence}</span>
-      </div>
-      <p className="mt-3 text-sm text-muted-foreground">{blurb}</p>
-      <ul className="mt-6 flex-1 space-y-2.5 text-sm">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" /><span className="text-foreground/85">{f}</span></li>
-        ))}
-      </ul>
-      <Link to="/signup" className={`mt-8 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium ${black ? "bg-foreground text-background" : highlight ? "bg-gradient-hero text-primary-foreground shadow-glow" : "border border-border bg-surface hover:bg-surface-2"}`}>{cta}</Link>
     </div>
   );
 }
