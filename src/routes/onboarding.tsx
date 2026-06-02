@@ -62,6 +62,11 @@ function Onboarding() {
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [avatarStyle, setAvatarStyle] = useState<string>("real");
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
@@ -69,16 +74,58 @@ function Onboarding() {
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
 
-  const simulateFace = () => {
-    setFaceUploaded(true);
-    let v = 0;
+  const computeHarmony = () => {
     const target = 72 + Math.floor(Math.random() * 22);
+    let v = 0;
+    setFaceHarmony(0);
     const tick = setInterval(() => {
-      v += 2;
+      v += 4;
       setFaceHarmony(Math.min(v, target));
       if (v >= target) clearInterval(tick);
-    }, 30);
+    }, 25);
   };
+
+  async function handlePhotoFile(file: File) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast.error("Please pick an image file."); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be under 8MB."); return; }
+    setPhotoUploading(true);
+    try {
+      // Always show instant local preview
+      const localUrl = URL.createObjectURL(file);
+      setPhotoUrl(localUrl);
+      setFaceUploaded(true);
+      computeHarmony();
+
+      // If signed in, upload to storage and persist on profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error } = await supabase.storage
+          .from("profile-photos")
+          .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+        if (error) throw error;
+        const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
+        setPhotoUrl(pub.publicUrl);
+        await supabase.from("profiles").update({ photo_url: pub.publicUrl }).eq("id", user.id);
+        toast.success("Selfie saved.");
+      } else {
+        toast.success("Selfie ready. We'll save it after sign in.");
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
+
+  function clearPhoto() {
+    setPhotoUrl(null);
+    setFaceUploaded(false);
+    setFaceHarmony(0);
+  }
+
 
   const finish = async (skipGames = false) => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
