@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, ArrowRight, Check, Sparkles } from "lucide-react";
+import { Camera, ArrowRight, Check, Sparkles, Upload, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "A few playful questions to shape your Discovery Profile." }] }),
@@ -60,6 +62,11 @@ function Onboarding() {
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [avatarStyle, setAvatarStyle] = useState<string>("real");
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
@@ -67,16 +74,58 @@ function Onboarding() {
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
 
-  const simulateFace = () => {
-    setFaceUploaded(true);
-    let v = 0;
+  const computeHarmony = () => {
     const target = 72 + Math.floor(Math.random() * 22);
+    let v = 0;
+    setFaceHarmony(0);
     const tick = setInterval(() => {
-      v += 2;
+      v += 4;
       setFaceHarmony(Math.min(v, target));
       if (v >= target) clearInterval(tick);
-    }, 30);
+    }, 25);
   };
+
+  async function handlePhotoFile(file: File) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast.error("Please pick an image file."); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be under 8MB."); return; }
+    setPhotoUploading(true);
+    try {
+      // Always show instant local preview
+      const localUrl = URL.createObjectURL(file);
+      setPhotoUrl(localUrl);
+      setFaceUploaded(true);
+      computeHarmony();
+
+      // If signed in, upload to storage and persist on profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error } = await supabase.storage
+          .from("profile-photos")
+          .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+        if (error) throw error;
+        const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
+        setPhotoUrl(pub.publicUrl);
+        await supabase.from("profiles").update({ photo_url: pub.publicUrl }).eq("id", user.id);
+        toast.success("Selfie saved.");
+      } else {
+        toast.success("Selfie ready. We'll save it after sign in.");
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
+
+  function clearPhoto() {
+    setPhotoUrl(null);
+    setFaceUploaded(false);
+    setFaceHarmony(0);
+  }
+
 
   const finish = async (skipGames = false) => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
@@ -226,24 +275,93 @@ function Onboarding() {
               <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
               <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
             </div>
-            <div className="flex flex-col items-center gap-6 rounded-3xl border border-dashed border-border bg-card p-10">
-              {!faceUploaded ? (
-                <button onClick={simulateFace} className="flex flex-col items-center gap-4 text-center">
-                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow transition-transform hover:scale-105">
-                    <Camera className="h-12 w-12 text-primary-foreground" />
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) handlePhotoFile(f);
+              }}
+              className={`flex flex-col items-center gap-6 rounded-3xl border-2 border-dashed p-8 transition-colors ${
+                dragActive ? "border-primary bg-primary/5" : "border-border bg-card"
+              }`}
+            >
+              <input
+                ref={selfieInputRef}
+                type="file"
+                accept="image/*"
+                capture="user"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }}
+              />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }}
+              />
+
+              <div className="relative h-40 w-40 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Your selfie" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Camera className="h-14 w-14 text-primary-foreground/90" />
                   </div>
-                  <span className="font-medium">Tap to capture (demo)</span>
-                  <span className="text-xs text-muted-foreground">We never share your raw selfie.</span>
+                )}
+                {photoUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  </div>
+                )}
+                {faceUploaded && !photoUploading && (
+                  <div className="absolute bottom-1 right-1 rounded-full bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold text-primary shadow">
+                    {faceHarmony}%
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => selfieInputRef.current?.click()}
+                  disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105 disabled:opacity-50"
+                >
+                  <Camera className="h-4 w-4" /> {photoUrl ? "Retake selfie" : "Take selfie"}
                 </button>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-face shadow-glow">
-                    <span className="font-display text-4xl font-bold text-primary-foreground">{faceHarmony}%</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">Sensory harmony noted (private)</div>
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium hover:border-foreground/30 disabled:opacity-50"
+                >
+                  <Upload className="h-4 w-4" /> Upload photo
+                </button>
+                {photoUrl && (
+                  <button
+                    type="button"
+                    onClick={clearPhoto}
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" /> Remove
+                  </button>
+                )}
+              </div>
+
+              <div className="text-center">
+                <div className="text-sm text-foreground/85">
+                  {faceUploaded ? "Sensory harmony noted — kept private." : "Drag & drop, take a selfie, or upload from your library."}
                 </div>
-              )}
+                <div className="mt-1 text-xs text-muted-foreground">
+                  JPG or PNG · up to 8MB · we never share your raw selfie.
+                </div>
+              </div>
             </div>
+
 
             {faceUploaded && (
               <div>
