@@ -5,7 +5,8 @@ import {
   useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
-import { loadRealMatches, likeProfile, type RealMatch } from "@/lib/matching-api";
+import { loadRealMatches, likeProfile, distanceLabel, type RealMatch } from "@/lib/matching-api";
+import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
 import {
@@ -23,18 +24,28 @@ function Matches() {
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"band" | "all">("all");
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const navigate = useNavigate();
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    loadRealMatches(40).then((rows) => {
+    loadRealMatches({
+      limit: 40,
+      nearbyOnly: filters.nearbyOnly,
+      radiusKm: filters.radiusKm || null,
+      country: filters.country || null,
+      language: filters.language || null,
+      intent: filters.intent || null,
+      ageMin: filters.ageMin,
+      ageMax: filters.ageMax,
+    }).then((rows) => {
       if (!alive) return;
       setMatches(rows);
       setLoading(false);
     });
     return () => { alive = false; };
-  }, []);
+  }, [filters]);
 
   const visible = useMemo(() => {
     if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
