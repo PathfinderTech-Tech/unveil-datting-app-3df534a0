@@ -5,13 +5,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X } from "lucide-react";
 
+// Order follows the user journey: arrive → set up → discover → connect →
+// (optional play) → unlock → meet → track → upgrade.
 const links = [
   { to: "/", label: "Home" },
   { to: "/onboarding", label: "Begin" },
   { to: "/spark", label: "Spark" },
-  { to: "/puzzles", label: "Puzzles" },
   { to: "/matches", label: "Matches" },
   { to: "/challenges", label: "Challenges" },
+  { to: "/puzzles", label: "Puzzles" },
   { to: "/contact-share", label: "Share" },
   { to: "/date-plan", label: "Date" },
   { to: "/passport", label: "Passport" },

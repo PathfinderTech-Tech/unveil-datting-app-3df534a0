@@ -39,6 +39,12 @@ const AVATAR_STYLES = [
   { id: "artistic",   label: "Artistic Illustration", hint: "Watercolor, soft." },
 ];
 
+const CONNECTION_STYLES = [
+  { id: "quick",     label: "Quick Connect",  hint: "I prefer chatting naturally.",            tone: "Skip games. Jump into messages." },
+  { id: "discovery", label: "Discovery Mode", hint: "I enjoy questions and interactive experiences.", tone: "Spark, puzzles, challenges — the works." },
+  { id: "slow",      label: "Slow Burn",      hint: "I like building trust before meeting.",    tone: "Take your time. Voice, words, then a date." },
+];
+
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -50,6 +56,7 @@ function Onboarding() {
   const [city, setCity] = useState("");
   const [intent, setIntent] = useState("");
   const [email, setEmail] = useState("");
+  const [connectionStyle, setConnectionStyle] = useState<string>("");
   const [profession, setProfession] = useState<Profession | null>(null);
   const [faceUploaded, setFaceUploaded] = useState(false);
   const [faceHarmony, setFaceHarmony] = useState(0);
@@ -71,10 +78,10 @@ function Onboarding() {
     }, 30);
   };
 
-  const finish = async () => {
+  const finish = async (skipGames = false) => {
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
-    const draft = { name, age, gender, country, stateRegion, city, intent, email, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
+    const draft = { name, age, gender, country, stateRegion, city, intent, email, connectionStyle, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
     sessionStorage.setItem("unveil-draft", JSON.stringify(draft));
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -88,11 +95,13 @@ function Onboarding() {
         }).eq("id", user.id);
         await supabase.from("onboarding_answers").upsert({
           user_id: user.id,
-          answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, character, discovery, summary, email },
+          answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, connectionStyle, character, discovery, summary, email },
         }, { onConflict: "user_id" });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
-    navigate({ to: "/game" });
+    // Quick Connect or explicit skip → straight to people. Others → Spark first.
+    if (skipGames || connectionStyle === "quick") navigate({ to: "/matches" });
+    else navigate({ to: "/spark" });
   };
 
   const isUS = country === "United States";
@@ -101,11 +110,13 @@ function Onboarding() {
   const canNext = [
     // Step 0: identity — name, age, gender, country (required), intent, email
     name.length > 1 && !!gender && !!country && !!intent && /\S+@\S+\.\S+/.test(email),
-    // Step 1: face + avatar style
+    // Step 1: connection style
+    !!connectionStyle,
+    // Step 2: face + avatar style
     faceUploaded && faceHarmony > 0 && !!avatarStyle,
-    // Step 2: profession
+    // Step 3: profession
     profession !== null,
-    // Step 3: discovery
+    // Step 4: discovery
     allAnswered,
   ][step];
 
@@ -115,7 +126,7 @@ function Onboarding() {
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* progress */}
         <div className="mb-10 flex items-center gap-2">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-border"}`} />
           ))}
         </div>
@@ -181,7 +192,32 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Your face & avatar</div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 02 — Connection Style</div>
+              <h1 className="mt-2 font-display text-4xl font-bold">How do you prefer to connect?</h1>
+              <p className="mt-2 text-muted-foreground">Pick the pace that fits you. You can change this anytime — and games are always optional.</p>
+            </div>
+            <div className="grid gap-3">
+              {CONNECTION_STYLES.map((s) => {
+                const active = connectionStyle === s.id;
+                return (
+                  <button key={s.id} type="button" onClick={() => setConnectionStyle(s.id)}
+                    className={`flex flex-col items-start gap-1 rounded-2xl border p-5 text-left transition-all ${
+                      active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"
+                    }`}>
+                    <div className="font-display text-lg font-medium">{s.label}</div>
+                    <div className="text-sm text-foreground/80">{s.hint}</div>
+                    <div className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{s.tone}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-6">
+            <div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 03 — Your face & avatar</div>
               <h1 className="mt-2 font-display text-4xl font-bold">A glimpse, your way.</h1>
               <p className="mt-2 text-muted-foreground">Upload a selfie. Then choose how you want to appear — your real photo, or a generated avatar that still looks like you.</p>
             </div>
@@ -232,10 +268,10 @@ function Onboarding() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 03 — Profession Axis</div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Profession Axis</div>
               <h1 className="mt-2 font-display text-4xl font-bold">How do you spend your hours?</h1>
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -259,10 +295,10 @@ function Onboarding() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="space-y-6">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Discovery Profile</div>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 05 — Discovery Profile</div>
               <h1 className="mt-2 font-display text-4xl font-bold">Six quick questions.</h1>
               <p className="mt-2 text-muted-foreground">No right answers. Just pick what sounds more like you.</p>
             </div>
@@ -312,7 +348,7 @@ function Onboarding() {
           >
             ← Back
           </button>
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canNext}
@@ -321,12 +357,20 @@ function Onboarding() {
               Continue <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
-            <button
-              onClick={finish}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
-            >
-              Discover your resonance <ArrowRight className="h-4 w-4" />
-            </button>
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+              <button
+                onClick={() => finish(true)}
+                className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Skip games — just let me chat
+              </button>
+              <button
+                onClick={() => finish(false)}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+              >
+                Discover your resonance <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           )}
         </div>
       </div>
