@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges_catalog: {
+        Row: {
+          created_at: string
+          criteria: Json | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          criteria?: Json | null
+          description?: string | null
+          icon?: string | null
+          id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          criteria?: Json | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -34,6 +61,68 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      challenge_packs: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          premium: boolean | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id: string
+          name: string
+          premium?: boolean | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          premium?: boolean | null
+        }
+        Relationships: []
+      }
+      challenge_questions: {
+        Row: {
+          created_at: string
+          id: string
+          meta: Json | null
+          options: Json | null
+          pack_id: string
+          prompt: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          options?: Json | null
+          pack_id: string
+          prompt: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          options?: Json | null
+          pack_id?: string
+          prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_questions_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_packs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       challenge_results: {
         Row: {
@@ -92,6 +181,69 @@ export type Database = {
         }
         Relationships: []
       }
+      date_plans: {
+        Row: {
+          created_at: string
+          date_type: string
+          id: string
+          invitee_id: string
+          location: string | null
+          notes: string | null
+          proposed_at: string | null
+          proposer_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_type: string
+          id?: string
+          invitee_id: string
+          location?: string | null
+          notes?: string | null
+          proposed_at?: string | null
+          proposer_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_type?: string
+          id?: string
+          invitee_id?: string
+          location?: string | null
+          notes?: string | null
+          proposed_at?: string | null
+          proposer_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      first_impression_responses: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          pick: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          pick: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          pick?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_results: {
         Row: {
           archetype: string | null
@@ -133,35 +285,53 @@ export type Database = {
       }
       matches: {
         Row: {
+          chemistry_score: number | null
           compatibility_score: number | null
+          connection_score: number | null
           created_at: string
           id: string
+          interaction_count: number | null
           matched_user_id: string
           matched_user_interested: boolean | null
           mutual_interest: boolean | null
           reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
+          share_matched_consent: boolean | null
+          share_unlocked: boolean | null
+          share_user_consent: boolean | null
           user_id: string
           user_interested: boolean | null
         }
         Insert: {
+          chemistry_score?: number | null
           compatibility_score?: number | null
+          connection_score?: number | null
           created_at?: string
           id?: string
+          interaction_count?: number | null
           matched_user_id: string
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
+          share_matched_consent?: boolean | null
+          share_unlocked?: boolean | null
+          share_user_consent?: boolean | null
           user_id: string
           user_interested?: boolean | null
         }
         Update: {
+          chemistry_score?: number | null
           compatibility_score?: number | null
+          connection_score?: number | null
           created_at?: string
           id?: string
+          interaction_count?: number | null
           matched_user_id?: string
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
+          share_matched_consent?: boolean | null
+          share_unlocked?: boolean | null
+          share_user_consent?: boolean | null
           user_id?: string
           user_interested?: boolean | null
         }
@@ -233,10 +403,14 @@ export type Database = {
         Row: {
           age: number | null
           archetype: string | null
+          avatar_style: string | null
+          avatar_url: string | null
           bio: string | null
           city: string | null
           communication_style: Json | null
           compatibility_score: number | null
+          connection_score: number | null
+          country: string | null
           created_at: string
           curiosity_level: number | null
           email: string | null
@@ -247,22 +421,31 @@ export type Database = {
           id: string
           intention: string | null
           interested_in: string | null
+          interests: string[] | null
           onboarding_complete: boolean | null
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           photo_url: string | null
+          preferred_language: string | null
+          relationship_intent: string | null
+          state_region: string | null
           subscription_tier:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          trust_score: number | null
           updated_at: string
           verified: boolean | null
         }
         Insert: {
           age?: number | null
           archetype?: string | null
+          avatar_style?: string | null
+          avatar_url?: string | null
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
           compatibility_score?: number | null
+          connection_score?: number | null
+          country?: string | null
           created_at?: string
           curiosity_level?: number | null
           email?: string | null
@@ -273,24 +456,33 @@ export type Database = {
           id: string
           intention?: string | null
           interested_in?: string | null
+          interests?: string[] | null
           onboarding_complete?: boolean | null
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
             | null
           photo_url?: string | null
+          preferred_language?: string | null
+          relationship_intent?: string | null
+          state_region?: string | null
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          trust_score?: number | null
           updated_at?: string
           verified?: boolean | null
         }
         Update: {
           age?: number | null
           archetype?: string | null
+          avatar_style?: string | null
+          avatar_url?: string | null
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
           compatibility_score?: number | null
+          connection_score?: number | null
+          country?: string | null
           created_at?: string
           curiosity_level?: number | null
           email?: string | null
@@ -301,16 +493,54 @@ export type Database = {
           id?: string
           intention?: string | null
           interested_in?: string | null
+          interests?: string[] | null
           onboarding_complete?: boolean | null
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
             | null
           photo_url?: string | null
+          preferred_language?: string | null
+          relationship_intent?: string | null
+          state_region?: string | null
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          trust_score?: number | null
           updated_at?: string
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      puzzle_content: {
+        Row: {
+          answer: string
+          created_at: string
+          difficulty: number | null
+          id: string
+          meta: Json | null
+          options: Json | null
+          prompt: string
+          puzzle_type: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          meta?: Json | null
+          options?: Json | null
+          prompt: string
+          puzzle_type: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          meta?: Json | null
+          options?: Json | null
+          prompt?: string
+          puzzle_type?: string
         }
         Relationships: []
       }
@@ -365,6 +595,42 @@ export type Database = {
           reported_user_id?: string
           reporter_id?: string
           status?: Database["public"]["Enums"]["report_status"] | null
+        }
+        Relationships: []
+      }
+      shared_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          instagram: string | null
+          matched_user_id: string
+          phone: string | null
+          telegram: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          matched_user_id: string
+          phone?: string | null
+          telegram?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          matched_user_id?: string
+          phone?: string | null
+          telegram?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -541,6 +807,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consent_share_contact: {
+        Args: { _match_user: string }
+        Returns: {
+          unlocked: boolean
+        }[]
+      }
       discover_profiles: {
         Args: { _limit?: number }
         Returns: {
