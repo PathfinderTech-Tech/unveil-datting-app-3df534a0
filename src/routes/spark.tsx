@@ -68,7 +68,8 @@ function SparkPage() {
     );
   }, [uid]);
 
-  const next = () => { setIdx((i) => i + 1); setAnswer(""); };
+  const next = () => { setIdx((i) => (i + 1) % pool.length); setAnswer(""); };
+  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); setAnswer(""); };
   const save = async () => {
     if (!answer.trim()) return;
     const entry = { q: q.text, a: answer.trim(), cat: q.category };
