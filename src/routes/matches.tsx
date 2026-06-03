@@ -548,7 +548,7 @@ function MatchSheet({ match, you, onClose, onLike, onThought }: { match: Synapse
             <button onClick={onClose} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
               <X className="h-4 w-4" /> Step back
             </button>
-            <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
+            <button onClick={onThought} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
               <MessageCircle className="h-4 w-4" /> Send a thought
             </button>
           </div>
