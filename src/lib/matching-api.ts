@@ -208,14 +208,13 @@ export async function toggleSaveProfile(targetUserId: string) {
   const { data: u } = await supabase.auth.getUser();
   const uid = u.user?.id;
   if (!uid) return { error: "unauthenticated", saved: false };
-  const { data: existing } = await supabase.from("saved_profiles" as never)
-    .select("id").eq("user_id", uid).eq("target_user_id", targetUserId).maybeSingle();
+  const sp = (supabase as unknown as { from: (t: string) => any }).from("saved_profiles");
+  const { data: existing } = await sp.select("id").eq("user_id", uid).eq("target_user_id", targetUserId).maybeSingle();
   if (existing) {
-    await supabase.from("saved_profiles" as never).delete().eq("user_id", uid).eq("target_user_id", targetUserId);
+    await sp.delete().eq("user_id", uid).eq("target_user_id", targetUserId);
     return { error: null, saved: false };
   }
-  const { error } = await supabase.from("saved_profiles" as never)
-    .insert({ user_id: uid, target_user_id: targetUserId });
+  const { error } = await sp.insert({ user_id: uid, target_user_id: targetUserId });
   return { error: error?.message ?? null, saved: !error };
 }
 
