@@ -30,6 +30,7 @@ type DiscoverRow = {
   lat_approx: number | null;
   lng_approx: number | null;
   distance_km: number | null;
+  strengths: string[] | null;
 };
 
 export type MatchTag = "Nearby" | "Same City" | "Same Country" | "Global Match" | "Travel Match" | "Language Match";
@@ -44,6 +45,8 @@ export type RealMatch = SynapseProfile & {
   locationPrivacy: string;
   distanceKm: number | null;
   tags: MatchTag[];
+  strengths: string[];
+  pairScore: number;
 };
 
 export type DiscoverFilters = {
