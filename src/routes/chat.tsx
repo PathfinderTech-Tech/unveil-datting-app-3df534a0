@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
+import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
+import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -55,6 +57,8 @@ function Chat() {
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { quota, refresh: refreshQuota } = useMessageQuota();
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
@@ -143,13 +147,26 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
+    if (!quota.unlimited && quota.remaining <= 0) {
+      setPaywallOpen(true);
+      return;
+    }
     const content = scrubPII(draft.trim());
     setDraft("");
-    await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
+    const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
+    if (error) {
+      if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+        setPaywallOpen(true);
+        await refreshQuota();
+        return;
+      }
+      toast.error(error.message);
+      return;
+    }
     await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
-    // Clear typing
     const sb = supabase as unknown as { from: (t: string) => any };
     await sb.from("typing_indicators").delete().eq("conversation_id", active.id).eq("user_id", user.id);
+    refreshQuota();
   };
 
   const onDraftChange = (v: string) => {
