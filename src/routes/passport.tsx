@@ -36,9 +36,19 @@ function Passport() {
     uid ? unlockedIds : profile ? ["adventurer"] : []
   );
 
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
+
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">UNVEIL Passport</div>
