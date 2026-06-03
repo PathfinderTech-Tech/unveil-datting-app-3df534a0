@@ -52,10 +52,19 @@ export function useUnreadCount() {
     }
 
     refresh();
-    const channel = supabase
-      .channel(`unread-${user.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, refresh)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "message_reads" }, refresh)
+    const channelName = `unread-${user.id}-${Math.random().toString(36).slice(2, 10)}`;
+    const channel = supabase.channel(channelName);
+    channel
+      .on(
+        "postgres_changes" as any,
+        { event: "INSERT", schema: "public", table: "messages" },
+        refresh as any,
+      )
+      .on(
+        "postgres_changes" as any,
+        { event: "INSERT", schema: "public", table: "message_reads" },
+        refresh as any,
+      )
       .subscribe();
 
     return () => {
