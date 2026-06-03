@@ -124,6 +124,8 @@ function toSynapse(row: DiscoverRow, me: Me): RealMatch {
     locationPrivacy: row.location_privacy || "distance",
     distanceKm: row.distance_km != null ? Number(row.distance_km) : null,
     tags: tagsFor(row, me),
+    strengths: row.strengths ?? [],
+    pairScore: row.compatibility_score ?? 60,
   };
 }
 
