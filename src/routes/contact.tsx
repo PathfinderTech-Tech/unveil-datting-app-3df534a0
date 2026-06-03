@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalShell } from "@/components/LegalShell";
+import { MailActions } from "@/components/MailActions";
 import { Mail, Shield, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
