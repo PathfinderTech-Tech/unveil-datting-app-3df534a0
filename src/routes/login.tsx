@@ -61,6 +61,12 @@ function Login() {
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card/80 p-8 backdrop-blur">
         <h1 className="font-display text-3xl font-light">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">Continue your discovery.</p>
+        {cooldownBanner && (
+          <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+            {cooldownBanner}{" "}
+            <Link to="/support" className="underline">Contact support</Link>
+          </div>
+        )}
 
         <div className="mt-6">
           <OAuthButtons mode="signin" />
