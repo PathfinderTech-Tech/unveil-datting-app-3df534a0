@@ -349,6 +349,8 @@ function Matches() {
             No one to discover yet. As more people complete onboarding, they'll appear here.
           </div>
         )}
+        </>
+        )}
       </div>
 
       {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} onLike={() => handleLike(active)} />}
