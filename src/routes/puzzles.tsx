@@ -161,20 +161,31 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
   }
 
   const q = items[i];
-  const isCorrect = picked !== null && picked === q.answer;
+  const isCorrect = reveal?.correct ?? false;
   const meta = CATEGORY_META[category];
 
-  function next() {
-    if (picked === q.answer) setCorrectCount((c) => c + 1);
-    if (uid) markCompleted("puzzle", q.id, picked ?? undefined);
-    if (i + 1 >= items!.length) {
-      const finalCorrect = (picked === q.answer ? correctCount + 1 : correctCount);
-      onScore(finalCorrect * 20);
-      setDone(true);
-    } else {
-      setI((v) => v + 1); setPicked(null);
+  async function onPick(opt: string) {
+    if (picked !== null) return;
+    setPicked(opt);
+    const { data } = await supabase.rpc("check_puzzle", { _id: q.id, _pick: opt });
+    const row = Array.isArray(data) ? data[0] : data;
+    const r = row as { correct: boolean; answer: string; explanation: string | null } | null;
+    if (r) {
+      setReveal(r);
+      if (r.correct) setCorrectCount((c) => c + 1);
+      if (uid) markCompleted("puzzle", q.id, opt);
     }
   }
+
+  function next() {
+    if (i + 1 >= items!.length) {
+      onScore(correctCount * 20);
+      setDone(true);
+    } else {
+      setI((v) => v + 1); setPicked(null); setReveal(null);
+    }
+  }
+
 
   return (
     <div className="space-y-4">
