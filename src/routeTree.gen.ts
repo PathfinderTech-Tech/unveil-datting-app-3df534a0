@@ -34,6 +34,7 @@ import { Route as ContactShareRouteImport } from './routes/contact-share'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
+import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlayThisOrThatRouteImport } from './routes/play.this-or-that'
@@ -169,6 +170,11 @@ const ChallengesRoute = ChallengesRouteImport.update({
   path: '/challenges',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AvatarRoute = AvatarRouteImport.update({
+  id: '/avatar',
+  path: '/avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -219,6 +225,7 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
@@ -255,6 +262,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/avatar'
     | '/challenges'
     | '/chat'
     | '/checkout'
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/avatar'
     | '/challenges'
     | '/chat'
     | '/checkout'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/avatar'
     | '/challenges'
     | '/chat'
     | '/checkout'
@@ -439,6 +451,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AvatarRoute: typeof AvatarRoute
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChallengesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/avatar': {
+      id: '/avatar'
+      path: '/avatar'
+      fullPath: '/avatar'
+      preLoaderRoute: typeof AvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -743,6 +763,7 @@ const PlayRouteWithChildren = PlayRoute._addFileChildren(PlayRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AvatarRoute: AvatarRoute,
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
