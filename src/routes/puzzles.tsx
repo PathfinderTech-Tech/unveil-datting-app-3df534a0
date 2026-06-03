@@ -110,30 +110,26 @@ function Puzzles() {
   );
 }
 
-type Q = PuzzleRow & { options: string[] };
+type Q = { id: string; category: string; puzzle: string; difficulty: number; options: string[] };
 
 function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; uid: string | null; onBack: () => void; onScore: (pts: number) => void }) {
   const [items, setItems] = useState<Q[] | null>(null);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [reveal, setReveal] = useState<{ correct: boolean; answer: string; explanation: string | null } | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const rows = await loadDailyPuzzles(5, category);
-      // Build distractors from other answers in the same category.
-      const { data: pool } = await supabase
-        .from("puzzles").select("answer").eq("active", true).eq("category", category).limit(200);
-      const allAnswers = Array.from(new Set((pool ?? []).map((p: { answer: string }) => p.answer)));
-      const qs: Q[] = rows.map((r) => {
-        const others = allAnswers.filter((a) => a !== r.answer).sort(() => Math.random() - 0.5).slice(0, 3);
-        const options = [r.answer, ...others].sort(() => Math.random() - 0.5);
-        return { ...r, options };
-      });
-      setItems(qs);
+      // Server returns puzzles with options already shuffled; answer is never sent.
+      const { data, error } = await supabase.rpc("get_puzzle_round", { _category: category, _limit: 5 });
+      if (error) { setItems([]); return; }
+      const rows = (data ?? []) as Array<{ id: string; category: string; puzzle: string; difficulty: number; options: string[] }>;
+      setItems(rows.map((r) => ({ ...r, options: Array.isArray(r.options) ? r.options : [] })));
     })();
   }, [category]);
+
 
   if (!items) return (
     <div className="space-y-4">
