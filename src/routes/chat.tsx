@@ -194,6 +194,23 @@ function Chat() {
     return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
   }
 
+  const fetchIcebreakers = async () => {
+    if (!peerId) return;
+    setIdeasLoading(true);
+    setIdeasOpen(true);
+    try {
+      const res = await generateIcebreakers({ data: { peerId } });
+      if ("error" in res) throw new Error(res.error);
+      setIdeas(res.icebreakers);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't generate icebreakers");
+      setIdeasOpen(false);
+    } finally {
+      setIdeasLoading(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
