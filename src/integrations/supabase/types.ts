@@ -271,6 +271,71 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          day_key: string
+          id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          day_key?: string
+          id?: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          day_key?: string
+          id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "daily_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_questions: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          id: string
+          options: Json
+          prompt: string
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          id?: string
+          options?: Json
+          prompt: string
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          options?: Json
+          prompt?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       date_plans: {
         Row: {
           created_at: string
@@ -663,6 +728,36 @@ export type Database = {
         }
         Relationships: []
       }
+      personality_blueprint: {
+        Row: {
+          attachment_style: string | null
+          communication_style: string | null
+          conflict_style: string | null
+          notes: Json
+          relationship_style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachment_style?: string | null
+          communication_style?: string | null
+          conflict_style?: string | null
+          notes?: Json
+          relationship_style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachment_style?: string | null
+          communication_style?: string | null
+          conflict_style?: string | null
+          notes?: Json
+          relationship_style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -700,6 +795,8 @@ export type Database = {
           preferred_language: string | null
           premium_until: string | null
           profile_photo_url: string | null
+          readiness_breakdown: Json
+          readiness_score: number
           relationship_intent: string | null
           state_region: string | null
           subscription_tier:
@@ -747,6 +844,8 @@ export type Database = {
           preferred_language?: string | null
           premium_until?: string | null
           profile_photo_url?: string | null
+          readiness_breakdown?: Json
+          readiness_score?: number
           relationship_intent?: string | null
           state_region?: string | null
           subscription_tier?:
@@ -794,6 +893,8 @@ export type Database = {
           preferred_language?: string | null
           premium_until?: string | null
           profile_photo_url?: string | null
+          readiness_breakdown?: Json
+          readiness_score?: number
           relationship_intent?: string | null
           state_region?: string | null
           subscription_tier?:
@@ -922,6 +1023,30 @@ export type Database = {
           reported_user_id?: string
           reporter_id?: string
           status?: Database["public"]["Enums"]["report_status"] | null
+        }
+        Relationships: []
+      }
+      reveal_progress: {
+        Row: {
+          day: number
+          id: string
+          match_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          day?: number
+          id?: string
+          match_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          day?: number
+          id?: string
+          match_id?: string
+          unlocked_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1412,6 +1537,7 @@ export type Database = {
           values_score: number
         }[]
       }
+      compute_readiness_score: { Args: { _uid: string }; Returns: number }
       consent_share_contact: {
         Args: { _match_user: string }
         Returns: {
