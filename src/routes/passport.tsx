@@ -5,6 +5,8 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { loadBadges, useUserId } from "@/lib/games-api";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { BetaBadge } from "@/components/BetaBadge";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
@@ -15,11 +17,14 @@ function Passport() {
   const [profile] = useProfile();
   const uid = useUserId();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
+  const [isBeta, setIsBeta] = useState(false);
 
   // Load real earned badges from DB
   useEffect(() => {
     if (!uid) return;
     loadBadges().then(setUnlockedIds);
+    supabase.from("profiles").select("beta_member").eq("id", uid).maybeSingle()
+      .then(({ data }) => setIsBeta(!!data?.beta_member));
   }, [uid]);
 
   // Fall back to a tiny demo set only when not signed in
@@ -33,7 +38,10 @@ function Passport() {
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">UNVEIL Passport</div>
-          <h1 className="mt-2 font-display text-5xl font-bold">Your dating journey, stamped.</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-4xl font-bold md:text-5xl">Your dating journey, stamped.</h1>
+            {isBeta && <BetaBadge />}
+          </div>
           <p className="mt-3 max-w-xl text-muted-foreground">
             Badges aren't trophies. They're proof you showed up — honestly, generously, playfully.
           </p>
