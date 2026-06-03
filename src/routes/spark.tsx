@@ -95,9 +95,19 @@ function SparkPage() {
     next();
   };
 
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
+
       <div className="mx-auto max-w-3xl px-6 py-12">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Spark Questions</div>
