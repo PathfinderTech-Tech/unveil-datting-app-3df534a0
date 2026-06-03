@@ -1,13 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, ArrowRight, Check, Sparkles, Upload, Loader2, X } from "lucide-react";
+import { generateAvatar } from "@/lib/avatar.functions";
+import { Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X, Wand2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
 
 
 export const Route = createFileRoute("/onboarding")({
