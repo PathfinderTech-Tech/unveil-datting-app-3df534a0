@@ -1604,6 +1604,14 @@ export type Database = {
           verified_badges: number
         }[]
       }
+      check_puzzle: {
+        Args: { _id: string; _pick: string }
+        Returns: {
+          answer: string
+          correct: boolean
+          explanation: string
+        }[]
+      }
       compute_compatibility: {
         Args: { _a: string; _b: string }
         Returns: {
@@ -1708,6 +1716,16 @@ export type Database = {
           resets_at: string
           unlimited: boolean
           used: number
+        }[]
+      }
+      get_puzzle_round: {
+        Args: { _category: string; _limit?: number }
+        Returns: {
+          category: string
+          difficulty: number
+          id: string
+          options: Json
+          puzzle: string
         }[]
       }
       has_active_subscription: {

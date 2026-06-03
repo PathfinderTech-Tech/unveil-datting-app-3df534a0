@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { ArrowRight, ArrowLeft, Trophy, Check, X, Loader2 } from "lucide-react";
 import { savePuzzleScore, loadPuzzleScores, useUserId, awardBadge } from "@/lib/games-api";
-import { loadDailyPuzzles, markCompleted, PUZZLE_CATEGORIES, type PuzzleRow } from "@/lib/content-api";
+import { markCompleted, PUZZLE_CATEGORIES } from "@/lib/content-api";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/puzzles")({
@@ -32,16 +32,12 @@ function Puzzles() {
   const uid = useUserId();
   const [active, setActive] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  
 
   useEffect(() => { if (uid) loadPuzzleScores().then(setScores); }, [uid]);
-  useEffect(() => {
-    supabase.from("puzzles").select("category").eq("active", true).then(({ data }) => {
-      const c: Record<string, number> = {};
-      (data ?? []).forEach((r: { category: string }) => { c[r.category] = (c[r.category] ?? 0) + 1; });
-      setCounts(c);
-    });
-  }, []);
+  // Category counts are no longer fetched client-side (puzzle answers are
+  // now server-protected). Show "Play" instead of an item count.
+
 
   const best = useMemo(() => {
     const entries = Object.entries(scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
@@ -83,7 +79,7 @@ function Puzzles() {
                   <p className="mt-1 text-sm text-muted-foreground">{meta.tagline}</p>
                   <div className="mt-5 flex items-center justify-between">
                     <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {scores[t] ? `Best ${scores[t]}` : `${counts[t] ?? 0} puzzles`}
+                      {scores[t] ? `Best ${scores[t]}` : "Play"}
                     </span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
@@ -114,30 +110,26 @@ function Puzzles() {
   );
 }
 
-type Q = PuzzleRow & { options: string[] };
+type Q = { id: string; category: string; puzzle: string; difficulty: number; options: string[] };
 
 function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; uid: string | null; onBack: () => void; onScore: (pts: number) => void }) {
   const [items, setItems] = useState<Q[] | null>(null);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [reveal, setReveal] = useState<{ correct: boolean; answer: string; explanation: string | null } | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const rows = await loadDailyPuzzles(5, category);
-      // Build distractors from other answers in the same category.
-      const { data: pool } = await supabase
-        .from("puzzles").select("answer").eq("active", true).eq("category", category).limit(200);
-      const allAnswers = Array.from(new Set((pool ?? []).map((p: { answer: string }) => p.answer)));
-      const qs: Q[] = rows.map((r) => {
-        const others = allAnswers.filter((a) => a !== r.answer).sort(() => Math.random() - 0.5).slice(0, 3);
-        const options = [r.answer, ...others].sort(() => Math.random() - 0.5);
-        return { ...r, options };
-      });
-      setItems(qs);
+      // Server returns puzzles with options already shuffled; answer is never sent.
+      const { data, error } = await supabase.rpc("get_puzzle_round", { _category: category, _limit: 5 });
+      if (error) { setItems([]); return; }
+      const rows = (data ?? []) as Array<{ id: string; category: string; puzzle: string; difficulty: number; options: string[] }>;
+      setItems(rows.map((r) => ({ ...r, options: Array.isArray(r.options) ? r.options : [] })));
     })();
   }, [category]);
+
 
   if (!items) return (
     <div className="space-y-4">
@@ -161,7 +153,7 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
           <div className="font-mono text-xs uppercase tracking-wider opacity-80">Round complete</div>
           <div className="mt-2 font-display text-5xl font-bold">{correctCount} / {items.length}</div>
           <div className="mt-2 text-sm opacity-90">+{pts} curiosity points</div>
-          <button onClick={() => { setI(0); setPicked(null); setCorrectCount(0); setDone(false); }}
+          <button onClick={() => { setI(0); setPicked(null); setReveal(null); setCorrectCount(0); setDone(false); }}
             className="mt-5 rounded-full bg-background/20 px-5 py-2 text-sm font-medium hover:bg-background/30">Play again</button>
         </div>
       </div>
@@ -169,20 +161,31 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
   }
 
   const q = items[i];
-  const isCorrect = picked !== null && picked === q.answer;
+  const isCorrect = reveal?.correct ?? false;
   const meta = CATEGORY_META[category];
 
-  function next() {
-    if (picked === q.answer) setCorrectCount((c) => c + 1);
-    if (uid) markCompleted("puzzle", q.id, picked ?? undefined);
-    if (i + 1 >= items!.length) {
-      const finalCorrect = (picked === q.answer ? correctCount + 1 : correctCount);
-      onScore(finalCorrect * 20);
-      setDone(true);
-    } else {
-      setI((v) => v + 1); setPicked(null);
+  async function onPick(opt: string) {
+    if (picked !== null) return;
+    setPicked(opt);
+    const { data } = await supabase.rpc("check_puzzle", { _id: q.id, _pick: opt });
+    const row = Array.isArray(data) ? data[0] : data;
+    const r = row as { correct: boolean; answer: string; explanation: string | null } | null;
+    if (r) {
+      setReveal(r);
+      if (r.correct) setCorrectCount((c) => c + 1);
+      if (uid) markCompleted("puzzle", q.id, opt);
     }
   }
+
+  function next() {
+    if (i + 1 >= items!.length) {
+      onScore(correctCount * 20);
+      setDone(true);
+    } else {
+      setI((v) => v + 1); setPicked(null); setReveal(null);
+    }
+  }
+
 
   return (
     <div className="space-y-4">
@@ -203,11 +206,15 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
         <h2 className="mt-2 font-display text-2xl font-light leading-snug md:text-3xl">{q.puzzle}</h2>
         <div className="mt-6 grid gap-2 md:grid-cols-2">
           {q.options.map((opt) => {
-            const state = picked === null ? "idle" : opt === q.answer ? "correct" : picked === opt ? "wrong" : "muted";
+            const state =
+              reveal === null
+                ? (picked === null ? "idle" : (picked === opt ? "pending" : "muted"))
+                : opt === reveal.answer ? "correct" : picked === opt ? "wrong" : "muted";
             return (
-              <button key={opt} disabled={picked !== null} onClick={() => setPicked(opt)}
+              <button key={opt} disabled={picked !== null} onClick={() => onPick(opt)}
                 className={`flex items-center justify-between rounded-2xl border p-4 text-left text-sm transition-all ${
                   state === "idle" ? "border-border bg-surface hover:border-primary" :
+                  state === "pending" ? "border-primary bg-primary/10" :
                   state === "correct" ? "border-neon/60 bg-neon/10" :
                   state === "wrong" ? "border-accent bg-accent/10" :
                   "border-border bg-surface opacity-50"
@@ -219,15 +226,15 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
             );
           })}
         </div>
-        {picked !== null && (
+        {reveal !== null && (
           <div className="mt-5 space-y-3">
             <div className={`text-sm ${isCorrect ? "text-neon" : "text-muted-foreground"}`}>
-              {isCorrect ? "Nice — that's it." : `Answer: ${q.answer}`}
+              {isCorrect ? "Nice — that's it." : `Answer: ${reveal.answer}`}
             </div>
-            {q.explanation && (
+            {reveal.explanation && (
               <div className="rounded-2xl border border-border bg-surface/60 p-3 text-xs text-muted-foreground">
                 <span className="font-mono uppercase tracking-wider text-[9px] text-accent">Insight</span>
-                <div className="mt-1">{q.explanation}</div>
+                <div className="mt-1">{reveal.explanation}</div>
               </div>
             )}
             <div className="flex justify-end">
