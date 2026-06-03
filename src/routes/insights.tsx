@@ -66,40 +66,43 @@ function InsightsPage() {
 
 /* ---------------- Today ---------------- */
 function TodayTab() {
-  const fetchToday = useServerFn(getTodayQuestion);
+  const fetchBundle = useServerFn(getTodayBundle);
   const submit = useServerFn(saveDailyAnswer);
   const fetchHistory = useServerFn(getAnswerHistory);
-  const [data, setData] = useState<any>(null);
+  const [cards, setCards] = useState<Array<{ category: string; question: any; answer: string | null }>>([]);
   const [history, setHistory] = useState<any[]>([]);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
-    const [t, h] = await Promise.all([fetchToday({}), fetchHistory({})]);
-    setData(t);
+    const [b, h] = await Promise.all([fetchBundle({}), fetchHistory({})]);
+    setCards(b.cards as any);
     setHistory(h.history);
   }
   useEffect(() => { load(); }, []);
 
-  async function pick(answer: string) {
-    if (!data?.question) return;
-    setBusy(true);
+  async function pick(qid: string, answer: string, category: string) {
+    setBusy(qid);
     try {
-      const r = await submit({ data: { questionId: data.question.id, answer } });
+      const r = await submit({ data: { questionId: qid, answer } });
       toast.success(`Saved. Readiness: ${r.score ?? "—"}`);
+      trackEvent(ANALYTICS.dailyAnswerSubmitted, { category, answer });
+      if (category === "challenge") trackEvent(ANALYTICS.challengeCompleted, { qid });
       await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
   const streak = useMemo(() => {
     if (!history.length) return 0;
+    const days = Array.from(new Set(history.map((h) => h.day_key)));
+    days.sort((a, b) => (a < b ? 1 : -1));
     let s = 0;
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
-    for (let i = 0; i < history.length; i++) {
-      const d = new Date(history[i].day_key + "T00:00:00Z");
+    for (let i = 0; i < days.length; i++) {
+      const d = new Date(days[i] + "T00:00:00Z");
       const exp = new Date(today); exp.setUTCDate(today.getUTCDate() - i);
       if (d.getTime() === exp.getTime()) s++;
       else break;
@@ -107,48 +110,62 @@ function TodayTab() {
     return s;
   }, [history]);
 
-  if (!data) return <p className="text-muted-foreground">Loading…</p>;
-
-  const q = data.question;
-  const answered = data.answered;
+  const answeredCount = cards.filter((c) => c.answer).length;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface/40 p-4">
-        <Flame className="h-5 w-5 text-primary" aria-hidden />
-        <div>
-          <p className="text-sm text-muted-foreground">Daily streak</p>
-          <p className="text-xl font-semibold">{streak} day{streak === 1 ? "" : "s"}</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface/40 p-4">
+          <Flame className="h-5 w-5 text-primary" aria-hidden />
+          <div>
+            <p className="text-sm text-muted-foreground">Daily streak</p>
+            <p className="text-xl font-semibold">{streak} day{streak === 1 ? "" : "s"}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface/40 p-4">
+          <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+          <div>
+            <p className="text-sm text-muted-foreground">Today's progress</p>
+            <p className="text-xl font-semibold">{answeredCount} of {cards.length}</p>
+          </div>
         </div>
       </div>
 
-      {q && (
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
-            {q.category}
-          </span>
-          <h2 className="mt-3 text-xl font-medium">{q.prompt}</h2>
-          {answered ? (
-            <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 p-4">
-              <p className="text-sm text-muted-foreground">Your answer today</p>
-              <p className="mt-1 font-medium">{answered.answer}</p>
-            </div>
-          ) : (
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              {(q.options as string[]).map((opt) => (
-                <button
-                  key={opt}
-                  disabled={busy}
-                  onClick={() => pick(opt)}
-                  className="rounded-xl border border-border bg-background/60 px-4 py-3 text-left text-sm transition-colors hover:border-primary hover:bg-primary/10 disabled:opacity-50"
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {cards.map((c) => (
+          <div key={c.category} className="rounded-2xl border border-border bg-surface/40 p-5">
+            <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+              {c.category}
+            </span>
+            {c.question ? (
+              <>
+                <h2 className="mt-3 text-base font-medium">{c.question.prompt}</h2>
+                {c.answer ? (
+                  <div className="mt-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
+                    <p className="text-xs text-muted-foreground">Your answer</p>
+                    <p className="mt-0.5 text-sm font-medium">{c.answer}</p>
+                  </div>
+                ) : (
+                  <div className="mt-3 grid gap-2">
+                    {(c.question.options as string[]).map((opt) => (
+                      <button
+                        key={opt}
+                        disabled={busy === c.question.id}
+                        onClick={() => pick(c.question.id, opt, c.category)}
+                        className="rounded-xl border border-border bg-background/60 px-3 py-2 text-left text-sm transition-colors hover:border-primary hover:bg-primary/10 disabled:opacity-50"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">No prompt today.</p>
+            )}
+          </div>
+        ))}
+      </div>
 
       {history.length > 0 && (
         <div>
