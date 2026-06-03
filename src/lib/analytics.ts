@@ -14,7 +14,7 @@ export async function track(event: AnalyticsEvent, properties: Record<string, un
     await supabase.from("analytics_events").insert({
       user_id: user?.id ?? null,
       event,
-      properties,
+      properties: properties as never,
     });
   } catch {
     /* swallow */
