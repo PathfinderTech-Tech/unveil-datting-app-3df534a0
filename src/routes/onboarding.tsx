@@ -64,7 +64,9 @@ const CONNECTION_STYLES = [
 
 function Onboarding() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const [name, setName] = useState("");
   const [age, setAge] = useState(28);
   const [gender, setGender] = useState("");
@@ -91,6 +93,55 @@ function Onboarding() {
   const character = allAnswered
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
+
+  // Hydrate from DB. If onboarding is already complete, never reset the user
+  // to Step 1 — bounce them to /matches. Otherwise prefill saved values and
+  // resume on the first incomplete step.
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { setHydrated(true); return; }
+    let alive = true;
+    (async () => {
+      const [{ data: prof }, { data: onb }] = await Promise.all([
+        supabase.from("profiles")
+          .select("first_name, age, gender, country, state_region, city, intention, relationship_intent, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+          .eq("id", user.id).maybeSingle(),
+        supabase.from("onboarding_answers")
+          .select("answers").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (!alive) return;
+
+      if (prof?.onboarding_complete) {
+        navigate({ to: "/matches", replace: true });
+        return;
+      }
+
+      if (prof?.first_name) setName(prof.first_name);
+      if (typeof prof?.age === "number") setAge(prof.age);
+      if (prof?.gender) setGender(prof.gender);
+      if (prof?.country) setCountry(prof.country);
+      if (prof?.state_region) setStateRegion(prof.state_region);
+      if (prof?.city) setCity(prof.city);
+      const intentVal = prof?.relationship_intent || prof?.intention;
+      if (intentVal) setIntent(intentVal);
+      if (user.email) setEmail(user.email);
+      const sel = prof?.profile_photo_url || prof?.photo_url;
+      if (sel) { setPhotoUrl(sel); setFaceUploaded(true); setFaceHarmony(85); }
+      if (prof?.avatar_url) setAvatarUrl(prof.avatar_url);
+      if (prof?.avatar_style) setAvatarStyle(prof.avatar_style as AvatarStyleId);
+
+      const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
+      if (answers) {
+        if (typeof answers.connectionStyle === "string") setConnectionStyle(answers.connectionStyle);
+        if (typeof answers.profession === "string") setProfession(answers.profession as Profession);
+        if (answers.discovery && typeof answers.discovery === "object") {
+          setDiscovery(answers.discovery as Partial<DiscoveryProfile>);
+        }
+      }
+      setHydrated(true);
+    })();
+    return () => { alive = false; };
+  }, [user, authLoading, navigate]);
 
 
   const computeHarmony = () => {
