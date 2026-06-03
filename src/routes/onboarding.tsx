@@ -235,7 +235,9 @@ function Onboarding() {
 
 
 
-  const finish = async (skipGames = false) => {
+  const finish = async (mode: "discover" | "spark" | "stay" = "stay") => {
+    if (saving) return;
+    setSaving(true);
     const profObj = PROFESSIONS.find((p) => p.id === profession)!;
     const summary = allAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
     const draft = { name, age, gender, country, stateRegion, city, intent, email, connectionStyle, profession: profession!, professionLabel: profObj.label, faceHarmony, avatarStyle, character, discovery, summary };
@@ -263,9 +265,12 @@ function Onboarding() {
         await track("profile_completed", { intent, country });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
-    if (skipGames || connectionStyle === "quick") navigate({ to: "/matches" });
-    else navigate({ to: "/spark" });
+    setSaving(false);
+    if (mode === "discover") { navigate({ to: "/matches" }); return; }
+    if (mode === "spark") { navigate({ to: "/spark" }); return; }
+    setCompleted(true);
   };
+
 
 
   const isUS = country === "United States";
