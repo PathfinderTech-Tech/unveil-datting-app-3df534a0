@@ -202,8 +202,9 @@ function Onboarding() {
     name.length > 1 && !!gender && !!country && !!intent && /\S+@\S+\.\S+/.test(email),
     // Step 1: connection style
     !!connectionStyle,
-    // Step 2: face + avatar style
-    faceUploaded && faceHarmony > 0 && !!avatarStyle,
+    // Step 2: selfie + avatar (optional — Continue always allowed)
+    true,
+
     // Step 3: profession
     profession !== null,
     // Step 4: discovery
