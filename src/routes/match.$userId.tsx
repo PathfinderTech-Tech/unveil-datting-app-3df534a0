@@ -37,6 +37,10 @@ function MatchInsights() {
     (async () => {
       setLoading(true);
       const { data: u } = await supabase.auth.getUser();
+      if (u.user?.id && u.user.id === userId) {
+        navigate({ to: "/profile", replace: true });
+        return;
+      }
       const { data: p } = await supabase.from("profiles")
         .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests")
         .eq("id", userId).maybeSingle();
@@ -47,7 +51,7 @@ function MatchInsights() {
       setCompat(await loadCompatibility(userId));
       setLoading(false);
     })();
-  }, [userId]);
+  }, [userId, navigate]);
 
   async function handleLike() {
     const res = await likeProfile(userId);

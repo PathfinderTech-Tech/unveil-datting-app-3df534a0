@@ -189,6 +189,10 @@ export function distanceLabel(km: number | null): string | null {
 }
 
 export async function likeProfile(targetUserId: string) {
+  const { data: u } = await supabase.auth.getUser();
+  const myId = u.user?.id;
+  if (!myId) return { error: "Sign in required.", mutual: false, conversationId: null as string | null };
+  if (targetUserId === myId) return { error: "You can't send interest to yourself.", mutual: false, conversationId: null as string | null };
   const { data, error } = await supabase.rpc("like_profile", { _target: targetUserId });
   if (error) return { error: error.message, mutual: false, conversationId: null as string | null };
   const row = Array.isArray(data) ? data[0] : data;
