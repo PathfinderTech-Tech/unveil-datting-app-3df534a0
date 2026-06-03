@@ -611,6 +611,7 @@ const HIDDEN_TAGLINES = [
 ];
 
 function HiddenMatchesView() {
+  const navigate = useNavigate();
   const fetchHidden = useServerFn(loadHiddenMatches);
   const logView = useServerFn(logHiddenMatchView);
   const [items, setItems] = useState<HiddenMatch[]>([]);
