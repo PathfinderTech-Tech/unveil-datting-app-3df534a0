@@ -14,23 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_attempts: {
+        Row: {
+          attempted_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          outcome: string
+          provider: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          outcome: string
+          provider?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          outcome?: string
+          provider?: string | null
+        }
+        Relationships: []
+      }
       account_deletions: {
         Row: {
           deleted_at: string
           email: string
           id: string
+          provider: string | null
+          reactivation_allowed_at: string | null
           user_id: string | null
         }
         Insert: {
           deleted_at?: string
           email: string
           id?: string
+          provider?: string | null
+          reactivation_allowed_at?: string | null
           user_id?: string | null
         }
         Update: {
           deleted_at?: string
           email?: string
           id?: string
+          provider?: string | null
+          reactivation_allowed_at?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -1655,6 +1688,7 @@ export type Database = {
           verified_badges: number
         }[]
       }
+      check_email_cooldown: { Args: { _email: string }; Returns: string }
       check_puzzle: {
         Args: { _id: string; _pick: string }
         Returns: {
@@ -1799,6 +1833,10 @@ export type Database = {
           match_id: string
           mutual: boolean
         }[]
+      }
+      log_deletion_attempt: {
+        Args: { _email: string; _outcome: string; _provider: string }
+        Returns: undefined
       }
       move_to_dlq: {
         Args: {

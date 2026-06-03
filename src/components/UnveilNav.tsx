@@ -5,10 +5,10 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useUnreadCount } from "@/hooks/use-unread";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings as SettingsIcon } from "lucide-react";
 
 // Desktop primary navigation. Authenticated journey: Discover → Compatibility →
-// Messages → Matches → Insights → Profile, with extras tucked into the mobile menu.
+// Messages → Matches → Insights → Profile → Passport → Settings.
 const PRIMARY = [
   { to: "/discover", label: "Discover" },
   { to: "/insights", label: "Insights" },
@@ -16,6 +16,8 @@ const PRIMARY = [
   { to: "/matches", label: "Matches" },
   { to: "/messages", label: "Messages" },
   { to: "/profile", label: "Profile" },
+  { to: "/passport", label: "Passport" },
+  { to: "/settings", label: "Settings" },
 ] as const;
 
 const SECONDARY = [
@@ -74,12 +76,22 @@ export function UnveilNav() {
         <div className="flex items-center gap-2">
           <div className="hidden md:block"><LanguageSwitcher variant="compact" /></div>
           {user ? (
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface"
-            >
-              Sign out
-            </button>
+            <>
+              <Link
+                to="/settings"
+                aria-label="Settings"
+                title="Settings"
+                className="rounded-full border border-border bg-surface/60 p-2 hover:bg-surface"
+              >
+                <SettingsIcon className="h-4 w-4" />
+              </Link>
+              <button
+                onClick={() => supabase.auth.signOut()}
+                className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface"
+              >
+                Sign out
+              </button>
+            </>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
               <Link to="/login" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface">Log in</Link>

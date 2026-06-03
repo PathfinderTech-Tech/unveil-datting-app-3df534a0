@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
 import { OAuthButtons } from "@/components/OAuthButtons";
 import { ArrowRight } from "lucide-react";
+import { getEmailCooldown, cooldownMessage, logDeletionAttempt } from "@/lib/cooldown";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "UNVEIL — Sign in" }] }),
@@ -16,10 +17,26 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [cooldownBanner, setCooldownBanner] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("cooldown") === "1") {
+      const msg = sessionStorage.getItem("cooldown:msg");
+      if (msg) setCooldownBanner(msg);
+    }
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErr("");
+    const until = await getEmailCooldown(email);
+    if (until) {
+      await logDeletionAttempt(email, "email", "blocked_cooldown");
+      setErr(cooldownMessage(until));
+      setLoading(false);
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) setErr(error.message);
@@ -44,6 +61,12 @@ function Login() {
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card/80 p-8 backdrop-blur">
         <h1 className="font-display text-3xl font-light">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">Continue your discovery.</p>
+        {cooldownBanner && (
+          <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+            {cooldownBanner}{" "}
+            <Link to="/support" className="underline">Contact support</Link>
+          </div>
+        )}
 
         <div className="mt-6">
           <OAuthButtons mode="signin" />

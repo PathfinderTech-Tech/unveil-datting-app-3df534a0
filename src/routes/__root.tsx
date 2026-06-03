@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { CooldownGuard } from "@/components/CooldownGuard";
 import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 
@@ -139,6 +140,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CooldownGuard />
       <RevealNotifier />
       <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">

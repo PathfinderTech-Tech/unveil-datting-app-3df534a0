@@ -15,12 +15,13 @@ export const deleteAccount = createServerFn({ method: "POST" })
     try {
       const { data: u } = await supabase.auth.getUser();
       const email = u.user?.email ?? null;
+      const provider = (u.user?.app_metadata?.provider as string) || "email";
 
       // Record deletion (used by handle_new_user trigger to enforce cooldown).
       if (email) {
         await supabaseAdmin
           .from("account_deletions")
-          .insert({ email, user_id: userId });
+          .insert({ email, user_id: userId, provider });
       }
 
       // Best-effort cleanup of user-owned rows that don't cascade.
