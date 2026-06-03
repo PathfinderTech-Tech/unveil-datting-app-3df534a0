@@ -5,9 +5,11 @@ import { MailActions } from "./MailActions";
 const LEGAL = [
   { to: "/privacy", label: "Privacy" },
   { to: "/terms", label: "Terms" },
+  { to: "/refund", label: "Refund Policy" },
   { to: "/cookies", label: "Cookies" },
   { to: "/community-guidelines", label: "Community" },
   { to: "/safety", label: "Safety" },
+  { to: "/support", label: "Support" },
   { to: "/contact", label: "Contact" },
 ] as const;
 

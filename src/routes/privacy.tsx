@@ -19,37 +19,69 @@ function Privacy() {
   return (
     <LegalShell title="Privacy Policy" updated="June 2026">
       <p>
-        UNVEIL ("we", "us") respects your privacy. This policy explains what we collect, how we use it,
-        and the rights you have over your data. UNVEIL is operated as a compatibility-first dating
-        platform at <a href="https://unveil.best" className="text-accent underline">unveil.best</a>.
+        UNVEIL is operated by <strong>PathfinderTech, Inc.</strong> ("UNVEIL",
+        "we", "us") at <a href="https://unveil.best" className="text-accent underline">unveil.best</a>.
+        This policy explains what personal data we collect, how we use it, and
+        the rights you have. Contact: <a className="text-accent underline" href="mailto:support@unveil.best">support@unveil.best</a>.
       </p>
-      <LegalSection title="1. Information we collect">
-        <p>Account data (email, age, gender, location city), profile data (photos, voice prompts, bio, interests), compatibility answers from onboarding quizzes, verification documents when you opt in (selfie, government ID), and usage data (matches, messages, payments).</p>
+
+      <LegalSection title="1. Data we collect">
+        <ul className="ml-5 list-disc space-y-1">
+          <li><strong>Account data</strong>: email, password hash, date of birth, gender, location city, language.</li>
+          <li><strong>Profile information</strong>: display name, bio, prompts, interests, values, lifestyle answers, relationship goals.</li>
+          <li><strong>Photos and videos</strong> you upload to your profile or send in chat.</li>
+          <li><strong>Voice introductions</strong> recorded during onboarding or for reveal journeys.</li>
+          <li><strong>Messages and communications</strong> with other members (encrypted at rest).</li>
+          <li><strong>Compatibility assessments</strong>: quiz answers, personality blueprint, scores, and AI-derived insights.</li>
+          <li><strong>Verification documents</strong> (selfie, government ID) only if you opt into verification.</li>
+          <li><strong>Analytics data</strong>: device type, app version, crash reports, feature usage (no advertising IDs).</li>
+          <li><strong>Payment information</strong> is processed by Stripe, Inc. UNVEIL never stores full card numbers; we receive only a token and the last four digits.</li>
+        </ul>
       </LegalSection>
+
       <LegalSection title="2. How we use your data">
-        <p>To create your profile, compute compatibility scores, surface matches, enable chat, process payments, verify identity, prevent abuse, and improve the product. We do not sell your personal data.</p>
+        <p>To create and maintain your account, compute compatibility, surface matches, enable messaging, process payments, verify identity, prevent fraud and abuse, comply with law, and improve the product. We do not sell personal data and do not use it for third-party advertising.</p>
       </LegalSection>
+
       <LegalSection title="3. Sharing">
-        <p>Matched users see your profile, photos, and shared answers. Payments are processed by Stripe. Verification documents are reviewed by our trust team and never shared with other users. We may disclose data if legally required.</p>
+        <p>Matched users see your profile, photos, and shared answers. Stripe processes payments. Apple and Google process App Store / Play subscriptions if used. Verification documents are reviewed by our trust team and never shown to other members. We disclose data when legally required.</p>
       </LegalSection>
-      <LegalSection title="4. Storage & security">
-        <p>Data is stored on encrypted infrastructure. Photos and IDs are stored in private buckets with row-level access policies. We use industry-standard transport encryption (TLS).</p>
+
+      <LegalSection title="4. Storage and security">
+        <p>Data is stored on encrypted infrastructure inside the EU and US. Photos and IDs live in private buckets with row-level access policies. Transport is TLS 1.2+. We run security scans, RLS, and access logging.</p>
       </LegalSection>
-      <LegalSection title="5. Your rights (GDPR / CCPA)">
-        <p>You can access, correct, export, or delete your data at any time from Settings, or by emailing us. Deletion is permanent and removes your matches and messages.</p>
-        <div className="mt-2"><MailActions /></div>
+
+      <LegalSection title="5. Account deletion and data export">
+        <p>You can <strong>export</strong> all your data from Settings → Privacy → Export, or <strong>delete</strong> your account from Settings → Account → Delete. Deletion is permanent: profile, matches, messages, and uploads are purged within 30 days. Audit logs required by law are retained up to 12 months.</p>
+        <div className="mt-2"><MailActions subject="Data export / deletion request" /></div>
       </LegalSection>
-      <LegalSection title="6. Retention">
-        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification documents: deleted within 90 days of approval or rejection.</p>
+
+      <LegalSection title="6. GDPR (EU / UK)">
+        <p>If you are in the EEA, UK, or Switzerland, you have rights to access, rectify, erase, restrict, and port your data, and to object to processing. Our legal bases are: contract (to provide the service), legitimate interest (safety and abuse prevention), consent (verification, marketing), and legal obligation. Lodge complaints with your local supervisory authority. Our EU representative can be reached at support@unveil.best.</p>
       </LegalSection>
-      <LegalSection title="7. Children">
-        <p>UNVEIL is strictly for users aged 18 and over. We do not knowingly collect data from minors.</p>
+
+      <LegalSection title="7. CCPA / CPRA (California)">
+        <p>California residents may request to know, delete, correct, and limit use of their personal information, and to opt out of sale or sharing. <strong>UNVEIL does not sell or share personal information.</strong> Submit requests to support@unveil.best — we will not discriminate against you for exercising these rights.</p>
       </LegalSection>
-      <LegalSection title="8. Changes">
-        <p>We will notify you in-app of material changes. Continued use after changes constitutes acceptance.</p>
+
+      <LegalSection title="8. Children's privacy">
+        <p>UNVEIL is strictly 18+. We do not knowingly collect data from anyone under 18. If you believe a minor has created an account, email support@unveil.best and we will remove it immediately and report as required by law.</p>
       </LegalSection>
-      <LegalSection title="9. Contact">
-        <p>Privacy questions:</p>
+
+      <LegalSection title="9. International users">
+        <p>If you use UNVEIL from outside the US, your data is transferred to the US and the EU. We rely on Standard Contractual Clauses for transfers from the EEA/UK and apply equivalent protections. By using UNVEIL, you consent to this transfer.</p>
+      </LegalSection>
+
+      <LegalSection title="10. Retention">
+        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification documents: deleted within 90 days of approval or rejection. Payment receipts: kept 7 years for tax compliance.</p>
+      </LegalSection>
+
+      <LegalSection title="11. Changes">
+        <p>We notify you in-app and by email of material changes. Continued use after changes constitutes acceptance.</p>
+      </LegalSection>
+
+      <LegalSection title="12. Contact">
+        <p>PathfinderTech, Inc. — Privacy team</p>
         <div className="mt-2"><MailActions subject="Privacy question" /></div>
       </LegalSection>
     </LegalShell>
