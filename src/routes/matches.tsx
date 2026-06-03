@@ -38,8 +38,10 @@ type ProfileState = {
 };
 
 function Matches() {
+  const { checking } = useRequireOnboarding();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
   const [profileState, setProfileState] = useState<ProfileState | null>(null);
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
