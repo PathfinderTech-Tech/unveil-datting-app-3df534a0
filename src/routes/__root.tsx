@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import "@/i18n";
+import { SiteFooter } from "@/components/SiteFooter";
 
 function NotFoundComponent() {
   return (

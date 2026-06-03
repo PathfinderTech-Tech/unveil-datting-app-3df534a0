@@ -18,6 +18,7 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PuzzlesRouteImport } from './routes/puzzles'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as PassportRouteImport } from './routes/passport'
@@ -30,7 +31,10 @@ import { Route as GameRouteImport } from './routes/game'
 import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DatePlanRouteImport } from './routes/date-plan'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactShareRouteImport } from './routes/contact-share'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
@@ -89,6 +93,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PuzzlesRoute = PuzzlesRouteImport.update({
   id: '/puzzles',
   path: '/puzzles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiumRoute = PremiumRouteImport.update({
@@ -151,9 +160,24 @@ const DatePlanRoute = DatePlanRouteImport.update({
   path: '/date-plan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactShareRoute = ContactShareRouteImport.update({
   id: '/contact-share',
   path: '/contact-share',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
+  id: '/community-guidelines',
+  path: '/community-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -235,7 +259,10 @@ export interface FileRoutesByFullPath {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
+  '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
@@ -248,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -273,7 +301,10 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
+  '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
@@ -286,6 +317,7 @@ export interface FileRoutesByTo {
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -312,7 +344,10 @@ export interface FileRoutesById {
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
+  '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
@@ -325,6 +360,7 @@ export interface FileRoutesById {
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -352,7 +388,10 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/community-guidelines'
+    | '/contact'
     | '/contact-share'
+    | '/cookies'
     | '/date-plan'
     | '/discover'
     | '/discover-summary'
@@ -365,6 +404,7 @@ export interface FileRouteTypes {
     | '/passport'
     | '/play'
     | '/premium'
+    | '/privacy'
     | '/puzzles'
     | '/reset-password'
     | '/results'
@@ -390,7 +430,10 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/community-guidelines'
+    | '/contact'
     | '/contact-share'
+    | '/cookies'
     | '/date-plan'
     | '/discover'
     | '/discover-summary'
@@ -403,6 +446,7 @@ export interface FileRouteTypes {
     | '/passport'
     | '/play'
     | '/premium'
+    | '/privacy'
     | '/puzzles'
     | '/reset-password'
     | '/results'
@@ -428,7 +472,10 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/chat'
     | '/checkout'
+    | '/community-guidelines'
+    | '/contact'
     | '/contact-share'
+    | '/cookies'
     | '/date-plan'
     | '/discover'
     | '/discover-summary'
@@ -441,6 +488,7 @@ export interface FileRouteTypes {
     | '/passport'
     | '/play'
     | '/premium'
+    | '/privacy'
     | '/puzzles'
     | '/reset-password'
     | '/results'
@@ -467,7 +515,10 @@ export interface RootRouteChildren {
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
+  CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
+  ContactRoute: typeof ContactRoute
   ContactShareRoute: typeof ContactShareRoute
+  CookiesRoute: typeof CookiesRoute
   DatePlanRoute: typeof DatePlanRoute
   DiscoverRoute: typeof DiscoverRoute
   DiscoverSummaryRoute: typeof DiscoverSummaryRoute
@@ -480,6 +531,7 @@ export interface RootRouteChildren {
   PassportRoute: typeof PassportRoute
   PlayRoute: typeof PlayRouteWithChildren
   PremiumRoute: typeof PremiumRoute
+  PrivacyRoute: typeof PrivacyRoute
   PuzzlesRoute: typeof PuzzlesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -556,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/puzzles'
       fullPath: '/puzzles'
       preLoaderRoute: typeof PuzzlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -642,11 +701,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DatePlanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact-share': {
       id: '/contact-share'
       path: '/contact-share'
       fullPath: '/contact-share'
       preLoaderRoute: typeof ContactShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-guidelines': {
+      id: '/community-guidelines'
+      path: '/community-guidelines'
+      fullPath: '/community-guidelines'
+      preLoaderRoute: typeof CommunityGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -787,7 +867,10 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
+  CommunityGuidelinesRoute: CommunityGuidelinesRoute,
+  ContactRoute: ContactRoute,
   ContactShareRoute: ContactShareRoute,
+  CookiesRoute: CookiesRoute,
   DatePlanRoute: DatePlanRoute,
   DiscoverRoute: DiscoverRoute,
   DiscoverSummaryRoute: DiscoverSummaryRoute,
@@ -800,6 +883,7 @@ const rootRouteChildren: RootRouteChildren = {
   PassportRoute: PassportRoute,
   PlayRoute: PlayRouteWithChildren,
   PremiumRoute: PremiumRoute,
+  PrivacyRoute: PrivacyRoute,
   PuzzlesRoute: PuzzlesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
@@ -815,13 +899,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
