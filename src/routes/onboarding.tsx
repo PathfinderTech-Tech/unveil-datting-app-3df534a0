@@ -306,7 +306,7 @@ function Onboarding() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="First name *">
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" className={inputCls} />
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name" className={inputCls} />
               </Field>
               <Field label="Age *">
                 <input type="number" min={18} value={age} onChange={(e) => setAge(+e.target.value)} className={inputCls} />
@@ -327,11 +327,11 @@ function Onboarding() {
                 <input value={stateRegion} onChange={(e) => setStateRegion(e.target.value)} placeholder="Optional" className={inputCls} />
               </Field>
               <Field label="City (optional)">
-                <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Lisbon" className={inputCls} />
+                <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Your city" className={inputCls} />
               </Field>
               <div className="md:col-span-2">
                 <Field label="Email *">
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} />
                 </Field>
               </div>
               <div className="md:col-span-2">
