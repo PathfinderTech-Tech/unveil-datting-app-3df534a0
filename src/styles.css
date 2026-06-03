@@ -160,6 +160,7 @@
   }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-glow-magenta { box-shadow: var(--shadow-glow-magenta); }
+  .shadow-glow-indigo { box-shadow: var(--shadow-glow-indigo); }
   .reveal-blur-1 { filter: blur(14px) saturate(0.8); }
   .reveal-blur-2 { filter: blur(5px) saturate(0.95); }
   .reveal-blur-3 { filter: none; }
