@@ -336,9 +336,6 @@ function BlueprintTab() {
 function RevealTab({ userId }: { userId: string }) {
   const [matches, setMatches] = useState<any[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [progress, setProgress] = useState<{ currentDay: number } | null>(null);
-  const fetchProg = useServerFn(getRevealProgress);
-  const advance = useServerFn(advanceReveal);
 
   useEffect(() => {
     (async () => {
@@ -347,7 +344,6 @@ function RevealTab({ userId }: { userId: string }) {
         .select("id, user_id, matched_user_id, mutual_interest")
         .eq("mutual_interest", true);
       const list = data ?? [];
-      // Enrich with peer name
       const peerIds = list.map((m: any) => (m.user_id === userId ? m.matched_user_id : m.user_id));
       const { data: profs } = peerIds.length
         ? await supabase.from("profiles").select("id, first_name, photo_url, avatar_url").in("id", peerIds)
@@ -362,34 +358,11 @@ function RevealTab({ userId }: { userId: string }) {
     })();
   }, [userId]);
 
-  useEffect(() => {
-    if (!selected) return;
-    (async () => {
-      const r = await fetchProg({ data: { matchId: selected } });
-      setProgress({ currentDay: r.currentDay });
-    })();
-  }, [selected]);
-
-  async function unlock() {
-    if (!selected) return;
-    try {
-      const r = await advance({ data: { matchId: selected } });
-      if (!r.ok) {
-        toast.error(r.reason ?? "Could not unlock");
-      } else {
-        toast.success(`Day ${r.day} unlocked`);
-        trackEvent(ANALYTICS.revealUnlocked, { matchId: selected, day: r.day });
-        const refreshed = await fetchProg({ data: { matchId: selected } });
-        setProgress({ currentDay: refreshed.currentDay });
-      }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
-    }
-  }
-
   if (!matches.length) {
     return <p className="text-muted-foreground">When you have mutual matches, your 7-day reveal journeys appear here.</p>;
   }
+
+  const active = matches.find((m) => m.id === selected);
 
   return (
     <div className="space-y-4">
@@ -407,41 +380,10 @@ function RevealTab({ userId }: { userId: string }) {
         ))}
       </div>
 
-      <ol className="space-y-3">
-        {REVEAL_STAGES.map((stage) => {
-          const unlocked = (progress?.currentDay ?? 0) >= stage.day;
-          return (
-            <li
-              key={stage.day}
-              className={`flex items-start gap-4 rounded-2xl border p-4 ${
-                unlocked ? "border-primary/40 bg-primary/5" : "border-border bg-surface/40"
-              }`}
-            >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                unlocked ? "bg-gradient-hero text-primary-foreground" : "bg-border text-muted-foreground"
-              }`}>
-                {unlocked ? <Check className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">Day {stage.day}</span>
-                  {unlocked && <Sparkles className="h-3.5 w-3.5 text-primary" />}
-                </div>
-                <p className="font-medium">{stage.title}</p>
-                <p className="text-sm text-muted-foreground">{stage.subtitle}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-
-      <button
-        onClick={unlock}
-        disabled={(progress?.currentDay ?? 0) >= 7}
-        className="w-full rounded-full bg-gradient-hero px-5 py-3 text-sm font-medium text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:opacity-50"
-      >
-        {(progress?.currentDay ?? 0) >= 7 ? "Journey complete" : `Unlock Day ${(progress?.currentDay ?? 0) + 1}`}
-      </button>
+      {selected && (
+        <RevealJourney matchId={selected} peerName={active?.peer?.first_name} />
+      )}
     </div>
   );
 }
+
