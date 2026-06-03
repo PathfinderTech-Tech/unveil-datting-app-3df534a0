@@ -370,7 +370,7 @@ function Onboarding() {
         const update: Record<string, unknown> = appearance === "real"
           ? { photo_url: pub.publicUrl, profile_photo_url: pub.publicUrl }
           : { profile_photo_url: pub.publicUrl };
-        await supabase.from("profiles").update(update).eq("id", user.id);
+        await supabase.from("profiles").update(update as never).eq("id", user.id);
         toast.success("Selfie saved.");
       }
     } catch (e: unknown) {
