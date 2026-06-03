@@ -25,13 +25,14 @@ export const Route = createFileRoute("/insights")({
 });
 
 function InsightsPage() {
+  const { checking } = useRequireOnboarding();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
 
-  if (loading) {
+  if (checking || loading) {
     return (
       <div className="min-h-screen bg-background">
         <UnveilNav />
@@ -40,6 +41,7 @@ function InsightsPage() {
     );
   }
   if (!user) return null;
+
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
