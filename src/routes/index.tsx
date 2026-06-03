@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
-import { supabase } from "@/integrations/supabase/client";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -20,55 +19,35 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const [email, setEmail] = useState("");
-  const [joined, setJoined] = useState(false);
-  const [err, setErr] = useState("");
-
-  const joinWaitlist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr("");
-    const { error } = await supabase.from("waitlist").insert({ email, source: "landing" });
-    if (error) setErr(error.message);
-    else setJoined(true);
-  };
-
   return (
     <div className="min-h-screen">
       <UnveilNav />
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-24 text-center">
-          <div className="mb-10 flex justify-center">
-            <LogoMark size={140} className="animate-float" />
+        <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-20 text-center md:px-6 md:pt-20 md:pb-24">
+          <div className="mb-8 flex justify-center md:mb-10">
+            <LogoMark size={120} className="animate-float md:!w-[140px] md:!h-[140px]" />
           </div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Love beyond the surface
+            Private Beta · Invite Only
           </div>
-          <h1 className="font-display text-5xl font-light leading-[1.05] md:text-7xl">
-            Connection starts
+          <h1 className="font-display text-4xl font-light leading-[1.05] sm:text-5xl md:text-7xl">
+            Connection begins
             <br />
             <span className="text-gradient-hero italic">beneath the surface.</span>
           </h1>
-          <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground">
-            UNVEIL is an intentional connection platform where compatibility unfolds through
-            curiosity, emotional rhythm, and meaningful interaction — before appearance
-            becomes central.
+          <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:mt-8 md:text-lg">
+            Voice before appearance. Meaning before matches.
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link
-              to="/discover"
-              className="group inline-flex items-center gap-2 rounded-full bg-gradient-hero px-7 py-3.5 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
-            >
-              Discover Yourself <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <a
-              href="#waitlist"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-7 py-3.5 font-medium hover:bg-surface"
-            >
-              Join Waitlist
+          <div className="mt-8 flex flex-wrap justify-center gap-3 md:mt-10">
+            <a href="#waitlist" className="group inline-flex items-center gap-2 rounded-full bg-gradient-hero px-7 py-3.5 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">
+              Join the Private Beta <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
+            <Link to="/discover" className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-7 py-3.5 font-medium hover:bg-surface">
+              Discover Yourself
+            </Link>
           </div>
         </div>
       </section>
