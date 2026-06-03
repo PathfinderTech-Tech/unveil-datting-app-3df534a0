@@ -35,13 +35,9 @@ function Puzzles() {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => { if (uid) loadPuzzleScores().then(setScores); }, [uid]);
-  useEffect(() => {
-    supabase.from("puzzles").select("category").eq("active", true).then(({ data }) => {
-      const c: Record<string, number> = {};
-      (data ?? []).forEach((r: { category: string }) => { c[r.category] = (c[r.category] ?? 0) + 1; });
-      setCounts(c);
-    });
-  }, []);
+  // Category counts are no longer fetched client-side (puzzle answers are
+  // now server-protected). Show "Play" instead of an item count.
+
 
   const best = useMemo(() => {
     const entries = Object.entries(scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
