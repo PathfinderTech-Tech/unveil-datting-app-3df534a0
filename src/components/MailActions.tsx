@@ -38,14 +38,23 @@ export function MailActions({
         {copied ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
         {copied ? "Copied" : "Copy"}
       </button>
-      <a
-        href={gmailComposeUrl(email, subject, body)}
-        target="_blank"
-        rel="noreferrer"
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          const url = gmailComposeUrl(email, subject, body);
+          // Open at the top level so it never lands inside a preview iframe
+          // (Gmail sends X-Frame-Options: DENY, which causes ERR_BLOCKED_BY_RESPONSE).
+          const w = window.open(url, "_blank", "noopener,noreferrer");
+          if (!w) {
+            try { window.top!.location.href = url; } catch { window.location.href = url; }
+          }
+        }}
         className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-2.5 py-1 text-[11px] text-primary-foreground shadow-glow"
+        aria-label="Compose email in Gmail (opens in new tab)"
       >
         <Mail className="h-3 w-3" /> Gmail <ExternalLink className="h-3 w-3" />
-      </a>
+      </button>
     </span>
   );
 }
