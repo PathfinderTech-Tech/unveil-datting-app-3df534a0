@@ -81,12 +81,16 @@ function Onboarding() {
   const [dragActive, setDragActive] = useState(false);
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [avatarStyle, setAvatarStyle] = useState<string>("real");
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>("real");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  const runGenerateAvatar = useServerFn(generateAvatar);
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allAnswered
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
+
 
   const computeHarmony = () => {
     const target = 72 + Math.floor(Math.random() * 22);
