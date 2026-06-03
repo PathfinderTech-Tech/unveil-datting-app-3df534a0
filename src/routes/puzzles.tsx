@@ -79,7 +79,7 @@ function Puzzles() {
                   <p className="mt-1 text-sm text-muted-foreground">{meta.tagline}</p>
                   <div className="mt-5 flex items-center justify-between">
                     <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {scores[t] ? `Best ${scores[t]}` : `${counts[t] ?? 0} puzzles`}
+                      {scores[t] ? `Best ${scores[t]}` : "Play"}
                     </span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
