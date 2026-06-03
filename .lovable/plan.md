@@ -1,56 +1,95 @@
-## Scope
+# UNVEIL V2 – Relationship Intelligence Platform
 
-Five production features layered on existing schema. No removals — Stripe, auth, premium gating, existing chat realtime infrastructure all preserved.
+Phase 1 plan. Builds on top of the foundation already shipped last turn (daily_questions, daily_answers, personality_blueprint, reveal_progress, readiness_score, Messages + Insights routes, updated nav). Nothing existing (Stripe, memberships, auth, premium, chat) will be removed.
 
-## 1. Database (one migration)
+## Status check (already shipped)
 
-New tables (all RLS-protected, GRANTed):
+- DB: `daily_questions` (30 seeded), `daily_answers`, `personality_blueprint`, `reveal_progress`, `profiles.readiness_score` + `readiness_breakdown`, `compute_readiness_score()` RPC
+- Server fns: `daily.functions.ts`, `blueprint.functions.ts`, `reveal.functions.ts`
+- Routes: `/messages` (real-time inbox), `/insights` (Today / Readiness / Blueprint / Reveal tabs)
+- Nav: Desktop + mobile updated with Messages & Insights
 
-- `daily_questions` — pool of curated questions (`category` ∈ relationship/values/personality, `prompt`, `options jsonb`). Seeded ~30 rows. Public read for authenticated.
-- `daily_answers` — `user_id`, `question_id`, `answer`, `day_key date`. Unique `(user_id, day_key)`. Owner CRUD.
-- `personality_blueprint` — `user_id pk`, `communication_style`, `attachment_style`, `conflict_style`, `relationship_style`, `updated_at`. Owner read/write; matched-user read.
-- `reveal_progress` — `user_id`, `match_id`, `day int 1..7`, `unlocked_at`. Owner read/write either side.
+## Phase 1 – what's still missing
 
-Add columns to `profiles`:
-- `readiness_score int default 0`
-- `readiness_breakdown jsonb default '{}'` (communication/commitment/emotional/values/goals subscores)
+### 1. Daily Compatibility — broaden beyond a single question
+- Extend `daily_questions.category` to include `relationship`, `values`, `personality`, `challenge`
+- Seed ~20 more rows across the 4 categories (insert tool)
+- `/insights` Today tab: render 4 cards (one per category) instead of single question; track per-category completion + streak
+- Server fn `getTodayBundle()` returns 4 questions deterministically picked per `day_key`
 
-DB function `compute_readiness_score(uid)` — derives subscores from `daily_answers` + `onboarding_answers` + `personality_blueprint`, returns int 0–100, upserts into profiles.
+### 2. Relationship Readiness Score — expand to 5 subscores
+- Update `compute_readiness_score(uid)` to output 5 subscores in `readiness_breakdown`:
+  `communication`, `emotional_intelligence`, `commitment`, `goals`, `values` (0–100 each)
+  Derivation:
+  - communication → `personality_blueprint.communication_style` + daily `relationship` answers
+  - emotional_intelligence → `personality_blueprint.conflict_style` + `game_results.emotional_score`
+  - commitment → `profiles.relationship_intent` + daily `relationship` answers
+  - goals → `onboarding_answers` goals fields + daily `values` answers
+  - values → daily `values` answers count + diversity
+  Overall = weighted avg.
+- Display: gauge on `/insights` Readiness tab (already present, just rebind), plus compact badge on `/profile`
 
-## 2. Server functions (`src/lib/`)
+### 3. Personality Blueprint — add Leadership Style
+- Migration: add `leadership_style text` column to `personality_blueprint`
+- Update Blueprint tab editor to 5 cards (Communication / Attachment / Conflict / Leadership / Relationship)
+- Visual: 5-point radar via SVG (no new deps)
 
-- `daily.functions.ts` — `getTodayQuestion()`, `saveDailyAnswer({questionId, answer})` → triggers `compute_readiness_score`.
-- `blueprint.functions.ts` — `getBlueprint(userId)`, `updateBlueprint(partial)`.
-- `reveal.functions.ts` — `getRevealProgress(matchId)`, `advanceReveal(matchId)` (enforces 24h cadence, max day 7).
-- Icebreakers function already exists — reuse.
+### 4. AI Icebreakers — wire to context
+- Existing `src/lib/icebreakers.functions.ts` (already created): extend prompt to pull shared interests, shared goals, compatibility score, last daily challenge answers
+- Render "Generate Icebreaker" + "New Suggestion" buttons inside chat composer (already present); add fallback in match detail
+- Uses Lovable AI Gateway (`google/gemini-3-flash-preview`); key already in env
 
-## 3. Routes
+### 5. No-Match Experience
+- New component `NoMatchHub` on `/discover` empty state and `/matches` empty state
+- Shows: today's 4 daily cards (link to Insights), one Personality Growth task (from daily_questions where category='personality'), one AI insight (cached daily, generated via gateway), one quiz (challenge_questions)
 
-- `src/routes/_authenticated/messages.tsx` — inbox: list conversations with avatar, last message preview, unread badge (computed from `messages` minus `message_reads`), realtime updates. Links to existing `/chat/:conversationId` flow.
-- `src/routes/_authenticated/insights.tsx` — tabbed dashboard:
-  1. **Today** — Daily question card + answer history streak
-  2. **Readiness** — score gauge 0–100 + 5 subscore bars
-  3. **Blueprint** — 4-quadrant cards (communication/attachment/conflict/relationship) with edit
-  4. **Reveal Journey** — per-match 7-day timeline with locked/unlocked stages
-- Update nav (`src/components/AppNav.tsx` or similar) — desktop: Discover · Compatibility · Messages · Matches · Insights · Profile. Mobile bottom bar: Discover · Messages · Matches · Insights · Profile. Messages icon shows unread dot.
+### 6. 7-Day Reveal Journey — already scaffolded
+- Verify `/insights` Reveal tab maps Day 1–7 to: Voice / Personality / Values / Life Goals / Partial Photo / Video / Full
+- Add reveal cards UI per day with the right gated content source (voice_prompts, personality_blueprint, daily values answers, onboarding goals, photo_url blurred → clear, video TBD placeholder, full profile)
 
-## 4. Mobile
+### 7. Navigation
+- Desktop: Discover · Insights · Challenges · Matches · Messages · Profile
+- Mobile bottom: Discover · Insights · Matches · Messages · Profile (Challenges via Insights tab)
+- Add `/challenges` route surfacing `challenge_packs` + `challenge_questions` (already exists in DB)
 
-All new routes use existing responsive primitives (`Card`, `Tabs`, `Sheet`). Bottom nav fixed on `<md`. Touch targets ≥44px.
-
-## 5. Out of scope this turn
-
-- Voice messages / image upload in chat (deferred)
-- Push notifications (needs FCM/APNs setup)
-- Admin analytics dashboard (next slice)
-- Playwright E2E (next slice)
+### 8. Analytics
+- Use existing `analytics_events` table
+- Helper `trackEvent(event, properties)` (browser → insert with `user_id = auth.uid()`)
+- Fire on: `daily_answer_submitted`, `quiz_completed`, `challenge_completed`, `reveal_unlocked`, `match_converted`, plus `app_open` for DAU
+- Admin metrics: extend existing admin analytics page (if present) with these counters; otherwise read via existing dashboard
 
 ## Files
 
-New: 1 migration, 3 server-fn files, 2 routes, 1 nav component update, 1 unread-badge hook, 1 readiness-gauge component, 1 blueprint-card component, 1 reveal-timeline component.
+**Migration (1):**
+- Add `leadership_style` to `personality_blueprint`
+- Update `compute_readiness_score()` to 5 subscores
 
-Edited: existing nav, `__root` or layout if needed for bottom bar slot.
+**Data inserts (1 via insert tool):**
+- ~20 more `daily_questions` across relationship/values/personality/challenge
+
+**Server fns (new/edit):**
+- `src/lib/daily.functions.ts` — add `getTodayBundle()`
+- `src/lib/icebreakers.functions.ts` — enrich context
+- `src/lib/insights.functions.ts` — `generateDailyInsight()` (AI, cached per day_key)
+- `src/lib/analytics.functions.ts` — `trackEvent()` server fn (optional; can do client-side insert)
+
+**Routes / components:**
+- `src/routes/challenges.tsx` (new)
+- `src/routes/insights.tsx` — Today bundle (4 cards), 5-point Blueprint radar, Reveal Day cards
+- `src/components/NoMatchHub.tsx` (new) + wired into `/discover` & `/matches` empty states
+- `src/components/ReadinessBadge.tsx` for `/profile`
+- `src/components/UnveilNav.tsx` + `MobileBottomNav.tsx` — add Challenges (desktop)
+
+**Hooks:**
+- `src/hooks/use-analytics.ts` (track helper)
 
 ## Verification
 
-Build passes, security linter clean, manual smoke: open Messages (empty state), open Insights tabs, answer a daily question, see readiness score update.
+- Build green; supabase linter clean
+- Manual smoke: answer one of each daily category → readiness subscores update; visit /discover with no matches → NoMatchHub renders; open Reveal tab on a mutual match → Day 1 voice card shows
+- Existing flows untouched: signup/login, Stripe checkout, membership upgrade, chat send/receive
+
+## Out of scope this phase
+
+- Video introduction recording (Day 6) — placeholder UI only
+- Push notifications, Playwright E2E, admin dashboard rebuild — defer to Phase 2
