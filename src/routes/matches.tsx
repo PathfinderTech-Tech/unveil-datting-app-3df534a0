@@ -12,6 +12,8 @@ import { Avatar } from "@/components/Avatar";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { toast } from "sonner";
 import {
   Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info, Home, RefreshCw, Share2,
