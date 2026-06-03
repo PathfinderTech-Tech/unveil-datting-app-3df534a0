@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "verifications" | "payments" | "reports";
+type Tab = "waitlist" | "verifications" | "payments" | "reports" | "feedback";
 
 function Admin() {
   const { user, loading } = useAuth();
