@@ -3,7 +3,15 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { Shield, Phone, MapPin, EyeOff, Flag, Mail, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/safety")({
-  head: () => ({ meta: [{ title: "Safety — UNVEIL" }] }),
+  head: () => ({
+    meta: [
+      { title: "Safety & Reporting — UNVEIL" },
+      { name: "description", content: "How to stay safe on UNVEIL and report unsafe behavior." },
+      { property: "og:title", content: "Safety & Reporting — UNVEIL" },
+      { property: "og:url", content: "https://unveil.best/safety" },
+    ],
+    links: [{ rel: "canonical", href: "https://unveil.best/safety" }],
+  }),
   component: Safety,
 });
 

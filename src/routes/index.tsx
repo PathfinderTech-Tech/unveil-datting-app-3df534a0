@@ -8,11 +8,13 @@ import { ArrowRight, Eye, MessageCircle, Heart, Waves, Sparkles } from "lucide-r
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UNVEIL — Love beyond the surface" },
-      { name: "description", content: "An intentional connection platform. Compatibility unfolds through emotional rhythm, curiosity, and meaningful interaction — before appearance becomes central." },
-      { property: "og:title", content: "UNVEIL — Love beyond the surface" },
-      { property: "og:description", content: "Discover compatibility through emotional rhythm, voice prompts, and gradual reveal." },
+      { title: "UNVEIL — Connection Starts Beneath the Surface" },
+      { name: "description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
+      { property: "og:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
+      { property: "og:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
+      { property: "og:url", content: "https://unveil.best/" },
     ],
+    links: [{ rel: "canonical", href: "https://unveil.best/" }],
   }),
   component: Home,
 });
