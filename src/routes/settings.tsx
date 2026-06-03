@@ -23,8 +23,35 @@ function Settings() {
   const { checking } = useRequireOnboarding();
   const { t } = useTranslation();
   const { quota } = useMessageQuota();
+  const navigate = useNavigate();
+  const deleteAccountFn = useServerFn(deleteAccount);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const passActive = !!quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date();
   const premiumActive = !!quota.premiumUntil && new Date(quota.premiumUntil) > new Date();
+
+  async function handleDelete() {
+    if (confirmText.trim().toUpperCase() !== "DELETE") {
+      toast.error('Type "DELETE" to confirm.');
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await deleteAccountFn();
+      if ("error" in res) {
+        toast.error(res.error);
+        setDeleting(false);
+        return;
+      }
+      await supabase.auth.signOut();
+      toast.success("Account deleted. You can re-register in 24 hours.");
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to delete account");
+      setDeleting(false);
+    }
+  }
   if (checking) {
     return (
       <div className="min-h-screen">
