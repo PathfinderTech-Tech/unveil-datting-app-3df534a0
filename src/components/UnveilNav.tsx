@@ -5,10 +5,10 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useUnreadCount } from "@/hooks/use-unread";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings as SettingsIcon } from "lucide-react";
 
 // Desktop primary navigation. Authenticated journey: Discover → Compatibility →
-// Messages → Matches → Insights → Profile, with extras tucked into the mobile menu.
+// Messages → Matches → Insights → Profile → Passport → Settings.
 const PRIMARY = [
   { to: "/discover", label: "Discover" },
   { to: "/insights", label: "Insights" },
@@ -16,6 +16,8 @@ const PRIMARY = [
   { to: "/matches", label: "Matches" },
   { to: "/messages", label: "Messages" },
   { to: "/profile", label: "Profile" },
+  { to: "/passport", label: "Passport" },
+  { to: "/settings", label: "Settings" },
 ] as const;
 
 const SECONDARY = [
