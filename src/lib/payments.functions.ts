@@ -48,20 +48,49 @@ const PRICE_META: Record<string, { kind: string; durationDays?: number; duration
   message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
 };
 
+const ALLOWED_RETURN_HOSTS = new Set([
+  "unveil.best",
+  "www.unveil.best",
+  "mind-match-maze.lovable.app",
+  "localhost",
+  "127.0.0.1",
+]);
+
+function validateReturnUrl(raw: string): string {
+  let u: URL;
+  try { u = new URL(raw); } catch { throw new Error("Invalid returnUrl"); }
+  if (u.protocol !== "https:" && u.protocol !== "http:") throw new Error("Invalid returnUrl protocol");
+  const host = u.hostname;
+  const ok =
+    ALLOWED_RETURN_HOSTS.has(host) ||
+    host.endsWith(".lovable.app") ||
+    host.endsWith(".lovable.dev");
+  if (!ok) throw new Error("returnUrl host not allowed");
+  return u.toString();
+}
+
 export const createCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: {
     priceId: string;
     quantity?: number;
     customerEmail?: string;
-    userId?: string;
     returnUrl: string;
     environment: StripeEnv;
   }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
+    if (data.customerEmail && data.customerEmail.length > 254) throw new Error("Invalid email");
+    data.returnUrl = validateReturnUrl(data.returnUrl);
     return data;
   })
-  .handler(async ({ data }): Promise<CheckoutSessionResult> => {
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     try {
+      const { userId, supabase } = context;
+      let email = data.customerEmail;
+      if (!email) {
+        const { data: u } = await supabase.auth.getUser();
+        email = u.user?.email ?? undefined;
+      }
       const stripe = createStripeClient(data.environment);
 
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
@@ -70,12 +99,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const isRecurring = stripePrice.type === "recurring";
       const meta = PRICE_META[data.priceId] ?? { kind: "other" };
 
-      const customerId = (data.customerEmail || data.userId)
-        ? await resolveOrCreateCustomer(stripe, {
-            email: data.customerEmail,
-            userId: data.userId,
-          })
-        : undefined;
+      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
       let productDescription: string | undefined;
       if (!isRecurring) {
@@ -89,10 +113,10 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const sharedMeta: Record<string, string> = {
         kind: meta.kind,
         priceId: data.priceId,
+        userId, // server-verified from JWT
       };
       if (meta.durationDays) sharedMeta.durationDays = String(meta.durationDays);
       if (meta.durationHours) sharedMeta.durationHours = String(meta.durationHours);
-      if (data.userId) sharedMeta.userId = data.userId;
 
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
@@ -100,7 +124,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ui_mode: "embedded_page" as any,
         return_url: data.returnUrl,
         managed_payments: { enabled: true } as any,
-        ...(customerId && { customer: customerId }),
+        customer: customerId,
         ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
         metadata: sharedMeta,
         ...(isRecurring && { subscription_data: { metadata: sharedMeta } }),
