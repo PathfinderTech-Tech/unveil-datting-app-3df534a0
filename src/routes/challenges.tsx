@@ -53,6 +53,17 @@ function Challenges() {
 
   const hasMatch = partners.length > 0;
 
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
