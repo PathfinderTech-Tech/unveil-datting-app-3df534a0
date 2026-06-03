@@ -279,12 +279,13 @@ function Onboarding() {
         ...extra,
       };
       await supabase.from("onboarding_answers").upsert(
-        { user_id: user.id, answers },
+        { user_id: user.id, answers: answers as never },
         { onConflict: "user_id" },
       );
       if (Object.keys(profileUpdate).length > 0) {
-        await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+        await supabase.from("profiles").update(profileUpdate as never).eq("id", user.id);
       }
+
       setSavedAt(Date.now());
     } catch (e) {
       console.warn("[onboarding] save failed", e);
