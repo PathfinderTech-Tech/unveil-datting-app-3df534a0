@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Compass, Heart, MessageCircle, User } from "lucide-react";
+import { Compass, Heart, MessageCircle, Sparkles, User } from "lucide-react";
+import { useUnreadCount } from "@/hooks/use-unread";
 
 const ITEMS = [
-  { to: "/", label: "Home", icon: Home },
   { to: "/discover", label: "Discover", icon: Compass },
+  { to: "/messages", label: "Messages", icon: MessageCircle, badge: true as const },
   { to: "/matches", label: "Matches", icon: Heart },
-  { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/passport", label: "You", icon: User },
+  { to: "/insights", label: "Insights", icon: Sparkles },
+  { to: "/passport", label: "Profile", icon: User },
 ] as const;
 
 /**
@@ -15,6 +16,7 @@ const ITEMS = [
  */
 export function MobileBottomNav() {
   const { location } = useRouterState();
+  const unread = useUnreadCount();
   return (
     <nav
       aria-label="Primary mobile navigation"
@@ -25,6 +27,7 @@ export function MobileBottomNav() {
         {ITEMS.map((item) => {
           const active = location.pathname === item.to;
           const Icon = item.icon;
+          const showBadge = "badge" in item && item.badge && unread > 0;
           return (
             <li key={item.to}>
               <Link
@@ -34,13 +37,19 @@ export function MobileBottomNav() {
                 }`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-                    active
-                      ? "bg-gradient-hero text-primary-foreground shadow-glow"
-                      : "bg-transparent"
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+                    active ? "bg-gradient-hero text-primary-foreground shadow-glow" : "bg-transparent"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
+                  {showBadge && (
+                    <span
+                      aria-label={`${unread} unread`}
+                      className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground"
+                    >
+                      {unread > 9 ? "9+" : unread}
+                    </span>
+                  )}
                 </span>
                 {item.label}
               </Link>
