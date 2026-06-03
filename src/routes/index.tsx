@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
-import { WaitlistForm } from "@/components/WaitlistForm";
-import { ArrowRight, Eye, MessageCircle, Heart, Waves, Sparkles } from "lucide-react";
+import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,20 +69,6 @@ function Home() {
         </div>
       </section>
 
-      {/* WAITLIST */}
-      <section id="waitlist" className="mx-auto max-w-3xl px-5 py-16 md:px-6 md:py-20">
-        <div className="rounded-3xl border border-border bg-gradient-deep p-6 text-center sm:p-10 md:p-14">
-          <Sparkles className="mx-auto mb-4 h-8 w-8 text-accent" />
-          <h2 className="font-display text-2xl font-light sm:text-3xl md:text-4xl">
-            Be present when we open.
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            Early members receive priority verification and a permanent founding-circle archetype.
-          </p>
-          <WaitlistForm />
-        </div>
-      </section>
-
       <footer className="border-t border-border py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
@@ -92,7 +77,7 @@ function Home() {
           </div>
           <div className="flex flex-wrap gap-5">
             <Link to="/terms">Terms</Link>
-            <Link to="/terms">Privacy</Link>
+            <Link to="/privacy">Privacy</Link>
             <Link to="/safety">Safety</Link>
             <Link to="/contact">Contact</Link>
           </div>

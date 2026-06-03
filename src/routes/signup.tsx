@@ -20,14 +20,6 @@ function Signup() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErr("");
-    // Invite-only: only approved waitlist emails may create accounts
-    const { data: approved, error: gateErr } = await supabase.rpc("is_email_approved", { _email: email });
-    if (gateErr) { setLoading(false); setErr(gateErr.message); return; }
-    if (!approved) {
-      setLoading(false);
-      setErr("UNVEIL is invite-only during private beta. Join the waitlist and we'll email you when you're approved.");
-      return;
-    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -50,11 +42,8 @@ function Signup() {
       </Link>
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card/80 p-8 backdrop-blur">
         <h1 className="font-display text-3xl font-light">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">UNVEIL is invite-only. Use the email you joined the waitlist with.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Join UNVEIL and start discovering meaningful connections.</p>
 
-        <div className="mt-3 rounded-xl border border-border bg-surface/50 px-3 py-2 text-[11px] text-muted-foreground">
-          Don't have an invite yet? <Link to="/" className="text-foreground underline">Join the waitlist</Link>.
-        </div>
 
         <div className="mt-6">
           <OAuthButtons mode="signup" />
