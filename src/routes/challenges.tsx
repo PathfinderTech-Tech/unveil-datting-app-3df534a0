@@ -6,6 +6,8 @@ import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
 import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type ChallengeRow } from "@/lib/content-api";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { supabase } from "@/integrations/supabase/client";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { toast } from "sonner";
 
 type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
