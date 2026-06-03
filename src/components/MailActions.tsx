@@ -1,20 +1,22 @@
-// Universal email actions — never opens a desktop mail client like Superhuman.
-// Renders the support address with a Copy button and a Gmail compose link.
+// Universal email actions — opens the visitor's default email app via mailto.
+// No webmail redirects (Gmail/Outlook/Superhuman websites are never opened).
 import { useState } from "react";
-import { Copy, Check, Mail, ExternalLink } from "lucide-react";
+import { Copy, Check, Mail } from "lucide-react";
 
 export const SUPPORT_EMAIL = "support@unveil.best";
+export const DEFAULT_SUPPORT_SUBJECT = "UNVEIL Support Request";
 
-export function gmailComposeUrl(to: string, subject = "", body = "") {
-  const params = new URLSearchParams({ view: "cm", fs: "1", to });
-  if (subject) params.set("su", subject);
+export function mailtoUrl(to: string, subject = DEFAULT_SUPPORT_SUBJECT, body = "") {
+  const params = new URLSearchParams();
+  if (subject) params.set("subject", subject);
   if (body) params.set("body", body);
-  return `https://mail.google.com/mail/?${params.toString()}`;
+  const qs = params.toString();
+  return `mailto:${to}${qs ? `?${qs}` : ""}`;
 }
 
 export function MailActions({
   email = SUPPORT_EMAIL,
-  subject = "",
+  subject = DEFAULT_SUPPORT_SUBJECT,
   body = "",
   className = "",
 }: { email?: string; subject?: string; body?: string; className?: string }) {
@@ -28,7 +30,12 @@ export function MailActions({
   }
   return (
     <span className={`inline-flex flex-wrap items-center gap-2 ${className}`}>
-      <span className="font-medium text-foreground">{email}</span>
+      <a
+        href={mailtoUrl(email, subject, body)}
+        className="font-medium text-foreground underline-offset-2 hover:underline"
+      >
+        {email}
+      </a>
       <button
         type="button"
         onClick={copy}
@@ -38,23 +45,12 @@ export function MailActions({
         {copied ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
         {copied ? "Copied" : "Copy"}
       </button>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          const url = gmailComposeUrl(email, subject, body);
-          // Open at the top level so it never lands inside a preview iframe
-          // (Gmail sends X-Frame-Options: DENY, which causes ERR_BLOCKED_BY_RESPONSE).
-          const w = window.open(url, "_blank", "noopener,noreferrer");
-          if (!w) {
-            try { window.top!.location.href = url; } catch { window.location.href = url; }
-          }
-        }}
+      <a
+        href={mailtoUrl(email, subject, body)}
         className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-2.5 py-1 text-[11px] text-primary-foreground shadow-glow"
-        aria-label="Compose email in Gmail (opens in new tab)"
       >
-        <Mail className="h-3 w-3" /> Gmail <ExternalLink className="h-3 w-3" />
-      </button>
+        <Mail className="h-3 w-3" /> Email us
+      </a>
     </span>
   );
 }
