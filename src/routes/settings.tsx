@@ -86,7 +86,7 @@ function Settings() {
                   {quota.remaining} of {quota.dailyLimit} free messages remaining today. Resets {quota.resetsAt ? new Date(quota.resetsAt).toLocaleTimeString() : "in 24h"}.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Link to="/checkout" search={{ product: "message_pass" } as any} className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-xs text-accent hover:bg-accent/20">
+                  <Link to="/checkout" search={({ product: "message_pass" }) as any} className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-xs text-accent hover:bg-accent/20">
                     <Zap className="h-3 w-3" /> Daily Pass · $1.99
                   </Link>
                   <Link to="/premium" className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-4 py-1.5 text-xs text-primary-foreground shadow-glow">
