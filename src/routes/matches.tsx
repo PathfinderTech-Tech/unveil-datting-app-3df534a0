@@ -121,7 +121,6 @@ function Matches() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((m) => {
-            const arch = ARCHETYPES[m.archetype];
             const dist = distanceLabel(m.distanceKm);
             const cityLabel = m.locationPrivacy === "country" ? (m.country || "—")
               : m.locationPrivacy === "hidden" ? "Location hidden"
