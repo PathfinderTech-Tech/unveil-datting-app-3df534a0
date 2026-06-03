@@ -48,8 +48,10 @@ const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
 };
 
 function SparkPage() {
+  const { checking } = useRequireOnboarding();
   const uid = useUserId();
   const [filter, setFilter] = useState<Category | "all">("all");
+
   const pool = useMemo(
     () => QUESTIONS.filter((q) => filter === "all" || q.category === filter),
     [filter]
