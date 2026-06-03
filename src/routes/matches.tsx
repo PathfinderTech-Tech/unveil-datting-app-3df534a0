@@ -164,6 +164,10 @@ function Matches() {
             </Link>
           </div>
 
+          <div className="mt-8 text-left">
+            <NoMatchHub title="Keep building while we search" />
+          </div>
+
           <p className="mt-8 text-xs text-muted-foreground">
             Want priority discovery? <Link to="/premium" className="text-primary underline">Upgrade to Premium</Link>.
           </p>
