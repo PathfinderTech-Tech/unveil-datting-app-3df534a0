@@ -158,6 +158,7 @@ async function savePlaceholder(
     await supabase
       .from("profiles")
       .update({
+        photo_url: selfieUrl,
         avatar_url: selfieUrl,
         avatar_style: style,
         avatar_generated_at: new Date().toISOString(),
@@ -179,6 +180,7 @@ async function savePlaceholder(
   await supabase
     .from("profiles")
     .update({
+      photo_url: dataUrl,
       avatar_url: dataUrl,
       avatar_style: style,
       avatar_generated_at: new Date().toISOString(),
@@ -188,6 +190,7 @@ async function savePlaceholder(
 
   return { avatarUrl: dataUrl, style, fallback: true, message };
 }
+
 
 function makeInitialsSvg(initials: string, style: string, archetype: string): string {
   const palettes: Record<string, [string, string]> = {
