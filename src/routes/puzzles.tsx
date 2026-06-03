@@ -153,7 +153,7 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
           <div className="font-mono text-xs uppercase tracking-wider opacity-80">Round complete</div>
           <div className="mt-2 font-display text-5xl font-bold">{correctCount} / {items.length}</div>
           <div className="mt-2 text-sm opacity-90">+{pts} curiosity points</div>
-          <button onClick={() => { setI(0); setPicked(null); setCorrectCount(0); setDone(false); }}
+          <button onClick={() => { setI(0); setPicked(null); setReveal(null); setCorrectCount(0); setDone(false); }}
             className="mt-5 rounded-full bg-background/20 px-5 py-2 text-sm font-medium hover:bg-background/30">Play again</button>
         </div>
       </div>
