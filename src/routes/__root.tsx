@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RevealNotifier />
       <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">
           <Outlet />
@@ -141,4 +143,10 @@ function RootComponent() {
       </div>
     </QueryClientProvider>
   );
+}
+
+function RevealNotifier() {
+  // Subscribes to reveal_progress and toasts on newly available stages.
+  useRevealNotifications();
+  return null;
 }

@@ -1,95 +1,79 @@
-# UNVEIL V2 – Relationship Intelligence Platform
+# UNVEIL V3 — Icebreakers, Reveal Journey & Hidden Matches™
 
-Phase 1 plan. Builds on top of the foundation already shipped last turn (daily_questions, daily_answers, personality_blueprint, reveal_progress, readiness_score, Messages + Insights routes, updated nav). Nothing existing (Stripe, memberships, auth, premium, chat) will be removed.
+This plan ships three connected slices on top of the existing Phase-1 foundation. Nothing existing (Stripe, memberships, auth, chat, premium, onboarding, discover) is removed.
 
-## Status check (already shipped)
+## 1. AI Icebreakers (categorised)
 
-- DB: `daily_questions` (30 seeded), `daily_answers`, `personality_blueprint`, `reveal_progress`, `profiles.readiness_score` + `readiness_breakdown`, `compute_readiness_score()` RPC
-- Server fns: `daily.functions.ts`, `blueprint.functions.ts`, `reveal.functions.ts`
-- Routes: `/messages` (real-time inbox), `/insights` (Today / Readiness / Blueprint / Reveal tabs)
-- Nav: Desktop + mobile updated with Messages & Insights
+Extend `src/lib/icebreakers.functions.ts`:
+- Add `category` to the `Icebreaker` type: `fun | deep | romantic | career | travel | family | opener | compatibility | voice`.
+- New input `{ peerId, category? }`. If category set, gateway prompt asks for 5 starters in that category; otherwise mixed.
+- Prompt enriches with: my+their interests, values, goals, archetype, compatibility strengths, daily-answer snippets.
+- Always include 1 "AI Suggested Opening Message" returned as `suggestedOpener: string`.
+- Track `ANALYTICS.icebreakerGenerated` with `{ peerId, category }` server-side after success.
 
-## Phase 1 – what's still missing
+Update `src/routes/chat.tsx`:
+- Add category chip row (Fun · Deep · Romantic · Career · Travel · Family) above existing icebreaker list.
+- "Generate New Icebreaker" regenerates for the selected category.
+- Render the AI suggested opener as a highlighted card with "Use this" → prefills composer.
 
-### 1. Daily Compatibility — broaden beyond a single question
-- Extend `daily_questions.category` to include `relationship`, `values`, `personality`, `challenge`
-- Seed ~20 more rows across the 4 categories (insert tool)
-- `/insights` Today tab: render 4 cards (one per category) instead of single question; track per-category completion + streak
-- Server fn `getTodayBundle()` returns 4 questions deterministically picked per `day_key`
+## 2. 7-Day Reveal Journey polish
 
-### 2. Relationship Readiness Score — expand to 5 subscores
-- Update `compute_readiness_score(uid)` to output 5 subscores in `readiness_breakdown`:
-  `communication`, `emotional_intelligence`, `commitment`, `goals`, `values` (0–100 each)
-  Derivation:
-  - communication → `personality_blueprint.communication_style` + daily `relationship` answers
-  - emotional_intelligence → `personality_blueprint.conflict_style` + `game_results.emotional_score`
-  - commitment → `profiles.relationship_intent` + daily `relationship` answers
-  - goals → `onboarding_answers` goals fields + daily `values` answers
-  - values → daily `values` answers count + diversity
-  Overall = weighted avg.
-- Display: gauge on `/insights` Readiness tab (already present, just rebind), plus compact badge on `/profile`
+Existing: `reveal_progress` table, `getRevealProgress`/`advanceReveal` server fns, Reveal tab on `/insights`.
 
-### 3. Personality Blueprint — add Leadership Style
-- Migration: add `leadership_style text` column to `personality_blueprint`
-- Update Blueprint tab editor to 5 cards (Communication / Attachment / Conflict / Leadership / Relationship)
-- Visual: 5-point radar via SVG (no new deps)
+Changes:
+- `src/components/RevealJourney.tsx` (new): full timeline component used on `/insights` Reveal tab and on `/match/$userId`. Renders 7 stage cards (Voice / Personality / Values / Goals / Partial Photo / Video / Full Profile) with:
+  - Locked/unlocked/available states.
+  - Unlock animation (Tailwind `animate-in fade-in slide-in-from-bottom-2` + a pulsing ring on the newly available stage).
+  - Countdown to next unlock (20h cadence from `reveal.functions.ts`).
+  - "Unlock now" button calling `advanceReveal`, then `trackEvent(ANALYTICS.revealUnlocked, { matchId, day })`.
+- `src/hooks/use-reveal-notifications.ts` (new): polls `getRevealProgress` for the user's mutual matches every 60s; when a new stage becomes available, fires a `sonner` toast "New reveal unlocked with {name} — Day {n}: {title}". Mounted once from `__root.tsx`.
+- Mobile/desktop responsive: stack vertically on mobile, horizontal timeline ≥md.
 
-### 4. AI Icebreakers — wire to context
-- Existing `src/lib/icebreakers.functions.ts` (already created): extend prompt to pull shared interests, shared goals, compatibility score, last daily challenge answers
-- Render "Generate Icebreaker" + "New Suggestion" buttons inside chat composer (already present); add fallback in match detail
-- Uses Lovable AI Gateway (`google/gemini-3-flash-preview`); key already in env
+## 3. Hidden Matches™
 
-### 5. No-Match Experience
-- New component `NoMatchHub` on `/discover` empty state and `/matches` empty state
-- Shows: today's 4 daily cards (link to Insights), one Personality Growth task (from daily_questions where category='personality'), one AI insight (cached daily, generated via gateway), one quiz (challenge_questions)
+### Schema (single migration)
+- New table `hidden_match_views (id, user_id, target_user_id, kind 'view'|'unlock', created_at)`.
+- Add column `profiles.personality_axes jsonb default '{}'` storing 4 axes derived from blueprint+daily answers: `social` (introvert↔extrovert), `planning` (dreamer↔planner), `cognition` (creative↔analytical), `role` (leader↔supporter), each -1..1.
+- New SQL function `public.discover_hidden_matches(_limit int)` → returns candidates where:
+  - values_score ≥ 70 (values must align)
+  - sum(abs(axes_diff)) ≥ threshold (complementary)
+  - excludes blocked / passed / already-mutual
+  - returns `similarity_score, complementary_score, shared_values text[], growth_opportunities text[]`.
+- RPC `public.compute_why_we_match(_a uuid, _b uuid)` returns similarity, complementary, shared values, growth opps, communication dynamics, strengths, challenges.
 
-### 6. 7-Day Reveal Journey — already scaffolded
-- Verify `/insights` Reveal tab maps Day 1–7 to: Voice / Personality / Values / Life Goals / Partial Photo / Video / Full
-- Add reveal cards UI per day with the right gated content source (voice_prompts, personality_blueprint, daily values answers, onboarding goals, photo_url blurred → clear, video TBD placeholder, full profile)
+### Server fns (`src/lib/hidden-matches.functions.ts`)
+- `loadHiddenMatches({ limit })` — wraps RPC, server-side gating: non-premium gets first 3 with full data + remaining as locked teasers (only count + complementary band). Premium: unlimited.
+- `whyWeMatch({ peerId })` — wraps RPC + calls Lovable AI Gateway (`google/gemini-3-flash-preview`) for "AI relationship insights" paragraph + recommended conversation topics. Cached per pair in memory.
+- All fire analytics: `hidden_match_view`, `hidden_match_unlock`, `why_we_match_open`, `hidden_match_message_started`.
 
-### 7. Navigation
-- Desktop: Discover · Insights · Challenges · Matches · Messages · Profile
-- Mobile bottom: Discover · Insights · Matches · Messages · Profile (Challenges via Insights tab)
-- Add `/challenges` route surfacing `challenge_packs` + `challenge_questions` (already exists in DB)
+### UI
+- `src/routes/discover.tsx`: add Tabs `Your Matches` | `Hidden Matches`. Each tab keeps its own data source.
+- `src/components/HiddenMatchCard.tsx`: complementary score ring, "Hidden Match" badge, tagline rotation, locked overlay for >3 (free) with `Unlock Hidden Matches™` CTA → `/premium`.
+- `src/components/WhyWeMatchSheet.tsx`: Sheet/Dialog with Similarity, Complementary, Shared Values, Growth, Communication Dynamics, Strengths, Challenges, AI insights, recommended topics, "Send icebreaker".
+- Curiosity banner on Discover header: "You have N Hidden Matches" + strongest band, computed from RPC.
 
-### 8. Analytics
-- Use existing `analytics_events` table
-- Helper `trackEvent(event, properties)` (browser → insert with `user_id = auth.uid()`)
-- Fire on: `daily_answer_submitted`, `quiz_completed`, `challenge_completed`, `reveal_unlocked`, `match_converted`, plus `app_open` for DAU
-- Admin metrics: extend existing admin analytics page (if present) with these counters; otherwise read via existing dashboard
+### Premium gating
+- Use existing `useSubscription`. Server fn also re-checks via `has_active_subscription` to prevent client bypass.
+
+### Branding
+- New tokens in `src/styles.css` (no color overwrites): `--gradient-hidden`, `--shadow-hidden` for Hidden Match surfaces.
+- Taglines randomised from an array.
+
+## 4. Sample data
+- Insert via supabase insert tool: 4 demo profiles (`Maya`, `Theo`, `Aria`, `Kai`) with onboarding_answers, personality_blueprint, and a `reveal_progress` row at Day 3 vs current user for quick demo. (Skip if local auth.uid context not available — gate behind admin script note.)
+
+## 5. Out of scope (defer)
+- Native push notifications (toasts only for now).
+- Admin reporting dashboard rebuild.
+- Real video recording for Day 6 (placeholder upload UI).
+
+## 6. Verification
+- `tsc --noEmit` green.
+- Manual smoke: open `/chat/:id` → pick "Deep" → new starters render + opener card.
+- `/insights` Reveal tab → animations + countdown.
+- `/discover` → Hidden Matches tab → 3 visible, 4th locked for free user; Why We Match opens.
 
 ## Files
-
-**Migration (1):**
-- Add `leadership_style` to `personality_blueprint`
-- Update `compute_readiness_score()` to 5 subscores
-
-**Data inserts (1 via insert tool):**
-- ~20 more `daily_questions` across relationship/values/personality/challenge
-
-**Server fns (new/edit):**
-- `src/lib/daily.functions.ts` — add `getTodayBundle()`
-- `src/lib/icebreakers.functions.ts` — enrich context
-- `src/lib/insights.functions.ts` — `generateDailyInsight()` (AI, cached per day_key)
-- `src/lib/analytics.functions.ts` — `trackEvent()` server fn (optional; can do client-side insert)
-
-**Routes / components:**
-- `src/routes/challenges.tsx` (new)
-- `src/routes/insights.tsx` — Today bundle (4 cards), 5-point Blueprint radar, Reveal Day cards
-- `src/components/NoMatchHub.tsx` (new) + wired into `/discover` & `/matches` empty states
-- `src/components/ReadinessBadge.tsx` for `/profile`
-- `src/components/UnveilNav.tsx` + `MobileBottomNav.tsx` — add Challenges (desktop)
-
-**Hooks:**
-- `src/hooks/use-analytics.ts` (track helper)
-
-## Verification
-
-- Build green; supabase linter clean
-- Manual smoke: answer one of each daily category → readiness subscores update; visit /discover with no matches → NoMatchHub renders; open Reveal tab on a mutual match → Day 1 voice card shows
-- Existing flows untouched: signup/login, Stripe checkout, membership upgrade, chat send/receive
-
-## Out of scope this phase
-
-- Video introduction recording (Day 6) — placeholder UI only
-- Push notifications, Playwright E2E, admin dashboard rebuild — defer to Phase 2
+- migrations: 1 (hidden_match_views, profiles.personality_axes, RPCs).
+- new: `src/components/RevealJourney.tsx`, `src/hooks/use-reveal-notifications.ts`, `src/lib/hidden-matches.functions.ts`, `src/components/HiddenMatchCard.tsx`, `src/components/WhyWeMatchSheet.tsx`.
+- edits: `src/lib/icebreakers.functions.ts`, `src/routes/chat.tsx`, `src/routes/insights.tsx`, `src/routes/discover.tsx`, `src/routes/__root.tsx`, `src/styles.css`.

@@ -5,7 +5,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { generateIcebreakers } from "@/lib/icebreakers.functions";
+import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
+
+const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
+  { id: "fun", label: "Fun" },
+  { id: "deep", label: "Deep" },
+  { id: "romantic", label: "Romantic" },
+  { id: "career", label: "Career" },
+  { id: "travel", label: "Travel" },
+  { id: "family", label: "Family" },
+];
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Conversations — UNVEIL" }] }),
@@ -41,6 +50,8 @@ function Chat() {
   const [showMenu, setShowMenu] = useState(false);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<{ text: string; kind: string }[]>([]);
+  const [opener, setOpener] = useState<string>("");
+  const [ideaCategory, setIdeaCategory] = useState<IcebreakerCategory | undefined>(undefined);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -194,21 +205,23 @@ function Chat() {
     return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
   }
 
-  const fetchIcebreakers = async () => {
+  const fetchIcebreakers = async (category?: IcebreakerCategory) => {
     if (!peerId) return;
+    setIdeaCategory(category);
     setIdeasLoading(true);
     setIdeasOpen(true);
     try {
-      const res = await generateIcebreakers({ data: { peerId } });
+      const res = await generateIcebreakers({ data: { peerId, category } });
       if ("error" in res) throw new Error(res.error);
       setIdeas(res.icebreakers);
+      setOpener(res.suggestedOpener);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't generate icebreakers");
-      setIdeasOpen(false);
     } finally {
       setIdeasLoading(false);
     }
   };
+
 
 
   return (
@@ -304,19 +317,44 @@ function Chat() {
               </div>
 
               {ideasOpen && (
-                <div className="border-t border-border bg-surface/50 p-3">
-                  <div className="mb-2 flex items-center justify-between">
+                <div className="border-t border-border bg-surface/50 p-3 space-y-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                       <Sparkles className="h-3 w-3 text-accent" /> AI Icebreakers
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={fetchIcebreakers} disabled={ideasLoading}
+                      <button onClick={() => fetchIcebreakers(ideaCategory)} disabled={ideasLoading}
                         className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-[10px] hover:bg-surface disabled:opacity-50">
-                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> New
+                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Generate New
                       </button>
                       <button onClick={() => setIdeasOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Close</button>
                     </div>
                   </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => fetchIcebreakers(undefined)}
+                      className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+                    >Mix</button>
+                    {ICE_CATEGORIES.map((c) => (
+                      <button key={c.id} onClick={() => fetchIcebreakers(c.id)}
+                        className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {opener && !ideasLoading && (
+                    <div className="rounded-2xl border border-accent/40 bg-accent/10 p-3">
+                      <div className="mb-1 flex items-center justify-between">
+                        <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">AI Suggested Opening Message</span>
+                        <button onClick={() => { setDraft(opener); setIdeasOpen(false); }}
+                          className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use this</button>
+                      </div>
+                      <p className="text-xs leading-relaxed">{opener}</p>
+                    </div>
+                  )}
+
                   {ideasLoading && ideas.length === 0 ? (
                     <div className="py-3 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
                   ) : (
@@ -336,7 +374,7 @@ function Chat() {
 
               <form onSubmit={(e) => { e.preventDefault(); send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={fetchIcebreakers} disabled={!peerId || ideasLoading}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />

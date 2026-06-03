@@ -16,6 +16,11 @@ import { toast } from "sonner";
 import {
   Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info, Home, RefreshCw, Share2,
 } from "lucide-react";
+import { HiddenMatchCard } from "@/components/HiddenMatchCard";
+import { WhyWeMatchSheet } from "@/components/WhyWeMatchSheet";
+import { loadHiddenMatches, logHiddenMatchView, type HiddenMatch } from "@/lib/hidden-matches.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
@@ -36,6 +41,7 @@ function Matches() {
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"band" | "all">("all");
+  const [mode, setMode] = useState<"your" | "hidden">("your");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB-backed gate (replaces localStorage useProfile). Onboarding completion
@@ -218,6 +224,21 @@ function Matches() {
     <div className="min-h-screen">
       <UnveilNav />
       <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-6 inline-flex rounded-full border border-border bg-card p-1">
+          <button
+            onClick={() => setMode("your")}
+            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode === "your" ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          >Your Matches</button>
+          <button
+            onClick={() => setMode("hidden")}
+            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode === "hidden" ? "bg-gradient-aura text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          >Hidden Matches™</button>
+        </div>
+
+        {mode === "hidden" ? (
+          <HiddenMatchesView />
+        ) : (
+        <>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -327,6 +348,8 @@ function Matches() {
           <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
             No one to discover yet. As more people complete onboarding, they'll appear here.
           </div>
+        )}
+        </>
         )}
       </div>
 
@@ -508,3 +531,108 @@ function CompareBar({ label, you, them }: { label: string; you: number; them: nu
     </div>
   );
 }
+
+const HIDDEN_TAGLINES = [
+  "Your perfect match may not be your type.",
+  "Discover the connections you would normally overlook.",
+  "Compatibility beyond attraction.",
+];
+
+function HiddenMatchesView() {
+  const fetchHidden = useServerFn(loadHiddenMatches);
+  const logView = useServerFn(logHiddenMatchView);
+  const [items, setItems] = useState<HiddenMatch[]>([]);
+  const [total, setTotal] = useState(0);
+  const [premium, setPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [why, setWhy] = useState<{ peerId: string; peerName: string | null } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetchHidden({ data: { limit: 24 } });
+        setItems(r.matches);
+        setTotal(r.total);
+        setPremium(r.premium);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Couldn't load Hidden Matches");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const strongest = items.find((m) => !m.locked && m.complementaryScore >= 90);
+  const tagline = HIDDEN_TAGLINES[Math.floor(Date.now() / 86_400_000) % HIDDEN_TAGLINES.length];
+
+  async function handleLike(m: HiddenMatch) {
+    const res = await likeProfile(m.id);
+    if (res.error) { toast.error(res.error); return; }
+    trackEvent("hidden_match_message_started", { peerId: m.id });
+    await logView({ data: { peerId: m.id, kind: "message" } });
+    if (res.mutual && res.conversationId) {
+      toast.success(`It's mutual with ${m.firstName ?? "your match"} — open the conversation.`);
+    } else {
+      toast.success("Interest sent.");
+    }
+  }
+
+  function openWhy(m: HiddenMatch) {
+    setWhy({ peerId: m.id, peerName: m.firstName });
+    logView({ data: { peerId: m.id, kind: "view" } }).catch(() => {});
+    trackEvent("hidden_match_view", { peerId: m.id });
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl border border-accent/30 bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-6">
+        <p className="font-mono text-[10px] uppercase tracking-luxury text-accent">Hidden Matches™</p>
+        <h1 className="mt-2 font-display text-3xl font-light md:text-4xl">
+          {loading ? "Reading your blueprint…" : `You have ${total} Hidden ${total === 1 ? "Match" : "Matches"}`}
+        </h1>
+        <p className="mt-1 text-sm text-foreground/80 italic">"{tagline}"</p>
+        {strongest && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            <Sparkles className="mr-1 inline h-3.5 w-3.5 text-accent" />
+            One Hidden Match has a {strongest.complementaryScore}% Complementary Score.
+          </p>
+        )}
+        {!premium && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Free preview shows 3 Hidden Matches. <Link to="/premium" className="text-accent underline">Unlock unlimited</Link>.
+          </p>
+        )}
+      </div>
+
+      {loading ? (
+        <p className="text-muted-foreground">Loading…</p>
+      ) : items.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
+          No Hidden Matches yet. As more profiles complete onboarding and you refine your blueprint, they'll appear here.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map((m, idx) => (
+            <HiddenMatchCard
+              key={m.id}
+              match={m}
+              taglineSeed={idx}
+              onView={() => openWhy(m)}
+              onWhy={() => openWhy(m)}
+              onLike={m.locked ? undefined : () => handleLike(m)}
+            />
+          ))}
+        </div>
+      )}
+
+      {why && (
+        <WhyWeMatchSheet
+          peerId={why.peerId}
+          peerName={why.peerName}
+          onClose={() => setWhy(null)}
+        />
+      )}
+    </div>
+  );
+}
+
