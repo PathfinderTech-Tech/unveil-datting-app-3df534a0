@@ -23,9 +23,11 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
@@ -121,6 +123,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchesRoute = MatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
@@ -134,6 +141,11 @@ const ManageSubscriptionRoute = ManageSubscriptionRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesRoute = GamesRouteImport.update({
@@ -275,9 +287,11 @@ export interface FileRoutesByFullPath {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
@@ -318,9 +332,11 @@ export interface FileRoutesByTo {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
@@ -362,9 +378,11 @@ export interface FileRoutesById {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
@@ -407,9 +425,11 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/insights'
     | '/login'
     | '/manage-subscription'
     | '/matches'
+    | '/messages'
     | '/onboarding'
     | '/passport'
     | '/play'
@@ -450,9 +470,11 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/insights'
     | '/login'
     | '/manage-subscription'
     | '/matches'
+    | '/messages'
     | '/onboarding'
     | '/passport'
     | '/play'
@@ -493,9 +515,11 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/insights'
     | '/login'
     | '/manage-subscription'
     | '/matches'
+    | '/messages'
     | '/onboarding'
     | '/passport'
     | '/play'
@@ -537,9 +561,11 @@ export interface RootRouteChildren {
   DiscoverSummaryRoute: typeof DiscoverSummaryRoute
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
+  InsightsRoute: typeof InsightsRoute
   LoginRoute: typeof LoginRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
   MatchesRoute: typeof MatchesRoute
+  MessagesRoute: typeof MessagesRoute
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
   PlayRoute: typeof PlayRouteWithChildren
@@ -659,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matches': {
       id: '/matches'
       path: '/matches'
@@ -678,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games': {
@@ -897,9 +937,11 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverSummaryRoute: DiscoverSummaryRoute,
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
+  InsightsRoute: InsightsRoute,
   LoginRoute: LoginRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
   MatchesRoute: MatchesRoute,
+  MessagesRoute: MessagesRoute,
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
   PlayRoute: PlayRouteWithChildren,
