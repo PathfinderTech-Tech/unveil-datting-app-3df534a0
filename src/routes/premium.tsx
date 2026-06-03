@@ -3,7 +3,7 @@ import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
-import { Check, Sparkles, Heart, ShieldCheck, Shield } from "lucide-react";
+import { Check, Sparkles, Heart, ShieldCheck, Shield, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({
@@ -174,6 +174,34 @@ function Membership() {
             <p className="mt-4 text-xs italic text-foreground/70">
               Premium helps you discover more. It does not determine whether you can connect.
             </p>
+          </div>
+        </div>
+
+        {/* DAILY MESSAGE PASS */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-accent/40 bg-accent/5 p-6 md:p-7">
+          <div className="flex items-start gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
+              <Zap className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-light">Daily Message Pass</h3>
+              <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                Unlock unlimited messaging for the next 24 hours. Perfect when you need a single great day of conversation without committing to a subscription.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="font-display text-2xl">$1.99</div>
+              <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">24 hours</div>
+            </div>
+            <Link
+              to="/checkout"
+              search={{ product: "message_pass" } as any}
+              className="inline-flex items-center justify-center rounded-full border border-accent bg-accent/15 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20"
+            >
+              Get Pass
+            </Link>
           </div>
         </div>
 
