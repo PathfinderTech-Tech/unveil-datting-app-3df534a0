@@ -7,6 +7,8 @@ import { loadBadges, useUserId } from "@/lib/games-api";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { BetaBadge } from "@/components/BetaBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
