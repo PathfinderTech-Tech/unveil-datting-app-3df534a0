@@ -544,39 +544,51 @@ function Onboarding() {
           </div>
         )}
 
-        <div className="mt-10 flex items-center justify-between">
+        <div className="mt-10 flex items-center justify-between gap-3">
           <button
             onClick={() => setStep(Math.max(0, step - 1))}
             disabled={step === 0}
-            className="rounded-full px-4 py-2 text-sm text-muted-foreground disabled:opacity-30"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30"
           >
-            ← Back
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
           </button>
-          {step < 4 ? (
-            <button
-              onClick={() => setStep(step + 1)}
-              disabled={!canNext}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
-            >
-              Continue <ArrowRight className="h-4 w-4" />
-            </button>
-          ) : (
-            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            {!STEPS[step].required && step < STEPS.length - 1 && (
               <button
-                onClick={() => finish(true)}
-                className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setStep(step + 1)}
+                className="rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground"
               >
-                Skip games — just let me chat
+                Skip this step
               </button>
+            )}
+            {step < STEPS.length - 1 ? (
               <button
-                onClick={() => finish(false)}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+                onClick={() => setStep(step + 1)}
+                disabled={!canNext}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
               >
-                Discover your resonance <ArrowRight className="h-4 w-4" />
+                Continue <ArrowRight className="h-4 w-4" />
               </button>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                <button
+                  onClick={() => finish(true)}
+                  className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Skip games — just let me chat
+                </button>
+                <button
+                  onClick={() => finish(false)}
+                  disabled={!canNext}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
+                >
+                  Discover your resonance <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
