@@ -32,6 +32,9 @@ type ProfileState = {
   baseScore: number;
   archetype: string | null;
   archetypeName: string;
+  completionPct: number;
+  questionsRemaining: number;
+  photosRemaining: number;
 };
 
 function Matches() {
@@ -51,18 +54,40 @@ function Matches() {
     if (authLoading || !user) return;
     let alive = true;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("onboarding_complete, compatibility_score, archetype")
-        .eq("id", user.id)
-        .maybeSingle();
+      const [{ data }, { data: onb }] = await Promise.all([
+        supabase.from("profiles")
+          .select("onboarding_complete, compatibility_score, archetype, first_name, gender, country, intention, relationship_intent, photo_url, profile_photo_url")
+          .eq("id", user.id).maybeSingle(),
+        supabase.from("onboarding_answers")
+          .select("answers").eq("user_id", user.id).maybeSingle(),
+      ]);
       if (!alive) return;
       const arch = (data?.archetype ?? null) as string | null;
+
+      // Compute resume progress for the "Finish your profile" card.
+      const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
+      const discovery = (answers?.discovery as Record<string, unknown> | undefined) ?? {};
+      const intent = data?.relationship_intent || data?.intention;
+      const hasIdentity = !!data?.first_name && !!data?.gender && !!data?.country && !!intent;
+      const hasConnStyle = typeof answers?.connectionStyle === "string" && !!answers.connectionStyle;
+      const hasProfession = typeof answers?.profession === "string" && !!answers.profession;
+      const hasPhoto = !!(data?.profile_photo_url || data?.photo_url);
+      const discoveryKeys = ["pace", "energy", "conflict", "future", "intimacy", "decisions"];
+      const discoveryAnswered = discoveryKeys.filter((k) => !!discovery[k]).length;
+      const totalSegments = 5; // identity, connection style, photo, profession, discovery
+      const doneSegments =
+        (hasIdentity ? 1 : 0) + (hasConnStyle ? 1 : 0) + (hasPhoto ? 1 : 0) +
+        (hasProfession ? 1 : 0) + (discoveryAnswered === discoveryKeys.length ? 1 : 0);
+      const completionPct = Math.round((doneSegments / totalSegments) * 100);
+
       setProfileState({
         onboardingComplete: !!data?.onboarding_complete,
         baseScore: data?.compatibility_score ?? 70,
         archetype: arch,
         archetypeName: arch && (ARCHETYPES as Record<string, { name: string }>)[arch]?.name || "Your resonance",
+        completionPct,
+        questionsRemaining: Math.max(0, discoveryKeys.length - discoveryAnswered),
+        photosRemaining: hasPhoto ? 0 : 1,
       });
     })();
     return () => { alive = false; };
@@ -123,14 +148,33 @@ function Matches() {
 
   // Signed in but hasn't finished onboarding → resume onboarding.
   if (!profileState!.onboardingComplete) {
+    const ps = profileState!;
     return (
       <div className="min-h-screen">
         <UnveilNav />
         <div className="mx-auto max-w-md p-12 text-center">
-          <h1 className="font-display text-3xl font-bold">Finish your profile.</h1>
-          <p className="mt-2 text-muted-foreground">Just a few more answers and we'll start finding compatible people.</p>
+          <h1 className="font-display text-3xl font-bold">Continue your profile.</h1>
+          <p className="mt-2 text-muted-foreground">Pick up right where you left off — nothing is lost.</p>
+
+          <div className="mt-6 rounded-3xl border border-border bg-card p-5 text-left">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Profile completion</span>
+              <span className="font-display text-lg font-bold text-gradient-hero">{ps.completionPct}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-border">
+              <div className="h-full bg-gradient-hero transition-all" style={{ width: `${ps.completionPct}%` }} />
+            </div>
+            <ul className="mt-4 space-y-1 text-xs text-muted-foreground">
+              {ps.questionsRemaining > 0 && <li>· Questions remaining: <span className="text-foreground">{ps.questionsRemaining}</span></li>}
+              {ps.photosRemaining > 0 && <li>· Photos remaining: <span className="text-foreground">{ps.photosRemaining}</span></li>}
+              {ps.questionsRemaining === 0 && ps.photosRemaining === 0 && (
+                <li>· A few final details to finish up.</li>
+              )}
+            </ul>
+          </div>
+
           <Link to="/onboarding" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
-            Resume <ArrowRight className="h-4 w-4" />
+            Continue profile <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

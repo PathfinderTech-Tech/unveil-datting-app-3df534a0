@@ -131,13 +131,30 @@ function Onboarding() {
       if (prof?.avatar_style) setAvatarStyle(prof.avatar_style as AvatarStyleId);
 
       const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
+      let _connStyle = "";
+      let _prof: Profession | null = null;
+      let _disc: Partial<DiscoveryProfile> = {};
       if (answers) {
-        if (typeof answers.connectionStyle === "string") setConnectionStyle(answers.connectionStyle);
-        if (typeof answers.profession === "string") setProfession(answers.profession as Profession);
+        if (typeof answers.connectionStyle === "string") { _connStyle = answers.connectionStyle; setConnectionStyle(_connStyle); }
+        if (typeof answers.profession === "string") { _prof = answers.profession as Profession; setProfession(_prof); }
         if (answers.discovery && typeof answers.discovery === "object") {
-          setDiscovery(answers.discovery as Partial<DiscoveryProfile>);
+          _disc = answers.discovery as Partial<DiscoveryProfile>;
+          setDiscovery(_disc);
         }
       }
+
+      // Resume at first incomplete step (Google + email login behave the same).
+      const _name = prof?.first_name ?? "";
+      const _gender = prof?.gender ?? "";
+      const _country = prof?.country ?? "";
+      const _intent = (prof?.relationship_intent || prof?.intention) ?? "";
+      const _email = user.email ?? "";
+      const step0Done = _name.length > 1 && !!_gender && !!_country && !!_intent && /\S+@\S+\.\S+/.test(_email);
+      const step1Done = !!_connStyle;
+      const step3Done = _prof !== null;
+      const step4Done = DISCOVERY_QUESTIONS.every((q) => _disc[q.key]);
+      const resumeStep = !step0Done ? 0 : !step1Done ? 1 : !step3Done ? 3 : !step4Done ? 4 : 2;
+      setStep(resumeStep);
       setHydrated(true);
     })();
     return () => { alive = false; };
