@@ -30,7 +30,9 @@ type Row = {
 };
 
 function MessagesPage() {
+  const { checking } = useRequireOnboarding();
   const { user, loading } = useAuth();
+
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
