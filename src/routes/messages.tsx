@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Search } from "lucide-react";
 
@@ -28,7 +30,9 @@ type Row = {
 };
 
 function MessagesPage() {
+  const { checking } = useRequireOnboarding();
   const { user, loading } = useAuth();
+
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
@@ -116,7 +120,7 @@ function MessagesPage() {
     return hay.includes(q.toLowerCase());
   });
 
-  if (loading) {
+  if (checking || loading) {
     return (
       <div className="min-h-screen bg-background">
         <UnveilNav />
@@ -124,6 +128,7 @@ function MessagesPage() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">

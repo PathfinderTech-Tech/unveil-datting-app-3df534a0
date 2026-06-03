@@ -4,7 +4,9 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { saveSparkAnswer, loadSparkAnswers, useUserId, awardBadge } from "@/lib/games-api";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/spark")({
   head: () => ({
@@ -46,8 +48,10 @@ const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
 };
 
 function SparkPage() {
+  const { checking } = useRequireOnboarding();
   const uid = useUserId();
   const [filter, setFilter] = useState<Category | "all">("all");
+
   const pool = useMemo(
     () => QUESTIONS.filter((q) => filter === "all" || q.category === filter),
     [filter]
@@ -91,9 +95,19 @@ function SparkPage() {
     next();
   };
 
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
+
       <div className="mx-auto max-w-3xl px-6 py-12">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Spark Questions</div>

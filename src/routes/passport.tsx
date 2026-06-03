@@ -7,6 +7,8 @@ import { loadBadges, useUserId } from "@/lib/games-api";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { BetaBadge } from "@/components/BetaBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "UNVEIL Passport" }, { name: "description", content: "Your dating badges, earned through real connection." }] }),
@@ -14,10 +16,12 @@ export const Route = createFileRoute("/passport")({
 });
 
 function Passport() {
+  const { checking } = useRequireOnboarding();
   const [profile] = useProfile();
   const uid = useUserId();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [isBeta, setIsBeta] = useState(false);
+
 
   // Load real earned badges from DB
   useEffect(() => {
@@ -32,9 +36,19 @@ function Passport() {
     uid ? unlockedIds : profile ? ["adventurer"] : []
   );
 
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
+
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">UNVEIL Passport</div>

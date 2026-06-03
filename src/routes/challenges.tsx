@@ -6,6 +6,8 @@ import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
 import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type ChallengeRow } from "@/lib/content-api";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { supabase } from "@/integrations/supabase/client";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { toast } from "sonner";
 
 type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
@@ -33,8 +35,10 @@ const CATEGORY_META: Record<string, { name: string; description: string; group: 
 const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
+  const { checking } = useRequireOnboarding();
   const search = useSearch({ from: "/challenges" }) as SearchParams;
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+
   const [active, setActive] = useState<string | null>(search.cat ?? null);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<"public" | "match">(search.tab ?? "public");
@@ -48,6 +52,17 @@ function Challenges() {
   }, []);
 
   const hasMatch = partners.length > 0;
+
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="min-h-screen">

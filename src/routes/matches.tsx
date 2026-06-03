@@ -12,6 +12,8 @@ import { Avatar } from "@/components/Avatar";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { toast } from "sonner";
 import {
   Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info, Home, RefreshCw, Share2,
@@ -38,8 +40,10 @@ type ProfileState = {
 };
 
 function Matches() {
+  const { checking } = useRequireOnboarding();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
   const [profileState, setProfileState] = useState<ProfileState | null>(null);
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +125,7 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
 
-  if (authLoading || (user && !profileState)) {
+  if (checking || authLoading || (user && !profileState)) {
     return (
       <div className="min-h-screen">
         <UnveilNav />
@@ -129,6 +133,7 @@ function Matches() {
       </div>
     );
   }
+
 
   // Not signed in → go sign in (never to onboarding step 1).
   if (!user) {
