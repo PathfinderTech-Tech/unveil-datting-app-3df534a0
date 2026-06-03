@@ -724,20 +724,22 @@ function Onboarding() {
             ) : (
               <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
                 <button
-                  onClick={() => finish(true)}
-                  className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => finish("discover")}
+                  disabled={!canNext || saving}
+                  className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40"
                 >
-                  Skip games — just let me chat
+                  Finish & go to Discover
                 </button>
                 <button
-                  onClick={() => finish(false)}
-                  disabled={!canNext}
+                  onClick={() => finish("stay")}
+                  disabled={!canNext || saving}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
                 >
-                  Discover your resonance <ArrowRight className="h-4 w-4" />
+                  {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : <>Complete My Profile <Check className="h-4 w-4" /></>}
                 </button>
               </div>
             )}
+
           </div>
         </div>
 
