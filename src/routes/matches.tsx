@@ -5,12 +5,12 @@ import {
   useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
-import { loadRealMatches, likeProfile, distanceLabel, type RealMatch } from "@/lib/matching-api";
+import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
 import {
-  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles,
+  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info,
 } from "lucide-react";
 
 export const Route = createFileRoute("/matches")({
@@ -80,6 +80,16 @@ function Matches() {
     setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
     setActive(null);
   }
+  async function handlePass(m: RealMatch) {
+    await passProfile(m.userId);
+    setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
+    toast("Passed.");
+  }
+  async function handleSave(m: RealMatch) {
+    const res = await toggleSaveProfile(m.userId);
+    if (res.error) { toast.error(res.error); return; }
+    toast.success(res.saved ? "Saved for later." : "Removed from saved.");
+  }
 
   return (
     <div className="min-h-screen">
@@ -111,57 +121,80 @@ function Matches() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((m) => {
-            const arch = ARCHETYPES[m.archetype];
             const dist = distanceLabel(m.distanceKm);
             const cityLabel = m.locationPrivacy === "country" ? (m.country || "—")
               : m.locationPrivacy === "hidden" ? "Location hidden"
               : m.city;
+            const band = bandLabel(m.pairScore);
             return (
-              <button
+              <div
                 key={m.userId}
-                onClick={() => setActive(m)}
-                className="group text-left rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
+                className="group flex flex-col rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
               >
-                <div className="flex items-start justify-between">
-                  <div className="relative">
-                    <div style={{ filter: "blur(8px)" }}>
-                      <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
+                <button onClick={() => setActive(m)} className="text-left">
+                  <div className="flex items-start justify-between">
+                    <div className="relative">
+                      <div style={{ filter: "blur(8px)" }}>
+                        <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                      </div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
-                      <Lock className="h-3 w-3 text-muted-foreground" />
+                    <div className="text-right">
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Compatibility</div>
+                      <div className="font-display text-2xl font-bold text-gradient-hero">{m.pairScore}%</div>
+                      <div className={`font-mono text-[10px] uppercase tracking-wider ${band.tone}`}>{band.label}</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Resonance</div>
-                    <div className="font-display text-2xl font-bold text-gradient-hero">{m.composite}</div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{cityLabel}</span>
+                    {m.age ? <span>· {m.age}</span> : null}
+                    {m.verified && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">Verified</span>}
                   </div>
-                </div>
 
-                <div className="mt-4">
-                  <div className="font-display text-lg font-bold" style={{ color: arch.hue as string }}>{arch.name}</div>
-                  <div className="text-xs italic text-muted-foreground">"{arch.tagline}"</div>
-                </div>
+                  {m.strengths.length > 0 && (
+                    <ul className="mt-3 space-y-1 text-xs text-foreground/85">
+                      {m.strengths.slice(0, 3).map((s) => (
+                        <li key={s} className="flex items-start gap-2"><Sparkles className="mt-0.5 h-3 w-3 text-accent" /> {s}</li>
+                      ))}
+                    </ul>
+                  )}
 
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{cityLabel}</span>
-                  <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" />{m.professionLabel}</span>
-                </div>
+                  {m.relationshipIntent && (
+                    <div className="mt-3 text-[11px] text-muted-foreground">
+                      <Briefcase className="mr-1 inline h-3 w-3" /> {m.relationshipIntent}
+                    </div>
+                  )}
 
-                {(m.tags.length > 0 || dist) && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {dist && (
-                      <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{dist}</span>
-                    )}
-                    {m.tags.slice(0, 3).map((t) => (
-                      <span key={t} className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] text-muted-foreground">{t}</span>
-                    ))}
-                  </div>
-                )}
+                  {(m.tags.length > 0 || dist) && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {dist && (
+                        <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{dist}</span>
+                      )}
+                      {m.tags.slice(0, 3).map((t) => (
+                        <span key={t} className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] text-muted-foreground">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </button>
 
-                <div className="mt-3 font-mono text-[11px] text-muted-foreground">
-                  Δ {Math.abs(m.composite - profile.composite)} pts
+                <div className="mt-4 flex items-center gap-2">
+                  <button onClick={() => handlePass(m)} aria-label="Pass" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
+                    <X className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => handleSave(m)} aria-label="Save" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
+                    <Bookmark className="h-4 w-4" />
+                  </button>
+                  <Link to="/match/$userId" params={{ userId: m.userId } as never} className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface" aria-label="Insights">
+                    <Info className="h-4 w-4" />
+                  </Link>
+                  <button onClick={() => handleLike(m)} aria-label="Like" className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-2 text-sm font-medium text-primary-foreground shadow-glow">
+                    <Heart className="h-4 w-4" /> Like
+                  </button>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

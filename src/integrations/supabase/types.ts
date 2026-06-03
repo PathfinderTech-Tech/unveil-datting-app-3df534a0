@@ -360,7 +360,9 @@ export type Database = {
           matched_user_id: string
           matched_user_interested: boolean | null
           mutual_interest: boolean | null
+          passed: boolean
           reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
+          saved: boolean
           share_matched_consent: boolean | null
           share_unlocked: boolean | null
           share_user_consent: boolean | null
@@ -377,7 +379,9 @@ export type Database = {
           matched_user_id: string
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
+          passed?: boolean
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
+          saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
           share_user_consent?: boolean | null
@@ -394,7 +398,9 @@ export type Database = {
           matched_user_id?: string
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
+          passed?: boolean
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
+          saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
           share_user_consent?: boolean | null
@@ -403,13 +409,58 @@ export type Database = {
         }
         Relationships: []
       }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      message_reads: {
+        Row: {
+          message_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          message_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          message_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
           conversation_id: string
           created_at: string
+          delivered_at: string | null
           flagged: boolean | null
           id: string
+          media_type: string | null
+          media_url: string | null
           message_type: string | null
           sender_id: string
         }
@@ -417,8 +468,11 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          delivered_at?: string | null
           flagged?: boolean | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           message_type?: string | null
           sender_id: string
         }
@@ -426,8 +480,11 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          delivered_at?: string | null
           flagged?: boolean | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           message_type?: string | null
           sender_id?: string
         }
@@ -724,6 +781,27 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shared_contacts: {
         Row: {
           created_at: string
@@ -885,6 +963,24 @@ export type Database = {
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      typing_indicators: {
+        Row: {
+          conversation_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1112,6 +1208,18 @@ export type Database = {
       }
     }
     Functions: {
+      compute_compatibility: {
+        Args: { _a: string; _b: string }
+        Returns: {
+          communication: number
+          friction: string[]
+          goals: number
+          lifestyle: number
+          overall: number
+          strengths: string[]
+          values_score: number
+        }[]
+      }
       consent_share_contact: {
         Args: { _match_user: string }
         Returns: {
@@ -1152,6 +1260,7 @@ export type Database = {
           photo_url: string
           preferred_language: string
           relationship_intent: string
+          strengths: string[]
           verified: boolean
         }[]
       }
@@ -1174,6 +1283,7 @@ export type Database = {
           mutual: boolean
         }[]
       }
+      pass_profile: { Args: { _target: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
