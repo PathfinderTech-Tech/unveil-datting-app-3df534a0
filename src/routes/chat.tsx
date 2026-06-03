@@ -5,7 +5,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { generateIcebreakers } from "@/lib/icebreakers.functions";
+import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
+
+const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
+  { id: "fun", label: "Fun" },
+  { id: "deep", label: "Deep" },
+  { id: "romantic", label: "Romantic" },
+  { id: "career", label: "Career" },
+  { id: "travel", label: "Travel" },
+  { id: "family", label: "Family" },
+];
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Conversations — UNVEIL" }] }),
