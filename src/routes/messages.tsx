@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Search } from "lucide-react";
 
