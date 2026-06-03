@@ -33,6 +33,7 @@ function MatchInsights() {
   const [compat, setCompat] = useState<Compat>(null);
   const [loading, setLoading] = useState(true);
   const [mineInterests, setMineInterests] = useState<string[]>([]);
+  const [showThought, setShowThought] = useState(false);
 
   useEffect(() => {
     (async () => {
