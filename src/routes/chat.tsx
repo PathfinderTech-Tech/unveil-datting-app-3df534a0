@@ -244,7 +244,22 @@ function Chat() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
       <div className="mx-auto grid max-w-6xl gap-4 px-6 py-10 md:grid-cols-[320px_1fr]">
+        {!quota.loading && !quota.unlimited && (
+          <div className="md:col-span-2 -mb-2 rounded-2xl border border-border bg-surface/60 px-4 py-2 text-xs text-muted-foreground">
+            {quota.remaining} of {quota.dailyLimit} free messages remaining today.
+            {" "}
+            <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline">Unlock 24h pass for $1.99</Link>
+            {" · "}
+            <Link to="/premium" className="text-primary underline">Go Premium</Link>
+          </div>
+        )}
+        {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
+          <div className="md:col-span-2 -mb-2 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent">
+            Unlimited messaging active · {formatRemainingTime(quota.messagePassUntil)} remaining on your Daily Pass.
+          </div>
+        )}
         <aside className="rounded-3xl border border-border bg-card p-4">
           <div className="mb-3 font-mono text-xs uppercase tracking-luxury text-muted-foreground">Open threads</div>
           {convs.length === 0 && (
