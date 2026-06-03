@@ -16,27 +16,63 @@ type Tab = "waitlist" | "verifications" | "payments" | "reports" | "feedback";
 function Admin() {
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<Tab>("verifications");
-  const [stats, setStats] = useState({ users: 0, reports: 0, premium: 0, pending: 0 });
+  const [tab, setTab] = useState<Tab>("waitlist");
+  const [stats, setStats] = useState({
+    users: 0, waitlistTotal: 0, waitlistPending: 0, approved: 0, rejected: 0,
+    pendingVerif: 0, premium: 0, reports: 0,
+  });
   const [verifications, setVerifications] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function refresh() {
-    const [u, r, p, vp, v, pay, rep] = await Promise.all([
+    const [u, wlt, wlp, wla, wlr, vp, r, p, v, pay, rep, wl, fb] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "approved"),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "rejected"),
+      supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
       supabase.from("reports").select("id", { count: "exact", head: true }),
       supabase.from("subscriptions").select("id", { count: "exact", head: true }).neq("tier", "free"),
-      supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
       supabase.from("verification_requests").select("*").in("status", ["pending_review", "submitted", "approved", "rejected"]).order("submitted_at", { ascending: false }).limit(50),
       supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(50),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("waitlist").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
-    setStats({ users: u.count || 0, reports: r.count || 0, premium: p.count || 0, pending: vp.count || 0 });
+    setStats({
+      users: u.count || 0,
+      waitlistTotal: wlt.count || 0,
+      waitlistPending: wlp.count || 0,
+      approved: wla.count || 0,
+      rejected: wlr.count || 0,
+      pendingVerif: vp.count || 0,
+      premium: p.count || 0,
+      reports: r.count || 0,
+    });
     setVerifications(v.data || []);
     setPayments(pay.data || []);
     setReports(rep.data || []);
+    setWaitlist(wl.data || []);
+    setFeedback(fb.data || []);
+  }
+
+  async function reviewWaitlist(id: string, status: "approved" | "rejected") {
+    setBusyId(id);
+    const patch: Record<string, unknown> = {
+      status,
+      reviewed_at: new Date().toISOString(),
+    };
+    if (status === "approved") patch.approved_at = new Date().toISOString();
+    const { error } = await supabase.from("waitlist").update(patch).eq("id", id);
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success(status === "approved" ? "Approved." : "Rejected.");
+    await refresh();
   }
 
   useEffect(() => {
