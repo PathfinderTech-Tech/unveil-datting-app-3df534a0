@@ -555,6 +555,30 @@ export type Database = {
         }
         Relationships: []
       }
+      hidden_match_views: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          target_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           chemistry_score: number | null
@@ -793,6 +817,7 @@ export type Database = {
           location_privacy: string
           location_updated_at: string | null
           onboarding_complete: boolean | null
+          personality_axes: Json
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           photo_url: string | null
           preferred_language: string | null
@@ -840,6 +865,7 @@ export type Database = {
           location_privacy?: string
           location_updated_at?: string | null
           onboarding_complete?: boolean | null
+          personality_axes?: Json
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
             | null
@@ -889,6 +915,7 @@ export type Database = {
           location_privacy?: string
           location_updated_at?: string | null
           onboarding_complete?: boolean | null
+          personality_axes?: Json
           photo_reveal_stage?:
             | Database["public"]["Enums"]["reveal_stage"]
             | null
@@ -1541,6 +1568,18 @@ export type Database = {
         }[]
       }
       compute_readiness_score: { Args: { _uid: string }; Returns: number }
+      compute_why_we_match: {
+        Args: { _a: string; _b: string }
+        Returns: {
+          challenges: string[]
+          communication_dynamics: string
+          complementary_score: number
+          growth_opportunities: string[]
+          shared_values: string[]
+          similarity_score: number
+          strengths: string[]
+        }[]
+      }
       consent_share_contact: {
         Args: { _match_user: string }
         Returns: {
@@ -1550,6 +1589,23 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      discover_hidden_matches: {
+        Args: { _limit?: number }
+        Returns: {
+          age: number
+          archetype: string
+          bio: string
+          city: string
+          complementary_score: number
+          country: string
+          first_name: string
+          growth_opportunities: string[]
+          id: string
+          photo_url: string
+          shared_values: string[]
+          similarity_score: number
+        }[]
       }
       discover_profiles: {
         Args: {
@@ -1623,6 +1679,7 @@ export type Database = {
         Returns: number
       }
       pass_profile: { Args: { _target: string }; Returns: undefined }
+      profile_axes: { Args: { _uid: string }; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
