@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { ArrowRight, ArrowLeft, Trophy, Check, X, Loader2 } from "lucide-react";
 import { savePuzzleScore, loadPuzzleScores, useUserId, awardBadge } from "@/lib/games-api";
-import { loadDailyPuzzles, markCompleted, PUZZLE_CATEGORIES, type PuzzleRow } from "@/lib/content-api";
+import { markCompleted, PUZZLE_CATEGORIES } from "@/lib/content-api";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/puzzles")({
