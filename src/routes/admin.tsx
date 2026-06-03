@@ -20,6 +20,7 @@ function Admin() {
   const [stats, setStats] = useState({
     users: 0, waitlistTotal: 0, waitlistPending: 0, approved: 0, rejected: 0,
     pendingVerif: 0, premium: 0, reports: 0,
+    messagesToday: 0, passesToday: 0, activePasses: 0, verifiedBadges: 0,
   });
   const [verifications, setVerifications] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -29,7 +30,7 @@ function Admin() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function refresh() {
-    const [u, wlt, wlp, wla, wlr, vp, r, p, v, pay, rep, wl, fb] = await Promise.all([
+    const [u, wlt, wlp, wla, wlr, vp, r, p, v, pay, rep, wl, fb, mon] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
       supabase.from("waitlist").select("id", { count: "exact", head: true }),
       supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -43,7 +44,9 @@ function Admin() {
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(20),
       supabase.from("waitlist").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(50),
+      (supabase as any).rpc("admin_monetization_stats"),
     ]);
+    const m = Array.isArray(mon.data) ? mon.data[0] : mon.data;
     setStats({
       users: u.count || 0,
       waitlistTotal: wlt.count || 0,
@@ -53,6 +56,10 @@ function Admin() {
       pendingVerif: vp.count || 0,
       premium: p.count || 0,
       reports: r.count || 0,
+      messagesToday: Number(m?.messages_today ?? 0),
+      passesToday: Number(m?.daily_passes_today ?? 0),
+      activePasses: Number(m?.active_message_passes ?? 0),
+      verifiedBadges: Number(m?.verified_badges ?? 0),
     });
     setVerifications(v.data || []);
     setPayments(pay.data || []);
@@ -131,9 +138,13 @@ function Admin() {
           <Stat icon={<Check className="h-4 w-4" />} label="Approved" value={stats.approved} />
           <Stat icon={<X className="h-4 w-4" />} label="Rejected" value={stats.rejected} />
           <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Verification pending" value={stats.pendingVerif} />
-          <Stat icon={<Crown className="h-4 w-4" />} label="Premium" value={stats.premium} />
+          <Stat icon={<Crown className="h-4 w-4" />} label="Premium subs (active)" value={stats.premium} />
           <Stat icon={<AlertTriangle className="h-4 w-4" />} label="Reports" value={stats.reports} />
           <Stat icon={<Mail className="h-4 w-4" />} label="Waitlist total" value={stats.waitlistTotal} />
+          <Stat icon={<CreditCard className="h-4 w-4" />} label="Messages today" value={stats.messagesToday} />
+          <Stat icon={<CreditCard className="h-4 w-4" />} label="Passes sold (24h)" value={stats.passesToday} />
+          <Stat icon={<CreditCard className="h-4 w-4" />} label="Active passes" value={stats.activePasses} />
+          <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Verified badges" value={stats.verifiedBadges} />
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
