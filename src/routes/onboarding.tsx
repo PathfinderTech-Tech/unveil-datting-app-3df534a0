@@ -89,10 +89,13 @@ function Onboarding() {
   const [generatingAvatar, setGeneratingAvatar] = useState(false);
   const runGenerateAvatar = useServerFn(generateAvatar);
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
+  const [completed, setCompleted] = useState(false);
+  const [saving, setSaving] = useState(false);
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allAnswered
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
+
 
   // Hydrate from DB. If onboarding is already complete, never reset the user
   // to Step 1 — bounce them to /matches. Otherwise prefill saved values and
