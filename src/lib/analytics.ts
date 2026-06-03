@@ -1,22 +1,30 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type AnalyticsEvent =
-  | "signup"
-  | "waitlist_join"
-  | "profile_completed"
-  | "verification_completed"
-  | "match_created"
-  | "premium_subscribed";
-
-export async function track(event: AnalyticsEvent, properties: Record<string, unknown> = {}) {
+/**
+ * Lightweight client-side analytics helper. Inserts into the
+ * `analytics_events` table — RLS scopes inserts to the current user.
+ * Fails silently so analytics never breaks the UI.
+ */
+export async function trackEvent(event: string, properties: Record<string, unknown> = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    const userId = data.user?.id ?? null;
     await supabase.from("analytics_events").insert({
-      user_id: user?.id ?? null,
       event,
-      properties: properties as never,
+      user_id: userId,
+      properties,
     });
   } catch {
-    /* swallow */
+    /* ignore */
   }
 }
+
+export const ANALYTICS = {
+  appOpen: "app_open",
+  dailyAnswerSubmitted: "daily_answer_submitted",
+  quizCompleted: "quiz_completed",
+  challengeCompleted: "challenge_completed",
+  revealUnlocked: "reveal_unlocked",
+  matchConverted: "match_converted",
+  icebreakerGenerated: "icebreaker_generated",
+} as const;
