@@ -32,6 +32,9 @@ type ProfileState = {
   baseScore: number;
   archetype: string | null;
   archetypeName: string;
+  completionPct: number;
+  questionsRemaining: number;
+  photosRemaining: number;
 };
 
 function Matches() {
@@ -51,18 +54,40 @@ function Matches() {
     if (authLoading || !user) return;
     let alive = true;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("onboarding_complete, compatibility_score, archetype")
-        .eq("id", user.id)
-        .maybeSingle();
+      const [{ data }, { data: onb }] = await Promise.all([
+        supabase.from("profiles")
+          .select("onboarding_complete, compatibility_score, archetype, first_name, gender, country, intention, relationship_intent, photo_url, profile_photo_url")
+          .eq("id", user.id).maybeSingle(),
+        supabase.from("onboarding_answers")
+          .select("answers").eq("user_id", user.id).maybeSingle(),
+      ]);
       if (!alive) return;
       const arch = (data?.archetype ?? null) as string | null;
+
+      // Compute resume progress for the "Finish your profile" card.
+      const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
+      const discovery = (answers?.discovery as Record<string, unknown> | undefined) ?? {};
+      const intent = data?.relationship_intent || data?.intention;
+      const hasIdentity = !!data?.first_name && !!data?.gender && !!data?.country && !!intent;
+      const hasConnStyle = typeof answers?.connectionStyle === "string" && !!answers.connectionStyle;
+      const hasProfession = typeof answers?.profession === "string" && !!answers.profession;
+      const hasPhoto = !!(data?.profile_photo_url || data?.photo_url);
+      const discoveryKeys = ["pace", "energy", "conflict", "future", "intimacy", "decisions"];
+      const discoveryAnswered = discoveryKeys.filter((k) => !!discovery[k]).length;
+      const totalSegments = 5; // identity, connection style, photo, profession, discovery
+      const doneSegments =
+        (hasIdentity ? 1 : 0) + (hasConnStyle ? 1 : 0) + (hasPhoto ? 1 : 0) +
+        (hasProfession ? 1 : 0) + (discoveryAnswered === discoveryKeys.length ? 1 : 0);
+      const completionPct = Math.round((doneSegments / totalSegments) * 100);
+
       setProfileState({
         onboardingComplete: !!data?.onboarding_complete,
         baseScore: data?.compatibility_score ?? 70,
         archetype: arch,
         archetypeName: arch && (ARCHETYPES as Record<string, { name: string }>)[arch]?.name || "Your resonance",
+        completionPct,
+        questionsRemaining: Math.max(0, discoveryKeys.length - discoveryAnswered),
+        photosRemaining: hasPhoto ? 0 : 1,
       });
     })();
     return () => { alive = false; };
