@@ -39,6 +39,8 @@
   --color-magenta: var(--magenta);
   --color-softblue: var(--softblue);
   --color-lilac: var(--lilac);
+  --color-indigo: var(--indigo);
+  --color-indigo-deep: var(--indigo-deep);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
 }
