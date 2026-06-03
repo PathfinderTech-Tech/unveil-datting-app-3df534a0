@@ -35,8 +35,10 @@ const CATEGORY_META: Record<string, { name: string; description: string; group: 
 const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
+  const { checking } = useRequireOnboarding();
   const search = useSearch({ from: "/challenges" }) as SearchParams;
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+
   const [active, setActive] = useState<string | null>(search.cat ?? null);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<"public" | "match">(search.tab ?? "public");
