@@ -15,12 +15,13 @@ const PRIMARY = [
   { to: "/challenges", label: "Challenges" },
   { to: "/matches", label: "Matches" },
   { to: "/messages", label: "Messages" },
-  { to: "/passport", label: "Profile" },
+  { to: "/profile", label: "Profile" },
 ] as const;
 
 const SECONDARY = [
   { to: "/", label: "Home" },
   { to: "/onboarding", label: "Begin" },
+  { to: "/passport", label: "Passport" },
   { to: "/play", label: "Play" },
   { to: "/contact-share", label: "Share" },
   { to: "/date-plan", label: "Date" },
