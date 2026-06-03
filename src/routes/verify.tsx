@@ -54,14 +54,16 @@ function Verify() {
 
   const needsBack = ID_TYPES.find((t) => t.value === idType)?.needsBack ?? false;
 
-  // Load existing draft / submission + profile photo
+  // Load existing draft / submission + profile photo + badge_paid gate
   useEffect(() => {
     if (!user) return;
     (async () => {
       const [{ data: vr }, { data: prof }] = await Promise.all([
         supabase.from("verification_requests").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("photo_url").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("photo_url, badge_paid, premium_until").eq("id", user.id).maybeSingle(),
       ]);
+      const premiumActive = !!prof?.premium_until && new Date(prof.premium_until) > new Date();
+      setBadgePaid(!!prof?.badge_paid || premiumActive);
       if (vr) {
         setStatus(vr.status as Status);
         setSelfieUrl(vr.selfie_url);
