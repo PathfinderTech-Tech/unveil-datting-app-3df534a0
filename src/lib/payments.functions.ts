@@ -39,12 +39,13 @@ async function resolveOrCreateCustomer(
 }
 
 // Maps human-readable price IDs to "kind" + premium duration days (one-time premium only).
-const PRICE_META: Record<string, { kind: string; durationDays?: number }> = {
+const PRICE_META: Record<string, { kind: string; durationDays?: number; durationHours?: number }> = {
   verified_badge_onetime: { kind: "verification_badge" },
   premium_monthly: { kind: "premium_subscription" },
   premium_yearly: { kind: "premium_subscription" },
   premium_quarterly: { kind: "premium_one_time", durationDays: 90 },
   premium_semiannual: { kind: "premium_one_time", durationDays: 180 },
+  message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
 };
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
