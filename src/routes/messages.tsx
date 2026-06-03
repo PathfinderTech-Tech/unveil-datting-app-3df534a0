@@ -120,7 +120,7 @@ function MessagesPage() {
     return hay.includes(q.toLowerCase());
   });
 
-  if (loading) {
+  if (checking || loading) {
     return (
       <div className="min-h-screen bg-background">
         <UnveilNav />
@@ -128,6 +128,7 @@ function MessagesPage() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
