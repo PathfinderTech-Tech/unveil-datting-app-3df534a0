@@ -8,12 +8,30 @@ const Input = z.object({
   selfieUrl: z.string().url().nullable().optional(),
 });
 
+// Identity-preserving prompts. We use Gemini image-edit with the actual selfie
+// as the source image so ethnicity, skin tone, facial features, and hair are
+// retained — not regenerated from a text description of an imaginary person.
 const STYLE_PROMPTS: Record<z.infer<typeof AvatarStyle>, string> = {
   real: "",
-  anime: "A warm, friendly anime-style portrait avatar of a single person, soft cel-shading, expressive eyes, gentle smile, clean studio background, centered headshot, premium quality, no text.",
-  stylized: "A modern stylized digital painting portrait avatar of a single person, soft brush strokes, rich color palette of deep purples and warm highlights, centered headshot, premium quality, no text.",
-  realistic: "A photorealistic studio portrait headshot of a single warm, approachable person, soft cinematic lighting, shallow depth of field, neutral elegant background, centered, premium quality, no text.",
-  mystery: "An elegant silhouette portrait avatar of a single person, dramatic backlight, soft purple-violet rim light, mysterious shadowed face, minimal background, premium quality, no text.",
+  anime:
+    "Transform THIS EXACT person in the source photo into a warm anime-style portrait. " +
+    "CRITICAL: preserve the person's ethnicity, skin tone, facial structure, eye shape, nose, lips, " +
+    "hair texture, hair color, and hairstyle exactly as in the source photo. Stylize only the rendering " +
+    "(soft cel-shading, expressive eyes, gentle smile, clean studio background). Do NOT change the person.",
+  stylized:
+    "Repaint THIS EXACT person in the source photo as a modern stylized digital painting portrait. " +
+    "CRITICAL: preserve the person's ethnicity, skin tone, facial structure, hair texture, hair color, " +
+    "and hairstyle exactly as in the source photo. Soft brush strokes, rich palette of deep purples and " +
+    "warm highlights, centered headshot. Do NOT change the person's identity.",
+  realistic:
+    "Create a photorealistic studio portrait of THIS EXACT person from the source photo. " +
+    "CRITICAL: preserve the person's ethnicity, skin tone, facial structure, eye color, nose, lips, " +
+    "hair texture, hair color, and hairstyle exactly as in the source photo. Improve lighting (soft " +
+    "cinematic), background (neutral elegant), and focus only. Do NOT change the person.",
+  mystery:
+    "Render THIS EXACT person from the source photo as an elegant backlit silhouette portrait. " +
+    "CRITICAL: keep the head shape, hair texture, and hairstyle silhouette matching the source photo. " +
+    "Dramatic backlight, soft purple-violet rim light, shadowed face, minimal background.",
 };
 
 type GenResult = {
@@ -46,31 +64,47 @@ export const generateAvatar = createServerFn({ method: "POST" })
       return { avatarUrl: data.selfieUrl, style: "real", fallback: false };
     }
 
+    if (!data.selfieUrl) {
+      return await savePlaceholder(
+        userId, data.style, null, supabase,
+        "Add a selfie first — we use it to keep your appearance recognizable.",
+      );
+    }
+
     const key = process.env.LOVABLE_API_KEY;
     const prompt = STYLE_PROMPTS[data.style];
 
-    // Try AI generation; on any failure, fall back gracefully without throwing.
     if (key) {
       try {
+        // Image-edit pipeline using Gemini's multimodal chat-completions image shape
+        // (OpenRouter format). The selfie is sent as image_url; Gemini conditions
+        // generation on it, preserving identity instead of inventing a new person.
         const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",
           headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "openai/gpt-image-2",
-            prompt,
-            size: "1024x1024",
-            quality: "low",
-            n: 1,
+            model: "google/gemini-3.1-flash-image-preview",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: prompt },
+                  { type: "image_url", image_url: { url: data.selfieUrl } },
+                ],
+              },
+            ],
+            modalities: ["image", "text"],
           }),
         });
         if (!res.ok) {
+          const errText = await res.text().catch(() => "");
           if (res.status === 429) throw new Error("Rate limited — try again in a moment.");
           if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace settings.");
-          throw new Error(`Generation failed (${res.status})`);
+          throw new Error(`Generation failed (${res.status}) ${errText.slice(0, 160)}`);
         }
         const json = (await res.json()) as { data?: Array<{ b64_json?: string }> };
         const b64 = json.data?.[0]?.b64_json;
-        if (!b64) throw new Error("Empty image response");
+        if (!b64) throw new Error("Empty image response — the model didn't return an image.");
 
         const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
         const path = `${userId}/avatars/${data.style}-${Date.now()}.png`;
@@ -88,24 +122,20 @@ export const generateAvatar = createServerFn({ method: "POST" })
             avatar_url: avatarUrl,
             avatar_style: data.style,
             avatar_generated_at: new Date().toISOString(),
-            profile_photo_url: data.selfieUrl ?? null,
+            profile_photo_url: data.selfieUrl,
           })
           .eq("id", userId);
 
         return { avatarUrl, style: data.style, fallback: false };
       } catch (e) {
-        // fall through to placeholder
         const message = e instanceof Error ? e.message : "Generation failed";
-        return await savePlaceholder(userId, data.style, data.selfieUrl ?? null, supabase, message);
+        return await savePlaceholder(userId, data.style, data.selfieUrl, supabase, message);
       }
     }
 
     return await savePlaceholder(
-      userId,
-      data.style,
-      data.selfieUrl ?? null,
-      supabase,
-      "AI avatar generation will be available soon.",
+      userId, data.style, data.selfieUrl, supabase,
+      "AI avatar generation is not configured yet.",
     );
   });
 
@@ -116,7 +146,21 @@ async function savePlaceholder(
   supabase: any,
   message: string,
 ): Promise<GenResult> {
-  // Pull first name + archetype to make the placeholder feel personal.
+  // When generation fails, fall back to the selfie itself (true to identity)
+  // rather than a generic gradient that hides who the person actually is.
+  if (selfieUrl) {
+    await supabase
+      .from("profiles")
+      .update({
+        avatar_url: selfieUrl,
+        avatar_style: style,
+        avatar_generated_at: new Date().toISOString(),
+        profile_photo_url: selfieUrl,
+      })
+      .eq("id", userId);
+    return { avatarUrl: selfieUrl, style, fallback: true, message };
+  }
+
   const { data: prof } = await supabase
     .from("profiles")
     .select("first_name, archetype")
@@ -132,7 +176,7 @@ async function savePlaceholder(
       avatar_url: dataUrl,
       avatar_style: style,
       avatar_generated_at: new Date().toISOString(),
-      profile_photo_url: selfieUrl,
+      profile_photo_url: null,
     })
     .eq("id", userId);
 

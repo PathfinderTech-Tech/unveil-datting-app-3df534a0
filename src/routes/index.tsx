@@ -94,7 +94,7 @@ function Home() {
             <Link to="/terms">Terms</Link>
             <Link to="/terms">Privacy</Link>
             <Link to="/safety">Safety</Link>
-            <a href="mailto:support@unveil.best">Contact</a>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </footer>

@@ -151,6 +151,7 @@ function Membership() {
               <span className="font-display text-4xl">{selected.price}</span>
               <span className="text-sm text-muted-foreground">/ {selected.label.toLowerCase()}</span>
             </div>
+            <p className="mt-1 text-xs text-muted-foreground">Tax calculated at checkout based on your billing region.</p>
 
             <ul className="mt-6 flex-1 space-y-2.5 text-sm">
               {PREMIUM_FEATURES.map((f) => (

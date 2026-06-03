@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalShell } from "@/components/LegalShell";
+import { MailActions } from "@/components/MailActions";
 import { Mail, Shield, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
@@ -61,9 +62,7 @@ function Card({
       </div>
       <h3 className="font-display text-lg font-light">{title}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{children}</p>
-      <a href={`mailto:${email}`} className="mt-3 inline-block text-sm text-accent underline">
-        {email}
-      </a>
+      <div className="mt-3"><MailActions email={email} /></div>
     </div>
   );
 }

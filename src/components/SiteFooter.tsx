@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LogoMark } from "./LogoHeader";
+import { MailActions } from "./MailActions";
 
 const LEGAL = [
   { to: "/privacy", label: "Privacy" },
@@ -31,9 +32,9 @@ export function SiteFooter() {
             <p className="mt-3 max-w-sm text-sm text-muted-foreground">
               Compatibility-first dating. Meaningful connections form before appearance becomes central.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">
-              <a href="mailto:support@unveil.best" className="hover:text-foreground">support@unveil.best</a>
-            </p>
+            <div className="mt-4 text-xs text-muted-foreground">
+              <MailActions />
+            </div>
           </div>
           <div>
             <h4 className="mb-3 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Product</h4>

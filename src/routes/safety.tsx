@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
+import { MailActions } from "@/components/MailActions";
 import { Shield, Phone, MapPin, EyeOff, Flag, Mail, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/safety")({
@@ -47,10 +48,8 @@ function Safety() {
         <div className="mt-12 rounded-3xl border border-accent/30 bg-accent/5 p-8">
           <Mail className="mb-3 h-6 w-6 text-accent" />
           <h2 className="font-display text-2xl font-light">Need help?</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Reach our safety team directly at{" "}
-            <a href="mailto:support@unveil.best" className="text-accent underline">support@unveil.best</a>.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Reach our safety team directly:</p>
+          <div className="mt-3 flex justify-center"><MailActions subject="Safety report" /></div>
         </div>
         <div className="mt-8 text-center">
           <Link to="/terms" className="text-xs text-muted-foreground underline">Read full Terms & Conditions</Link>
