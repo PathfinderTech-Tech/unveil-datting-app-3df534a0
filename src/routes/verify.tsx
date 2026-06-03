@@ -37,6 +37,7 @@ function Verify() {
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<Status>("draft");
   const [busy, setBusy] = useState(false);
+  const [badgePaid, setBadgePaid] = useState<boolean | null>(null);
 
   // Step 1
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
