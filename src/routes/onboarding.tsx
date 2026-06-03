@@ -77,7 +77,8 @@ const WORK_CATEGORIES = [
 ];
 
 // Step 5 — Compatibility foundation
-const COMPAT_QUESTIONS = [
+type CompatQ = { key: string; prompt: string; options: readonly string[]; optional?: boolean };
+const COMPAT_QUESTIONS: readonly CompatQ[] = [
   { key: "values",      prompt: "Which value matters most to you in a partner?",
     options: ["Honesty","Ambition","Kindness","Loyalty","Independence"] },
   { key: "communication", prompt: "Your ideal communication style:",
@@ -92,8 +93,9 @@ const COMPAT_QUESTIONS = [
     options: ["Spiritual","Religious","Agnostic","Atheist","Prefer not to say"], optional: true },
   { key: "longterm",    prompt: "What's important long-term?",
     options: ["Shared growth","Stability","Adventure together","Independence within partnership"] },
-] as const;
-type CompatKey = (typeof COMPAT_QUESTIONS)[number]["key"];
+];
+type CompatKey = string;
+
 
 // Step 6 — extra spark prompts (in addition to the 6 discovery binaries)
 const SPARK_PROMPTS = [
