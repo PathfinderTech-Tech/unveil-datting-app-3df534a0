@@ -4,6 +4,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
+import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
+import { Zap, Crown } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — UNVEIL" }] }),
@@ -12,12 +14,44 @@ export const Route = createFileRoute("/settings")({
 
 function Settings() {
   const { t } = useTranslation();
+  const { quota } = useMessageQuota();
+  const passActive = !!quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date();
+  const premiumActive = !!quota.premiumUntil && new Date(quota.premiumUntil) > new Date();
   return (
     <div className="min-h-screen">
       <UnveilNav />
       <section className="mx-auto max-w-2xl px-5 py-10 md:py-14">
         <h1 className="font-display text-3xl font-light md:text-4xl">{t("common.settings")}</h1>
         <div className="mt-8 space-y-5">
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <h2 className="font-display text-xl">Messaging</h2>
+            {quota.loading ? (
+              <p className="mt-2 text-xs text-muted-foreground">Loading…</p>
+            ) : quota.unlimited ? (
+              <div className="mt-3 space-y-2 text-sm">
+                {premiumActive && (
+                  <div className="flex items-center gap-2 text-primary"><Crown className="h-4 w-4" /> Premium active · unlimited messaging</div>
+                )}
+                {passActive && (
+                  <div className="flex items-center gap-2 text-accent"><Zap className="h-4 w-4" /> Daily Pass active · {formatRemainingTime(quota.messagePassUntil)} remaining</div>
+                )}
+              </div>
+            ) : (
+              <>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {quota.remaining} of {quota.dailyLimit} free messages remaining today. Resets {quota.resetsAt ? new Date(quota.resetsAt).toLocaleTimeString() : "in 24h"}.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link to="/checkout" search={{ product: "message_pass" } as any} className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-xs text-accent hover:bg-accent/20">
+                    <Zap className="h-3 w-3" /> Daily Pass · $1.99
+                  </Link>
+                  <Link to="/premium" className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-4 py-1.5 text-xs text-primary-foreground shadow-glow">
+                    <Crown className="h-3 w-3" /> Go Premium
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">{t("common.language")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">Change the interface language anytime.</p>
