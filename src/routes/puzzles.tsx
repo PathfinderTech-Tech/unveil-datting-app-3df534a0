@@ -206,11 +206,15 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
         <h2 className="mt-2 font-display text-2xl font-light leading-snug md:text-3xl">{q.puzzle}</h2>
         <div className="mt-6 grid gap-2 md:grid-cols-2">
           {q.options.map((opt) => {
-            const state = picked === null ? "idle" : opt === q.answer ? "correct" : picked === opt ? "wrong" : "muted";
+            const state =
+              reveal === null
+                ? (picked === null ? "idle" : (picked === opt ? "pending" : "muted"))
+                : opt === reveal.answer ? "correct" : picked === opt ? "wrong" : "muted";
             return (
-              <button key={opt} disabled={picked !== null} onClick={() => setPicked(opt)}
+              <button key={opt} disabled={picked !== null} onClick={() => onPick(opt)}
                 className={`flex items-center justify-between rounded-2xl border p-4 text-left text-sm transition-all ${
                   state === "idle" ? "border-border bg-surface hover:border-primary" :
+                  state === "pending" ? "border-primary bg-primary/10" :
                   state === "correct" ? "border-neon/60 bg-neon/10" :
                   state === "wrong" ? "border-accent bg-accent/10" :
                   "border-border bg-surface opacity-50"
@@ -222,15 +226,15 @@ function PuzzleRunner({ category, uid, onBack, onScore }: { category: string; ui
             );
           })}
         </div>
-        {picked !== null && (
+        {reveal !== null && (
           <div className="mt-5 space-y-3">
             <div className={`text-sm ${isCorrect ? "text-neon" : "text-muted-foreground"}`}>
-              {isCorrect ? "Nice — that's it." : `Answer: ${q.answer}`}
+              {isCorrect ? "Nice — that's it." : `Answer: ${reveal.answer}`}
             </div>
-            {q.explanation && (
+            {reveal.explanation && (
               <div className="rounded-2xl border border-border bg-surface/60 p-3 text-xs text-muted-foreground">
                 <span className="font-mono uppercase tracking-wider text-[9px] text-accent">Insight</span>
-                <div className="mt-1">{q.explanation}</div>
+                <div className="mt-1">{reveal.explanation}</div>
               </div>
             )}
             <div className="flex justify-end">
