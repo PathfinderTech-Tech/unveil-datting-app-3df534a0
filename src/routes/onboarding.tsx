@@ -215,11 +215,23 @@ function Onboarding() {
       <UnveilNav />
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* progress */}
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <div className="font-mono text-[11px] uppercase tracking-luxury text-muted-foreground">
+            Step {step + 1} of {STEPS.length} · {STEPS[step].label}
+            <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${STEPS[step].required ? "bg-primary/15 text-primary" : "bg-surface-2 text-muted-foreground"}`}>
+              {STEPS[step].required ? "Required" : "Optional"}
+            </span>
+          </div>
+          <div className="font-mono text-[11px] text-muted-foreground">
+            {step < STEPS.length - 1 ? <>Next: {STEPS[step].next}</> : <>Next: Your matches</>}
+          </div>
+        </div>
         <div className="mb-10 flex items-center gap-2">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-border"}`} />
+          {STEPS.map((_, i) => (
+            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gradient-hero" : "bg-border"}`} />
           ))}
         </div>
+
 
         {step === 0 && (
           <div className="space-y-6">
