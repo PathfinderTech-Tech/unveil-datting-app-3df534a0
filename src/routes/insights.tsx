@@ -8,6 +8,7 @@ import { getTodayBundle, saveDailyAnswer, getAnswerHistory } from "@/lib/daily.f
 import { trackEvent, ANALYTICS } from "@/lib/analytics";
 import { getBlueprint, updateBlueprint, STYLE_OPTIONS } from "@/lib/blueprint.functions";
 import { getRevealProgress, advanceReveal, REVEAL_STAGES } from "@/lib/reveal.functions";
+import { RevealJourney } from "@/components/RevealJourney";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Lock, Flame, Sparkles } from "lucide-react";
 import { toast } from "sonner";
