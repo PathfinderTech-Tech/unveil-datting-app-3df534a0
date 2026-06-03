@@ -265,6 +265,15 @@ function Onboarding() {
     allAnswered,
   ][step];
 
+  if (authLoading || (user && !hydrated)) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading your profile…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
