@@ -249,7 +249,7 @@ function Onboarding() {
         intent: (prof?.relationship_intent || prof?.intention) ?? "",
         email: user.email ?? "",
         appearance: (a?.appearance as AppearanceMode) ?? "real",
-        photoUrl: sel,
+        photoUrl: sel ?? null,
         avatarUrl: prof?.avatar_url ?? null,
         bio: prof?.bio ?? "",
         interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
