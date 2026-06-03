@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LogoMark } from "./LogoHeader";
+import { MailActions } from "./MailActions";
 
 const LEGAL = [
   { to: "/privacy", label: "Privacy" },
