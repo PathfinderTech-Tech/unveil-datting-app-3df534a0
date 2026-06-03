@@ -5,7 +5,7 @@ import {
   useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
-import { loadRealMatches, likeProfile, distanceLabel, type RealMatch } from "@/lib/matching-api";
+import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
