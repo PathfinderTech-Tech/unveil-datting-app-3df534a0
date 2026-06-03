@@ -19,6 +19,7 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PuzzlesRouteImport } from './routes/puzzles'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as PlayRouteImport } from './routes/play'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MatchesRouteImport } from './routes/matches'
@@ -26,6 +27,8 @@ import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscrip
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
+import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DatePlanRouteImport } from './routes/date-plan'
 import { Route as ContactShareRouteImport } from './routes/contact-share'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -33,6 +36,11 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayThisOrThatRouteImport } from './routes/play.this-or-that'
+import { Route as PlayStoryRouteImport } from './routes/play.story'
+import { Route as PlayQuizRouteImport } from './routes/play.quiz'
+import { Route as PlayPredictRouteImport } from './routes/play.predict'
+import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -86,6 +94,11 @@ const PremiumRoute = PremiumRouteImport.update({
   path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayRoute = PlayRouteImport.update({
+  id: '/play',
+  path: '/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PassportRoute = PassportRouteImport.update({
   id: '/passport',
   path: '/passport',
@@ -119,6 +132,16 @@ const GamesRoute = GamesRouteImport.update({
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverSummaryRoute = DiscoverSummaryRouteImport.update({
+  id: '/discover-summary',
+  path: '/discover-summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DatePlanRoute = DatePlanRouteImport.update({
@@ -156,6 +179,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayThisOrThatRoute = PlayThisOrThatRouteImport.update({
+  id: '/this-or-that',
+  path: '/this-or-that',
+  getParentRoute: () => PlayRoute,
+} as any)
+const PlayStoryRoute = PlayStoryRouteImport.update({
+  id: '/story',
+  path: '/story',
+  getParentRoute: () => PlayRoute,
+} as any)
+const PlayQuizRoute = PlayQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => PlayRoute,
+} as any)
+const PlayPredictRoute = PlayPredictRouteImport.update({
+  id: '/predict',
+  path: '/predict',
+  getParentRoute: () => PlayRoute,
+} as any)
+const PlayEscapeRoute = PlayEscapeRouteImport.update({
+  id: '/escape',
+  path: '/escape',
+  getParentRoute: () => PlayRoute,
+} as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/return',
   path: '/return',
@@ -176,6 +224,8 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
+  '/discover': typeof DiscoverRoute
+  '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -183,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
+  '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -194,6 +245,11 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/play/escape': typeof PlayEscapeRoute
+  '/play/predict': typeof PlayPredictRoute
+  '/play/quiz': typeof PlayQuizRoute
+  '/play/story': typeof PlayStoryRoute
+  '/play/this-or-that': typeof PlayThisOrThatRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -204,6 +260,8 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
+  '/discover': typeof DiscoverRoute
+  '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -211,6 +269,7 @@ export interface FileRoutesByTo {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
+  '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -222,6 +281,11 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/play/escape': typeof PlayEscapeRoute
+  '/play/predict': typeof PlayPredictRoute
+  '/play/quiz': typeof PlayQuizRoute
+  '/play/story': typeof PlayStoryRoute
+  '/play/this-or-that': typeof PlayThisOrThatRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -233,6 +297,8 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact-share': typeof ContactShareRoute
   '/date-plan': typeof DatePlanRoute
+  '/discover': typeof DiscoverRoute
+  '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
@@ -240,6 +306,7 @@ export interface FileRoutesById {
   '/matches': typeof MatchesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
+  '/play': typeof PlayRouteWithChildren
   '/premium': typeof PremiumRoute
   '/puzzles': typeof PuzzlesRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -251,6 +318,11 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/play/escape': typeof PlayEscapeRoute
+  '/play/predict': typeof PlayPredictRoute
+  '/play/quiz': typeof PlayQuizRoute
+  '/play/story': typeof PlayStoryRoute
+  '/play/this-or-that': typeof PlayThisOrThatRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -263,6 +335,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact-share'
     | '/date-plan'
+    | '/discover'
+    | '/discover-summary'
     | '/game'
     | '/games'
     | '/login'
@@ -270,6 +344,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/passport'
+    | '/play'
     | '/premium'
     | '/puzzles'
     | '/reset-password'
@@ -281,6 +356,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/play/escape'
+    | '/play/predict'
+    | '/play/quiz'
+    | '/play/story'
+    | '/play/this-or-that'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -291,6 +371,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact-share'
     | '/date-plan'
+    | '/discover'
+    | '/discover-summary'
     | '/game'
     | '/games'
     | '/login'
@@ -298,6 +380,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/passport'
+    | '/play'
     | '/premium'
     | '/puzzles'
     | '/reset-password'
@@ -309,6 +392,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/play/escape'
+    | '/play/predict'
+    | '/play/quiz'
+    | '/play/story'
+    | '/play/this-or-that'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -319,6 +407,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact-share'
     | '/date-plan'
+    | '/discover'
+    | '/discover-summary'
     | '/game'
     | '/games'
     | '/login'
@@ -326,6 +416,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/onboarding'
     | '/passport'
+    | '/play'
     | '/premium'
     | '/puzzles'
     | '/reset-password'
@@ -337,6 +428,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/play/escape'
+    | '/play/predict'
+    | '/play/quiz'
+    | '/play/story'
+    | '/play/this-or-that'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -348,6 +444,8 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactShareRoute: typeof ContactShareRoute
   DatePlanRoute: typeof DatePlanRoute
+  DiscoverRoute: typeof DiscoverRoute
+  DiscoverSummaryRoute: typeof DiscoverSummaryRoute
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
@@ -355,6 +453,7 @@ export interface RootRouteChildren {
   MatchesRoute: typeof MatchesRoute
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
+  PlayRoute: typeof PlayRouteWithChildren
   PremiumRoute: typeof PremiumRoute
   PuzzlesRoute: typeof PuzzlesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -440,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play': {
+      id: '/play'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/passport': {
       id: '/passport'
       path: '/passport'
@@ -487,6 +593,20 @@ declare module '@tanstack/react-router' {
       path: '/game'
       fullPath: '/game'
       preLoaderRoute: typeof GameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover-summary': {
+      id: '/discover-summary'
+      path: '/discover-summary'
+      fullPath: '/discover-summary'
+      preLoaderRoute: typeof DiscoverSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/date-plan': {
@@ -538,6 +658,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/this-or-that': {
+      id: '/play/this-or-that'
+      path: '/this-or-that'
+      fullPath: '/play/this-or-that'
+      preLoaderRoute: typeof PlayThisOrThatRouteImport
+      parentRoute: typeof PlayRoute
+    }
+    '/play/story': {
+      id: '/play/story'
+      path: '/story'
+      fullPath: '/play/story'
+      preLoaderRoute: typeof PlayStoryRouteImport
+      parentRoute: typeof PlayRoute
+    }
+    '/play/quiz': {
+      id: '/play/quiz'
+      path: '/quiz'
+      fullPath: '/play/quiz'
+      preLoaderRoute: typeof PlayQuizRouteImport
+      parentRoute: typeof PlayRoute
+    }
+    '/play/predict': {
+      id: '/play/predict'
+      path: '/predict'
+      fullPath: '/play/predict'
+      preLoaderRoute: typeof PlayPredictRouteImport
+      parentRoute: typeof PlayRoute
+    }
+    '/play/escape': {
+      id: '/play/escape'
+      path: '/escape'
+      fullPath: '/play/escape'
+      preLoaderRoute: typeof PlayEscapeRouteImport
+      parentRoute: typeof PlayRoute
+    }
     '/checkout/return': {
       id: '/checkout/return'
       path: '/return'
@@ -567,6 +722,24 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
   CheckoutRouteChildren,
 )
 
+interface PlayRouteChildren {
+  PlayEscapeRoute: typeof PlayEscapeRoute
+  PlayPredictRoute: typeof PlayPredictRoute
+  PlayQuizRoute: typeof PlayQuizRoute
+  PlayStoryRoute: typeof PlayStoryRoute
+  PlayThisOrThatRoute: typeof PlayThisOrThatRoute
+}
+
+const PlayRouteChildren: PlayRouteChildren = {
+  PlayEscapeRoute: PlayEscapeRoute,
+  PlayPredictRoute: PlayPredictRoute,
+  PlayQuizRoute: PlayQuizRoute,
+  PlayStoryRoute: PlayStoryRoute,
+  PlayThisOrThatRoute: PlayThisOrThatRoute,
+}
+
+const PlayRouteWithChildren = PlayRoute._addFileChildren(PlayRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -575,6 +748,8 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactShareRoute: ContactShareRoute,
   DatePlanRoute: DatePlanRoute,
+  DiscoverRoute: DiscoverRoute,
+  DiscoverSummaryRoute: DiscoverSummaryRoute,
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
@@ -582,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchesRoute: MatchesRoute,
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
+  PlayRoute: PlayRouteWithChildren,
   PremiumRoute: PremiumRoute,
   PuzzlesRoute: PuzzlesRoute,
   ResetPasswordRoute: ResetPasswordRoute,

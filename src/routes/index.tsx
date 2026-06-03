@@ -56,10 +56,10 @@ function Home() {
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link
-              to="/signup"
+              to="/discover"
               className="group inline-flex items-center gap-2 rounded-full bg-gradient-hero px-7 py-3.5 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
             >
-              Start Discovery <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              Discover Yourself <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <a
               href="#waitlist"

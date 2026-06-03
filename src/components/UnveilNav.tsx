@@ -11,10 +11,9 @@ import { Menu, X } from "lucide-react";
 const links = [
   { to: "/", label: "Home" },
   { to: "/onboarding", label: "Begin" },
-  { to: "/spark", label: "Spark" },
+  { to: "/discover", label: "Discover" },
   { to: "/matches", label: "Matches" },
-  { to: "/challenges", label: "Challenges" },
-  { to: "/puzzles", label: "Puzzles" },
+  { to: "/play", label: "Play" },
   { to: "/contact-share", label: "Share" },
   { to: "/date-plan", label: "Date" },
   { to: "/passport", label: "Passport" },
