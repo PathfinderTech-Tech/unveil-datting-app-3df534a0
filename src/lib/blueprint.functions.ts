@@ -5,6 +5,7 @@ const STYLES = {
   communication_style: ["Direct", "Reflective", "Playful", "Diplomatic"],
   attachment_style: ["Secure", "Anxious", "Avoidant", "Fearful"],
   conflict_style: ["Lean in", "Pause", "Repair quickly", "Need space"],
+  leadership_style: ["Initiator", "Collaborator", "Strategist", "Supporter"],
   relationship_style: ["Devoted partnership", "Independent bond", "Adventurous", "Slow-burn"],
 } as const;
 
