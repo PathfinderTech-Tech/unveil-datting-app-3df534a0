@@ -25,6 +25,11 @@ const SECONDARY = [
   { to: "/contact-share", label: "Share" },
   { to: "/date-plan", label: "Date" },
   { to: "/premium", label: "Membership" },
+  { to: "/support", label: "Support" },
+  { to: "/privacy", label: "Privacy" },
+  { to: "/terms", label: "Terms" },
+  { to: "/community-guidelines", label: "Community" },
+  { to: "/refund", label: "Refund" },
 ] as const;
 
 export function UnveilNav() {

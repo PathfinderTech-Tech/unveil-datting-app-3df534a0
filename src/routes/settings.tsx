@@ -31,6 +31,18 @@ function Settings() {
             </Link>
           </div>
           <FeedbackForm />
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <h2 className="font-display text-xl">Legal & support</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Policies, guidelines, and help.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+              <Link to="/privacy" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Privacy Policy</Link>
+              <Link to="/terms" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Terms of Service</Link>
+              <Link to="/community-guidelines" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Community Guidelines</Link>
+              <Link to="/refund" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Refund Policy</Link>
+              <Link to="/safety" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Safety</Link>
+              <Link to="/support" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Support Center</Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>

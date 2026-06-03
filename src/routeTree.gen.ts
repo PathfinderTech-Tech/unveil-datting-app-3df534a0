@@ -11,12 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PuzzlesRouteImport } from './routes/puzzles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
@@ -63,6 +65,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SparkRoute = SparkRouteImport.update({
   id: '/spark',
   path: '/spark',
@@ -91,6 +98,11 @@ const ResultsRoute = ResultsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PuzzlesRoute = PuzzlesRouteImport.update({
@@ -298,12 +310,14 @@ export interface FileRoutesByFullPath {
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -343,12 +357,14 @@ export interface FileRoutesByTo {
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -389,12 +405,14 @@ export interface FileRoutesById {
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/puzzles': typeof PuzzlesRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -436,12 +454,14 @@ export interface FileRouteTypes {
     | '/premium'
     | '/privacy'
     | '/puzzles'
+    | '/refund'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/support'
     | '/terms'
     | '/verify'
     | '/checkout/return'
@@ -481,12 +501,14 @@ export interface FileRouteTypes {
     | '/premium'
     | '/privacy'
     | '/puzzles'
+    | '/refund'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/support'
     | '/terms'
     | '/verify'
     | '/checkout/return'
@@ -526,12 +548,14 @@ export interface FileRouteTypes {
     | '/premium'
     | '/privacy'
     | '/puzzles'
+    | '/refund'
     | '/reset-password'
     | '/results'
     | '/safety'
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/support'
     | '/terms'
     | '/verify'
     | '/checkout/return'
@@ -572,12 +596,14 @@ export interface RootRouteChildren {
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
   PuzzlesRoute: typeof PuzzlesRoute
+  RefundRoute: typeof RefundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SafetyRoute: typeof SafetyRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SparkRoute: typeof SparkRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
@@ -599,6 +625,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/spark': {
@@ -641,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/puzzles': {
@@ -948,12 +988,14 @@ const rootRouteChildren: RootRouteChildren = {
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
   PuzzlesRoute: PuzzlesRoute,
+  RefundRoute: RefundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SafetyRoute: SafetyRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SparkRoute: SparkRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   MatchUserIdRoute: MatchUserIdRoute,

@@ -60,6 +60,12 @@ function Signup() {
         <p className="mt-5 text-center text-xs text-muted-foreground">
           Already a member? <Link to="/login" className="text-foreground underline">Sign in</Link>
         </p>
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+          By creating an account you confirm you are 18+ and agree to our{" "}
+          <Link to="/terms" className="underline hover:text-foreground">Terms</Link>,{" "}
+          <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>, and{" "}
+          <Link to="/community-guidelines" className="underline hover:text-foreground">Community Guidelines</Link>.
+        </p>
       </div>
     </div>
   );
