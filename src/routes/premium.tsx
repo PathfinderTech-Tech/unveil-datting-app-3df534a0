@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { Check, Sparkles, Heart, ShieldCheck, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/premium")({
@@ -107,7 +108,8 @@ function Membership() {
           />
 
           {/* PREMIUM */}
-          <div className="relative flex flex-col rounded-3xl border border-primary bg-card p-7 shadow-glow md:p-9">
+          <div className="relative flex flex-col overflow-hidden rounded-3xl border border-primary bg-card p-7 shadow-glow md:p-9">
+            <VeilBackdrop variant="corner" opacity={0.09} />
             <div className="absolute -top-3 left-7 rounded-full bg-gradient-hero px-3 py-1 font-mono text-[10px] uppercase tracking-luxury text-primary-foreground shadow-glow">
               Most chosen
             </div>
