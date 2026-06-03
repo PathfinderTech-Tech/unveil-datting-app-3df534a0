@@ -10,7 +10,7 @@ import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/Ma
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
 import {
-  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles,
+  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info,
 } from "lucide-react";
 
 export const Route = createFileRoute("/matches")({
