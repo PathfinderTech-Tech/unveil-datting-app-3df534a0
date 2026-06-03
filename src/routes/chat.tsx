@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
+import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
+import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -55,6 +57,8 @@ function Chat() {
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { quota, refresh: refreshQuota } = useMessageQuota();
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
@@ -143,13 +147,26 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
+    if (!quota.unlimited && quota.remaining <= 0) {
+      setPaywallOpen(true);
+      return;
+    }
     const content = scrubPII(draft.trim());
     setDraft("");
-    await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
+    const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
+    if (error) {
+      if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+        setPaywallOpen(true);
+        await refreshQuota();
+        return;
+      }
+      toast.error(error.message);
+      return;
+    }
     await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
-    // Clear typing
     const sb = supabase as unknown as { from: (t: string) => any };
     await sb.from("typing_indicators").delete().eq("conversation_id", active.id).eq("user_id", user.id);
+    refreshQuota();
   };
 
   const onDraftChange = (v: string) => {
@@ -227,7 +244,22 @@ function Chat() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
       <div className="mx-auto grid max-w-6xl gap-4 px-6 py-10 md:grid-cols-[320px_1fr]">
+        {!quota.loading && !quota.unlimited && (
+          <div className="md:col-span-2 -mb-2 rounded-2xl border border-border bg-surface/60 px-4 py-2 text-xs text-muted-foreground">
+            {quota.remaining} of {quota.dailyLimit} free messages remaining today.
+            {" "}
+            <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline">Unlock 24h pass for $1.99</Link>
+            {" · "}
+            <Link to="/premium" className="text-primary underline">Go Premium</Link>
+          </div>
+        )}
+        {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
+          <div className="md:col-span-2 -mb-2 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent">
+            Unlimited messaging active · {formatRemainingTime(quota.messagePassUntil)} remaining on your Daily Pass.
+          </div>
+        )}
         <aside className="rounded-3xl border border-border bg-card p-4">
           <div className="mb-3 font-mono text-xs uppercase tracking-luxury text-muted-foreground">Open threads</div>
           {convs.length === 0 && (

@@ -7,7 +7,7 @@ import { isStripeConfigured } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, ArrowLeft } from "lucide-react";
 
-type Search = { product?: "premium" | "verified"; plan?: "1" | "3" | "6" | "12" };
+type Search = { product?: "premium" | "verified" | "message_pass"; plan?: "1" | "3" | "6" | "12" };
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),
@@ -24,10 +24,12 @@ const PRICE_LABEL: Record<string, string> = {
   premium_semiannual: "UNVEIL Premium · 6 Months — $89.99",
   premium_yearly: "UNVEIL Premium · 12 Months — $149.99 / yr",
   verified_badge_onetime: "UNVEIL Verified Badge — $9.99 (one-time)",
+  message_pass_24h: "UNVEIL Daily Message Pass — $1.99 (24 hours)",
 };
 
 function priceIdFor(product: string, plan: string): string {
   if (product === "verified") return "verified_badge_onetime";
+  if (product === "message_pass") return "message_pass_24h";
   if (plan === "1") return "premium_monthly";
   if (plan === "3") return "premium_quarterly";
   if (plan === "6") return "premium_semiannual";

@@ -832,6 +832,8 @@ export type Database = {
           country: string | null
           created_at: string
           curiosity_level: number | null
+          daily_message_count: number
+          daily_message_reset_at: string
           discovery_radius_km: number
           emotional_rhythm: Json | null
           first_name: string | null
@@ -846,6 +848,7 @@ export type Database = {
           location_enabled: boolean
           location_privacy: string
           location_updated_at: string | null
+          message_pass_until: string | null
           onboarding_complete: boolean | null
           personality_axes: Json
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
@@ -880,6 +883,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           curiosity_level?: number | null
+          daily_message_count?: number
+          daily_message_reset_at?: string
           discovery_radius_km?: number
           emotional_rhythm?: Json | null
           first_name?: string | null
@@ -894,6 +899,7 @@ export type Database = {
           location_enabled?: boolean
           location_privacy?: string
           location_updated_at?: string | null
+          message_pass_until?: string | null
           onboarding_complete?: boolean | null
           personality_axes?: Json
           photo_reveal_stage?:
@@ -930,6 +936,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           curiosity_level?: number | null
+          daily_message_count?: number
+          daily_message_reset_at?: string
           discovery_radius_km?: number
           emotional_rhythm?: Json | null
           first_name?: string | null
@@ -944,6 +952,7 @@ export type Database = {
           location_enabled?: boolean
           location_privacy?: string
           location_updated_at?: string | null
+          message_pass_until?: string | null
           onboarding_complete?: boolean | null
           personality_axes?: Json
           photo_reveal_stage?:
@@ -1585,6 +1594,16 @@ export type Database = {
       }
     }
     Functions: {
+      admin_monetization_stats: {
+        Args: never
+        Returns: {
+          active_message_passes: number
+          active_premium_subs: number
+          daily_passes_today: number
+          messages_today: number
+          verified_badges: number
+        }[]
+      }
       compute_compatibility: {
         Args: { _a: string; _b: string }
         Returns: {
@@ -1679,6 +1698,18 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_message_quota: {
+        Args: { _uid?: string }
+        Returns: {
+          daily_limit: number
+          message_pass_until: string
+          premium_until: string
+          remaining: number
+          resets_at: string
+          unlimited: boolean
+          used: number
+        }[]
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -1718,6 +1749,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      user_has_unlimited_messaging: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
