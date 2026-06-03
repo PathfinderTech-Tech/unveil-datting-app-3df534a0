@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
@@ -6,7 +7,11 @@ import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
-import { Zap, Crown } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { deleteAccount } from "@/lib/account.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Zap, Crown, AlertTriangle, Trash2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/settings")({
