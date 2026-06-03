@@ -63,11 +63,11 @@ function Admin() {
 
   async function reviewWaitlist(id: string, status: "approved" | "rejected") {
     setBusyId(id);
-    const patch: Record<string, unknown> = {
+    const patch = {
       status,
       reviewed_at: new Date().toISOString(),
+      ...(status === "approved" ? { approved_at: new Date().toISOString() } : {}),
     };
-    if (status === "approved") patch.approved_at = new Date().toISOString();
     const { error } = await supabase.from("waitlist").update(patch).eq("id", id);
     setBusyId(null);
     if (error) return toast.error(error.message);
