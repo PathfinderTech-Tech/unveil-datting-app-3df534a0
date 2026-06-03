@@ -157,6 +157,8 @@ function Verify() {
     try {
       await saveDraft("pending_review");
       setStatus("pending_review");
+      const { track } = await import("@/lib/analytics");
+      await track("verification_completed", {});
       toast.success("Submitted for review.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Submit failed");
