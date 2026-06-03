@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
+import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/settings")({
@@ -14,8 +15,8 @@ function Settings() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
-      <section className="mx-auto max-w-2xl px-5 py-14">
-        <h1 className="font-display text-4xl font-light">{t("common.settings")}</h1>
+      <section className="mx-auto max-w-2xl px-5 py-10 md:py-14">
+        <h1 className="font-display text-3xl font-light md:text-4xl">{t("common.settings")}</h1>
         <div className="mt-8 space-y-5">
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">{t("common.language")}</h2>
