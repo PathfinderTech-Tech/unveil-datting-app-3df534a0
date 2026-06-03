@@ -3,8 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck } from "lucide-react";
+import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { generateIcebreakers } from "@/lib/icebreakers.functions";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Conversations — UNVEIL" }] }),
