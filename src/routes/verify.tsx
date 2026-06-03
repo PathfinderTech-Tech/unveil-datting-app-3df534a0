@@ -192,6 +192,8 @@ function Verify() {
               Please <Link to="/login" className="text-primary underline">sign in</Link> to start verification.
             </p>
           </div>
+        ) : badgePaid === false ? (
+          <BadgePaywall />
         ) : submitted ? (
           <SubmittedCard status={status} />
         ) : (
