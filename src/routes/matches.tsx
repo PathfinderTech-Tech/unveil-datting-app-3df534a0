@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { NoMatchHub } from "@/components/NoMatchHub";
 import {
   ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
@@ -162,6 +163,10 @@ function Matches() {
             <Link to="/passport" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2 sm:col-span-2">
               <Share2 className="h-4 w-4" /> View compatibility insights
             </Link>
+          </div>
+
+          <div className="mt-8 text-left">
+            <NoMatchHub title="Keep building while we search" />
           </div>
 
           <p className="mt-8 text-xs text-muted-foreground">

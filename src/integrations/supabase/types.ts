@@ -733,6 +733,7 @@ export type Database = {
           attachment_style: string | null
           communication_style: string | null
           conflict_style: string | null
+          leadership_style: string | null
           notes: Json
           relationship_style: string | null
           updated_at: string
@@ -742,6 +743,7 @@ export type Database = {
           attachment_style?: string | null
           communication_style?: string | null
           conflict_style?: string | null
+          leadership_style?: string | null
           notes?: Json
           relationship_style?: string | null
           updated_at?: string
@@ -751,6 +753,7 @@ export type Database = {
           attachment_style?: string | null
           communication_style?: string | null
           conflict_style?: string | null
+          leadership_style?: string | null
           notes?: Json
           relationship_style?: string | null
           updated_at?: string

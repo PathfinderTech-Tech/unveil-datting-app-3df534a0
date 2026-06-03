@@ -11,10 +11,10 @@ import { Menu, X } from "lucide-react";
 // Messages → Matches → Insights → Profile, with extras tucked into the mobile menu.
 const PRIMARY = [
   { to: "/discover", label: "Discover" },
-  { to: "/spark", label: "Compatibility" },
-  { to: "/messages", label: "Messages" },
-  { to: "/matches", label: "Matches" },
   { to: "/insights", label: "Insights" },
+  { to: "/challenges", label: "Challenges" },
+  { to: "/matches", label: "Matches" },
+  { to: "/messages", label: "Messages" },
   { to: "/passport", label: "Profile" },
 ] as const;
 
