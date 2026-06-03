@@ -469,6 +469,7 @@ export type Database = {
         Row: {
           age: number | null
           archetype: string | null
+          avatar_generated_at: string | null
           avatar_style: string | null
           avatar_url: string | null
           bio: string | null
@@ -497,6 +498,7 @@ export type Database = {
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           photo_url: string | null
           preferred_language: string | null
+          profile_photo_url: string | null
           relationship_intent: string | null
           state_region: string | null
           subscription_tier:
@@ -509,6 +511,7 @@ export type Database = {
         Insert: {
           age?: number | null
           archetype?: string | null
+          avatar_generated_at?: string | null
           avatar_style?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -539,6 +542,7 @@ export type Database = {
             | null
           photo_url?: string | null
           preferred_language?: string | null
+          profile_photo_url?: string | null
           relationship_intent?: string | null
           state_region?: string | null
           subscription_tier?:
@@ -551,6 +555,7 @@ export type Database = {
         Update: {
           age?: number | null
           archetype?: string | null
+          avatar_generated_at?: string | null
           avatar_style?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -581,6 +586,7 @@ export type Database = {
             | null
           photo_url?: string | null
           preferred_language?: string | null
+          profile_photo_url?: string | null
           relationship_intent?: string | null
           state_region?: string | null
           subscription_tier?:
