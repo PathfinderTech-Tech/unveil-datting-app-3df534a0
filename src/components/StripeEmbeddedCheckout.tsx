@@ -10,14 +10,13 @@ interface Props {
   returnUrl?: string;
 }
 
-export function StripeEmbeddedCheckout({ priceId, quantity, customerEmail, userId, returnUrl }: Props) {
+export function StripeEmbeddedCheckout({ priceId, quantity, customerEmail, userId: _userId, returnUrl }: Props) {
   const fetchClientSecret = async (): Promise<string> => {
     const result = await createCheckoutSession({
       data: {
         priceId,
         quantity,
         customerEmail,
-        userId,
         returnUrl: returnUrl || window.location.href,
         environment: getStripeEnvironment(),
       },
