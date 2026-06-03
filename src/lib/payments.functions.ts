@@ -38,6 +38,15 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
+// Maps human-readable price IDs to "kind" + premium duration days (one-time premium only).
+const PRICE_META: Record<string, { kind: string; durationDays?: number }> = {
+  verified_badge_onetime: { kind: "verification_badge" },
+  premium_monthly: { kind: "premium_subscription" },
+  premium_yearly: { kind: "premium_subscription" },
+  premium_quarterly: { kind: "premium_one_time", durationDays: 90 },
+  premium_semiannual: { kind: "premium_one_time", durationDays: 180 },
+};
+
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((data: {
     priceId: string;
@@ -58,6 +67,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       if (!prices.data.length) throw new Error("Price not found");
       const stripePrice = prices.data[0];
       const isRecurring = stripePrice.type === "recurring";
+      const meta = PRICE_META[data.priceId] ?? { kind: "other" };
 
       const customerId = (data.customerEmail || data.userId)
         ? await resolveOrCreateCustomer(stripe, {
@@ -75,6 +85,13 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         productDescription = product.name;
       }
 
+      const sharedMeta: Record<string, string> = {
+        kind: meta.kind,
+        priceId: data.priceId,
+      };
+      if (meta.durationDays) sharedMeta.durationDays = String(meta.durationDays);
+      if (data.userId) sharedMeta.userId = data.userId;
+
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
         mode: isRecurring ? "subscription" : "payment",
@@ -83,10 +100,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true } as any,
         ...(customerId && { customer: customerId }),
         ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
-        ...(data.userId && {
-          metadata: { userId: data.userId },
-          ...(isRecurring && { subscription_data: { metadata: { userId: data.userId } } }),
-        }),
+        metadata: sharedMeta,
+        ...(isRecurring && { subscription_data: { metadata: sharedMeta } }),
       } as any);
 
       return { clientSecret: session.client_secret ?? "" };

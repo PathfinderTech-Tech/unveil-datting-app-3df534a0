@@ -19,16 +19,20 @@ export const Route = createFileRoute("/checkout")({
 });
 
 const PRICE_LABEL: Record<string, string> = {
-  premium_1m: "UNVEIL Premium · 1 Month — $19.99",
-  premium_3m: "UNVEIL Premium · 3 Months — $49.99",
-  premium_6m: "UNVEIL Premium · 6 Months — $89.99",
-  premium_12m: "UNVEIL Premium · 12 Months — $149.99",
-  verified_onetime: "UNVEIL Verified Profile — $9.99 (one-time)",
+  premium_monthly: "UNVEIL Premium · 1 Month — $19.99 / mo",
+  premium_quarterly: "UNVEIL Premium · 3 Months — $49.99",
+  premium_semiannual: "UNVEIL Premium · 6 Months — $89.99",
+  premium_yearly: "UNVEIL Premium · 12 Months — $149.99 / yr",
+  verified_badge_onetime: "UNVEIL Verified Badge — $9.99 (one-time)",
 };
 
 function priceIdFor(product: string, plan: string): string {
-  if (product === "verified") return "verified_onetime";
-  return `premium_${plan}m`;
+  if (product === "verified") return "verified_badge_onetime";
+  if (plan === "1") return "premium_monthly";
+  if (plan === "3") return "premium_quarterly";
+  if (plan === "6") return "premium_semiannual";
+  if (plan === "12") return "premium_yearly";
+  return "premium_quarterly";
 }
 
 function Checkout() {

@@ -13,6 +13,23 @@ function getSupabase(): any {
   return _supabase;
 }
 
+async function recordTransaction(row: {
+  user_id: string;
+  kind: string;
+  stripe_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
+  stripe_invoice_id?: string | null;
+  stripe_subscription_id?: string | null;
+  price_id?: string | null;
+  amount_cents: number;
+  currency?: string;
+  status: string;
+  environment: StripeEnv;
+  description?: string | null;
+}) {
+  await getSupabase().from("transactions").insert(row);
+}
+
 async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
@@ -26,6 +43,7 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const productId = item?.price?.product;
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const periodEndIso = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
   await getSupabase().from("subscriptions").upsert(
     {
@@ -35,13 +53,26 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
       product_id: productId,
       price_id: priceId,
       status: subscription.status,
+      tier: subscription.status === "active" || subscription.status === "trialing" ? "premium" : "free",
       current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-      current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      current_period_end: periodEndIso,
       environment: env,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "stripe_subscription_id" }
   );
+
+  // Mirror onto profile for fast gating
+  if (periodEndIso) {
+    await getSupabase()
+      .from("profiles")
+      .update({
+        premium_until: periodEndIso,
+        subscription_tier: "premium",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+  }
 }
 
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
@@ -52,6 +83,7 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
   const productId = item?.price?.product;
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const periodEndIso = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
   await getSupabase()
     .from("subscriptions")
@@ -60,30 +92,115 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
       product_id: productId,
       price_id: priceId,
       current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-      current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      current_period_end: periodEndIso,
       cancel_at_period_end: subscription.cancel_at_period_end || false,
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+
+  const userId = subscription.metadata?.userId;
+  if (userId && periodEndIso) {
+    await getSupabase()
+      .from("profiles")
+      .update({ premium_until: periodEndIso, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
   await getSupabase()
     .from("subscriptions")
-    .update({ status: "canceled", updated_at: new Date().toISOString() })
+    .update({
+      status: "canceled",
+      tier: "free",
+      updated_at: new Date().toISOString(),
+    })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+
+  const userId = subscription.metadata?.userId;
+  if (userId) {
+    await getSupabase()
+      .from("profiles")
+      .update({ subscription_tier: "free", updated_at: new Date().toISOString() })
+      .eq("id", userId);
+  }
 }
 
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
-  // Track one-time Verified purchase
-  if (session.mode === "payment") {
-    const userId = session.metadata?.userId;
-    if (userId) {
+  const userId = session.metadata?.userId;
+  const kind = session.metadata?.kind ?? "other";
+  const priceId = session.metadata?.priceId ?? null;
+  const amount = session.amount_total ?? 0;
+  const currency = session.currency ?? "usd";
+
+  if (!userId) {
+    console.error("Checkout completed without userId metadata");
+    return;
+  }
+
+  // Always record a transaction
+  await recordTransaction({
+    user_id: userId,
+    kind,
+    stripe_session_id: session.id,
+    stripe_payment_intent_id: session.payment_intent ?? null,
+    stripe_invoice_id: session.invoice ?? null,
+    stripe_subscription_id: session.subscription ?? null,
+    price_id: priceId,
+    amount_cents: amount,
+    currency,
+    status: session.payment_status === "paid" ? "succeeded" : (session.payment_status ?? "pending"),
+    environment: env,
+    description: session.metadata?.description ?? null,
+  });
+
+  // Branch by kind
+  if (kind === "verification_badge") {
+    await getSupabase().from("verification_payments").upsert(
+      {
+        user_id: userId,
+        stripe_session_id: session.id,
+        stripe_payment_intent_id: session.payment_intent ?? null,
+        amount_cents: amount,
+        currency,
+        status: session.payment_status === "paid" ? "paid" : "pending",
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_session_id" }
+    );
+
+    if (session.payment_status === "paid") {
       await getSupabase()
         .from("profiles")
-        .update({ verified: true, updated_at: new Date().toISOString() })
+        .update({ badge_paid: true, updated_at: new Date().toISOString() })
+        .eq("id", userId);
+    }
+    return;
+  }
+
+  if (kind === "premium_one_time") {
+    const days = Number(session.metadata?.durationDays ?? 0);
+    if (days > 0 && session.payment_status === "paid") {
+      // Extend premium_until from MAX(now, current) + days
+      const { data: prof } = await getSupabase()
+        .from("profiles")
+        .select("premium_until")
+        .eq("id", userId)
+        .maybeSingle();
+      const base = prof?.premium_until && new Date(prof.premium_until) > new Date()
+        ? new Date(prof.premium_until)
+        : new Date();
+      const newEnd = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+      await getSupabase()
+        .from("profiles")
+        .update({
+          premium_until: newEnd.toISOString(),
+          subscription_tier: "premium",
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", userId);
     }
   }
@@ -115,7 +232,7 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
       POST: async ({ request }) => {
         const rawEnv = new URL(request.url).searchParams.get("env");
         if (rawEnv !== "sandbox" && rawEnv !== "live") {
-          console.error("Webhook received with invalid or missing env:", rawEnv);
+          console.error("Webhook received with invalid env:", rawEnv);
           return Response.json({ received: true, ignored: "invalid env" });
         }
         const env: StripeEnv = rawEnv;

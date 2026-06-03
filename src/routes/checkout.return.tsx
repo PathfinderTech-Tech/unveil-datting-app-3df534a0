@@ -26,7 +26,10 @@ function CheckoutReturn() {
             : "Welcome to UNVEIL."}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/matches" className="rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
+          <Link to="/verify" className="rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
+            Continue to verification
+          </Link>
+          <Link to="/matches" className="rounded-full border border-border bg-surface px-6 py-3 text-sm hover:bg-surface-2">
             Discover matches
           </Link>
           <Link to="/manage-subscription" className="rounded-full border border-border bg-surface px-6 py-3 text-sm hover:bg-surface-2">
