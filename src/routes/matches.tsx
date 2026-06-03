@@ -41,6 +41,7 @@ function Matches() {
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"band" | "all">("all");
+  const [mode, setMode] = useState<"your" | "hidden">("your");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB-backed gate (replaces localStorage useProfile). Onboarding completion
