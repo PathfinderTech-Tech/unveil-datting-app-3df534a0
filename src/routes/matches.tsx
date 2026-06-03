@@ -2,15 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
-  useProfile, ARCHETYPES, PRESENCE_LABELS, chemistryFor,
+  ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
 } from "@/lib/synapse-store";
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import {
-  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info,
+  Heart, X, ArrowRight, MapPin, Briefcase, Mic, MessageCircle, Eye, Lock, Unlock, Sparkles, Bookmark, Info, Home, RefreshCw, Share2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/matches")({
@@ -18,16 +20,48 @@ export const Route = createFileRoute("/matches")({
   component: Matches,
 });
 
+type ProfileState = {
+  onboardingComplete: boolean;
+  baseScore: number;
+  archetype: string | null;
+  archetypeName: string;
+};
+
 function Matches() {
-  const [profile] = useProfile();
-  const baseScore = profile?.composite ?? 70;
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [profileState, setProfileState] = useState<ProfileState | null>(null);
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"band" | "all">("all");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const navigate = useNavigate();
+
+  // DB-backed gate (replaces localStorage useProfile). Onboarding completion
+  // is the only requirement to enter Matches — discovery answers refine the
+  // score but should never lock the page.
+  useEffect(() => {
+    if (authLoading || !user) return;
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("onboarding_complete, compatibility_score, archetype")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+      const arch = (data?.archetype ?? null) as string | null;
+      setProfileState({
+        onboardingComplete: !!data?.onboarding_complete,
+        baseScore: data?.compatibility_score ?? 70,
+        archetype: arch,
+        archetypeName: arch && (ARCHETYPES as Record<string, { name: string }>)[arch]?.name || "Your resonance",
+      });
+    })();
+    return () => { alive = false; };
+  }, [user, authLoading]);
 
   useEffect(() => {
+    if (!profileState?.onboardingComplete) return;
     let alive = true;
     setLoading(true);
     loadRealMatches({
@@ -45,28 +79,110 @@ function Matches() {
       setLoading(false);
     });
     return () => { alive = false; };
-  }, [filters]);
+  }, [filters, profileState?.onboardingComplete]);
 
+  const baseScore = profileState?.baseScore ?? 70;
   const visible = useMemo(() => {
     if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
     return matches;
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
 
-  if (!profile) {
+  if (authLoading || (user && !profileState)) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+  // Not signed in → go sign in (never to onboarding step 1).
+  if (!user) {
     return (
       <div className="min-h-screen">
         <UnveilNav />
         <div className="mx-auto max-w-md p-12 text-center">
-          <h1 className="font-display text-3xl font-bold">Discover your resonance first.</h1>
-          <p className="mt-2 text-muted-foreground">Your band reveals once your signature is composed.</p>
-          <Link to="/onboarding" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
-            Begin <ArrowRight className="h-4 w-4" />
+          <h1 className="font-display text-3xl font-bold">Sign in to see your matches.</h1>
+          <p className="mt-2 text-muted-foreground">Your profile and matches travel with your account.</p>
+          <Link to="/login" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
+            Log in <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
     );
   }
+
+  // Signed in but hasn't finished onboarding → resume onboarding.
+  if (!profileState!.onboardingComplete) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center">
+          <h1 className="font-display text-3xl font-bold">Finish your profile.</h1>
+          <p className="mt-2 text-muted-foreground">Just a few more answers and we'll start finding compatible people.</p>
+          <Link to="/onboarding" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
+            Resume <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Signed in + onboarding complete but no matches yet → "Your profile is live" waiting room.
+  if (!loading && visible.length === 0) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <section className="mx-auto max-w-2xl px-6 py-16 text-center">
+          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <h1 className="mt-5 font-display text-4xl font-light md:text-5xl">Your profile is <span className="text-gradient-aura italic">live</span>.</h1>
+          <p className="mt-3 text-muted-foreground">
+            We're searching for compatible connections. New people complete onboarding every day —
+            you'll see them here as they arrive.
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <Link to="/" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2">
+              <Home className="h-4 w-4" /> Return home
+            </Link>
+            <Link to="/discover" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2">
+              <RefreshCw className="h-4 w-4" /> Refine Discovery answers
+            </Link>
+            <Link to="/play" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2">
+              <Sparkles className="h-4 w-4" /> Play solo questions
+            </Link>
+            <Link to="/spark" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2">
+              <MessageCircle className="h-4 w-4" /> Improve your profile
+            </Link>
+            <Link to="/passport" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2 sm:col-span-2">
+              <Share2 className="h-4 w-4" /> View compatibility insights
+            </Link>
+          </div>
+
+          <p className="mt-8 text-xs text-muted-foreground">
+            Want priority discovery? <Link to="/premium" className="text-primary underline">Upgrade to Premium</Link>.
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  // Build a synapse-shaped "me" object the MatchSheet expects.
+  const profile: SynapseProfile = {
+    name: "You",
+    age: 0,
+    city: "",
+    profession: "creative",
+    professionLabel: "",
+    faceHarmony: 70,
+    mindScore: profileState!.baseScore,
+    character: { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 },
+    composite: profileState!.baseScore,
+    archetype: (profileState!.archetype as SynapseProfile["archetype"]) ?? "signal",
+  };
 
   async function handleLike(m: RealMatch) {
     const res = await likeProfile(m.userId);
