@@ -20,14 +20,6 @@ function Signup() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErr("");
-    // Invite-only: only approved waitlist emails may create accounts
-    const { data: approved, error: gateErr } = await supabase.rpc("is_email_approved", { _email: email });
-    if (gateErr) { setLoading(false); setErr(gateErr.message); return; }
-    if (!approved) {
-      setLoading(false);
-      setErr("UNVEIL is invite-only during private beta. Join the waitlist and we'll email you when you're approved.");
-      return;
-    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
