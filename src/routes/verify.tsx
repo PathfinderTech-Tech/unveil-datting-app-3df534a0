@@ -428,3 +428,37 @@ function SubmittedCard({ status }: { status: Status }) {
     </div>
   );
 }
+
+function BadgePaywall() {
+  return (
+    <div className="mt-10 rounded-3xl border border-primary bg-card p-7 text-center shadow-glow md:p-10">
+      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground">
+        <ShieldCheck className="h-6 w-6" />
+      </div>
+      <h2 className="mt-5 font-display text-3xl">Unlock identity verification</h2>
+      <p className="mx-auto mt-3 max-w-lg text-sm text-muted-foreground">
+        The Verified Badge is a one-time $9.99 unlock. After payment you'll complete a 3-step
+        identity check and a reviewer will approve your badge within 24h. Already on Premium?
+        Verification is included free.
+      </p>
+      <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <Link
+          to="/checkout"
+          search={{ product: "verified", plan: "1" } as any}
+          className="rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow"
+        >
+          Pay $9.99 & Verify
+        </Link>
+        <Link
+          to="/premium"
+          className="rounded-full border border-border bg-surface px-6 py-3 text-sm hover:bg-surface-2"
+        >
+          See Premium plans
+        </Link>
+      </div>
+      <p className="mt-6 text-[11px] text-muted-foreground">
+        Refunded automatically if your verification is rejected.
+      </p>
+    </div>
+  );
+}
