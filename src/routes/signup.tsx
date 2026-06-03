@@ -20,6 +20,14 @@ function Signup() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErr("");
+    const { getEmailCooldown, cooldownMessage, logDeletionAttempt } = await import("@/lib/cooldown");
+    const until = await getEmailCooldown(email);
+    if (until) {
+      await logDeletionAttempt(email, "email", "blocked_cooldown");
+      setErr(cooldownMessage(until));
+      setLoading(false);
+      return;
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -29,7 +37,7 @@ function Signup() {
     if (error) {
       const msg = error.message || "";
       if (msg.includes("ACCOUNT_DELETION_COOLDOWN")) {
-        setErr("This email was recently used for a deleted account. Please wait 24 hours before re-registering.");
+        setErr("You recently deleted this account. You can create a new account again after 24 hours. Need help? Contact support@unveil.best");
       } else {
         setErr(msg);
       }
