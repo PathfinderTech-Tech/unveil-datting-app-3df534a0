@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
@@ -6,7 +7,11 @@ import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
-import { Zap, Crown } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { deleteAccount } from "@/lib/account.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Zap, Crown, AlertTriangle, Trash2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/settings")({
@@ -18,8 +23,35 @@ function Settings() {
   const { checking } = useRequireOnboarding();
   const { t } = useTranslation();
   const { quota } = useMessageQuota();
+  const navigate = useNavigate();
+  const deleteAccountFn = useServerFn(deleteAccount);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const passActive = !!quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date();
   const premiumActive = !!quota.premiumUntil && new Date(quota.premiumUntil) > new Date();
+
+  async function handleDelete() {
+    if (confirmText.trim().toUpperCase() !== "DELETE") {
+      toast.error('Type "DELETE" to confirm.');
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await deleteAccountFn();
+      if ("error" in res) {
+        toast.error(res.error);
+        setDeleting(false);
+        return;
+      }
+      await supabase.auth.signOut();
+      toast.success("Account deleted. You can re-register in 24 hours.");
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to delete account");
+      setDeleting(false);
+    }
+  }
   if (checking) {
     return (
       <div className="min-h-screen">
@@ -88,6 +120,53 @@ function Settings() {
               <Link to="/safety" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Safety</Link>
               <Link to="/support" className="rounded-xl border border-border bg-surface/60 px-3 py-2 hover:bg-surface">Support Center</Link>
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6">
+            <h2 className="flex items-center gap-2 font-display text-xl text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Delete account
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Permanently delete your UNVEIL account, profile, matches, messages, and all related data.
+              This cannot be undone. For your safety, the same email cannot register a new account for 24 hours after deletion.
+            </p>
+            {!confirmOpen ? (
+              <button
+                onClick={() => setConfirmOpen(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-destructive bg-destructive/10 px-5 py-2 text-xs font-medium text-destructive hover:bg-destructive/20"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete my account
+              </button>
+            ) : (
+              <div className="mt-4 space-y-3">
+                <p className="text-xs text-foreground">
+                  Type <span className="font-mono font-bold">DELETE</span> to confirm. You will be signed out immediately.
+                </p>
+                <input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full max-w-xs rounded-xl border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-destructive"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setConfirmOpen(false); setConfirmText(""); }}
+                    disabled={deleting}
+                    className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-xs hover:bg-surface disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting || confirmText.trim().toUpperCase() !== "DELETE"}
+                    className="inline-flex items-center gap-2 rounded-full bg-destructive px-5 py-2 text-xs font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> {deleting ? "Deleting…" : "Permanently delete"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

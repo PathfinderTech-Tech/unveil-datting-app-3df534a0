@@ -23,6 +23,7 @@ import { WhyWeMatchSheet } from "@/components/WhyWeMatchSheet";
 import { loadHiddenMatches, logHiddenMatchView, type HiddenMatch } from "@/lib/hidden-matches.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { trackEvent } from "@/lib/analytics";
+import { ThoughtModal } from "@/components/ThoughtModal";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
@@ -124,6 +125,7 @@ function Matches() {
     return matches;
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
+  const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
 
   if (checking || authLoading || (user && !profileState)) {
     return (
@@ -402,14 +404,35 @@ function Matches() {
         )}
       </div>
 
-      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} onLike={() => handleLike(active)} />}
+      {active && (
+        <MatchSheet
+          match={active}
+          you={profile}
+          onClose={() => setActive(null)}
+          onLike={() => handleLike(active)}
+          onThought={() => { setThoughtFor(active); setActive(null); }}
+        />
+      )}
+      {thoughtFor && (
+        <ThoughtModal
+          targetUserId={thoughtFor.userId}
+          targetName={thoughtFor.name}
+          onClose={() => setThoughtFor(null)}
+          onSent={(r) => {
+            setMatches((prev) => prev.filter((p) => p.userId !== thoughtFor.userId));
+            if (r.mutual && r.conversationId) {
+              navigate({ to: "/chat", search: { c: r.conversationId } as never });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
 
 type Stage = 1 | 2 | 3;
 
-function MatchSheet({ match, you, onClose, onLike }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void }) {
+function MatchSheet({ match, you, onClose, onLike, onThought }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void; onThought: () => void }) {
   // Progressive reveal — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
   const arch = ARCHETYPES[match.archetype];
@@ -525,7 +548,7 @@ function MatchSheet({ match, you, onClose, onLike }: { match: SynapseProfile; yo
             <button onClick={onClose} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
               <X className="h-4 w-4" /> Step back
             </button>
-            <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
+            <button onClick={onThought} className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-2 text-sm hover:bg-surface">
               <MessageCircle className="h-4 w-4" /> Send a thought
             </button>
           </div>
@@ -588,6 +611,7 @@ const HIDDEN_TAGLINES = [
 ];
 
 function HiddenMatchesView() {
+  const navigate = useNavigate();
   const fetchHidden = useServerFn(loadHiddenMatches);
   const logView = useServerFn(logHiddenMatchView);
   const [items, setItems] = useState<HiddenMatch[]>([]);
@@ -620,7 +644,8 @@ function HiddenMatchesView() {
     trackEvent("hidden_match_message_started", { peerId: m.id });
     await logView({ data: { peerId: m.id, kind: "message" } });
     if (res.mutual && res.conversationId) {
-      toast.success(`It's mutual with ${m.firstName ?? "your match"} — open the conversation.`);
+      toast.success(`It's mutual with ${m.firstName ?? "your match"} — opening the conversation.`);
+      navigate({ to: "/chat", search: { c: res.conversationId } as never });
     } else {
       toast.success("Interest sent.");
     }

@@ -6,6 +6,7 @@ import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { Avatar } from "@/components/Avatar";
 import { Sparkles, AlertTriangle, MessageCircle, Heart, ArrowLeft, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { ThoughtModal } from "@/components/ThoughtModal";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match insights — UNVEIL" }] }),
@@ -32,6 +33,7 @@ function MatchInsights() {
   const [compat, setCompat] = useState<Compat>(null);
   const [loading, setLoading] = useState(true);
   const [mineInterests, setMineInterests] = useState<string[]>([]);
+  const [showThought, setShowThought] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -192,12 +194,29 @@ function MatchInsights() {
           </>
         )}
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <button onClick={() => setShowThought(true)} className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm hover:bg-surface">
+            <MessageCircle className="h-4 w-4" /> Send a thought
+          </button>
           <button onClick={handleLike} className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow">
             <Heart className="h-4 w-4" /> Send interest
           </button>
         </div>
       </div>
+      {showThought && (
+        <ThoughtModal
+          targetUserId={userId}
+          targetName={profile.first_name ?? undefined}
+          onClose={() => setShowThought(false)}
+          onSent={(r) => {
+            if (r.mutual && r.conversationId) {
+              navigate({ to: "/chat", search: { c: r.conversationId } as never });
+            } else {
+              navigate({ to: "/matches" });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

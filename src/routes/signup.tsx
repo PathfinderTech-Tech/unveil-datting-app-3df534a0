@@ -26,8 +26,14 @@ function Signup() {
       options: { emailRedirectTo: `${window.location.origin}/onboarding` },
     });
     setLoading(false);
-    if (error) setErr(error.message);
-    else {
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("ACCOUNT_DELETION_COOLDOWN")) {
+        setErr("This email was recently used for a deleted account. Please wait 24 hours before re-registering.");
+      } else {
+        setErr(msg);
+      }
+    } else {
       const { track } = await import("@/lib/analytics");
       await track("signup", { email });
       navigate({ to: "/onboarding" });
