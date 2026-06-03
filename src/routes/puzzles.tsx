@@ -32,7 +32,7 @@ function Puzzles() {
   const uid = useUserId();
   const [active, setActive] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  
 
   useEffect(() => { if (uid) loadPuzzleScores().then(setScores); }, [uid]);
   // Category counts are no longer fetched client-side (puzzle answers are
