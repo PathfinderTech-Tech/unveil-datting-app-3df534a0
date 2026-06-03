@@ -303,8 +303,44 @@ function Chat() {
                 {msgs.length === 0 && <div className="text-center text-xs text-muted-foreground">Send the first thought.</div>}
               </div>
 
+              {ideasOpen && (
+                <div className="border-t border-border bg-surface/50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                      <Sparkles className="h-3 w-3 text-accent" /> AI Icebreakers
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={fetchIcebreakers} disabled={ideasLoading}
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-[10px] hover:bg-surface disabled:opacity-50">
+                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> New
+                      </button>
+                      <button onClick={() => setIdeasOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Close</button>
+                    </div>
+                  </div>
+                  {ideasLoading && ideas.length === 0 ? (
+                    <div className="py-3 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {ideas.map((i, idx) => (
+                        <button key={idx} type="button"
+                          onClick={() => { setDraft(i.text); setIdeasOpen(false); }}
+                          className="max-w-full rounded-2xl border border-border bg-card px-3 py-2 text-left text-xs hover:border-primary">
+                          <span className="mr-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] uppercase text-primary">{i.kind}</span>
+                          {i.text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <form onSubmit={(e) => { e.preventDefault(); send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
+                <button type="button" onClick={fetchIcebreakers} disabled={!peerId || ideasLoading}
+                  title="AI Icebreakers"
+                  className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
+                  <Sparkles className="h-4 w-4 text-accent" />
+                </button>
                 <input value={draft} onChange={(e) => onDraftChange(e.target.value)}
                   placeholder="A thought, gently…"
                   className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary" />
