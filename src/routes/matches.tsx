@@ -23,6 +23,7 @@ import { WhyWeMatchSheet } from "@/components/WhyWeMatchSheet";
 import { loadHiddenMatches, logHiddenMatchView, type HiddenMatch } from "@/lib/hidden-matches.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { trackEvent } from "@/lib/analytics";
+import { ThoughtModal } from "@/components/ThoughtModal";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
