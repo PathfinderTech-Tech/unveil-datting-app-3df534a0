@@ -31,7 +31,7 @@ function Home() {
           </div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Private Beta · Invite Only
+            Now Live · Meaningful Connections
           </div>
           <h1 className="font-display text-4xl font-light leading-[1.05] sm:text-5xl md:text-7xl">
             Connection begins
@@ -39,12 +39,12 @@ function Home() {
             <span className="text-gradient-hero italic">beneath the surface.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:mt-8 md:text-lg">
-            Voice before appearance. Meaning before matches.
+            Voice before appearance. Compatibility before matches.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3 md:mt-10">
-            <a href="#waitlist" className="group inline-flex items-center gap-2 rounded-full bg-gradient-hero px-7 py-3.5 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">
-              Join the Private Beta <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </a>
+            <Link to="/signup" className="group inline-flex items-center gap-2 rounded-full bg-gradient-hero px-7 py-3.5 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">
+              Create Your Profile <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
             <Link to="/discover" className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-7 py-3.5 font-medium hover:bg-surface">
               Discover Yourself
             </Link>
