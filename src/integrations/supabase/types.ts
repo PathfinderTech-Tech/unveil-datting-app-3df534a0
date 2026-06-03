@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          deleted_at: string
+          email: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          deleted_at?: string
+          email: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          deleted_at?: string
+          email?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -1278,6 +1299,36 @@ export type Database = {
         }
         Relationships: []
       }
+      thoughts: {
+        Row: {
+          content: string
+          created_at: string
+          delivered_as_message_id: string | null
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          delivered_as_message_id?: string | null
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          delivered_as_message_id?: string | null
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_cents: number
@@ -1740,6 +1791,7 @@ export type Database = {
         Returns: boolean
       }
       is_email_approved: { Args: { _email: string }; Returns: boolean }
+      is_email_in_cooldown: { Args: { _email: string }; Returns: boolean }
       like_profile: {
         Args: { _target: string }
         Returns: {
@@ -1765,6 +1817,14 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      send_thought: {
+        Args: { _content: string; _target: string }
+        Returns: {
+          conversation_id: string
+          mutual: boolean
+          thought_id: string
         }[]
       }
       user_has_unlimited_messaging: { Args: { _uid: string }; Returns: boolean }
