@@ -208,10 +208,10 @@ function ReadinessTab({ userId }: { userId: string }) {
 
   const buckets: { key: string; label: string }[] = [
     { key: "communication", label: "Communication" },
-    { key: "commitment", label: "Commitment" },
-    { key: "emotional", label: "Emotional maturity" },
-    { key: "values", label: "Values" },
-    { key: "goals", label: "Life goals" },
+    { key: "emotional_intelligence", label: "Emotional intelligence" },
+    { key: "commitment", label: "Commitment readiness" },
+    { key: "goals", label: "Relationship goals" },
+    { key: "values", label: "Values alignment" },
   ];
 
   return (
