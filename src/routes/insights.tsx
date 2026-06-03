@@ -297,6 +297,7 @@ function BlueprintTab() {
     { key: "communication_style", title: "Communication", subtitle: "How you express and listen" },
     { key: "attachment_style", title: "Attachment", subtitle: "How you bond" },
     { key: "conflict_style", title: "Conflict", subtitle: "How you navigate friction" },
+    { key: "leadership_style", title: "Leadership", subtitle: "How you take initiative" },
     { key: "relationship_style", title: "Relationship", subtitle: "The partnership you want" },
   ];
 
