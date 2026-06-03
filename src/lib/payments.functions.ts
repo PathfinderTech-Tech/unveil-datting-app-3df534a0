@@ -91,6 +91,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         priceId: data.priceId,
       };
       if (meta.durationDays) sharedMeta.durationDays = String(meta.durationDays);
+      if (meta.durationHours) sharedMeta.durationHours = String(meta.durationHours);
       if (data.userId) sharedMeta.userId = data.userId;
 
       const session = await stripe.checkout.sessions.create({

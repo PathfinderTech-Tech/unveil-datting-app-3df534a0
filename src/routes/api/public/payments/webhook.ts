@@ -203,6 +203,26 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         })
         .eq("id", userId);
     }
+    return;
+  }
+
+  if (kind === "message_pass_24h") {
+    const hours = Number(session.metadata?.durationHours ?? 24);
+    if (session.payment_status === "paid") {
+      const { data: prof } = await getSupabase()
+        .from("profiles")
+        .select("message_pass_until")
+        .eq("id", userId)
+        .maybeSingle();
+      const base = prof?.message_pass_until && new Date(prof.message_pass_until) > new Date()
+        ? new Date(prof.message_pass_until)
+        : new Date();
+      const newEnd = new Date(base.getTime() + hours * 60 * 60 * 1000);
+      await getSupabase()
+        .from("profiles")
+        .update({ message_pass_until: newEnd.toISOString(), updated_at: new Date().toISOString() })
+        .eq("id", userId);
+    }
   }
 }
 
