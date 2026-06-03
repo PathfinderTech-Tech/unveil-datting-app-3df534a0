@@ -135,6 +135,7 @@
   .bg-gradient-hero { background: var(--gradient-hero); }
   .bg-gradient-aura { background: var(--gradient-aura); }
   .bg-gradient-deep { background: var(--gradient-deep); }
+  .bg-gradient-indigo { background: var(--gradient-indigo); }
   .text-gradient-hero {
     background: var(--gradient-hero);
     -webkit-background-clip: text;
