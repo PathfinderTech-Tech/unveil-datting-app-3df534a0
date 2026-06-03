@@ -431,9 +431,42 @@ function Onboarding() {
                     );
                   })}
                 </div>
+
+                {avatarStyle !== "real" && (
+                  <div className="mt-4 rounded-2xl border border-border bg-surface/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="font-display text-sm">Generate your {AVATAR_STYLES.find(s => s.id === avatarStyle)?.label}</div>
+                        <div className="text-xs text-muted-foreground">Optional — you can always switch back to your real photo.</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGenerateAvatar}
+                        disabled={generatingAvatar || !photoUrl}
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50"
+                      >
+                        {generatingAvatar
+                          ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Generating…</>
+                          : avatarUrl
+                            ? <><RefreshCw className="h-3.5 w-3.5" /> Regenerate</>
+                            : <><Wand2 className="h-3.5 w-3.5" /> Generate avatar</>}
+                      </button>
+                    </div>
+                    {avatarUrl && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <img src={avatarUrl} alt="Generated avatar" className="h-20 w-20 rounded-2xl object-cover ring-2 ring-primary/40" />
+                        <div className="text-xs text-muted-foreground">
+                          Saved to your profile. You can regenerate or skip to keep your selfie.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   You can switch between your real photo and your generated avatar at any time.
                 </p>
+
               </div>
             )}
           </div>
