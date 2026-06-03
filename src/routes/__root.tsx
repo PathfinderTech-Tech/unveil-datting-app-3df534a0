@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
 
 function NotFoundComponent() {
   return (
