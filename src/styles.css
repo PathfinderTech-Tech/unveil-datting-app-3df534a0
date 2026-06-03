@@ -156,7 +156,48 @@
   .reveal-blur-2 { filter: blur(5px) saturate(0.95); }
   .reveal-blur-3 { filter: none; }
   .tracking-luxury { letter-spacing: 0.3em; }
+
+  /* UNVEIL veil motif — subtle brand watermark for cards/sections/loaders */
+  .veil-motif {
+    position: relative;
+    isolation: isolate;
+  }
+  .veil-motif::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("/__l5e/assets-v1/fc47f23b-c33c-4bdb-adce-2c00fe4a4f02/unveil-logo-v2.png");
+    background-repeat: no-repeat;
+    background-position: center right -20%;
+    background-size: 65% auto;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: -1;
+    mix-blend-mode: screen;
+  }
+  .veil-motif-center::before {
+    background-position: center center;
+    background-size: 55% auto;
+    opacity: 0.08;
+  }
+  .veil-motif-corner::before {
+    background-position: bottom -10% right -10%;
+    background-size: 45% auto;
+    opacity: 0.07;
+  }
+  .btn-gradient-primary {
+    background: var(--gradient-hero);
+    color: var(--primary-foreground);
+    box-shadow: 0 10px 30px -10px oklch(0.65 0.22 305 / 0.55);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .btn-gradient-primary:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 14px 40px -12px oklch(0.70 0.24 340 / 0.65);
+    transform: translateY(-1px);
+  }
 }
+
 
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 30px oklch(0.65 0.22 305 / 0.4); }
