@@ -404,7 +404,28 @@ function Matches() {
         )}
       </div>
 
-      {active && <MatchSheet match={active} you={profile} onClose={() => setActive(null)} onLike={() => handleLike(active)} />}
+      {active && (
+        <MatchSheet
+          match={active}
+          you={profile}
+          onClose={() => setActive(null)}
+          onLike={() => handleLike(active)}
+          onThought={() => { setThoughtFor(active); setActive(null); }}
+        />
+      )}
+      {thoughtFor && (
+        <ThoughtModal
+          targetUserId={thoughtFor.userId}
+          targetName={thoughtFor.name}
+          onClose={() => setThoughtFor(null)}
+          onSent={(r) => {
+            setMatches((prev) => prev.filter((p) => p.userId !== thoughtFor.userId));
+            if (r.mutual && r.conversationId) {
+              navigate({ to: "/chat", search: { c: r.conversationId } as never });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
