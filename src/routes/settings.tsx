@@ -5,7 +5,9 @@ import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { Zap, Crown } from "lucide-react";
+
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — UNVEIL" }] }),
