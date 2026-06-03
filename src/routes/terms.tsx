@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
+import { MailActions } from "@/components/MailActions";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -39,7 +40,7 @@ function Terms() {
             To the maximum extent permitted by law, UNVEIL is not liable for user conduct, offline meetings, personal disputes, emotional harm, financial loss, or user-generated content.
           </Section>
           <Section title="6. Reports">
-            You may report any issues to <a href="mailto:support@unveil.best" className="text-accent underline">support@unveil.best</a>. Our team reviews reports and may take moderation action at its discretion.
+            You may report any issues to our team. <span className="inline-block align-middle"><MailActions subject="UNVEIL report" /></span> Our team reviews reports and may take moderation action at its discretion.
           </Section>
           <Section title="7. Privacy">
             UNVEIL processes personal data (including photos and voice prompts) to provide the service. You retain ownership of your content and may delete your account and data at any time.

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalShell, LegalSection } from "@/components/LegalShell";
+import { MailActions } from "@/components/MailActions";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -35,7 +36,8 @@ function Privacy() {
         <p>Data is stored on encrypted infrastructure. Photos and IDs are stored in private buckets with row-level access policies. We use industry-standard transport encryption (TLS).</p>
       </LegalSection>
       <LegalSection title="5. Your rights (GDPR / CCPA)">
-        <p>You can access, correct, export, or delete your data at any time from Settings, or by emailing <a href="mailto:support@unveil.best" className="text-accent underline">support@unveil.best</a>. Deletion is permanent and removes your matches and messages.</p>
+        <p>You can access, correct, export, or delete your data at any time from Settings, or by emailing us. Deletion is permanent and removes your matches and messages.</p>
+        <div className="mt-2"><MailActions /></div>
       </LegalSection>
       <LegalSection title="6. Retention">
         <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification documents: deleted within 90 days of approval or rejection.</p>
@@ -47,7 +49,8 @@ function Privacy() {
         <p>We will notify you in-app of material changes. Continued use after changes constitutes acceptance.</p>
       </LegalSection>
       <LegalSection title="9. Contact">
-        <p>Privacy questions: <a href="mailto:support@unveil.best" className="text-accent underline">support@unveil.best</a>.</p>
+        <p>Privacy questions:</p>
+        <div className="mt-2"><MailActions subject="Privacy question" /></div>
       </LegalSection>
     </LegalShell>
   );
