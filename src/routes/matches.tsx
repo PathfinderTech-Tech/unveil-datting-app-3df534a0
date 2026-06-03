@@ -80,6 +80,16 @@ function Matches() {
     setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
     setActive(null);
   }
+  async function handlePass(m: RealMatch) {
+    await passProfile(m.userId);
+    setMatches((prev) => prev.filter((p) => p.userId !== m.userId));
+    toast("Passed.");
+  }
+  async function handleSave(m: RealMatch) {
+    const res = await toggleSaveProfile(m.userId);
+    if (res.error) { toast.error(res.error); return; }
+    toast.success(res.saved ? "Saved for later." : "Removed from saved.");
+  }
 
   return (
     <div className="min-h-screen">
