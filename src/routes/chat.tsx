@@ -374,7 +374,7 @@ function Chat() {
 
               <form onSubmit={(e) => { e.preventDefault(); send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={fetchIcebreakers} disabled={!peerId || ideasLoading}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />
