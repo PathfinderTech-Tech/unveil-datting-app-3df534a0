@@ -15,11 +15,21 @@ export const Route = createFileRoute("/settings")({
 });
 
 function Settings() {
+  const { checking } = useRequireOnboarding();
   const { t } = useTranslation();
   const { quota } = useMessageQuota();
   const passActive = !!quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date();
   const premiumActive = !!quota.premiumUntil && new Date(quota.premiumUntil) > new Date();
+  if (checking) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
   return (
+
     <div className="min-h-screen">
       <UnveilNav />
       <section className="mx-auto max-w-2xl px-5 py-10 md:py-14">
