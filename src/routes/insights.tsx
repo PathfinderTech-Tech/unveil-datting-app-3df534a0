@@ -378,6 +378,7 @@ function RevealTab({ userId }: { userId: string }) {
         toast.error(r.reason ?? "Could not unlock");
       } else {
         toast.success(`Day ${r.day} unlocked`);
+        trackEvent(ANALYTICS.revealUnlocked, { matchId: selected, day: r.day });
         const refreshed = await fetchProg({ data: { matchId: selected } });
         setProgress({ currentDay: refreshed.currentDay });
       }
