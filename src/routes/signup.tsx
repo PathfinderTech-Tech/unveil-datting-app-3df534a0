@@ -42,11 +42,8 @@ function Signup() {
       </Link>
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card/80 p-8 backdrop-blur">
         <h1 className="font-display text-3xl font-light">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">UNVEIL is invite-only. Use the email you joined the waitlist with.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Join UNVEIL and start discovering meaningful connections.</p>
 
-        <div className="mt-3 rounded-xl border border-border bg-surface/50 px-3 py-2 text-[11px] text-muted-foreground">
-          Don't have an invite yet? <Link to="/" className="text-foreground underline">Join the waitlist</Link>.
-        </div>
 
         <div className="mt-6">
           <OAuthButtons mode="signup" />
