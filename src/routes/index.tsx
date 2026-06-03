@@ -71,35 +71,16 @@ function Home() {
       </section>
 
       {/* WAITLIST */}
-      <section id="waitlist" className="mx-auto max-w-3xl px-6 py-20">
-        <div className="rounded-3xl border border-border bg-gradient-deep p-10 text-center md:p-14">
+      <section id="waitlist" className="mx-auto max-w-3xl px-5 py-16 md:px-6 md:py-20">
+        <div className="rounded-3xl border border-border bg-gradient-deep p-6 text-center sm:p-10 md:p-14">
           <Sparkles className="mx-auto mb-4 h-8 w-8 text-accent" />
-          <h2 className="font-display text-3xl font-light md:text-4xl">
+          <h2 className="font-display text-2xl font-light sm:text-3xl md:text-4xl">
             Be present when we open.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
             Early members receive priority verification and a permanent founding-circle archetype.
           </p>
-          {joined ? (
-            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-3 text-sm">
-              <Heart className="h-4 w-4 text-accent" /> You're on the list.
-            </div>
-          ) : (
-            <form onSubmit={joinWaitlist} className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="w-full max-w-xs rounded-full border border-border bg-surface px-5 py-3 text-sm outline-none focus:border-primary"
-              />
-              <button className="rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
-                Join waitlist
-              </button>
-            </form>
-          )}
-          {err && <p className="mt-3 text-xs text-destructive">{err}</p>}
+          <WaitlistForm />
         </div>
       </section>
 
