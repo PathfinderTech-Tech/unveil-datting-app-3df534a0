@@ -4,7 +4,9 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { saveSparkAnswer, loadSparkAnswers, useUserId, awardBadge } from "@/lib/games-api";
+import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/spark")({
   head: () => ({
