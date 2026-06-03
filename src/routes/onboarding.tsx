@@ -299,6 +299,44 @@ function Onboarding() {
     );
   }
 
+  if (completed) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-xl px-6 py-20 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-hero shadow-glow">
+            <Check className="h-10 w-10 text-primary-foreground" />
+          </div>
+          <div className="font-mono text-[11px] uppercase tracking-luxury text-primary">100% Complete · Profile Setup Complete</div>
+          <h1 className="mt-3 font-display text-4xl font-bold">Your UNVEIL profile is ready</h1>
+          <p className="mt-3 text-muted-foreground">You can now:</p>
+          <ul className="mt-4 space-y-2 text-left text-sm mx-auto max-w-sm">
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Discover compatible matches</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Unlock personality insights</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Complete your profile</li>
+            <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Start meaningful conversations</li>
+          </ul>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => navigate({ to: "/matches" })}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+            >
+              Go to Discover <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate({ to: "/profile" })}
+              className="rounded-full border border-border bg-surface px-6 py-3 font-medium hover:border-foreground/30"
+            >
+              View My Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const pct = Math.round(((step + 1) / STEPS.length) * 100);
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
@@ -311,10 +349,11 @@ function Onboarding() {
               {STEPS[step].required ? "Required" : "Optional"}
             </span>
           </div>
-          <div className="font-mono text-[11px] text-muted-foreground">
-            {step < STEPS.length - 1 ? <>Next: {STEPS[step].next}</> : <>Next: Your matches</>}
+          <div className="font-mono text-[11px] text-primary">
+            {pct}% Complete
           </div>
         </div>
+
         <div className="mb-10 flex items-center gap-2">
           {STEPS.map((_, i) => (
             <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gradient-hero" : "bg-border"}`} />
