@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
-import { WaitlistForm } from "@/components/WaitlistForm";
-import { ArrowRight, Eye, MessageCircle, Heart, Waves, Sparkles } from "lucide-react";
+import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
