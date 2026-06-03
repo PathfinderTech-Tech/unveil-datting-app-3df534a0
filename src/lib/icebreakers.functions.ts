@@ -70,8 +70,8 @@ export const generateIcebreakers = createServerFn({ method: "POST" })
         supabase.rpc("compute_compatibility", { _a: userId, _b: data.peerId }).maybeSingle(),
       ]);
 
-      const meP = me.data ?? {};
-      const themP = them.data ?? {};
+      const meP: any = me.data ?? {};
+      const themP: any = them.data ?? {};
       const c: any = compat.data ?? {};
 
       const prompt = [
