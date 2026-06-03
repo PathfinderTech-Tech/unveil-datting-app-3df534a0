@@ -644,7 +644,8 @@ function HiddenMatchesView() {
     trackEvent("hidden_match_message_started", { peerId: m.id });
     await logView({ data: { peerId: m.id, kind: "message" } });
     if (res.mutual && res.conversationId) {
-      toast.success(`It's mutual with ${m.firstName ?? "your match"} — open the conversation.`);
+      toast.success(`It's mutual with ${m.firstName ?? "your match"} — opening the conversation.`);
+      navigate({ to: "/chat", search: { c: res.conversationId } as never });
     } else {
       toast.success("Interest sent.");
     }
