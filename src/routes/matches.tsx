@@ -125,7 +125,7 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
 
-  if (authLoading || (user && !profileState)) {
+  if (checking || authLoading || (user && !profileState)) {
     return (
       <div className="min-h-screen">
         <UnveilNav />
@@ -133,6 +133,7 @@ function Matches() {
       </div>
     );
   }
+
 
   // Not signed in → go sign in (never to onboarding step 1).
   if (!user) {
