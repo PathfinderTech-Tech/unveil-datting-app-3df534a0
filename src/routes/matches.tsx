@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { NoMatchHub } from "@/components/NoMatchHub";
 import {
   ARCHETYPES, PRESENCE_LABELS, chemistryFor,
   type SynapseProfile,
