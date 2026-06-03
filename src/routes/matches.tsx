@@ -123,8 +123,8 @@ function Matches() {
   const visible = useMemo(() => {
     if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
     return matches;
-  }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
+  const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
 
   if (checking || authLoading || (user && !profileState)) {
     return (
