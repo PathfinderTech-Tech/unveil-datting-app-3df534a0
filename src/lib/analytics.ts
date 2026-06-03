@@ -12,12 +12,15 @@ export async function trackEvent(event: string, properties: Record<string, unkno
     await supabase.from("analytics_events").insert({
       event,
       user_id: userId,
-      properties,
+      properties: JSON.parse(JSON.stringify(properties ?? {})),
     });
   } catch {
     /* ignore */
   }
 }
+
+// Back-compat alias used across the app.
+export const track = trackEvent;
 
 export const ANALYTICS = {
   appOpen: "app_open",
