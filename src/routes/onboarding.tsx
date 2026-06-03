@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
@@ -7,6 +7,7 @@ import {
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { generateAvatar } from "@/lib/avatar.functions";
 import { Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X, Wand2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
