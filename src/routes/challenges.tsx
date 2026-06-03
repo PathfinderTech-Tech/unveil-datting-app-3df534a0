@@ -1,21 +1,22 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useSearch, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, MessageCircle, Heart, Calendar, Lock, Users } from "lucide-react";
 import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
 import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type ChallengeRow } from "@/lib/content-api";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type SearchParams = { u?: string; cat?: string };
+type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
 
 export const Route = createFileRoute("/challenges")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     u: typeof s.u === "string" ? s.u : undefined,
     cat: typeof s.cat === "string" ? s.cat : undefined,
+    tab: s.tab === "public" || s.tab === "match" ? s.tab : undefined,
   }),
-  head: () => ({ meta: [{ title: "Challenges — UNVEIL" }, { name: "description", content: "Playful 2-player packs that spark chemistry before the date." }] }),
+  head: () => ({ meta: [{ title: "Challenges — UNVEIL" }, { name: "description", content: "Public reflections for everyone. Couple challenges unlock with mutual matches." }] }),
   component: Challenges,
 });
 
@@ -36,6 +37,7 @@ function Challenges() {
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
   const [active, setActive] = useState<string | null>(search.cat ?? null);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [tab, setTab] = useState<"public" | "match">(search.tab ?? "public");
 
   useEffect(() => {
     supabase.from("challenges").select("category").eq("active", true).then(({ data }) => {
@@ -45,33 +47,97 @@ function Challenges() {
     });
   }, []);
 
+  const hasMatch = partners.length > 0;
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">
-          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Challenge Before The Date</div>
-          <h1 className="mt-2 font-display text-5xl font-bold">Play first. Meet second.</h1>
-          <p className="mt-3 max-w-xl text-muted-foreground">Two-player packs that build chemistry — then a tiny ritual to settle the first date.</p>
+          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Challenges</div>
+          <h1 className="mt-2 font-display text-5xl font-bold">Reflect first. Connect deeper.</h1>
+          <p className="mt-3 max-w-xl text-muted-foreground">Public prompts for everyone. Couple challenges unlock once you have a mutual match.</p>
         </div>
 
-        <section className="mb-6 rounded-3xl border border-border bg-card p-6">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Play with</div>
-          {loading
-            ? <div className="text-sm text-muted-foreground">Loading…</div>
-            : <PartnerPicker partners={partners} value={partnerId} onChange={setPartnerId} />}
-          {partners.length === 0 && (
-            <p className="mt-3 text-xs text-muted-foreground">You can still preview a pack — your picks will save once you have a mutual match.</p>
-          )}
-        </section>
+        {/* Tabs */}
+        <div className="mb-6 inline-flex rounded-full border border-border bg-card p-1">
+          <button
+            onClick={() => { setTab("public"); setActive(null); }}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "public" ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          ><Sparkles className="h-3.5 w-3.5" /> Public</button>
+          <button
+            onClick={() => { setTab("match"); setActive(null); }}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "match" ? "bg-gradient-aura text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          >{hasMatch ? <Users className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />} Match Challenges</button>
+        </div>
 
-        {active
-          ? <PackRunner category={active} partnerId={partnerId} onBack={() => setActive(null)} />
-          : <PackGrid counts={counts} onPick={setActive} />}
+        {tab === "public" ? (
+          <PublicChallenges />
+        ) : !hasMatch ? (
+          <MatchLockedEmpty />
+        ) : (
+          <>
+            <section className="mb-6 rounded-3xl border border-border bg-card p-6">
+              <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Play with</div>
+              {loading
+                ? <div className="text-sm text-muted-foreground">Loading…</div>
+                : <PartnerPicker partners={partners} value={partnerId} onChange={setPartnerId} />}
+            </section>
+
+            {active
+              ? <PackRunner category={active} partnerId={partnerId} onBack={() => setActive(null)} />
+              : <PackGrid counts={counts} onPick={setActive} />}
+          </>
+        )}
       </div>
     </div>
   );
 }
+
+function PublicChallenges() {
+  const tiles = [
+    { to: "/play",   icon: Calendar,       title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
+    { to: "/spark",  icon: MessageCircle,  title: "Icebreakers & Reflections",   desc: "Short prompts that shape your bio and unlock new conversation hooks." },
+    { to: "/games",  icon: Sparkles,       title: "Solo Mind Games",             desc: "Puzzles that quietly improve your matching signal." },
+    { to: "/insights", icon: Heart,        title: "Community Reflections",       desc: "See how your answers compare with the wider UNVEIL community." },
+  ] as const;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {tiles.map((t) => {
+        const Icon = t.icon;
+        return (
+          <Link key={t.to} to={t.to}
+            className="group rounded-3xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow">
+            <Icon className="h-5 w-5 text-accent" />
+            <div className="mt-4 font-display text-xl">{t.title}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{t.desc}</div>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs text-primary">Open <ArrowRight className="h-3 w-3" /></span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function MatchLockedEmpty() {
+  return (
+    <div className="rounded-3xl border border-dashed border-border bg-card/40 p-10 text-center">
+      <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-surface ring-1 ring-border">
+        <Lock className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <h2 className="font-display text-2xl font-bold">Match Challenges are couple-only.</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+        Couple compatibility, 7-day connection, Opposite Match, Values, Future Goals and Readiness challenges unlock the moment you have a mutual match.
+      </p>
+      <Link to="/matches" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
+        Find matches <ArrowRight className="h-4 w-4" />
+      </Link>
+      <p className="mt-3 text-[11px] text-muted-foreground">In the meantime, the <strong>Public</strong> tab has daily questions, icebreakers and reflections.</p>
+    </div>
+  );
+}
+
 
 function PackGrid({ counts, onPick }: { counts: Record<string, number>; onPick: (c: string) => void }) {
   return (
