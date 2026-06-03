@@ -30,6 +30,7 @@ function Settings() {
               {t("premium.manageSubscription")}
             </Link>
           </div>
+          <FeedbackForm />
         </div>
       </section>
     </div>
