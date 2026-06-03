@@ -198,3 +198,42 @@ export async function likeProfile(targetUserId: string) {
     conversationId: (row?.conversation_id as string | null) ?? null,
   };
 }
+
+export async function passProfile(targetUserId: string) {
+  const { error } = await supabase.rpc("pass_profile", { _target: targetUserId } as never);
+  return { error: error?.message ?? null };
+}
+
+export async function toggleSaveProfile(targetUserId: string) {
+  const { data: u } = await supabase.auth.getUser();
+  const uid = u.user?.id;
+  if (!uid) return { error: "unauthenticated", saved: false };
+  const { data: existing } = await supabase.from("saved_profiles" as never)
+    .select("id").eq("user_id", uid).eq("target_user_id", targetUserId).maybeSingle();
+  if (existing) {
+    await supabase.from("saved_profiles" as never).delete().eq("user_id", uid).eq("target_user_id", targetUserId);
+    return { error: null, saved: false };
+  }
+  const { error } = await supabase.from("saved_profiles" as never)
+    .insert({ user_id: uid, target_user_id: targetUserId });
+  return { error: error?.message ?? null, saved: !error };
+}
+
+export async function loadCompatibility(targetUserId: string) {
+  const { data, error } = await supabase.rpc("compute_compatibility", { _a: (await supabase.auth.getUser()).data.user?.id, _b: targetUserId } as never);
+  if (error) return null;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row as {
+    overall: number; communication: number; lifestyle: number;
+    values_score: number; goals: number;
+    strengths: string[]; friction: string[];
+  } | null;
+}
+
+export function bandLabel(score: number): { label: string; tone: string } {
+  if (score >= 90) return { label: "Exceptional Match", tone: "text-neon" };
+  if (score >= 80) return { label: "Strong Match", tone: "text-primary" };
+  if (score >= 70) return { label: "Good Match", tone: "text-accent" };
+  return { label: "Possible Match", tone: "text-muted-foreground" };
+}
+
