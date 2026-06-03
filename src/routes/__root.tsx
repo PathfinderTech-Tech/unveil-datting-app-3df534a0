@@ -132,6 +132,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RevealNotifier />
       <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">
           <Outlet />
@@ -141,4 +142,10 @@ function RootComponent() {
       </div>
     </QueryClientProvider>
   );
+}
+
+function RevealNotifier() {
+  // Subscribes to reveal_progress and toasts on newly available stages.
+  useRevealNotifications();
+  return null;
 }
