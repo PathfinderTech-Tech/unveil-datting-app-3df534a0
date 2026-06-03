@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
 import { OAuthButtons } from "@/components/OAuthButtons";
 import { ArrowRight } from "lucide-react";
+import { getEmailCooldown, cooldownMessage, logDeletionAttempt } from "@/lib/cooldown";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "UNVEIL — Sign in" }] }),
@@ -16,10 +17,26 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [cooldownBanner, setCooldownBanner] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("cooldown") === "1") {
+      const msg = sessionStorage.getItem("cooldown:msg");
+      if (msg) setCooldownBanner(msg);
+    }
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErr("");
+    const until = await getEmailCooldown(email);
+    if (until) {
+      await logDeletionAttempt(email, "email", "blocked_cooldown");
+      setErr(cooldownMessage(until));
+      setLoading(false);
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) setErr(error.message);
