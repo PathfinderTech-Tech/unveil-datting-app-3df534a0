@@ -868,6 +868,66 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          id: string
+          id_back_url: string | null
+          id_front_url: string | null
+          id_type: string | null
+          legal_first_name: string | null
+          legal_last_name: string | null
+          profile_photo_url: string | null
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          selfie_url: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          id?: string
+          id_back_url?: string | null
+          id_front_url?: string | null
+          id_type?: string | null
+          legal_first_name?: string | null
+          legal_last_name?: string | null
+          profile_photo_url?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          selfie_url?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          id?: string
+          id_back_url?: string | null
+          id_front_url?: string | null
+          id_type?: string | null
+          legal_first_name?: string | null
+          legal_last_name?: string | null
+          profile_photo_url?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          selfie_url?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       voice_prompts: {
         Row: {
           audio_url: string
