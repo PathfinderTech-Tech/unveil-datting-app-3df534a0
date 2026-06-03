@@ -142,7 +142,25 @@ function Onboarding() {
     setPhotoUrl(null);
     setFaceUploaded(false);
     setFaceHarmony(0);
+    setAvatarUrl(null);
   }
+
+  async function handleGenerateAvatar() {
+    if (!photoUrl) { toast.error("Add a selfie first."); return; }
+    setGeneratingAvatar(true);
+    try {
+      const res = await runGenerateAvatar({ data: { style: avatarStyle, selfieUrl: photoUrl } });
+      setAvatarUrl(res.avatarUrl);
+      if (res.fallback && res.message) toast.message(res.message);
+      else toast.success("Your avatar is ready.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not generate avatar");
+    } finally {
+      setGeneratingAvatar(false);
+    }
+  }
+
+
 
 
   const finish = async (skipGames = false) => {
