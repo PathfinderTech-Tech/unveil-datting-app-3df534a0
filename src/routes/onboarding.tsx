@@ -37,12 +37,23 @@ const INTENTS = [
 ];
 
 const AVATAR_STYLES = [
-  { id: "real",       label: "Real Photo",          hint: "Show the actual you." },
-  { id: "anime",      label: "Anime Avatar",        hint: "Stylized, playful." },
-  { id: "stylized",   label: "Stylized Avatar",     hint: "Graphic, modern." },
-  { id: "realistic",  label: "Realistic AI Portrait", hint: "Painted, lifelike." },
-  { id: "artistic",   label: "Artistic Illustration", hint: "Watercolor, soft." },
-];
+  { id: "real",       label: "Real Photo",            hint: "Show the actual you." },
+  { id: "anime",      label: "Anime Avatar",          hint: "Stylized, playful." },
+  { id: "stylized",   label: "Stylized Avatar",       hint: "Painted, modern." },
+  { id: "realistic",  label: "Realistic AI Portrait", hint: "Cinematic, lifelike." },
+  { id: "mystery",    label: "Mystery Avatar",        hint: "Silhouette, intriguing." },
+] as const;
+type AvatarStyleId = (typeof AVATAR_STYLES)[number]["id"];
+
+// Step metadata for the "Step X of Y · Label · Required/Optional" header.
+const STEPS = [
+  { label: "Account",           required: true,  next: "Selfie" },
+  { label: "Connection style",  required: true,  next: "Selfie & avatar" },
+  { label: "Selfie & avatar",   required: false, next: "Profession" },
+  { label: "Profession",        required: true,  next: "Discovery quiz" },
+  { label: "Discovery quiz",    required: true,  next: "Your matches" },
+] as const;
+
 
 const CONNECTION_STYLES = [
   { id: "quick",     label: "Quick Connect",  hint: "I prefer chatting naturally.",            tone: "Skip games. Jump into messages." },
