@@ -224,6 +224,21 @@ function Matches() {
     <div className="min-h-screen">
       <UnveilNav />
       <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-6 inline-flex rounded-full border border-border bg-card p-1">
+          <button
+            onClick={() => setMode("your")}
+            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode === "your" ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          >Your Matches</button>
+          <button
+            onClick={() => setMode("hidden")}
+            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode === "hidden" ? "bg-gradient-aura text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+          >Hidden Matches™</button>
+        </div>
+
+        {mode === "hidden" ? (
+          <HiddenMatchesView />
+        ) : (
+        <>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
