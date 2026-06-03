@@ -1,13 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
   type DiscoveryProfile, type Profession,
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, ArrowRight, Check, Sparkles, Upload, Loader2, X } from "lucide-react";
+import { generateAvatar } from "@/lib/avatar.functions";
+import { Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X, Wand2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
 
 
 export const Route = createFileRoute("/onboarding")({
@@ -34,12 +37,23 @@ const INTENTS = [
 ];
 
 const AVATAR_STYLES = [
-  { id: "real",       label: "Real Photo",          hint: "Show the actual you." },
-  { id: "anime",      label: "Anime Avatar",        hint: "Stylized, playful." },
-  { id: "stylized",   label: "Stylized Avatar",     hint: "Graphic, modern." },
-  { id: "realistic",  label: "Realistic AI Portrait", hint: "Painted, lifelike." },
-  { id: "artistic",   label: "Artistic Illustration", hint: "Watercolor, soft." },
-];
+  { id: "real",       label: "Real Photo",            hint: "Show the actual you." },
+  { id: "anime",      label: "Anime Avatar",          hint: "Stylized, playful." },
+  { id: "stylized",   label: "Stylized Avatar",       hint: "Painted, modern." },
+  { id: "realistic",  label: "Realistic AI Portrait", hint: "Cinematic, lifelike." },
+  { id: "mystery",    label: "Mystery Avatar",        hint: "Silhouette, intriguing." },
+] as const;
+type AvatarStyleId = (typeof AVATAR_STYLES)[number]["id"];
+
+// Step metadata for the "Step X of Y · Label · Required/Optional" header.
+const STEPS = [
+  { label: "Account",           required: true,  next: "Selfie" },
+  { label: "Connection style",  required: true,  next: "Selfie & avatar" },
+  { label: "Selfie & avatar",   required: false, next: "Profession" },
+  { label: "Profession",        required: true,  next: "Discovery quiz" },
+  { label: "Discovery quiz",    required: true,  next: "Your matches" },
+] as const;
+
 
 const CONNECTION_STYLES = [
   { id: "quick",     label: "Quick Connect",  hint: "I prefer chatting naturally.",            tone: "Skip games. Jump into messages." },
@@ -67,12 +81,16 @@ function Onboarding() {
   const [dragActive, setDragActive] = useState(false);
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [avatarStyle, setAvatarStyle] = useState<string>("real");
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>("real");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  const runGenerateAvatar = useServerFn(generateAvatar);
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const allAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allAnswered
     ? discoveryToCharacter(discovery as DiscoveryProfile)
     : { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 };
+
 
   const computeHarmony = () => {
     const target = 72 + Math.floor(Math.random() * 22);
@@ -124,7 +142,25 @@ function Onboarding() {
     setPhotoUrl(null);
     setFaceUploaded(false);
     setFaceHarmony(0);
+    setAvatarUrl(null);
   }
+
+  async function handleGenerateAvatar() {
+    if (!photoUrl) { toast.error("Add a selfie first."); return; }
+    setGeneratingAvatar(true);
+    try {
+      const res = await runGenerateAvatar({ data: { style: avatarStyle, selfieUrl: photoUrl } });
+      setAvatarUrl(res.avatarUrl);
+      if (res.fallback && res.message) toast.message(res.message);
+      else toast.success("Your avatar is ready.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not generate avatar");
+    } finally {
+      setGeneratingAvatar(false);
+    }
+  }
+
+
 
 
   const finish = async (skipGames = false) => {
@@ -166,8 +202,9 @@ function Onboarding() {
     name.length > 1 && !!gender && !!country && !!intent && /\S+@\S+\.\S+/.test(email),
     // Step 1: connection style
     !!connectionStyle,
-    // Step 2: face + avatar style
-    faceUploaded && faceHarmony > 0 && !!avatarStyle,
+    // Step 2: selfie + avatar (optional — Continue always allowed)
+    true,
+
     // Step 3: profession
     profession !== null,
     // Step 4: discovery
@@ -179,11 +216,23 @@ function Onboarding() {
       <UnveilNav />
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* progress */}
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <div className="font-mono text-[11px] uppercase tracking-luxury text-muted-foreground">
+            Step {step + 1} of {STEPS.length} · {STEPS[step].label}
+            <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${STEPS[step].required ? "bg-primary/15 text-primary" : "bg-surface-2 text-muted-foreground"}`}>
+              {STEPS[step].required ? "Required" : "Optional"}
+            </span>
+          </div>
+          <div className="font-mono text-[11px] text-muted-foreground">
+            {step < STEPS.length - 1 ? <>Next: {STEPS[step].next}</> : <>Next: Your matches</>}
+          </div>
+        </div>
         <div className="mb-10 flex items-center gap-2">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-border"}`} />
+          {STEPS.map((_, i) => (
+            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gradient-hero" : "bg-border"}`} />
           ))}
         </div>
+
 
         {step === 0 && (
           <div className="space-y-6">
@@ -383,9 +432,42 @@ function Onboarding() {
                     );
                   })}
                 </div>
+
+                {avatarStyle !== "real" && (
+                  <div className="mt-4 rounded-2xl border border-border bg-surface/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="font-display text-sm">Generate your {AVATAR_STYLES.find(s => s.id === avatarStyle)?.label}</div>
+                        <div className="text-xs text-muted-foreground">Optional — you can always switch back to your real photo.</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGenerateAvatar}
+                        disabled={generatingAvatar || !photoUrl}
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50"
+                      >
+                        {generatingAvatar
+                          ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Generating…</>
+                          : avatarUrl
+                            ? <><RefreshCw className="h-3.5 w-3.5" /> Regenerate</>
+                            : <><Wand2 className="h-3.5 w-3.5" /> Generate avatar</>}
+                      </button>
+                    </div>
+                    {avatarUrl && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <img src={avatarUrl} alt="Generated avatar" className="h-20 w-20 rounded-2xl object-cover ring-2 ring-primary/40" />
+                        <div className="text-xs text-muted-foreground">
+                          Saved to your profile. You can regenerate or skip to keep your selfie.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   You can switch between your real photo and your generated avatar at any time.
                 </p>
+
               </div>
             )}
           </div>
@@ -463,39 +545,51 @@ function Onboarding() {
           </div>
         )}
 
-        <div className="mt-10 flex items-center justify-between">
+        <div className="mt-10 flex items-center justify-between gap-3">
           <button
             onClick={() => setStep(Math.max(0, step - 1))}
             disabled={step === 0}
-            className="rounded-full px-4 py-2 text-sm text-muted-foreground disabled:opacity-30"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30"
           >
-            ← Back
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
           </button>
-          {step < 4 ? (
-            <button
-              onClick={() => setStep(step + 1)}
-              disabled={!canNext}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
-            >
-              Continue <ArrowRight className="h-4 w-4" />
-            </button>
-          ) : (
-            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            {!STEPS[step].required && step < STEPS.length - 1 && (
               <button
-                onClick={() => finish(true)}
-                className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setStep(step + 1)}
+                className="rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground"
               >
-                Skip games — just let me chat
+                Skip this step
               </button>
+            )}
+            {step < STEPS.length - 1 ? (
               <button
-                onClick={() => finish(false)}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105"
+                onClick={() => setStep(step + 1)}
+                disabled={!canNext}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
               >
-                Discover your resonance <ArrowRight className="h-4 w-4" />
+                Continue <ArrowRight className="h-4 w-4" />
               </button>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                <button
+                  onClick={() => finish(true)}
+                  className="rounded-full border border-border bg-surface/60 px-5 py-2 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Skip games — just let me chat
+                </button>
+                <button
+                  onClick={() => finish(false)}
+                  disabled={!canNext}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
+                >
+                  Discover your resonance <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
