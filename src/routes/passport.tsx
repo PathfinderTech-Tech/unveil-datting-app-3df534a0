@@ -16,10 +16,12 @@ export const Route = createFileRoute("/passport")({
 });
 
 function Passport() {
+  const { checking } = useRequireOnboarding();
   const [profile] = useProfile();
   const uid = useUserId();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [isBeta, setIsBeta] = useState(false);
+
 
   // Load real earned badges from DB
   useEffect(() => {
