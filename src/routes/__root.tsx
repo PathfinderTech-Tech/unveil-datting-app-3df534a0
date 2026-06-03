@@ -13,6 +13,7 @@ import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
+import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 
 function NotFoundComponent() {
   return (
