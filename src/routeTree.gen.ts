@@ -42,6 +42,7 @@ import { Route as PlayStoryRouteImport } from './routes/play.story'
 import { Route as PlayQuizRouteImport } from './routes/play.quiz'
 import { Route as PlayPredictRouteImport } from './routes/play.predict'
 import { Route as PlayEscapeRouteImport } from './routes/play.escape'
+import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -210,6 +211,11 @@ const PlayEscapeRoute = PlayEscapeRouteImport.update({
   path: '/escape',
   getParentRoute: () => PlayRoute,
 } as any)
+const MatchUserIdRoute = MatchUserIdRouteImport.update({
+  id: '/match/$userId',
+  path: '/match/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/return',
   path: '/return',
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/match/$userId': typeof MatchUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -289,6 +296,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/match/$userId': typeof MatchUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/match/$userId': typeof MatchUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/match/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/match/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/checkout/return'
+    | '/match/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   SparkRoute: typeof SparkRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  MatchUserIdRoute: typeof MatchUserIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -713,6 +726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayEscapeRouteImport
       parentRoute: typeof PlayRoute
     }
+    '/match/$userId': {
+      id: '/match/$userId'
+      path: '/match/$userId'
+      fullPath: '/match/$userId'
+      preLoaderRoute: typeof MatchUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/return': {
       id: '/checkout/return'
       path: '/return'
@@ -789,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   SparkRoute: SparkRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  MatchUserIdRoute: MatchUserIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
