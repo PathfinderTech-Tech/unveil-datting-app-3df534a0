@@ -50,6 +50,8 @@ function Chat() {
   const [showMenu, setShowMenu] = useState(false);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<{ text: string; kind: string }[]>([]);
+  const [opener, setOpener] = useState<string>("");
+  const [ideaCategory, setIdeaCategory] = useState<IcebreakerCategory | undefined>(undefined);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
