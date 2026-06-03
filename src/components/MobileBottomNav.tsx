@@ -7,7 +7,7 @@ const ITEMS = [
   { to: "/messages", label: "Messages", icon: MessageCircle, badge: true as const },
   { to: "/matches", label: "Matches", icon: Heart },
   { to: "/insights", label: "Insights", icon: Sparkles },
-  { to: "/passport", label: "Profile", icon: User },
+  { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
 /**
