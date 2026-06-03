@@ -25,27 +25,33 @@ export function HiddenMatchCard({
 }) {
   if (match.locked) {
     return (
-      <div className="relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent" />
+      <div className="relative flex flex-col overflow-hidden rounded-3xl border border-accent/40 bg-card p-5">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-transparent" />
         <div className="relative">
           <div className="flex items-start justify-between">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface ring-1 ring-border">
-              <Lock className="h-5 w-5 text-muted-foreground" />
+            <div className="relative">
+              <div style={{ filter: "blur(10px)" }}>
+                <Avatar seed={match.id.slice(0, 6) + "-180"} size={56} label="Opposite" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
+                <Lock className="h-3 w-3 text-muted-foreground" />
+              </div>
             </div>
             <div className="text-right">
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Complementary</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-accent">Opposite Match</div>
               <div className="font-display text-2xl font-bold text-gradient-aura">{match.complementaryScore}%</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Complementary</div>
             </div>
           </div>
-          <p className="mt-4 font-display text-lg italic text-foreground/80">
+          <p className="mt-4 font-display text-base italic text-foreground/80">
             "{TAGLINES[taglineSeed % TAGLINES.length]}"
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">A Hidden Match awaits. Unlock to see who.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Premium reveals identity, "Why we match" insights, and chat.</p>
           <Link
             to="/premium"
             className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
           >
-            <Sparkles className="h-4 w-4" /> Unlock Hidden Matches™
+            <Sparkles className="h-4 w-4" /> Unlock with Premium
           </Link>
         </div>
       </div>
