@@ -472,6 +472,7 @@ export type Database = {
           avatar_generated_at: string | null
           avatar_style: string | null
           avatar_url: string | null
+          badge_paid: boolean
           bio: string | null
           city: string | null
           communication_style: Json | null
@@ -498,6 +499,7 @@ export type Database = {
           photo_reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           photo_url: string | null
           preferred_language: string | null
+          premium_until: string | null
           profile_photo_url: string | null
           relationship_intent: string | null
           state_region: string | null
@@ -514,6 +516,7 @@ export type Database = {
           avatar_generated_at?: string | null
           avatar_style?: string | null
           avatar_url?: string | null
+          badge_paid?: boolean
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
@@ -542,6 +545,7 @@ export type Database = {
             | null
           photo_url?: string | null
           preferred_language?: string | null
+          premium_until?: string | null
           profile_photo_url?: string | null
           relationship_intent?: string | null
           state_region?: string | null
@@ -558,6 +562,7 @@ export type Database = {
           avatar_generated_at?: string | null
           avatar_style?: string | null
           avatar_url?: string | null
+          badge_paid?: boolean
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
@@ -586,6 +591,7 @@ export type Database = {
             | null
           photo_url?: string | null
           preferred_language?: string | null
+          premium_until?: string | null
           profile_photo_url?: string | null
           relationship_intent?: string | null
           state_region?: string | null
@@ -832,6 +838,57 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string | null
+          environment: string
+          id: string
+          kind: string
+          price_id: string | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          stripe_subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          environment?: string
+          id?: string
+          kind: string
+          price_id?: string | null
+          status: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          environment?: string
+          id?: string
+          kind?: string
+          price_id?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -870,6 +927,45 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          environment: string
+          id: string
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          id?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          id?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
