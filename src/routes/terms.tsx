@@ -2,7 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({ meta: [{ title: "Terms — UNVEIL" }] }),
+  head: () => ({
+    meta: [
+      { title: "Terms of Service — UNVEIL" },
+      { name: "description", content: "The terms that govern your use of UNVEIL." },
+      { property: "og:title", content: "Terms of Service — UNVEIL" },
+      { property: "og:url", content: "https://unveil.best/terms" },
+    ],
+    links: [{ rel: "canonical", href: "https://unveil.best/terms" }],
+  }),
   component: Terms,
 });
 
