@@ -13,6 +13,7 @@ import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
+import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -84,12 +85,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
       { property: "og:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: logoAsset.url },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: logoAsset.url },
       { name: "twitter:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
       { name: "twitter:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: logoAsset.url },
+      { rel: "apple-touch-icon", href: logoAsset.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" },
@@ -102,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "UNVEIL",
           url: "https://unveil.best",
+          logo: logoAsset.url,
           email: "support@unveil.best",
           description: "Compatibility-first dating platform where meaningful connections form before appearance becomes central.",
         }),
