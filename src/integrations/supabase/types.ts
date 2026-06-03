@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          properties: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          properties?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          properties?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       badges_catalog: {
         Row: {
           created_at: string
@@ -286,6 +310,123 @@ export type Database = {
         }
         Relationships: []
       }
+      email_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string
+          status?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
+      email_send_state: {
+        Row: {
+          auth_email_ttl_minutes: number
+          batch_size: number
+          id: number
+          retry_after_until: string | null
+          send_delay_ms: number
+          transactional_email_ttl_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          status: string
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       first_impression_responses: {
         Row: {
           card_id: string
@@ -530,6 +671,7 @@ export type Database = {
           avatar_style: string | null
           avatar_url: string | null
           badge_paid: boolean
+          beta_member: boolean
           bio: string | null
           city: string | null
           communication_style: Json | null
@@ -574,6 +716,7 @@ export type Database = {
           avatar_style?: string | null
           avatar_url?: string | null
           badge_paid?: boolean
+          beta_member?: boolean
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
@@ -620,6 +763,7 @@ export type Database = {
           avatar_style?: string | null
           avatar_url?: string | null
           badge_paid?: boolean
+          beta_member?: boolean
           bio?: string | null
           city?: string | null
           communication_style?: Json | null
@@ -916,6 +1060,30 @@ export type Database = {
         }
         Relationships: []
       }
+      suppressed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_cents: number
@@ -1155,22 +1323,46 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          approved_at: string | null
+          country: string | null
           created_at: string
           email: string
+          first_name: string | null
+          gender: string | null
           id: string
+          relationship_goal: string | null
+          reviewed_at: string | null
+          reviewer_notes: string | null
           source: string | null
+          status: string
         }
         Insert: {
+          approved_at?: string | null
+          country?: string | null
           created_at?: string
           email: string
+          first_name?: string | null
+          gender?: string | null
           id?: string
+          relationship_goal?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
           source?: string | null
+          status?: string
         }
         Update: {
+          approved_at?: string | null
+          country?: string | null
           created_at?: string
           email?: string
+          first_name?: string | null
+          gender?: string | null
           id?: string
+          relationship_goal?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
           source?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -1226,6 +1418,10 @@ export type Database = {
           unlocked: boolean
         }[]
       }
+      delete_email: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
       discover_profiles: {
         Args: {
           _age_max?: number
@@ -1264,6 +1460,10 @@ export type Database = {
           verified: boolean
         }[]
       }
+      enqueue_email: {
+        Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -1275,6 +1475,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_email_approved: { Args: { _email: string }; Returns: boolean }
       like_profile: {
         Args: { _target: string }
         Returns: {
@@ -1283,7 +1484,24 @@ export type Database = {
           mutual: boolean
         }[]
       }
+      move_to_dlq: {
+        Args: {
+          dlq_name: string
+          message_id: number
+          payload: Json
+          source_queue: string
+        }
+        Returns: number
+      }
       pass_profile: { Args: { _target: string }; Returns: undefined }
+      read_email_batch: {
+        Args: { batch_size: number; queue_name: string; vt: number }
+        Returns: {
+          message: Json
+          msg_id: number
+          read_ct: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

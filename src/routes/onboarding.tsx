@@ -187,6 +187,8 @@ function Onboarding() {
           user_id: user.id,
           answers: { profession, professionLabel: profObj.label, faceHarmony, avatarStyle, country, stateRegion, connectionStyle, character, discovery, summary, email },
         }, { onConflict: "user_id" });
+        const { track } = await import("@/lib/analytics");
+        await track("profile_completed", { intent, country });
       }
     } catch (e) { console.warn("[unveil] onboarding save skipped", e); }
     if (skipGames || connectionStyle === "quick") navigate({ to: "/matches" });

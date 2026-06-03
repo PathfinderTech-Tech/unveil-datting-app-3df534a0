@@ -11,32 +11,68 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "verifications" | "payments" | "reports";
+type Tab = "waitlist" | "verifications" | "payments" | "reports" | "feedback";
 
 function Admin() {
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<Tab>("verifications");
-  const [stats, setStats] = useState({ users: 0, reports: 0, premium: 0, pending: 0 });
+  const [tab, setTab] = useState<Tab>("waitlist");
+  const [stats, setStats] = useState({
+    users: 0, waitlistTotal: 0, waitlistPending: 0, approved: 0, rejected: 0,
+    pendingVerif: 0, premium: 0, reports: 0,
+  });
   const [verifications, setVerifications] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function refresh() {
-    const [u, r, p, vp, v, pay, rep] = await Promise.all([
+    const [u, wlt, wlp, wla, wlr, vp, r, p, v, pay, rep, wl, fb] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "approved"),
+      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "rejected"),
+      supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
       supabase.from("reports").select("id", { count: "exact", head: true }),
       supabase.from("subscriptions").select("id", { count: "exact", head: true }).neq("tier", "free"),
-      supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
       supabase.from("verification_requests").select("*").in("status", ["pending_review", "submitted", "approved", "rejected"]).order("submitted_at", { ascending: false }).limit(50),
       supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(50),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("waitlist").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
-    setStats({ users: u.count || 0, reports: r.count || 0, premium: p.count || 0, pending: vp.count || 0 });
+    setStats({
+      users: u.count || 0,
+      waitlistTotal: wlt.count || 0,
+      waitlistPending: wlp.count || 0,
+      approved: wla.count || 0,
+      rejected: wlr.count || 0,
+      pendingVerif: vp.count || 0,
+      premium: p.count || 0,
+      reports: r.count || 0,
+    });
     setVerifications(v.data || []);
     setPayments(pay.data || []);
     setReports(rep.data || []);
+    setWaitlist(wl.data || []);
+    setFeedback(fb.data || []);
+  }
+
+  async function reviewWaitlist(id: string, status: "approved" | "rejected") {
+    setBusyId(id);
+    const patch = {
+      status,
+      reviewed_at: new Date().toISOString(),
+      ...(status === "approved" ? { approved_at: new Date().toISOString() } : {}),
+    };
+    const { error } = await supabase.from("waitlist").update(patch).eq("id", id);
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success(status === "approved" ? "Approved." : "Rejected.");
+    await refresh();
   }
 
   useEffect(() => {
@@ -87,21 +123,25 @@ function Admin() {
       <UnveilNav />
       <section className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-12">
         <h1 className="font-display text-3xl font-light md:text-4xl">Admin</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Verification, payments & moderation</p>
+        <p className="mt-1 text-sm text-muted-foreground">Waitlist, verification, payments & moderation</p>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat icon={<Users className="h-4 w-4" />} label="Users" value={stats.users} />
-          <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Pending verifications" value={stats.pending} />
+        <div className="mt-8 grid gap-3 grid-cols-2 lg:grid-cols-4">
+          <Stat icon={<Users className="h-4 w-4" />} label="Total users" value={stats.users} />
+          <Stat icon={<Mail className="h-4 w-4" />} label="Waitlist (pending)" value={stats.waitlistPending} />
+          <Stat icon={<Check className="h-4 w-4" />} label="Approved" value={stats.approved} />
+          <Stat icon={<X className="h-4 w-4" />} label="Rejected" value={stats.rejected} />
+          <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Verification pending" value={stats.pendingVerif} />
           <Stat icon={<Crown className="h-4 w-4" />} label="Premium" value={stats.premium} />
           <Stat icon={<AlertTriangle className="h-4 w-4" />} label="Reports" value={stats.reports} />
+          <Stat icon={<Mail className="h-4 w-4" />} label="Waitlist total" value={stats.waitlistTotal} />
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2 border-b border-border">
-          {(["verifications", "payments", "reports"] as Tab[]).map((t) => (
+        <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
+          {(["waitlist", "verifications", "payments", "reports", "feedback"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`relative px-4 py-2 text-sm capitalize transition-colors ${
+              className={`relative whitespace-nowrap px-4 py-2 text-sm capitalize transition-colors ${
                 tab === t ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -110,6 +150,80 @@ function Admin() {
             </button>
           ))}
         </div>
+
+        {tab === "waitlist" && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+            {waitlist.length === 0 ? (
+              <Empty label="No waitlist entries yet." />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-surface-2 text-xs uppercase tracking-luxury text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-3 text-left">Name</th>
+                      <th className="px-3 py-3 text-left">Email</th>
+                      <th className="px-3 py-3 text-left">Country</th>
+                      <th className="px-3 py-3 text-left">Gender</th>
+                      <th className="px-3 py-3 text-left">Goal</th>
+                      <th className="px-3 py-3 text-left">Status</th>
+                      <th className="px-3 py-3 text-left">When</th>
+                      <th className="px-3 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {waitlist.map((w) => (
+                      <tr key={w.id} className="border-t border-border">
+                        <td className="px-3 py-3">{w.first_name || "—"}</td>
+                        <td className="px-3 py-3 font-mono text-xs">{w.email}</td>
+                        <td className="px-3 py-3 text-xs">{w.country || "—"}</td>
+                        <td className="px-3 py-3 text-xs capitalize">{w.gender || "—"}</td>
+                        <td className="px-3 py-3 text-xs">{w.relationship_goal?.replace(/_/g, " ") || "—"}</td>
+                        <td className="px-3 py-3"><StatusPill status={w.status} /></td>
+                        <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(w.created_at).toLocaleDateString()}</td>
+                        <td className="px-3 py-3 text-right">
+                          {w.status === "pending" ? (
+                            <div className="inline-flex gap-1.5">
+                              <button disabled={busyId === w.id} onClick={() => reviewWaitlist(w.id, "approved")}
+                                className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-3 py-1.5 text-[11px] font-medium text-primary-foreground shadow-glow disabled:opacity-60">
+                                {busyId === w.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Approve
+                              </button>
+                              <button disabled={busyId === w.id} onClick={() => reviewWaitlist(w.id, "rejected")}
+                                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-[11px] hover:bg-surface-2 disabled:opacity-60">
+                                <X className="h-3 w-3" /> Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "feedback" && (
+          <div className="mt-6 space-y-3">
+            {feedback.length === 0 ? (
+              <Empty label="No feedback yet." />
+            ) : feedback.map((f) => (
+              <div key={f.id} className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-luxury">{f.kind}</span>
+                    {f.subject && <span className="font-medium">{f.subject}</span>}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</span>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{f.message}</p>
+                <div className="mt-2 font-mono text-[10px] text-muted-foreground">user: {f.user_id?.slice(0, 8) ?? "anon"}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {tab === "verifications" && (
           <div className="mt-6 space-y-3">
@@ -246,6 +360,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
 function StatusPill({ status }: { status: string }) {
   const colors: Record<string, string> = {
     pending_review: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    pending: "bg-orange-500/15 text-orange-400 border-orange-500/30",
     approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
     rejected: "bg-red-500/15 text-red-400 border-red-500/30",
     submitted: "bg-blue-500/15 text-blue-400 border-blue-500/30",
