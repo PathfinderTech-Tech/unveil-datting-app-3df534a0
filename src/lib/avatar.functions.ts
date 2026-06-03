@@ -119,12 +119,18 @@ export const generateAvatar = createServerFn({ method: "POST" })
         await supabase
           .from("profiles")
           .update({
+            // Public profile image becomes the chosen avatar everywhere
+            // (discover, matches, messages, cards). The original selfie is
+            // kept private in profile_photo_url and never exposed publicly
+            // unless the user picks "Real Photo".
+            photo_url: avatarUrl,
             avatar_url: avatarUrl,
             avatar_style: data.style,
             avatar_generated_at: new Date().toISOString(),
             profile_photo_url: data.selfieUrl,
           })
           .eq("id", userId);
+
 
         return { avatarUrl, style: data.style, fallback: false };
       } catch (e) {
