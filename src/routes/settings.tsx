@@ -169,7 +169,6 @@ function Settings() {
             )}
           </div>
         </div>
-        </div>
       </section>
     </div>
   );
