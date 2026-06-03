@@ -8,6 +8,7 @@ import {
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
+import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -134,8 +135,9 @@ function Matches() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
-        <section className="mx-auto max-w-2xl px-6 py-16 text-center">
-          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
+        <section className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl px-6 py-16 text-center">
+          <VeilBackdrop variant="center" opacity={0.08} />
+          <div className="relative mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
             <Sparkles className="h-6 w-6" />
           </div>
           <h1 className="mt-5 font-display text-4xl font-light md:text-5xl">Your profile is <span className="text-gradient-aura italic">live</span>.</h1>

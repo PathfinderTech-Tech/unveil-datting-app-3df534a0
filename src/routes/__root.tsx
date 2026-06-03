@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import "@/i18n";
 import { SiteFooter } from "@/components/SiteFooter";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 function NotFoundComponent() {
   return (
@@ -131,11 +132,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">
           <Outlet />
         </div>
         <SiteFooter />
+        <MobileBottomNav />
       </div>
     </QueryClientProvider>
   );

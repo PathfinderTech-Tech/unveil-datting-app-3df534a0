@@ -540,7 +540,8 @@ function Onboarding() {
           <div className="space-y-6">
             <div>
               <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Step 04 — Profession Axis</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">How do you spend your hours?</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">How do you spend your <span className="text-gradient-aura italic">hours</span>?</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Pick the world your days revolve around.</p>
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               {PROFESSIONS.map((p) => {
@@ -549,13 +550,36 @@ function Onboarding() {
                   <button
                     key={p.id}
                     onClick={() => setProfession(p.id)}
-                    className={`group relative flex flex-col items-start gap-2 rounded-2xl border p-5 text-left transition-all ${
-                      active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-card hover:border-foreground/30"
+                    className={`group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 ${
+                      active
+                        ? "border-primary bg-gradient-to-br from-primary/20 via-primary/5 to-transparent shadow-glow scale-[1.02]"
+                        : "border-border bg-card/60 backdrop-blur-sm hover:border-primary/40 hover:bg-card hover:shadow-glow hover:scale-[1.01]"
                     }`}
                   >
-                    <span className="text-2xl">{p.icon}</span>
-                    <span className="font-display font-bold">{p.label}</span>
-                    {active && <Check className="absolute right-3 top-3 h-4 w-4 text-primary" />}
+                    {/* Glass shimmer */}
+                    <div
+                      aria-hidden
+                      className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+                        active ? "opacity-100" : "opacity-0 group-hover:opacity-60"
+                      }`}
+                      style={{
+                        background:
+                          "radial-gradient(120% 80% at 0% 0%, oklch(0.65 0.22 305 / 0.18), transparent 60%)",
+                      }}
+                    />
+                    <span
+                      className={`relative flex h-10 w-10 items-center justify-center rounded-xl text-2xl transition-all ${
+                        active
+                          ? "bg-gradient-hero shadow-glow"
+                          : "bg-surface group-hover:bg-gradient-hero/40"
+                      }`}
+                    >
+                      {p.icon}
+                    </span>
+                    <span className="relative font-display text-base font-bold">{p.label}</span>
+                    {active && (
+                      <Check className="absolute right-3 top-3 h-4 w-4 text-primary" />
+                    )}
                   </button>
                 );
               })}
