@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Lock, Sparkles, Heart, MessageCircle, TrendingUp } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { trackEvent } from "@/lib/analytics";
+import { PremiumPaywallModal } from "@/components/PremiumPaywallModal";
 
 type InsightSection = {
   icon: typeof Sparkles;
@@ -37,6 +38,7 @@ const SECTIONS: InsightSection[] = [
 
 export function InsightsPlusPaywall() {
   const { isPremium, loading } = useSubscription();
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) trackEvent("insights_plus_viewed", { premium: isPremium });
@@ -76,17 +78,19 @@ export function InsightsPlusPaywall() {
               {isPremium ? (
                 <p className="mt-3 text-sm leading-relaxed text-foreground/85">{s.detail}</p>
               ) : (
-                <div className="relative mt-3">
-                  <p
-                    className="select-none text-sm leading-relaxed text-foreground/85 blur-[6px]"
-                    aria-hidden
-                  >
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  className="relative mt-3 block w-full text-left"
+                  aria-label={`Unlock ${s.title}`}
+                >
+                  <p className="select-none text-sm leading-relaxed text-foreground/85 blur-[6px]" aria-hidden>
                     {s.detail}
                   </p>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Lock className="h-5 w-5 text-primary/70" />
                   </div>
-                </div>
+                </button>
               )}
             </article>
           );
@@ -112,6 +116,14 @@ export function InsightsPlusPaywall() {
           </Link>
         </div>
       )}
+
+      <PremiumPaywallModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        feature="insights_plus"
+        title="Unlock your full Insights+"
+        description="Premium reveals the language behind your patterns — attachment depth, communication signature, and the soft edges to work on."
+      />
     </section>
   );
 }

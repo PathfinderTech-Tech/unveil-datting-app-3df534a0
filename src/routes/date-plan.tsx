@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
+import { GuidedFirstDate } from "@/components/GuidedFirstDate";
 import { proposeDate, loadDatePlans, respondToDatePlan, type DatePlan } from "@/lib/social-api";
 import { Coffee, Utensils, BookOpen, Mountain, Image, Trees, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -180,10 +181,15 @@ function DatePlanRoute() {
             </div>
           </section>
         )}
+
+        <div className="mt-10">
+          <GuidedFirstDate />
+        </div>
       </div>
     </div>
   );
 }
+
 
 function themeLabel(id: string) { return THEMES.find((t) => t.id === id)?.label ?? id; }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
