@@ -47,15 +47,14 @@ function computeCompletion(row: Record<string, unknown> | null): number {
 export function HomeDashboard({ user }: { user: User }) {
   const [profile, setProfile] = useState<ProfileSnapshot | null>(null);
   const [newMatches, setNewMatches] = useState(0);
-  const [featured, setFeatured] = useState<{ id: string; title: string; category: string; minutes: number | null } | null>(null);
-  const [hasVisitors, setHasVisitors] = useState(false);
+  const [featured, setFeatured] = useState<{ id: string; question: string; category: string } | null>(null);
   const [insightsViewed, setInsightsViewed] = useState(false);
   const unread = useUnreadCount();
 
   useEffect(() => {
     let alive = true;
     (async () => {
-      const [profileRes, matchesRes, challengeRes, visitorsRes, eventsRes] = await Promise.all([
+      const [profileRes, matchesRes, challengeRes, eventsRes] = await Promise.all([
         supabase
           .from("profiles")
           .select(
@@ -70,15 +69,11 @@ export function HomeDashboard({ user }: { user: User }) {
           .eq("mutual_interest", true),
         supabase
           .from("challenges")
-          .select("id, title, category, minutes")
+          .select("id, question, category")
           .eq("active", true)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
-        supabase
-          .from("profile_visits")
-          .select("id", { count: "exact", head: true })
-          .eq("visited_user_id", user.id),
         supabase
           .from("analytics_events")
           .select("id", { count: "exact", head: true })
@@ -94,11 +89,7 @@ export function HomeDashboard({ user }: { user: User }) {
         completion: computeCompletion(p),
       });
       setNewMatches(matchesRes.count ?? 0);
-      if (challengeRes.data) {
-        const c = challengeRes.data as { id: string; title: string; category: string; minutes: number | null };
-        setFeatured(c);
-      }
-      setHasVisitors((visitorsRes.count ?? 0) > 0);
+      if (challengeRes.data) setFeatured(challengeRes.data);
       setInsightsViewed((eventsRes.count ?? 0) > 0);
     })();
     return () => {
@@ -116,14 +107,6 @@ export function HomeDashboard({ user }: { user: User }) {
         to: "/insights",
       } as const;
     }
-    if (hasVisitors) {
-      return {
-        title: "See who revisited your profile",
-        body: "Premium reveals the people who came back for a second look.",
-        cta: "Unlock visitors",
-        to: "/premium",
-      } as const;
-    }
     if (newMatches > 0) {
       return {
         title: "Your next introduction is ready",
@@ -133,7 +116,7 @@ export function HomeDashboard({ user }: { user: User }) {
       } as const;
     }
     return null;
-  }, [profile?.premium, insightsViewed, hasVisitors, newMatches]);
+  }, [profile?.premium, insightsViewed, newMatches]);
 
   const name = profile?.first_name?.trim() || "friend";
   const completion = profile?.completion ?? 0;
