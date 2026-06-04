@@ -17,6 +17,17 @@ export const getBlueprint = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const target = data.userId && /^[0-9a-f-]{36}$/i.test(data.userId) ? data.userId : userId;
+    if (target !== userId) {
+      // Defense in depth: require mutual match to view another user's blueprint
+      const { data: m } = await supabase
+        .from("matches")
+        .select("id")
+        .or(`and(user_id.eq.${userId},matched_user_id.eq.${target}),and(user_id.eq.${target},matched_user_id.eq.${userId})`)
+        .eq("mutual_interest", true)
+        .limit(1)
+        .maybeSingle();
+      if (!m) return { blueprint: null, isOwner: false };
+    }
     const { data: bp } = await supabase
       .from("personality_blueprint")
       .select("*")
