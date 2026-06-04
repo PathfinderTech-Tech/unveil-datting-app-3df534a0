@@ -292,7 +292,16 @@ function Day1({
       prompt_3: vals[2].trim().slice(0, 120),
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      trackEvent("intro_prompts_submit_failed", { match_id: matchId, error: error.message });
+      toast.error(error.message);
+      return;
+    }
+    trackEvent("intro_prompts_submitted", {
+      match_id: matchId,
+      peer_already_submitted: !!peerIntro,
+      avg_length: Math.round(vals.reduce((s, v) => s + v.trim().length, 0) / 3),
+    });
     toast.success("Your answers are shared.");
   }
 
