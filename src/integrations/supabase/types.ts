@@ -639,6 +639,27 @@ export type Database = {
         }
         Relationships: []
       }
+      guided_date_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          step_key: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          step_key: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          step_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hidden_match_views: {
         Row: {
           created_at: string
@@ -1469,6 +1490,30 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      values_challenge_progress: {
+        Row: {
+          category: string
+          completion_count: number
+          id: string
+          last_completed_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completion_count?: number
+          id?: string
+          last_completed_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completion_count?: number
+          id?: string
+          last_completed_at?: string
           user_id?: string
         }
         Relationships: []
