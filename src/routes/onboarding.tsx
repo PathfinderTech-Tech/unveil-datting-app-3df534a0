@@ -951,7 +951,7 @@ function ProfilePreview(props: {
     <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-glow">
       <div className="relative aspect-square w-full bg-gradient-face">
         {display ? (
-          <img src={display} alt="" className="h-full w-full object-cover" />
+          <SignedImage src={display} alt="" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center text-primary-foreground/80"><Lock className="h-16 w-16" /></div>} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-primary-foreground/80">
             <Lock className="h-16 w-16" />
