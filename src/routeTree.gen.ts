@@ -19,6 +19,7 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RefundRouteImport } from './routes/refund'
+import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PuzzlesRouteImport } from './routes/puzzles'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -104,6 +105,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RefundRoute = RefundRouteImport.update({
   id: '/refund',
   path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PuzzlesRoute = PuzzlesRouteImport.update({
@@ -317,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/puzzles': typeof PuzzlesRoute
+  '/quiz': typeof QuizRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -365,6 +372,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/puzzles': typeof PuzzlesRoute
+  '/quiz': typeof QuizRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -414,6 +422,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/puzzles': typeof PuzzlesRoute
+  '/quiz': typeof QuizRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -464,6 +473,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/puzzles'
+    | '/quiz'
     | '/refund'
     | '/reset-password'
     | '/results'
@@ -512,6 +522,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/puzzles'
+    | '/quiz'
     | '/refund'
     | '/reset-password'
     | '/results'
@@ -560,6 +571,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/puzzles'
+    | '/quiz'
     | '/refund'
     | '/reset-password'
     | '/results'
@@ -609,6 +621,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   PuzzlesRoute: typeof PuzzlesRoute
+  QuizRoute: typeof QuizRoute
   RefundRoute: typeof RefundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -694,6 +707,13 @@ declare module '@tanstack/react-router' {
       path: '/refund'
       fullPath: '/refund'
       preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/puzzles': {
@@ -1009,6 +1029,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   PuzzlesRoute: PuzzlesRoute,
+  QuizRoute: QuizRoute,
   RefundRoute: RefundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,

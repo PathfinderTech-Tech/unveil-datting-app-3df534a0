@@ -7,6 +7,8 @@ import { Avatar } from "@/components/Avatar";
 import { Sparkles, AlertTriangle, MessageCircle, Heart, ArrowLeft, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { ThoughtModal } from "@/components/ThoughtModal";
+import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
+import { CompatibilityMap } from "@/components/CompatibilityMap";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match insights — UNVEIL" }] }),
