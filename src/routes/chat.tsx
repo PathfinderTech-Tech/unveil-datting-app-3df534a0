@@ -83,6 +83,25 @@ function Chat() {
     return active.user_a === user.id ? active.user_b : active.user_a;
   }, [active, user]);
 
+  // Look up the mutual match for this conversation so we can run the Day 1–4 scaffold.
+  useEffect(() => {
+    if (!user || !peerId) { setMatchInfo(null); return; }
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id, created_at, mutual_interest, user_id, matched_user_id")
+        .or(`and(user_id.eq.${user.id},matched_user_id.eq.${peerId}),and(user_id.eq.${peerId},matched_user_id.eq.${user.id})`)
+        .eq("mutual_interest", true)
+        .order("created_at", { ascending: true })
+        .limit(1);
+      if (!alive) return;
+      const row = data?.[0];
+      setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
+    })();
+    return () => { alive = false; };
+  }, [user, peerId]);
+
   // Load messages + reactions + reads when conversation opens
   useEffect(() => {
     if (!active || !user) return;
