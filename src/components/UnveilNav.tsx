@@ -20,20 +20,42 @@ const PRIMARY = [
   { to: "/settings", label: "Settings" },
 ] as const;
 
-const SECONDARY = [
-  { to: "/", label: "Home" },
-  { to: "/onboarding", label: "Begin" },
-  { to: "/passport", label: "Passport" },
-  { to: "/play", label: "Play" },
-  { to: "/contact-share", label: "Share" },
-  { to: "/date-plan", label: "Date" },
-  { to: "/premium", label: "Membership" },
-  { to: "/support", label: "Support" },
-  { to: "/privacy", label: "Privacy" },
-  { to: "/terms", label: "Terms" },
-  { to: "/community-guidelines", label: "Community" },
-  { to: "/refund", label: "Refund" },
-] as const;
+// Sectioned mobile drawer — Core / Identity / Account / Legal.
+const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
+  {
+    label: "Core",
+    items: [
+      { to: "/discover", label: "Discover" },
+      { to: "/messages", label: "Messages" },
+      { to: "/matches", label: "Matches" },
+    ],
+  },
+  {
+    label: "Identity",
+    items: [
+      { to: "/passport", label: "Passport" },
+      { to: "/insights", label: "Insights" },
+      { to: "/challenges", label: "Challenges" },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { to: "/premium", label: "Membership" },
+      { to: "/verify", label: "Verification" },
+      { to: "/contact-share", label: "Share & Invite" },
+      { to: "/settings", label: "Settings" },
+    ],
+  },
+  {
+    label: "Legal",
+    items: [
+      { to: "/privacy", label: "Privacy Policy" },
+      { to: "/terms", label: "Terms of Use" },
+      { to: "/support", label: "Support" },
+    ],
+  },
+];
 
 export function UnveilNav() {
   const { location } = useRouterState();
