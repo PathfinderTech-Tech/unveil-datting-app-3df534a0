@@ -444,17 +444,21 @@ function Chat() {
                 </div>
               )}
 
-              <form onSubmit={(e) => { e.preventDefault(); send(); }}
+              <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled) send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />
                 </button>
-                <input value={draft} onChange={(e) => onDraftChange(e.target.value)}
-                  placeholder="A thought, gently…"
-                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary" />
-                <button type="submit" className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow">
+                <input
+                  value={draft}
+                  onChange={(e) => onDraftChange(e.target.value)}
+                  disabled={!chatGate.enabled}
+                  placeholder={chatGate.enabled ? "A thought, gently…" : (chatGate.placeholder ?? "Chat is locked until your slow reveal unlocks it")}
+                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary disabled:opacity-60"
+                />
+                <button type="submit" disabled={!chatGate.enabled} className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
                   <Send className="h-4 w-4" />
                 </button>
               </form>
