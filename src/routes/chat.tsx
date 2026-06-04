@@ -327,6 +327,19 @@ function Chat() {
                 )}
               </div>
 
+              {matchInfo && user && peerId && (
+                <ConversationScaffold
+                  matchId={matchInfo.id}
+                  matchCreatedAt={matchInfo.created_at}
+                  selfId={user.id}
+                  peerId={peerId}
+                  peerName={peerName}
+                  onChatGateChange={(enabled, placeholder) => setChatGate({ enabled, placeholder })}
+                />
+              )}
+
+
+
               <div className="flex-1 space-y-2 overflow-y-auto p-6">
                 {msgs.map((m) => {
                   const mine = m.sender_id === user.id;
