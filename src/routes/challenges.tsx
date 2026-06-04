@@ -7,8 +7,9 @@ import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type Challeng
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
-
+import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
+
 
 type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
 
