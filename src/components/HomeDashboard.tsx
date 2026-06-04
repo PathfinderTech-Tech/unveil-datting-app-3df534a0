@@ -4,6 +4,8 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadCount } from "@/hooks/use-unread";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { JourneyMilestones } from "@/components/JourneyMilestones";
+
 
 // Profile fields we evaluate for completion. Each filled field is one point.
 const COMPLETION_FIELDS = [
