@@ -127,18 +127,39 @@ export function UnveilNav() {
       </div>
       {open && (
         <div className="border-t border-border bg-background/95 lg:hidden">
-          <nav className="mx-auto grid max-w-7xl grid-cols-2 gap-1 px-6 py-3">
-            {[...PRIMARY, ...SECONDARY].map((l) => (
-              <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-surface hover:text-foreground">
-                {l.label}
-              </Link>
+          <nav className="mx-auto max-w-7xl px-6 py-4">
+            {SECTIONS.map((section, idx) => (
+              <div
+                key={section.label}
+                className={idx > 0 ? "mt-4 border-t border-[#2A2A2E] pt-4" : ""}
+              >
+                <div className="px-2 pb-2 text-[13px] font-medium uppercase tracking-[0.1em] text-[#7A7876]">
+                  {section.label}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {section.items.map((l) => {
+                    const active = location.pathname === l.to;
+                    return (
+                      <Link
+                        key={l.to}
+                        to={l.to}
+                        onClick={() => setOpen(false)}
+                        className={`rounded-xl px-3 py-2 text-[15px] transition-colors ${
+                          active ? "bg-primary/15 text-foreground" : "text-foreground/90 hover:bg-surface"
+                        }`}
+                      >
+                        {l.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
             {!user && (
-              <>
-                <Link to="/login" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm">Log in</Link>
-                <Link to="/signup" onClick={() => setOpen(false)} className="rounded-xl bg-gradient-hero px-3 py-2 text-sm text-primary-foreground">Sign up</Link>
-              </>
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[#2A2A2E] pt-4">
+                <Link to="/login" onClick={() => setOpen(false)} className="rounded-xl border border-border px-3 py-2 text-center text-sm">Log in</Link>
+                <Link to="/signup" onClick={() => setOpen(false)} className="rounded-xl bg-gradient-hero px-3 py-2 text-center text-sm text-primary-foreground">Sign up</Link>
+              </div>
             )}
           </nav>
         </div>
