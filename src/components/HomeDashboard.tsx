@@ -194,7 +194,11 @@ export function HomeDashboard({ user }: { user: User }) {
         </div>
       </section>
 
-      {/* 5. Rotating contextual nudge (max one) */}
+      {/* 5. Journey milestones (Stage 5 polish) */}
+      <JourneyMilestones />
+
+      {/* 6. Rotating contextual nudge (max one) */}
+
       {nudge && (
         <section className="rounded-2xl border border-[#2A2A2E] bg-[#161618] p-5">
           <div className="flex items-start gap-3">
