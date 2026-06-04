@@ -424,6 +424,13 @@ function Day3({
   const [busy, setBusy] = useState(false);
   const locked = !!selfDay3;
   const revealed = !!selfDay3 && !!peerDay3;
+  const revealTrackedRef = useRef(false);
+  useEffect(() => {
+    if (revealed && !revealTrackedRef.current) {
+      revealTrackedRef.current = true;
+      trackEvent("day3_mutual_reveal", { match_id: matchId });
+    }
+  }, [revealed, matchId]);
 
   async function submit() {
     if (val.trim().length < 20) return;
