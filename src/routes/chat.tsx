@@ -62,6 +62,7 @@ function Chat() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
+  const [peerName, setPeerName] = useState<string>("them");
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
