@@ -8,6 +8,10 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { BetaBadge } from "@/components/BetaBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+import { PassportIdentityCard } from "@/components/PassportIdentityCard";
+import { ShareablePassportCard } from "@/components/ShareablePassportCard";
+import { GlobalPassportJourneys } from "@/components/GlobalPassportJourneys";
+
 
 
 export const Route = createFileRoute("/passport")({
@@ -21,6 +25,8 @@ function Passport() {
   const uid = useUserId();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [isBeta, setIsBeta] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
 
 
   // Load real earned badges from DB
@@ -49,29 +55,31 @@ function Passport() {
     <div className="min-h-screen">
       <UnveilNav />
 
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        <div className="mb-10">
-          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">UNVEIL Passport</div>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-4xl font-bold md:text-5xl">Your dating journey, stamped.</h1>
+      <div className="mx-auto max-w-4xl px-6 py-12 space-y-8">
+        <header>
+          <div className="flex items-center justify-between gap-3">
+            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">UNVEIL Passport</div>
             {isBeta && <BetaBadge />}
           </div>
-          <p className="mt-3 max-w-xl text-muted-foreground">
-            Badges aren't trophies. They're proof you showed up — honestly, generously, playfully.
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Your identity, your badges, and the slow rhythm of love across the world.
           </p>
-        </div>
+        </header>
 
-        <div className="mb-6 rounded-3xl border border-border bg-gradient-hero p-6 text-primary-foreground shadow-glow">
+        {uid && <PassportIdentityCard userId={uid} onShare={() => setShareOpen(true)} />}
+
+        <div className="rounded-3xl border border-border bg-gradient-hero p-6 text-primary-foreground shadow-glow">
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5" />
             <div className="font-display text-xl font-bold">
-              {unlocked.size} of {BADGES.length} earned
+              {unlocked.size} of {BADGES.length} badges earned
             </div>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/20">
             <div className="h-full bg-primary-foreground/80" style={{ width: `${(unlocked.size / BADGES.length) * 100}%` }} />
           </div>
         </div>
+
 
         {uid && (
           <div className="mb-6 grid gap-3 md:grid-cols-2">
@@ -102,12 +110,24 @@ function Passport() {
           })}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="text-center">
           <Link to="/challenges" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
             Earn more in Challenges →
           </Link>
         </div>
+
+        <GlobalPassportJourneys />
       </div>
+
+      {uid && (
+        <ShareablePassportCard
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          userId={uid}
+          badgeCount={unlocked.size}
+          totalBadges={BADGES.length}
+        />
+      )}
     </div>
   );
 }
