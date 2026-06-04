@@ -149,6 +149,14 @@ function MatchInsights() {
           </div>
         )}
 
+        {matchId && meId && (
+          <div className="mt-4">
+            <CoupleJourney matchId={matchId} userId={meId} />
+          </div>
+        )}
+
+
+
         <div className="mt-4 rounded-3xl border border-border bg-card p-6">
           <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Shared</h2>
           <div className="mt-3 space-y-2 text-sm">
