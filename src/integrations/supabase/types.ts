@@ -684,6 +684,60 @@ export type Database = {
         }
         Relationships: []
       }
+      match_day3_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          match_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          match_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          match_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      match_intro_prompts: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          prompt_1: string | null
+          prompt_2: string | null
+          prompt_3: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          prompt_1?: string | null
+          prompt_2?: string | null
+          prompt_3?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          prompt_1?: string | null
+          prompt_2?: string | null
+          prompt_3?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           chemistry_score: number | null
