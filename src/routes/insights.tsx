@@ -13,6 +13,7 @@ import { RevealJourney } from "@/components/RevealJourney";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flame, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { InsightsPlusPaywall } from "@/components/InsightsPlusPaywall";
 
 export const Route = createFileRoute("/insights")({
   head: () => ({
