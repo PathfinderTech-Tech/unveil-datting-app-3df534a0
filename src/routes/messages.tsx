@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 
@@ -178,7 +179,11 @@ function MessagesPage() {
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                     {r.peer_photo ? (
-                      <img src={r.peer_photo} alt="" className="h-full w-full object-cover" />
+                      <SignedImage src={r.peer_photo} alt="" className="h-full w-full object-cover" fallback={
+                        <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
+                          {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}
+                        </div>
+                      } />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
                         {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}

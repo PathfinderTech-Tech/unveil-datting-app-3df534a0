@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { SignedImage } from "@/components/SignedImage";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -366,7 +367,7 @@ function PhotoSlot({
     <div className="flex flex-col items-center gap-3">
       <div className={`relative flex w-full items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface ${compact ? "h-40" : "h-56"}`}>
         {url ? (
-          <img src={url} alt="" className="h-full w-full object-cover" />
+          <SignedImage src={url} alt="" className="h-full w-full object-cover" fallback={<Camera className="h-7 w-7 text-muted-foreground" />} />
         ) : (
           <Camera className="h-7 w-7 text-muted-foreground" />
         )}
@@ -397,7 +398,7 @@ function ComparePanel({ title, url, fallback }: { title: string; url: string | n
     <div className="rounded-2xl border border-border bg-surface p-3">
       <div className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">{title}</div>
       <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-surface-2">
-        {url ? <img src={url} alt={title} className="h-full w-full object-cover" />
+        {url ? <SignedImage src={url} alt={title} className="h-full w-full object-cover" fallback={<span className="px-3 text-center text-xs text-muted-foreground">Loading…</span>} />
              : <span className="px-3 text-center text-xs text-muted-foreground">{fallback ?? "Not provided"}</span>}
       </div>
     </div>

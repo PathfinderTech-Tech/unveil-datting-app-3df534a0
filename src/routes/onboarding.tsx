@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
+import { SignedImage } from "@/components/SignedImage";
 import {
   PROFESSIONS, DISCOVERY_QUESTIONS, discoveryToCharacter, discoverySummary,
   type DiscoveryProfile, type Profession,
@@ -579,9 +580,9 @@ function Onboarding() {
 
                 <div className="relative h-32 w-32 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
                   {(appearance === "avatar" && avatarUrl) ? (
-                    <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                    <SignedImage src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
                   ) : photoUrl ? (
-                    <img src={photoUrl} alt="Selfie" className="h-full w-full object-cover" />
+                    <SignedImage src={photoUrl} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>
                   )}
