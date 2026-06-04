@@ -154,7 +154,8 @@ function MatchInsights() {
             </div>
           </div>
         </div>
-        </div>
+
+
 
         {compat && (
           <>
