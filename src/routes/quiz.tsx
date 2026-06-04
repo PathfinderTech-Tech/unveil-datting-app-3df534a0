@@ -183,6 +183,8 @@ function QuizFlow() {
       return;
     }
     if (!onPrefStep) {
+      const q = QUESTIONS[step];
+      track("quiz_question_answered", { question_id: q.id, answer: answers[q.id], step: step + 1 });
       transition(() => setStep((s) => s + 1));
       return;
     }
@@ -198,12 +200,13 @@ function QuizFlow() {
           .maybeSingle();
         const merged = {
           ...((existing?.answers as object) ?? {}),
-          quiz: { answers, match_preference: pref },
+          quiz: { answers, match_preference: pref, completed_at: new Date().toISOString() },
         };
         await supabase
           .from("onboarding_answers")
           .upsert({ user_id: user.id, answers: merged }, { onConflict: "user_id" });
       }
+      await track(ANALYTICS.quizCompleted, { match_preference: pref, answers });
       toast.success("Your match style is set ✨");
       navigate({ to: "/matches" });
     } finally {
