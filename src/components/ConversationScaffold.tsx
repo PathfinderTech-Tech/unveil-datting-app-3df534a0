@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
-import { Lock, Sparkles, X, CheckCircle2 } from "lucide-react";
+import { Lock, Sparkles, X, CheckCircle2, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * Day 1–4 Structured Conversation Scaffolding for a mutual match thread.
