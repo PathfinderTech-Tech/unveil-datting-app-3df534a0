@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
+import { ConversationScaffold } from "@/components/ConversationScaffold";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
