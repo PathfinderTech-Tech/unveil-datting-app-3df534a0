@@ -182,12 +182,10 @@ export function HomeDashboard({ user }: { user: User }) {
           {featured?.category ?? "Today's Challenge"}
         </div>
         <div className="mt-2 text-[16px] font-semibold text-foreground">
-          {featured?.title ?? "Start a reflection to deepen your next match"}
+          {featured?.question ?? "Start a reflection to deepen your next match"}
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {featured?.minutes ? `${featured.minutes} min` : "A few minutes"}
-          </span>
+          <span className="text-xs text-muted-foreground">2 min</span>
           <Link to="/challenges" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
             Start <ArrowRight className="h-3.5 w-3.5" />
           </Link>
