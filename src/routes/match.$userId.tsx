@@ -90,6 +90,10 @@ function MatchInsights() {
           <ArrowLeft className="h-4 w-4" /> Back to matches
         </Link>
 
+        <div className="mb-4">
+          <SlowRevealTimeline day={3} />
+        </div>
+
         <div className="rounded-3xl border border-border bg-card p-8">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -106,7 +110,6 @@ function MatchInsights() {
             </div>
             {compat && band && (
               <div className="text-right">
-                <div className="font-display text-4xl font-bold text-gradient-hero">{compat.overall}%</div>
                 <div className={`font-mono text-[10px] uppercase tracking-wider ${band.tone}`}>{band.label}</div>
               </div>
             )}
@@ -115,42 +118,42 @@ function MatchInsights() {
           {profile.bio && <p className="mt-4 text-sm italic text-foreground/85">"{profile.bio}"</p>}
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-border bg-card p-6">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Sub-scores</h2>
-            <div className="mt-3 space-y-3">
-              {subs.map((r) => (
-                <div key={r.label}>
-                  <div className="mb-1 flex justify-between text-xs">
-                    <span className="text-muted-foreground">{r.label}</span>
-                    <span className="font-mono">{r.v}%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-surface">
-                    <div className="h-full bg-gradient-hero" style={{ width: `${r.v}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+        {compat && (
+          <div className="mt-4">
+            <CompatibilityMap
+              rows={[
+                { label: "Values alignment", value: compat.values_score },
+                {
+                  label: "Communication style",
+                  value: compat.communication,
+                  note: "Your communication styles are different — this can create depth with patience.",
+                },
+                { label: "Life goals", value: compat.goals },
+                { label: "Lifestyle fit", value: compat.lifestyle },
+                { label: "Ambition match", value: compat.overall },
+              ]}
+            />
           </div>
+        )}
 
-          <div className="rounded-3xl border border-border bg-card p-6">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Shared</h2>
-            <div className="mt-3 space-y-2 text-sm">
-              <div>
-                <div className="text-xs text-muted-foreground">Shared interests</div>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {sharedInterests.length === 0 && <span className="text-xs text-muted-foreground">None overlap yet</span>}
-                  {sharedInterests.map((i) => (
-                    <span key={i} className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px]">{i}</span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Relationship intent</div>
-                <div className="mt-1 text-sm">{profile.relationship_intent ?? "—"}</div>
+        <div className="mt-4 rounded-3xl border border-border bg-card p-6">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Shared</h2>
+          <div className="mt-3 space-y-2 text-sm">
+            <div>
+              <div className="text-xs text-muted-foreground">Shared interests</div>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {sharedInterests.length === 0 && <span className="text-xs text-muted-foreground">None overlap yet</span>}
+                {sharedInterests.map((i) => (
+                  <span key={i} className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px]">{i}</span>
+                ))}
               </div>
             </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Relationship intent</div>
+              <div className="mt-1 text-sm">{profile.relationship_intent ?? "—"}</div>
+            </div>
           </div>
+        </div>
         </div>
 
         {compat && (
