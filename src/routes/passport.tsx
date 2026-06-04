@@ -25,6 +25,8 @@ function Passport() {
   const uid = useUserId();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [isBeta, setIsBeta] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
 
 
   // Load real earned badges from DB
