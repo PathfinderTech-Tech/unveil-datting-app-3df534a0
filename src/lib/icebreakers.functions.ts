@@ -74,6 +74,15 @@ export const generateIcebreakers = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ icebreakers: Icebreaker[]; suggestedOpener: string } | { error: string }> => {
     const { supabase, userId } = context;
     try {
+      // Defense in depth: require mutual match before generating icebreakers with peer context
+      const { data: matchRow } = await supabase
+        .from("matches")
+        .select("id")
+        .or(`and(user_id.eq.${userId},matched_user_id.eq.${data.peerId}),and(user_id.eq.${data.peerId},matched_user_id.eq.${userId})`)
+        .eq("mutual_interest", true)
+        .limit(1)
+        .maybeSingle();
+      if (!matchRow) return { error: "You can only generate icebreakers with a mutual match." };
       const [me, them, compat, mineAns, theirAns] = await Promise.all([
         supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio").eq("id", userId).maybeSingle(),
         supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio").eq("id", data.peerId).maybeSingle(),
