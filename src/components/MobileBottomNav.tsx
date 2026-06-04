@@ -20,38 +20,36 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#2A2A2E] bg-background/90 backdrop-blur-xl lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-md grid-cols-5">
+      <ul className="mx-auto grid h-16 max-w-md grid-cols-5">
         {ITEMS.map((item) => {
           const active = location.pathname === item.to;
           const Icon = item.icon;
           const showBadge = "badge" in item && item.badge && unread > 0;
           return (
-            <li key={item.to}>
+            <li key={item.to} className="flex">
               <Link
                 to={item.to}
-                className={`flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`relative flex w-full flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
+                  active
+                    ? "font-semibold text-primary"
+                    : "font-normal text-[#7A7876] hover:text-foreground"
                 }`}
               >
-                <span
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-                    active ? "bg-gradient-hero text-primary-foreground shadow-glow" : "bg-transparent"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
+                <span className="relative flex items-center justify-center">
+                  <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.2 : 1.8} />
                   {showBadge && (
                     <span
                       aria-label={`${unread} unread`}
-                      className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground"
+                      className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground"
                     >
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
                 </span>
-                {item.label}
+                <span>{item.label}</span>
               </Link>
             </li>
           );
