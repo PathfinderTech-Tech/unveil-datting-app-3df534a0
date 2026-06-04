@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
+import { ConversationScaffold } from "@/components/ConversationScaffold";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -59,6 +60,9 @@ function Chat() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
+  const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
+  const [peerName, setPeerName] = useState<string>("them");
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
@@ -79,6 +83,29 @@ function Chat() {
     if (!active || !user) return null;
     return active.user_a === user.id ? active.user_b : active.user_a;
   }, [active, user]);
+
+  // Look up the mutual match for this conversation so we can run the Day 1–4 scaffold.
+  useEffect(() => {
+    if (!user || !peerId) { setMatchInfo(null); return; }
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id, created_at, mutual_interest, user_id, matched_user_id")
+        .or(`and(user_id.eq.${user.id},matched_user_id.eq.${peerId}),and(user_id.eq.${peerId},matched_user_id.eq.${user.id})`)
+        .eq("mutual_interest", true)
+        .order("created_at", { ascending: true })
+        .limit(1);
+      if (!alive) return;
+      const row = data?.[0];
+      setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
+
+      const { data: prof } = await supabase.from("profiles").select("first_name").eq("id", peerId).maybeSingle();
+      if (!alive) return;
+      setPeerName(prof?.first_name ?? "them");
+    })();
+    return () => { alive = false; };
+  }, [user, peerId]);
 
   // Load messages + reactions + reads when conversation opens
   useEffect(() => {
@@ -300,6 +327,19 @@ function Chat() {
                 )}
               </div>
 
+              {matchInfo && user && peerId && (
+                <ConversationScaffold
+                  matchId={matchInfo.id}
+                  matchCreatedAt={matchInfo.created_at}
+                  selfId={user.id}
+                  peerId={peerId}
+                  peerName={peerName}
+                  onChatGateChange={(enabled, placeholder) => setChatGate({ enabled, placeholder })}
+                />
+              )}
+
+
+
               <div className="flex-1 space-y-2 overflow-y-auto p-6">
                 {msgs.map((m) => {
                   const mine = m.sender_id === user.id;
@@ -404,17 +444,21 @@ function Chat() {
                 </div>
               )}
 
-              <form onSubmit={(e) => { e.preventDefault(); send(); }}
+              <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled) send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />
                 </button>
-                <input value={draft} onChange={(e) => onDraftChange(e.target.value)}
-                  placeholder="A thought, gently…"
-                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary" />
-                <button type="submit" className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow">
+                <input
+                  value={draft}
+                  onChange={(e) => onDraftChange(e.target.value)}
+                  disabled={!chatGate.enabled}
+                  placeholder={chatGate.enabled ? "A thought, gently…" : (chatGate.placeholder ?? "Chat is locked until your slow reveal unlocks it")}
+                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary disabled:opacity-60"
+                />
+                <button type="submit" disabled={!chatGate.enabled} className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
                   <Send className="h-4 w-4" />
                 </button>
               </form>
