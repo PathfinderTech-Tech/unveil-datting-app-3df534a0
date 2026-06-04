@@ -90,6 +90,27 @@ export function ConversationScaffold({
   const peerDay3 = day3.find((r) => r.user_id === peerId);
   const bothDay3 = !!selfDay3 && !!peerDay3;
 
+  // Track scaffold view once per (match, day) per session.
+  const trackedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const key = `${matchId}:${day}`;
+    if (trackedKeyRef.current === key) return;
+    trackedKeyRef.current = key;
+    trackEvent("scaffold_view", {
+      match_id: matchId,
+      day,
+      self_intro_submitted: !!selfIntro,
+      peer_intro_submitted: !!peerIntro,
+      self_day3_submitted: !!selfDay3,
+      both_day3_submitted: bothDay3,
+    });
+  }, [matchId, day, selfIntro, peerIntro, selfDay3, bothDay3]);
+
+  // Late-unlock edge cases: if user reaches Day 4+ without having completed Day 1 or Day 3,
+  // chat opens (so they're never stuck), but the scaffold still surfaces a catch-up CTA.
+  const needsDay1Catchup = day >= 2 && !selfIntro;
+  const needsDay3Catchup = day >= 4 && !selfDay3;
+
   // Gate logic: chat input is enabled on Day 4+, OR on Day 3 once both answered the challenge.
   const chatEnabled = day >= 4 || (day === 3 && bothDay3);
   useEffect(() => {
@@ -101,12 +122,28 @@ export function ConversationScaffold({
     onChatGateChange?.(chatEnabled, placeholder);
   }, [chatEnabled, day, bothDay3, onChatGateChange]);
 
-  // Day 5+: just the archive link
+  // Day 5+: polished journey summary + archive trigger
   if (day >= 5) {
+    const introsCount = (selfIntro ? 1 : 0) + (peerIntro ? 1 : 0);
+    const day3Count = (selfDay3 ? 1 : 0) + (peerDay3 ? 1 : 0);
     return (
-      <div className="border-b border-border bg-surface/30 px-4 py-2">
-        <button onClick={() => setArchiveOpen(true)} className="text-xs text-muted-foreground underline-offset-2 hover:underline">
-          View our journey →
+      <div className="border-b border-border bg-surface/30 px-4 py-3">
+        <button
+          onClick={() => { setArchiveOpen(true); trackEvent("scaffold_journey_opened", { match_id: matchId, day }); }}
+          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-2.5 text-left transition-colors hover:border-accent/60 hover:bg-card"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15">
+              <BookOpen className="h-4 w-4 text-accent" />
+            </div>
+            <div>
+              <div className="text-[13px] font-medium leading-tight">Your journey so far</div>
+              <div className="text-[11px] text-muted-foreground">
+                Day {day} · {introsCount}/2 prompt cards · {day3Count}/2 mission answers
+              </div>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
         </button>
         {archiveOpen && (
           <ArchiveModal
@@ -129,44 +166,91 @@ export function ConversationScaffold({
       </div>
 
       {day === 1 && (
-        <Day1
-          matchId={matchId}
-          selfId={selfId}
-          peerName={peerName}
-          selfIntro={selfIntro}
-          peerIntro={peerIntro}
-        />
+        <Day1 matchId={matchId} selfId={selfId} peerName={peerName} selfIntro={selfIntro} peerIntro={peerIntro} />
       )}
 
       {day === 2 && (
-        <Day2 selfId={selfId} matchId={matchId} peerId={peerId} peerName={peerName} />
+        <>
+          {needsDay1Catchup && (
+            <CatchupBanner
+              label="You haven't shared your Day 1 prompts yet"
+              onAction={() => trackEvent("scaffold_catchup_clicked", { match_id: matchId, day, step: "day1" })}
+            >
+              <Day1 matchId={matchId} selfId={selfId} peerName={peerName} selfIntro={selfIntro} peerIntro={peerIntro} />
+            </CatchupBanner>
+          )}
+          <Day2 selfId={selfId} matchId={matchId} peerId={peerId} peerName={peerName} />
+        </>
       )}
 
       {day === 3 && (
-        <Day3
-          matchId={matchId}
-          selfId={selfId}
-          peerName={peerName}
-          selfDay3={selfDay3}
-          peerDay3={peerDay3}
-        />
+        <>
+          {needsDay1Catchup && (
+            <CatchupBanner
+              label="Finish your Day 1 prompts first"
+              onAction={() => trackEvent("scaffold_catchup_clicked", { match_id: matchId, day, step: "day1" })}
+            >
+              <Day1 matchId={matchId} selfId={selfId} peerName={peerName} selfIntro={selfIntro} peerIntro={peerIntro} />
+            </CatchupBanner>
+          )}
+          <Day3 matchId={matchId} selfId={selfId} peerName={peerName} selfDay3={selfDay3} peerDay3={peerDay3} />
+        </>
       )}
 
-      {day === 4 && !day4Dismissed && (
-        <div className="relative rounded-2xl border border-border bg-card p-4 pr-10 text-sm text-foreground/85">
-          You've spent 3 days getting to know each other through prompts and voice. The conversation is yours now.
-          <button
-            onClick={() => {
-              localStorage.setItem(`unveil:scaffold-day4:${matchId}`, "1");
-              setDay4Dismissed(true);
-            }}
-            className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground hover:bg-surface"
-            aria-label="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+      {day === 4 && (
+        <>
+          {needsDay1Catchup && (
+            <CatchupBanner
+              label="Catch up — share your Day 1 prompts"
+              onAction={() => trackEvent("scaffold_catchup_clicked", { match_id: matchId, day, step: "day1" })}
+            >
+              <Day1 matchId={matchId} selfId={selfId} peerName={peerName} selfIntro={selfIntro} peerIntro={peerIntro} />
+            </CatchupBanner>
+          )}
+          {needsDay3Catchup && (
+            <CatchupBanner
+              label="One more — answer the shared challenge"
+              onAction={() => trackEvent("scaffold_catchup_clicked", { match_id: matchId, day, step: "day3" })}
+            >
+              <Day3 matchId={matchId} selfId={selfId} peerName={peerName} selfDay3={selfDay3} peerDay3={peerDay3} />
+            </CatchupBanner>
+          )}
+          {!day4Dismissed && (
+            <div className="relative rounded-2xl border border-border bg-card p-4 pr-10 text-sm text-foreground/85">
+              You've spent 3 days getting to know each other through prompts and voice. The conversation is yours now.
+              <button
+                onClick={() => {
+                  localStorage.setItem(`unveil:scaffold-day4:${matchId}`, "1");
+                  setDay4Dismissed(true);
+                  trackEvent("scaffold_day4_dismissed", { match_id: matchId });
+                }}
+                className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground hover:bg-surface"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+function CatchupBanner({ label, children, onAction }: { label: string; children: React.ReactNode; onAction?: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-3 rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[12px] text-foreground/85">{label}</div>
+        <button
+          onClick={() => { setOpen((v) => !v); if (!open) onAction?.(); }}
+          className="rounded-full border border-accent/40 px-3 py-1 text-[11px] text-accent hover:bg-accent/10"
+        >
+          {open ? "Hide" : "Open"}
+        </button>
+      </div>
+      {open && <div className="mt-3">{children}</div>}
     </div>
   );
 }
