@@ -99,6 +99,10 @@ function Chat() {
       if (!alive) return;
       const row = data?.[0];
       setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
+
+      const { data: prof } = await supabase.from("profiles").select("first_name").eq("id", peerId).maybeSingle();
+      if (!alive) return;
+      setPeerName(prof?.first_name ?? "them");
     })();
     return () => { alive = false; };
   }, [user, peerId]);
