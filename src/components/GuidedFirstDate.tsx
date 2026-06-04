@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Coffee, Clock, MessageCircle, Heart, Check } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = [
   {
@@ -43,17 +44,44 @@ const STEPS = [
 
 export function GuidedFirstDate() {
   const [done, setDone] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
 
-  function toggle(key: string) {
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !alive) return;
+      setUserId(user.id);
+      const { data } = await supabase
+        .from("guided_date_progress")
+        .select("step_key")
+        .eq("user_id", user.id);
+      if (alive && data) setDone(new Set(data.map((r: { step_key: string }) => r.step_key)));
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  async function toggle(key: string) {
+    const wasDone = done.has(key);
     setDone((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else {
-        next.add(key);
-        trackEvent("guided_date_step_completed", { step: key });
-      }
+      if (wasDone) next.delete(key);
+      else next.add(key);
       return next;
     });
+    if (!userId) return;
+    if (wasDone) {
+      await supabase
+        .from("guided_date_progress")
+        .delete()
+        .eq("user_id", userId)
+        .eq("step_key", key);
+    } else {
+      await supabase
+        .from("guided_date_progress")
+        .upsert({ user_id: userId, step_key: key }, { onConflict: "user_id,step_key" });
+      trackEvent("guided_date_step_completed", { step: key });
+    }
   }
 
   const total = STEPS.reduce((sum, s) => sum + s.items.length, 0);

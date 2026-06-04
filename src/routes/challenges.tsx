@@ -7,8 +7,9 @@ import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type Challeng
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
-
+import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
+
 
 type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
 
@@ -233,13 +234,33 @@ function PackRunner({ category, partnerId, onBack }: { category: string; partner
         picks: pickArray as never,
         reward, payment, both_agree: bothAgree,
         partner_id: partnerId ?? null,
-      }).then(({ error }) => {
+      }).then(async ({ error }) => {
         if (error) toast.error("Couldn't save", { description: error });
         else { toast.success("Challenge locked in ✨"); awardBadge("challenge-champion"); }
         setSaved(true);
+
+        // Track per-user category progress (esp. values) and unlock milestones
+        const group = CATEGORY_META[category]?.group;
+        const { data: existing } = await supabase
+          .from("values_challenge_progress")
+          .select("completion_count")
+          .eq("user_id", uid)
+          .eq("category", category)
+          .maybeSingle();
+        const nextCount = (existing?.completion_count ?? 0) + 1;
+        await supabase.from("values_challenge_progress").upsert(
+          { user_id: uid, category, completion_count: nextCount, last_completed_at: new Date().toISOString() },
+          { onConflict: "user_id,category" },
+        );
+        trackEvent("challenge_pack_completed", { category, group, count: nextCount, values_only: group === "values" });
+        if (group === "values" && [3, 5, 10].includes(nextCount)) {
+          trackEvent("values_milestone_unlocked", { category, milestone: nextCount });
+          toast.success(`Values milestone unlocked · ${nextCount} packs`, { description: "New depth prompts opened." });
+        }
       });
     }
-  }, [saved, allAnswered, reward, payment, bothAgree, uid, partnerId, picks, questions]);
+  }, [saved, allAnswered, reward, payment, bothAgree, uid, partnerId, picks, questions, category]);
+
 
   if (!questions) return (
     <div className="space-y-4">
