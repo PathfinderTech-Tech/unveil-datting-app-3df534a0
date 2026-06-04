@@ -4,6 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { track, ANALYTICS } from "@/lib/analytics";
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
