@@ -11,6 +11,23 @@ export const REVEAL_STAGES = [
   { day: 7, title: "Full profile reveal", subtitle: "The whole picture" },
 ] as const;
 
+async function assertMatchParticipant(
+  supabase: any,
+  userId: string,
+  matchId: string,
+) {
+  const { data: m, error } = await supabase
+    .from("matches")
+    .select("user_id, matched_user_id, mutual_interest")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!m) throw new Error("Match not found");
+  const isParticipant = m.user_id === userId || m.matched_user_id === userId;
+  if (!isParticipant) throw new Error("Forbidden");
+  if (!m.mutual_interest) throw new Error("Match is not mutual");
+}
+
 export const getRevealProgress = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { matchId: string }) => {
@@ -19,13 +36,18 @@ export const getRevealProgress = createServerFn({ method: "GET" })
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    await assertMatchParticipant(supabase, userId, data.matchId);
     const { data: rows } = await supabase
       .from("reveal_progress")
       .select("day, unlocked_at, user_id")
       .eq("match_id", data.matchId);
     const mine = (rows ?? []).filter((r: any) => r.user_id === userId);
     const currentDay = mine.reduce((m: number, r: any) => Math.max(m, r.day), 0);
-    return { currentDay, stages: REVEAL_STAGES, history: rows ?? [] };
+    // Return only own rows + aggregate peer stage (no peer timestamps).
+    const peerStage = (rows ?? [])
+      .filter((r: any) => r.user_id !== userId)
+      .reduce((m: number, r: any) => Math.max(m, r.day), 0);
+    return { currentDay, peerStage, stages: REVEAL_STAGES, history: mine };
   });
 
 export const advanceReveal = createServerFn({ method: "POST" })
@@ -36,6 +58,7 @@ export const advanceReveal = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    await assertMatchParticipant(supabase, userId, data.matchId);
     const { data: rows } = await supabase
       .from("reveal_progress")
       .select("day, unlocked_at")
@@ -58,3 +81,4 @@ export const advanceReveal = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, day: nextDay };
   });
+
