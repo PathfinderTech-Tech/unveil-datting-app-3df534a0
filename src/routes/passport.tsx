@@ -8,6 +8,10 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { BetaBadge } from "@/components/BetaBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+import { PassportIdentityCard } from "@/components/PassportIdentityCard";
+import { ShareablePassportCard } from "@/components/ShareablePassportCard";
+import { GlobalPassportJourneys } from "@/components/GlobalPassportJourneys";
+
 
 
 export const Route = createFileRoute("/passport")({
