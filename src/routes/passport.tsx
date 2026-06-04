@@ -110,12 +110,24 @@ function Passport() {
           })}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="text-center">
           <Link to="/challenges" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
             Earn more in Challenges →
           </Link>
         </div>
+
+        <GlobalPassportJourneys />
       </div>
+
+      {uid && (
+        <ShareablePassportCard
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          userId={uid}
+          badgeCount={unlocked.size}
+          totalBadges={BADGES.length}
+        />
+      )}
     </div>
   );
 }
