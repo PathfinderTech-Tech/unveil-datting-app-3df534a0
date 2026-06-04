@@ -4,6 +4,7 @@ import { Copy, Download, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
+import { useSubscription } from "@/hooks/use-subscription";
 
 type CardData = {
   first_name: string | null;
@@ -61,6 +62,7 @@ export function ShareablePassportCard({
   totalBadges: number;
 }) {
   const [data, setData] = useState<CardData | null>(null);
+  const { isPremium } = useSubscription();
 
   useEffect(() => {
     if (!open) return;
@@ -70,8 +72,8 @@ export function ShareablePassportCard({
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => setData((data as CardData) ?? null));
-    trackEvent("shareable_card_opened");
-  }, [open, userId]);
+    trackEvent("shareable_card_opened", { premium: isPremium });
+  }, [open, userId, isPremium]);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/passport` : "/passport";
   const shareText = `My UNVEIL Passport — slow love, real connection.`;
@@ -88,14 +90,14 @@ export function ShareablePassportCard({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    trackEvent("shareable_card_downloaded");
+    trackEvent("shareable_card_downloaded", { premium: isPremium });
   }
 
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied");
-      trackEvent("shareable_card_link_copied");
+      trackEvent("shareable_card_link_copied", { premium: isPremium });
     } catch {
       toast.error("Could not copy");
     }
@@ -105,7 +107,7 @@ export function ShareablePassportCard({
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({ title: "UNVEIL Passport", text: shareText, url: shareUrl });
-        trackEvent("shareable_card_native_shared");
+        trackEvent("shareable_card_native_shared", { premium: isPremium });
       } catch {
         /* canceled */
       }
@@ -113,6 +115,7 @@ export function ShareablePassportCard({
       copyLink();
     }
   }
+
 
   const svgPreview = data ? buildSvg(data, badgeCount, totalBadges) : "";
 
