@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
+import { HomeDashboard } from "@/components/HomeDashboard";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -18,9 +20,19 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { user, loading } = useAuth();
+  if (user && !loading) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <HomeDashboard user={user} />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen">
       <UnveilNav />
+
 
       {/* HERO */}
       <section className="relative overflow-hidden">
