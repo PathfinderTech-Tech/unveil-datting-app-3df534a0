@@ -128,7 +128,23 @@ function QuizFlow() {
         if (p.pref) setPref(p.pref);
       } catch { /* noop */ }
     }
-  }, []);
+    // Check if quiz already completed → bounce to matches
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("onboarding_answers")
+        .select("answers")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const quiz = (data?.answers as Record<string, unknown> | null)?.quiz;
+      if (quiz) {
+        navigate({ to: "/matches", replace: true });
+        return;
+      }
+      track("quiz_started", {});
+    })();
+  }, [navigate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
