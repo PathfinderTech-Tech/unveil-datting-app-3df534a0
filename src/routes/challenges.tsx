@@ -42,6 +42,7 @@ function Challenges() {
   const [active, setActive] = useState<string | null>(search.cat ?? null);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<"public" | "match">(search.tab ?? "public");
+  const [valuesOnly, setValuesOnly] = useState(false);
 
   useEffect(() => {
     supabase.from("challenges").select("category").eq("active", true).then(({ data }) => {
@@ -101,7 +102,22 @@ function Challenges() {
 
             {active
               ? <PackRunner category={active} partnerId={partnerId} onBack={() => setActive(null)} />
-              : <PackGrid counts={counts} onPick={setActive} />}
+              : <>
+                  <div className="mb-4 flex items-center justify-between rounded-2xl border border-border bg-surface/40 p-3">
+                    <div>
+                      <div className="text-sm font-medium">Values-only mode</div>
+                      <div className="text-xs text-muted-foreground">Show only prompts that surface what you each believe.</div>
+                    </div>
+                    <button
+                      onClick={() => setValuesOnly((v) => !v)}
+                      className={`relative h-6 w-11 rounded-full transition ${valuesOnly ? "bg-primary" : "bg-border"}`}
+                      aria-pressed={valuesOnly}
+                    >
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-background transition ${valuesOnly ? "left-[22px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+                  <PackGrid counts={counts} onPick={setActive} valuesOnly={valuesOnly} />
+                </>}
           </>
         )}
       </div>
@@ -154,10 +170,11 @@ function MatchLockedEmpty() {
 }
 
 
-function PackGrid({ counts, onPick }: { counts: Record<string, number>; onPick: (c: string) => void }) {
+function PackGrid({ counts, onPick, valuesOnly }: { counts: Record<string, number>; onPick: (c: string) => void; valuesOnly?: boolean }) {
+  const groups = valuesOnly ? ["values"] : GROUP_ORDER;
   return (
     <div className="space-y-8">
-      {GROUP_ORDER.map((g) => {
+      {groups.map((g) => {
         const cats = CHALLENGE_CATEGORIES.filter((c) => CATEGORY_META[c]?.group === g);
         if (cats.length === 0) return null;
         return (
