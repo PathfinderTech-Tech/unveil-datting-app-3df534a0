@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Lock, Sparkles, Heart, MessageCircle, TrendingUp } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { trackEvent } from "@/lib/analytics";
+import { PremiumPaywallModal } from "@/components/PremiumPaywallModal";
 
 type InsightSection = {
   icon: typeof Sparkles;
@@ -37,6 +38,7 @@ const SECTIONS: InsightSection[] = [
 
 export function InsightsPlusPaywall() {
   const { isPremium, loading } = useSubscription();
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) trackEvent("insights_plus_viewed", { premium: isPremium });
