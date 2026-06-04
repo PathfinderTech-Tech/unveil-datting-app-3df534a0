@@ -4,6 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { track, ANALYTICS } from "@/lib/analytics";
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
@@ -127,7 +128,23 @@ function QuizFlow() {
         if (p.pref) setPref(p.pref);
       } catch { /* noop */ }
     }
-  }, []);
+    // Check if quiz already completed → bounce to matches
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("onboarding_answers")
+        .select("answers")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const quiz = (data?.answers as Record<string, unknown> | null)?.quiz;
+      if (quiz) {
+        navigate({ to: "/matches", replace: true });
+        return;
+      }
+      track("quiz_started", {});
+    })();
+  }, [navigate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -166,6 +183,8 @@ function QuizFlow() {
       return;
     }
     if (!onPrefStep) {
+      const q = QUESTIONS[step];
+      track("quiz_question_answered", { question_id: q.id, answer: answers[q.id], step: step + 1 });
       transition(() => setStep((s) => s + 1));
       return;
     }
@@ -181,12 +200,13 @@ function QuizFlow() {
           .maybeSingle();
         const merged = {
           ...((existing?.answers as object) ?? {}),
-          quiz: { answers, match_preference: pref },
+          quiz: { answers, match_preference: pref, completed_at: new Date().toISOString() },
         };
         await supabase
           .from("onboarding_answers")
           .upsert({ user_id: user.id, answers: merged }, { onConflict: "user_id" });
       }
+      await track(ANALYTICS.quizCompleted, { match_preference: pref, answers });
       toast.success("Your match style is set ✨");
       navigate({ to: "/matches" });
     } finally {

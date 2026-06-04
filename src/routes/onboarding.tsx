@@ -345,7 +345,7 @@ function Onboarding() {
     setSaving(false);
     if (redirect === "discover") navigate({ to: "/matches" });
     else if (redirect === "hidden") navigate({ to: "/matches" });
-    else navigate({ to: "/passport" });
+    else navigate({ to: "/quiz" });
   }
 
   // ---------- Photo upload ----------
