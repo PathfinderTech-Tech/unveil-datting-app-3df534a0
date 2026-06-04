@@ -40,7 +40,7 @@ export function PremiumPaywallModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-primary/30 bg-card p-6 shadow-glow">
         <button
-          onClick={onClose}
+          onClick={dismiss}
           aria-label="Close"
           className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-surface hover:text-foreground"
         >
@@ -69,13 +69,13 @@ export function PremiumPaywallModal({
         <div className="mt-5 space-y-2">
           <Link
             to="/premium"
-            onClick={() => trackEvent("paywall_cta_clicked", { feature })}
+            onClick={() => trackEvent("paywall_cta_clicked", { feature, funnel_stage: "converted" })}
             className="block rounded-full bg-gradient-hero py-3 text-center text-sm font-medium text-primary-foreground shadow-glow"
           >
             See membership options
           </Link>
           <button
-            onClick={onClose}
+            onClick={dismiss}
             className="w-full rounded-full border border-border py-2 text-sm text-muted-foreground hover:bg-surface"
           >
             Not now
