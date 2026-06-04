@@ -52,6 +52,11 @@ function InsightsPage() {
           <h1 className="text-3xl font-semibold tracking-tight">Insights</h1>
           <p className="mt-1 text-sm text-muted-foreground">Your relationship intelligence dashboard.</p>
         </header>
+
+        <div className="mb-8">
+          <InsightsPlusPaywall />
+        </div>
+
         <Tabs defaultValue="today" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="today">Today</TabsTrigger>
