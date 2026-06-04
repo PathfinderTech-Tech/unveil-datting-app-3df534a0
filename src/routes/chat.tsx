@@ -60,6 +60,8 @@ function Chat() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
+  const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
