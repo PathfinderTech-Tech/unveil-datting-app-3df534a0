@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
+import { SignedImage } from "@/components/SignedImage";
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -156,10 +157,11 @@ function ProfilePage() {
         <div className="rounded-3xl border border-border bg-card p-6 shadow-glow">
           <div className="flex flex-wrap items-center gap-5">
             {displayPhoto ? (
-              <img
+              <SignedImage
                 src={displayPhoto}
                 alt={profile?.first_name ?? "You"}
                 className="h-24 w-24 rounded-full object-cover ring-2 ring-primary/40"
+                fallback={<GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-180`} size={96} label={profile?.first_name ?? "U"} />}
               />
             ) : (
               <GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-180`} size={96} label={profile?.first_name ?? "U"} />
@@ -228,7 +230,7 @@ function ProfilePage() {
               <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Profile photo</div>
               <div className="mt-2">
                 {displayPhoto ? (
-                  <img src={displayPhoto} alt="Profile" className="h-24 w-24 rounded-2xl object-cover" />
+                  <SignedImage src={displayPhoto} alt="Profile" className="h-24 w-24 rounded-2xl object-cover" fallback={<div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-surface text-xs text-muted-foreground">…</div>} />
                 ) : (
                   <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-surface text-xs text-muted-foreground">None</div>
                 )}
@@ -238,7 +240,7 @@ function ProfilePage() {
               <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Avatar ({profile?.avatar_style ?? "real"})</div>
               <div className="mt-2">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="h-24 w-24 rounded-2xl object-cover" />
+                  <SignedImage src={profile.avatar_url} alt="Avatar" className="h-24 w-24 rounded-2xl object-cover" fallback={<GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-220`} size={96} label={profile?.first_name ?? "U"} />} />
                 ) : (
                   <GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-220`} size={96} label={profile?.first_name ?? "U"} />
                 )}

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Camera, Loader2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SignedImage } from "@/components/SignedImage";
 import { toast } from "sonner";
 
 type Props = {
@@ -41,7 +42,7 @@ export function PhotoUpload({ userId, initialUrl, onUploaded, label = "Upload ph
     <div className="flex w-full flex-col items-center gap-3">
       <div className="relative flex h-48 w-48 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface">
         {url ? (
-          <img src={url} alt="Your photo" className="h-full w-full object-cover" />
+          <SignedImage src={url} alt="Your photo" className="h-full w-full object-cover" fallback={<Camera className="h-8 w-8 text-muted-foreground" />} />
         ) : (
           <Camera className="h-8 w-8 text-muted-foreground" />
         )}

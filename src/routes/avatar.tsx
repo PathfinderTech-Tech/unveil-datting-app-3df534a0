@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
+import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateAvatar } from "@/lib/avatar.functions";
@@ -258,7 +259,7 @@ function AvatarPage() {
 function SelfieFrame({ url, busy, onClear }: { url: string | null; busy: boolean; onClear: () => void }) {
   return (
     <div className="relative flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface">
-      {url ? <img src={url} alt="Selfie" className="h-full w-full object-cover" /> : <Camera className="h-7 w-7 text-muted-foreground" />}
+      {url ? <SignedImage src={url} alt="Selfie" className="h-full w-full object-cover" fallback={<Camera className="h-7 w-7 text-muted-foreground" />} /> : <Camera className="h-7 w-7 text-muted-foreground" />}
       {busy && <div className="absolute inset-0 flex items-center justify-center bg-background/60"><Loader2 className="h-5 w-5 animate-spin" /></div>}
       {url && !busy && (
         <button onClick={onClear} type="button" aria-label="Remove"
@@ -275,7 +276,7 @@ function Preview({ title, url, highlight }: { title: string; url: string | null;
     <div className={`rounded-2xl border p-3 ${highlight ? "border-primary bg-primary/5" : "border-border bg-surface"}`}>
       <div className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">{title}</div>
       <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-surface-2">
-        {url ? <img src={url} alt={title} className="h-full w-full object-cover" />
+        {url ? <SignedImage src={url} alt={title} className="h-full w-full object-cover" fallback={<span className="text-xs text-muted-foreground">Loading…</span>} />
              : <span className="text-xs text-muted-foreground">Not available</span>}
       </div>
     </div>
