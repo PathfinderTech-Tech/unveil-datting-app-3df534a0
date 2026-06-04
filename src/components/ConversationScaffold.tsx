@@ -434,7 +434,16 @@ function Day3({
       answer: val.trim().slice(0, 200),
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      trackEvent("day3_submit_failed", { match_id: matchId, error: error.message });
+      toast.error(error.message);
+      return;
+    }
+    trackEvent("day3_answer_submitted", {
+      match_id: matchId,
+      peer_already_submitted: !!peerDay3,
+      length: val.trim().length,
+    });
     toast.success("Your answer is locked in.");
   }
 
