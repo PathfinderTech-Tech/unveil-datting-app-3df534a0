@@ -26,8 +26,14 @@ export function PremiumPaywallModal({
   ],
 }: Props) {
   useEffect(() => {
-    if (open) trackEvent("paywall_viewed", { feature });
+    if (open) trackEvent("paywall_viewed", { feature, funnel_stage: "shown" });
   }, [open, feature]);
+
+  function dismiss() {
+    trackEvent("paywall_dismissed", { feature, funnel_stage: "dismissed" });
+    onClose();
+  }
+
 
   if (!open) return null;
   return (
