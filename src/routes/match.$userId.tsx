@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ThoughtModal } from "@/components/ThoughtModal";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { CompatibilityMap } from "@/components/CompatibilityMap";
+import { CoupleJourney } from "@/components/CoupleJourney";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match insights — UNVEIL" }] }),
@@ -36,6 +37,8 @@ function MatchInsights() {
   const [loading, setLoading] = useState(true);
   const [mineInterests, setMineInterests] = useState<string[]>([]);
   const [showThought, setShowThought] = useState(false);
+  const [matchId, setMatchId] = useState<string | null>(null);
+  const [meId, setMeId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -51,8 +54,18 @@ function MatchInsights() {
       const { data: me } = await supabase.from("profiles")
         .select("interests").eq("id", u.user?.id ?? "").maybeSingle();
       setMineInterests((me?.interests as string[]) ?? []);
+      setMeId(u.user?.id ?? null);
       setProfile(p as Profile | null);
       setCompat(await loadCompatibility(userId));
+      if (u.user?.id) {
+        const { data: m } = await supabase
+          .from("matches")
+          .select("id, mutual_interest")
+          .or(`and(user_id.eq.${u.user.id},matched_user_id.eq.${userId}),and(user_id.eq.${userId},matched_user_id.eq.${u.user.id})`)
+          .eq("mutual_interest", true)
+          .maybeSingle();
+        setMatchId((m as any)?.id ?? null);
+      }
       setLoading(false);
     })();
   }, [userId, navigate]);
