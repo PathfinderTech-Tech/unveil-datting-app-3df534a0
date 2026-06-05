@@ -5,12 +5,12 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { generateAvatar } from "@/lib/avatar.functions";
+import { generateAvatar, listAvatarHistory, setActiveAvatar, deleteAvatarHistoryItem, type AvatarHistoryItem } from "@/lib/avatar.functions";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, X, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Image as ImageIcon, Wand2,
-} from "lucide-react";
+  Sparkles, RefreshCw, Image as ImageIcon, Wand2, History, Trash2,
+}  from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
   head: () => ({
