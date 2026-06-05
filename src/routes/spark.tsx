@@ -90,11 +90,11 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
   { id: "g3", category: "growth", text: "What kind of feedback is genuinely hard for you to receive — even when you know it's true?", placeholder: "I struggle most when someone tells me..." },
   { id: "g4", category: "growth", text: "What's something you've been trying to change about yourself for a long time that still isn't working?", placeholder: "I keep trying to... and it keeps not working because..." },
 
-  // RELATIONSHIP CLARITY
-  { id: "rc1", category: "relationship_clarity", text: "What's the most honest thing you could say about what you're looking for right now?", placeholder: "Right now, honestly, I want..." },
-  { id: "rc2", category: "relationship_clarity", text: "What did past partners always misunderstand about you — and are you still figuring out how to explain it?", placeholder: "People in relationships always seem to misread..." },
-  { id: "rc3", category: "relationship_clarity", text: "How do you show love when you don't know the right words?", placeholder: "When I don't know what to say I usually..." },
-  { id: "rc4", category: "relationship_clarity", text: "What does feeling truly seen by someone look like for you — specifically?", placeholder: "I feel most seen when someone..." },
+  // RELATIONSHIP CLARITY (merged into relationships)
+  { id: "rc1", category: "relationships", text: "What's the most honest thing you could say about what you're looking for right now?", placeholder: "Right now, honestly, I want..." },
+  { id: "rc2", category: "relationships", text: "What did past partners always misunderstand about you — and are you still figuring out how to explain it?", placeholder: "People in relationships always seem to misread..." },
+  { id: "rc3", category: "relationships", text: "How do you show love when you don't know the right words?", placeholder: "When I don't know what to say I usually..." },
+  { id: "rc4", category: "relationships", text: "What does feeling truly seen by someone look like for you — specifically?", placeholder: "I feel most seen when someone..." },
 ];
 
 const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
