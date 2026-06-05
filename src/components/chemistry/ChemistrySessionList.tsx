@@ -21,15 +21,12 @@ export function ChemistrySessionList() {
   if (!data || sessions.length === 0) return null;
 
   return (
-    <section
-      className="rounded-2xl border p-5"
-      style={{ background: "#161618", borderColor: "#2A2A2E" }}
-    >
+    <section className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-display text-base font-bold" style={{ color: "#F0EDE8" }}>
+        <h3 className="font-display text-base font-bold text-foreground">
           Session History
         </h3>
-        <span className="text-[11px]" style={{ color: "#7A7876" }}>
+        <span className="text-[11px] text-muted-foreground">
           {sessions.length} session{sessions.length === 1 ? "" : "s"}
         </span>
       </div>
@@ -60,8 +57,7 @@ function SessionRow({
   const tierMeta = TIER_META[session.tier];
   return (
     <li
-      className="overflow-hidden rounded-xl border"
-      style={{ background: "#0D0D0F", borderColor: "#2A2A2E" }}
+      className="overflow-hidden rounded-xl border border-border bg-background"
     >
       <button
         type="button"
@@ -74,25 +70,25 @@ function SessionRow({
             <span
               className="inline-flex h-5 items-center rounded-full px-2 text-[10px] font-semibold uppercase tracking-wider"
               style={{
-                background: `${tierMeta.color}22`,
-                color: tierMeta.color,
-                border: `1px solid ${tierMeta.color}55`,
+                background: "color-mix(in oklch, var(--primary) 14%, transparent)",
+                color: "var(--primary)",
+                border: "1px solid color-mix(in oklch, var(--primary) 35%, transparent)",
               }}
             >
               {tierMeta.emoji} {session.tier}
             </span>
-            <span className="font-mono text-xs" style={{ color: "#7A7876" }}>
+            <span className="font-mono text-xs text-muted-foreground">
               {session.score} / {SESSION_MAX}
             </span>
           </div>
-          <div className="mt-1 text-[11px]" style={{ color: "#7A7876" }}>
+          <div className="mt-1 text-[11px] text-muted-foreground">
             {relativeDate(session.date)}
           </div>
         </div>
         <ChevronDown
           className="h-4 w-4 shrink-0 transition-transform"
           style={{
-            color: "#7A7876",
+            color: "var(--muted-foreground)",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
           }}
         />
@@ -101,10 +97,10 @@ function SessionRow({
       {open && (
         <div
           className="border-t px-4 py-3"
-          style={{ borderColor: "#2A2A2E", background: "#101012" }}
+          style={{ borderColor: "var(--border)", background: "var(--logo-ink)" }}
         >
           {session.results.length === 0 ? (
-            <p className="text-[11px]" style={{ color: "#7A7876" }}>
+            <p className="text-[11px] text-muted-foreground">
               No per-game breakdown stored for this session.
             </p>
           ) : (
