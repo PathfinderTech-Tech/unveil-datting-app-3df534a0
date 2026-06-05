@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { saveSparkAnswer, loadSparkAnswers, useUserId, awardBadge } from "@/lib/games-api";
+import { saveSparkAnswer, loadSparkAnswers, deleteSparkAnswer, useUserId, awardBadge } from "@/lib/games-api";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { toast } from "sonner";
 
