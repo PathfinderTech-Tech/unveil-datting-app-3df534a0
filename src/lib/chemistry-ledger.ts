@@ -73,12 +73,21 @@ export function sumSession(results: GameResult[]): { total: number; bonusTotal: 
 
 /* ---------- Persistent cumulative chemistry score ---------- */
 
+export type SessionRecord = {
+  id: string;
+  date: string; // ISO
+  score: number;
+  tier: Tier;
+  results: GameResult[];
+};
+
 export type ChemistryScoreData = {
   cumulativeScore: number;
   sessionCount: number;
   lastSessionScore: number;
   lastSessionTier: Tier;
   lastSessionDate: string; // ISO
+  sessions?: SessionRecord[];
 };
 
 const KEY = "unveil-chemistry-v1";
@@ -98,14 +107,22 @@ function saveChemistry(d: ChemistryScoreData) {
   window.dispatchEvent(new CustomEvent("unveil-chemistry-updated"));
 }
 
-export function recordSession(sessionScore: number, tier: Tier): ChemistryScoreData {
+export function recordSession(sessionScore: number, tier: Tier, results: GameResult[] = []): ChemistryScoreData {
   const prev = loadChemistry();
+  const newSession: SessionRecord = {
+    id: `s_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    date: new Date().toISOString(),
+    score: sessionScore,
+    tier,
+    results,
+  };
   const next: ChemistryScoreData = {
     cumulativeScore: (prev?.cumulativeScore ?? 0) + sessionScore,
     sessionCount: (prev?.sessionCount ?? 0) + 1,
     lastSessionScore: sessionScore,
     lastSessionTier: tier,
-    lastSessionDate: new Date().toISOString(),
+    lastSessionDate: newSession.date,
+    sessions: [newSession, ...(prev?.sessions ?? [])].slice(0, 50),
   };
   saveChemistry(next);
   return next;
