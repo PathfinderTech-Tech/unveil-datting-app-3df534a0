@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
 import { SignedImage } from "@/components/SignedImage";
+import { RevealProgressCard } from "@/components/RevealProgressCard";
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -126,7 +127,9 @@ function ProfilePage() {
     );
   }
 
-  const displayPhoto = profile?.profile_photo_url || profile?.photo_url || null;
+  // Public-facing identity is always the avatar; the real selfie stays gated
+  // by the reveal system and is only shown in the "Photos & avatar" section.
+  const displayPhoto = profile?.avatar_url || profile?.photo_url || null;
   const completion = completionPercent(profile, voices.length);
   const missing = missingSections(profile, voices.length);
   const axes = (profile?.personality_axes ?? {}) as Record<string, number>;
@@ -207,6 +210,9 @@ function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Reveal progress — gates when real photos unlock */}
+        {profile?.id && <RevealProgressCard userId={profile.id} />}
 
         {/* About */}
         <Section title="About me">
