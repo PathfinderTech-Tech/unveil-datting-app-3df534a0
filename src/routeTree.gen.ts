@@ -56,6 +56,7 @@ import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -294,6 +295,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminBetaRoute = AdminBetaRouteImport.update({
+  id: '/beta',
+  path: '/beta',
+  getParentRoute: () => AdminRoute,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -309,7 +315,7 @@ const ApiPublicPaymentsWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -360,7 +367,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -412,7 +420,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
   '/challenges': typeof ChallengesRoute
   '/chat': typeof ChatRoute
@@ -450,6 +458,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/admin/beta': typeof AdminBetaRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/admin/beta'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -554,6 +564,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/admin/beta'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -605,6 +616,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/admin/beta'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -619,7 +631,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AvatarRoute: typeof AvatarRoute
   ChallengesRoute: typeof ChallengesRoute
   ChatRoute: typeof ChatRoute
@@ -994,6 +1006,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/beta': {
+      id: '/admin/beta'
+      path: '/beta'
+      fullPath: '/admin/beta'
+      preLoaderRoute: typeof AdminBetaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1010,6 +1029,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminBetaRoute: typeof AdminBetaRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminBetaRoute: AdminBetaRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface CheckoutRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
@@ -1043,7 +1072,7 @@ const PlayRouteWithChildren = PlayRoute._addFileChildren(PlayRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AvatarRoute: AvatarRoute,
   ChallengesRoute: ChallengesRoute,
   ChatRoute: ChatRoute,
@@ -1089,13 +1118,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
