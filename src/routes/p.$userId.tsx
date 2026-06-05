@@ -21,10 +21,11 @@ export const Route = createFileRoute("/p/$userId")({
     const name = p.firstName ?? "Someone";
     const archetype = (p.archetype ?? "Signal").replace(/-/g, " ");
     const loc = [p.city, p.country].filter(Boolean).join(", ");
-    const title = `${name}'s UNVEIL Passport — ${archetype}`;
+    const verifiedTag = p.verified ? " · Verified" : "";
+    const title = `${name}'s UNVEIL Passport — ${archetype}${verifiedTag}`;
     const description = loc
-      ? `${name} · ${archetype} · ${loc}. Slow love, real connection on UNVEIL.`
-      : `${name} · ${archetype}. Slow love, real connection on UNVEIL.`;
+      ? `${name} · ${archetype}${verifiedTag} · ${loc}. Slow love, real connection on UNVEIL.`
+      : `${name} · ${archetype}${verifiedTag}. Slow love, real connection on UNVEIL.`;
     const image = p.avatarUrl ?? p.photoUrl ?? p.profilePhotoUrl ?? undefined;
     return {
       meta: [
