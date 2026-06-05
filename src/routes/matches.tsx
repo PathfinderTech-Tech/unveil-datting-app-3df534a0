@@ -275,7 +275,11 @@ function Matches() {
 
   async function handleLike(m: RealMatch) {
     const res = await likeProfile(m.userId);
-    if (res.error) { toast.error(res.error); return; }
+    if (res.error) {
+      console.error("[unveil] like_profile failed", res.error);
+      toast.error(res.error);
+      return;
+    }
     if (res.mutual) {
       toast.success(`It's mutual with ${m.name} — a conversation is open.`);
       if (res.conversationId) navigate({ to: "/chat", search: { c: res.conversationId } as never });
