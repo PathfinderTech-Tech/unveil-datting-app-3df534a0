@@ -33,22 +33,22 @@ export function TwoTruthsGame({ onComplete, onSkip }: {
   return (
     <div className="space-y-5">
       <GameHeader step={1} total={1} title="Two Truths & a Lie" />
-      <p className="text-center text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+      <p className="text-center text-[11px] uppercase tracking-wider text-muted-foreground">
         Three statements about you. Two true. One lie. Mark the lie.
       </p>
       {fields.map((v, i) => (
         <div key={i} className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
               Statement {i + 1}
             </span>
             <button
               onClick={() => setLie(i)}
               className="rounded-full border px-2 py-0.5 text-[10px]"
               style={{
-                borderColor: lie === i ? "rgba(239,68,68,0.5)" : "#2A2A2E",
-                color: lie === i ? "rgb(239,68,68)" : "#7A7876",
-                background: lie === i ? "rgba(239,68,68,0.1)" : "transparent",
+                borderColor: lie === i ? "color-mix(in oklch, var(--destructive) 55%, transparent)" : "var(--border)",
+                color: lie === i ? "var(--destructive)" : "var(--muted-foreground)",
+                background: lie === i ? "color-mix(in oklch, var(--destructive) 12%, transparent)" : "transparent",
               }}
             >
               {lie === i ? "✓ The lie" : "Mark as lie"}
@@ -59,23 +59,20 @@ export function TwoTruthsGame({ onComplete, onSkip }: {
             onChange={(e) => setF(i, e.target.value)}
             placeholder={TWO_TRUTHS_PROMPTS[i % TWO_TRUTHS_PROMPTS.length]}
             rows={2}
-            className="w-full resize-none rounded-2xl border px-3 py-2 text-sm focus:outline-none"
-            style={{ background: "#1E1E21", borderColor: "#2A2A2E", color: "#F0EDE8" }}
+            className="w-full resize-none rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
           />
         </div>
       ))}
       <button
         onClick={() => setUsedPrompt(true)}
-        className="w-full rounded-full border px-3 py-1.5 text-[11px]"
-        style={{ color: "#7A7876", borderColor: "#2A2A2E" }}
+        className="w-full rounded-full border border-border px-3 py-1.5 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-primary"
       >
         Use prompt chip (no bonus, no penalty)
       </button>
       <button
         onClick={submit}
         disabled={!canSubmit}
-        className="w-full rounded-full px-4 py-3 text-sm font-semibold transition-opacity disabled:opacity-40"
-        style={{ background: "linear-gradient(135deg, #8B5CF6, #A78BFA)", color: "#0D0D0F" }}
+        className="w-full rounded-full bg-gradient-hero px-4 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-opacity hover:opacity-95 disabled:opacity-40"
       >
         Submit
       </button>
