@@ -9,8 +9,6 @@ import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
-import { VerificationGate } from "@/components/VerificationGate";
-import { useVerification } from "@/hooks/use-verification";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 
