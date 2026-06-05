@@ -1,13 +1,13 @@
 import { Sparkles } from "lucide-react";
 
 const STAGES = [
-  { day: 1, label: "Text introduction" },
-  { day: 2, label: "Voice note revealed" },
-  { day: 3, label: "Personality insights revealed" },
-  { day: 4, label: "Shared challenge unlocked" },
-  { day: 5, label: "Partial photo unlocked" },
-  { day: 6, label: "Full photos revealed" },
-  { day: 7, label: "Date readiness unlocked" },
+  { day: 1, label: "Values" },
+  { day: 2, label: "Lifestyle" },
+  { day: 3, label: "Communication style" },
+  { day: 4, label: "Relationship goals" },
+  { day: 5, label: "Personality & habits" },
+  { day: 6, label: "Future vision" },
+  { day: 7, label: "Contact reveal decision" },
 ] as const;
 
 export function SlowRevealTimeline({ day = 1 }: { day?: number }) {

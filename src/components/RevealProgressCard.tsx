@@ -64,22 +64,22 @@ export function RevealProgressCard({ userId }: { userId: string }) {
   const passed = Object.values(checks).filter(Boolean).length;
   const total = Object.keys(checks).length;
   const pct = Math.round((passed / total) * 100);
-  const unlocked = passed >= 4; // 4 of 5 to unlock photo reveal
+  const unlocked = passed >= 4; // 4 of 5 signals to unlock direct contact sharing
 
   return (
     <div className="mt-6 rounded-3xl border border-primary/30 bg-card p-6 shadow-glow">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Reveal progress
+            Contact reveal progress
           </div>
           <div className="mt-1 font-display text-lg font-bold">
-            {unlocked ? "Photo Reveal Available" : "Real photos unlock through real connection"}
+            {unlocked ? "Contact sharing available" : "Direct contact unlocks through real connection"}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {unlocked
-              ? "You've built enough trust — both sides must consent to reveal photos."
-              : "Your real photos unlock after meaningful connection. Keep going."}
+              ? "You've built enough trust — both sides must opt in to exchange contact info."
+              : "Keep building. Phone, email, and social handles unlock after meaningful connection."}
           </p>
         </div>
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${unlocked ? "bg-gradient-hero text-primary-foreground" : "bg-surface text-muted-foreground"}`}>
