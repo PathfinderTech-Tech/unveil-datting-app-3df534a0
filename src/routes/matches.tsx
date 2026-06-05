@@ -127,22 +127,23 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
-  const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
+  type PeerMeta = { avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null };
+  const [peerMeta, setPeerMeta] = useState<Record<string, PeerMeta>>({});
 
   useEffect(() => {
-    const ids = visible.map((m) => m.userId).filter((id) => !(id in avatarUrls));
+    const ids = visible.map((m) => m.userId).filter((id) => !(id in peerMeta));
     if (ids.length === 0) return;
     let alive = true;
     supabase
       .from("profiles")
-      .select("id, avatar_url")
+      .select("id, avatar_url, photo_url, discovery_mode")
       .in("id", ids)
       .then(({ data }) => {
         if (!alive || !data) return;
-        setAvatarUrls((prev) => {
+        setPeerMeta((prev) => {
           const next = { ...prev };
-          for (const row of data as Array<{ id: string; avatar_url: string | null }>) {
-            if (row.avatar_url) next[row.id] = row.avatar_url;
+          for (const row of data as Array<{ id: string } & PeerMeta>) {
+            next[row.id] = { avatar_url: row.avatar_url, photo_url: row.photo_url, discovery_mode: row.discovery_mode };
           }
           return next;
         });
