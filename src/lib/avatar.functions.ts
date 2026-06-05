@@ -76,6 +76,20 @@ export const generateAvatar = createServerFn({ method: "POST" })
 
     if (key) {
       try {
+        // The profile-photos bucket is private — the AI gateway cannot fetch
+        // a public URL. Download the selfie via the service-role client and
+        // inline it as a data URL so Gemini can read it.
+        const selfiePath = extractBucketPath(data.selfieUrl);
+        let imageUrl = data.selfieUrl;
+        if (selfiePath) {
+          const { data: dl, error: dlErr } = await supabaseAdmin.storage
+            .from("profile-photos").download(selfiePath);
+          if (dlErr || !dl) throw new Error(`Could not read selfie: ${dlErr?.message ?? "missing"}`);
+          const buf = new Uint8Array(await dl.arrayBuffer());
+          const b64src = bytesToBase64(buf);
+          imageUrl = `data:${dl.type || "image/jpeg"};base64,${b64src}`;
+        }
+
         // Image-edit pipeline using Gemini's multimodal chat-completions image shape
         // (OpenRouter format). The selfie is sent as image_url; Gemini conditions
         // generation on it, preserving identity instead of inventing a new person.
@@ -89,7 +103,7 @@ export const generateAvatar = createServerFn({ method: "POST" })
                 role: "user",
                 content: [
                   { type: "text", text: prompt },
-                  { type: "image_url", image_url: { url: data.selfieUrl } },
+                  { type: "image_url", image_url: { url: imageUrl } },
                 ],
               },
             ],
