@@ -291,6 +291,53 @@ function AvatarPage() {
                 <ArrowLeft className="h-4 w-4" /> Change style
               </button>
             </div>
+
+            {history.length > 0 && (
+              <div className="mt-8 border-t border-border pt-6">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <History className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-display">Avatar history</span>
+                    <span className="text-xs text-muted-foreground">({history.length})</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Tap to restore</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+                  {history.map((item) => {
+                    const isActive = avatarUrl === item.url || avatarUrl?.split("?")[0] === item.url.split("?")[0];
+                    return (
+                      <div key={item.path} className="group relative">
+                        <button
+                          onClick={() => revertTo(item)}
+                          disabled={busy}
+                          className={`block aspect-square w-full overflow-hidden rounded-xl border transition ${
+                            isActive ? "border-primary ring-2 ring-primary shadow-glow" : "border-border hover:border-primary/50"
+                          } disabled:opacity-50`}
+                          title={`${item.style} · ${new Date(item.createdAt).toLocaleString()}`}
+                        >
+                          <img src={item.url} alt={item.style} className="h-full w-full object-cover" />
+                        </button>
+                        <div className="mt-1 text-center font-mono text-[9px] uppercase tracking-luxury text-muted-foreground">
+                          {item.style}
+                        </div>
+                        <button
+                          onClick={() => removeItem(item)}
+                          aria-label="Delete"
+                          className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                        {isActive && (
+                          <div className="absolute left-1 top-1 rounded-full bg-primary p-0.5 text-primary-foreground">
+                            <Check className="h-3 w-3" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>
