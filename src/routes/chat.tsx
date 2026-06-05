@@ -500,7 +500,7 @@ function Chat() {
                   <VerificationGate
                     status={verification.status}
                     variant="inline"
-                    reason="Verified members only can send and reply to messages."
+                    reason="Verify to unlock 15 messages/day, the verified badge, and the verified-only matching pool."
                   />
                 </div>
               )}
