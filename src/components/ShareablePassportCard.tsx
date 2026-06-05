@@ -196,8 +196,10 @@ export function ShareablePassportCard({
   const activeCrop =
     prefs.choice === "selfie" ? prefs.crops.selfie : prefs.crops.avatar;
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/passport` : "/passport";
-  const shareText = `My UNVEIL Passport — slow love, real connection.`;
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/p/${userId}` : `/p/${userId}`;
+  const shareText = `${data?.first_name ? `${data.first_name}'s` : "My"} UNVEIL Passport — slow love, real connection.`;
+  const mailtoHref = `mailto:?subject=${encodeURIComponent("My UNVEIL Passport")}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+
 
   function setChoice(choice: PhotoChoice) {
     setPrefs((p) => ({ ...p, choice }));
