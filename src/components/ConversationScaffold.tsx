@@ -538,7 +538,7 @@ function ArchiveModal({
   const peerD3 = day3.find((r) => r.user_id !== selfId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-glow">
         <div className="mb-4 flex items-center justify-between">
           <div className="font-display text-lg font-bold">Your journey so far</div>

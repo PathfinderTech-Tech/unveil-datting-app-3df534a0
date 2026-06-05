@@ -55,12 +55,12 @@
   --logo-surface-2: oklch(0.205 0.075 298);
   --logo-ivory: oklch(0.955 0.018 72);
   --logo-muted: oklch(0.72 0.055 305);
-  --logo-violet: oklch(0.61 0.27 292);
-  --logo-purple: oklch(0.67 0.27 310);
-  --logo-magenta: oklch(0.72 0.28 334);
-  --logo-rose: oklch(0.80 0.20 348);
-  --logo-gold: oklch(0.82 0.16 67);
-  --logo-amber: oklch(0.74 0.18 48);
+  --logo-violet: oklch(0.56 0.22 286);
+  --logo-purple: oklch(0.61 0.22 304);
+  --logo-magenta: oklch(0.65 0.20 328);
+  --logo-rose: oklch(0.72 0.14 346);
+  --logo-gold: oklch(0.80 0.14 68);
+  --logo-amber: oklch(0.70 0.14 48);
 
   --background: var(--logo-black);
   --foreground: var(--logo-ivory);
@@ -99,9 +99,9 @@
   --indigo: var(--logo-violet);
   --indigo-deep: oklch(0.33 0.15 288);
 
-  --gradient-logo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 34%, var(--logo-magenta) 62%, var(--logo-gold) 100%);
-  --gradient-logo-hover: linear-gradient(135deg, oklch(0.68 0.29 292) 0%, oklch(0.74 0.29 312) 34%, oklch(0.78 0.29 334) 62%, oklch(0.88 0.17 67) 100%);
-  --gradient-logo-active: linear-gradient(135deg, oklch(0.50 0.24 292) 0%, oklch(0.56 0.24 310) 38%, oklch(0.61 0.25 334) 68%, oklch(0.70 0.16 62) 100%);
+  --gradient-logo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 38%, var(--logo-magenta) 68%, var(--logo-gold) 100%);
+  --gradient-logo-hover: linear-gradient(135deg, color-mix(in oklch, var(--logo-violet) 86%, var(--logo-ivory)) 0%, color-mix(in oklch, var(--logo-purple) 88%, var(--logo-ivory)) 38%, color-mix(in oklch, var(--logo-magenta) 86%, var(--logo-ivory)) 68%, color-mix(in oklch, var(--logo-gold) 88%, var(--logo-ivory)) 100%);
+  --gradient-logo-active: linear-gradient(135deg, color-mix(in oklch, var(--logo-violet) 82%, var(--logo-black)) 0%, color-mix(in oklch, var(--logo-purple) 84%, var(--logo-black)) 38%, color-mix(in oklch, var(--logo-magenta) 82%, var(--logo-black)) 68%, color-mix(in oklch, var(--logo-gold) 84%, var(--logo-black)) 100%);
   --gradient-hero: var(--gradient-logo);
   --gradient-aura: linear-gradient(180deg, var(--logo-rose) 0%, var(--logo-magenta) 38%, var(--logo-purple) 70%, var(--logo-violet) 100%);
   --gradient-deep: linear-gradient(135deg, var(--logo-surface-2) 0%, var(--logo-ink) 58%, var(--logo-black) 100%);
@@ -111,10 +111,10 @@
   --gradient-face: linear-gradient(135deg, var(--logo-purple) 0%, var(--logo-magenta) 58%, var(--logo-gold) 100%);
   --gradient-soul: linear-gradient(135deg, var(--logo-magenta) 0%, var(--logo-rose) 52%, var(--logo-gold) 100%);
 
-  --shadow-logo: 0 0 36px -8px oklch(0.72 0.28 334 / 0.62), 0 0 18px -8px oklch(0.82 0.16 67 / 0.55);
-  --shadow-glow: 0 0 80px -10px oklch(0.67 0.27 310 / 0.58);
-  --shadow-glow-magenta: 0 0 80px -10px oklch(0.72 0.28 334 / 0.58);
-  --shadow-glow-indigo: 0 0 80px -10px oklch(0.61 0.27 292 / 0.58);
+  --shadow-logo: 0 0 32px -10px color-mix(in oklch, var(--logo-magenta) 58%, transparent), 0 0 18px -10px color-mix(in oklch, var(--logo-gold) 50%, transparent);
+  --shadow-glow: 0 0 72px -14px color-mix(in oklch, var(--logo-purple) 56%, transparent);
+  --shadow-glow-magenta: 0 0 72px -14px color-mix(in oklch, var(--logo-magenta) 52%, transparent);
+  --shadow-glow-indigo: 0 0 72px -14px color-mix(in oklch, var(--logo-violet) 54%, transparent);
   --shadow-card: 0 30px 80px -30px oklch(0 0 0 / 0.8);
 }
 
@@ -125,10 +125,10 @@
     background: var(--color-background);
     color: var(--color-foreground);
     background-image:
-      radial-gradient(at 15% 0%, oklch(0.45 0.22 305 / 0.55) 0px, transparent 55%),
-      radial-gradient(at 85% 100%, oklch(0.50 0.22 320 / 0.45) 0px, transparent 55%),
-      radial-gradient(at 10% 90%, oklch(0.40 0.20 275 / 0.40) 0px, transparent 60%),
-      radial-gradient(at 50% 50%, oklch(0.50 0.20 295 / 0.25) 0px, transparent 60%);
+      radial-gradient(at 15% 0%, color-mix(in oklch, var(--logo-purple) 38%, transparent) 0px, transparent 55%),
+      radial-gradient(at 85% 100%, color-mix(in oklch, var(--logo-gold) 26%, transparent) 0px, transparent 55%),
+      radial-gradient(at 10% 90%, color-mix(in oklch, var(--logo-violet) 30%, transparent) 0px, transparent 60%),
+      radial-gradient(at 50% 50%, color-mix(in oklch, var(--logo-magenta) 18%, transparent) 0px, transparent 60%);
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
@@ -215,7 +215,7 @@
   }
   .btn-gradient-primary:hover {
     background: var(--gradient-logo-hover);
-    box-shadow: 0 14px 42px -10px oklch(0.72 0.28 334 / 0.74);
+    box-shadow: 0 14px 42px -12px color-mix(in oklch, var(--logo-magenta) 68%, transparent);
     transform: translateY(-1px);
   }
   .btn-gradient-primary:active { background: var(--gradient-logo-active); transform: translateY(0) scale(0.98); }
@@ -223,9 +223,9 @@
 
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 30px oklch(0.65 0.22 305 / 0.4); }
-  33% { box-shadow: 0 0 50px oklch(0.58 0.20 275 / 0.55); }
-  66% { box-shadow: 0 0 60px oklch(0.70 0.24 340 / 0.7); }
+  0%, 100% { box-shadow: 0 0 30px color-mix(in oklch, var(--logo-purple) 40%, transparent); }
+  33% { box-shadow: 0 0 50px color-mix(in oklch, var(--logo-violet) 48%, transparent); }
+  66% { box-shadow: 0 0 60px color-mix(in oklch, var(--logo-magenta) 52%, transparent); }
 }
 .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
 
@@ -247,9 +247,9 @@
 
 /* Chemistry Points Economy animations */
 @keyframes chem-pulse {
-  0%   { box-shadow: 0 0 0 0 oklch(0.67 0.27 310 / 0.4); }
-  70%  { box-shadow: 0 0 0 6px oklch(0.67 0.27 310 / 0); }
-  100% { box-shadow: 0 0 0 0 oklch(0.67 0.27 310 / 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklch, var(--logo-purple) 42%, transparent); }
+  70%  { box-shadow: 0 0 0 6px color-mix(in oklch, var(--logo-purple) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--logo-purple) 0%, transparent); }
 }
 @keyframes chem-bonus-float {
   0%   { opacity: 0; transform: translate(-50%, 0px); }
@@ -313,9 +313,9 @@
 
 body {
   background:
-    radial-gradient(ellipse 70% 50% at 50% 20%, oklch(0.67 0.27 310 / 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 42% at 85% 85%, oklch(0.82 0.16 67 / 0.10) 0%, transparent 62%),
-    radial-gradient(ellipse 55% 44% at 12% 10%, oklch(0.61 0.27 292 / 0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 50% at 50% 20%, color-mix(in oklch, var(--logo-purple) 12%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 42% at 85% 85%, color-mix(in oklch, var(--logo-gold) 9%, transparent) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 44% at 12% 10%, color-mix(in oklch, var(--logo-violet) 12%, transparent) 0%, transparent 62%),
     var(--u-bg) !important;
   background-attachment: fixed;
   font-family: var(--font-body-satoshi);
@@ -344,11 +344,11 @@ h1, h2, h3, h4 {
 }
 .u-card-glow::before {
   top: -50px; right: -50px; width: 180px; height: 180px;
-  background: radial-gradient(circle, oklch(0.67 0.27 310 / 0.20) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--logo-purple) 18%, transparent) 0%, transparent 65%);
 }
 .u-card-glow::after {
   bottom: -40px; left: -30px; width: 130px; height: 130px;
-  background: radial-gradient(circle, oklch(0.82 0.16 67 / 0.11) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--logo-gold) 10%, transparent) 0%, transparent 65%);
 }
 .u-card > * { position: relative; z-index: 1; }
 
@@ -375,7 +375,7 @@ h1, h2, h3, h4 {
   padding: 12px 24px;
   transition: background 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
-.u-btn-primary:hover  { background: var(--gradient-logo-hover); box-shadow: 0 14px 42px -10px oklch(0.72 0.28 334 / 0.74); }
+.u-btn-primary:hover  { background: var(--gradient-logo-hover); box-shadow: 0 14px 42px -12px color-mix(in oklch, var(--logo-magenta) 68%, transparent); }
 .u-btn-primary:active { background: var(--gradient-logo-active); transform: scale(0.97); }
 
 .u-btn-ghost {
@@ -436,10 +436,10 @@ h1, h2, h3, h4 {
   border-radius: 999px;
   background: conic-gradient(
     from 0deg,
-    oklch(0.80 0.20 348 / 0.85),
-    oklch(0.72 0.28 334 / 0.62),
-    oklch(0.82 0.16 67 / 0.62),
-    oklch(0.67 0.27 310 / 0.85)
+    color-mix(in oklch, var(--logo-rose) 82%, transparent),
+    color-mix(in oklch, var(--logo-magenta) 62%, transparent),
+    color-mix(in oklch, var(--logo-gold) 62%, transparent),
+    color-mix(in oklch, var(--logo-purple) 82%, transparent)
   );
   animation: orbitRing 4s linear infinite;
   z-index: -1;
@@ -495,9 +495,9 @@ h1, h2, h3, h4 {
 @keyframes taglineUp      { from { opacity: 0; transform: translateY(12px); letter-spacing: 0.3em; } to { opacity: 1; transform: translateY(0); letter-spacing: 0.12em; } }
 @keyframes ctaRise        { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes optionPop      { from { opacity: 0; transform: scale(0.93) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-@keyframes selectFlash    { 0% { background: oklch(0.67 0.27 310 / 0.06); } 40% { background: oklch(0.67 0.27 310 / 0.20); box-shadow: 0 0 16px oklch(0.72 0.28 334 / 0.25); } 100% { background: oklch(0.67 0.27 310 / 0.10); } }
-@keyframes breathe        { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 oklch(0.67 0.27 310 / 0.6); } 50% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 5px oklch(0.67 0.27 310 / 0); } }
-@keyframes emeraldPulse   { 0%, 100% { box-shadow: 0 0 0 0 oklch(0.78 0.17 162 / 0); } 50% { box-shadow: 0 0 16px 2px oklch(0.78 0.17 162 / 0.18); } }
+@keyframes selectFlash    { 0% { background: color-mix(in oklch, var(--logo-purple) 6%, transparent); } 40% { background: color-mix(in oklch, var(--logo-purple) 20%, transparent); box-shadow: 0 0 16px color-mix(in oklch, var(--logo-magenta) 24%, transparent); } 100% { background: color-mix(in oklch, var(--logo-purple) 10%, transparent); } }
+@keyframes breathe        { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklch, var(--logo-purple) 58%, transparent); } 50% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 5px color-mix(in oklch, var(--logo-purple) 0%, transparent); } }
+@keyframes emeraldPulse   { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--u-emerald) 0%, transparent); } 50% { box-shadow: 0 0 16px 2px color-mix(in oklch, var(--u-emerald) 18%, transparent); } }
 @keyframes orbitRing      { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes rippleOut      { from { transform: scale(0.8); opacity: 0.6; } to { transform: scale(2.2); opacity: 0; } }
 @keyframes typingBounce   { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
@@ -505,10 +505,10 @@ h1, h2, h3, h4 {
 @keyframes shake          { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
 @keyframes goldSweep      { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 @keyframes sonarRing      { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.0); } }
-@keyframes dotGlow        { 0%, 100% { box-shadow: 0 0 4px oklch(0.67 0.27 310 / 0.6); } 50% { box-shadow: 0 0 12px oklch(0.72 0.28 334 / 1); } }
+@keyframes dotGlow        { 0%, 100% { box-shadow: 0 0 4px color-mix(in oklch, var(--logo-purple) 58%, transparent); } 50% { box-shadow: 0 0 12px var(--logo-magenta); } }
 @keyframes progressFill   { from { width: 0%; } }
 @keyframes barFill        { from { width: 0%; } }
-@keyframes chemistryGlow  { 0%, 100% { text-shadow: 0 0 6px oklch(0.67 0.27 310 / 0.4); } 50% { text-shadow: 0 0 14px oklch(0.67 0.27 310 / 0.8); } }
+@keyframes chemistryGlow  { 0%, 100% { text-shadow: 0 0 6px color-mix(in oklch, var(--logo-purple) 40%, transparent); } 50% { text-shadow: 0 0 14px color-mix(in oklch, var(--logo-purple) 78%, transparent); } }
 @keyframes numberCount    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cardRise       { from { opacity: 0; transform: translateY(60px) scale(0.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes scanSweep      { 0% { top: -2px; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }

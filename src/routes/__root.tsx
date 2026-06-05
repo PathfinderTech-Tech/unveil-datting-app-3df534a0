@@ -150,7 +150,7 @@ function RootComponent() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          backgroundImage: `radial-gradient(ellipse at center, oklch(0.075 0.018 295 / 0) 0%, oklch(0.075 0.018 295 / 0.75) 50%, oklch(0.075 0.018 295 / 0.96) 100%), url(${watermarkAsset.url})`,
+          backgroundImage: `radial-gradient(ellipse at center, color-mix(in oklch, var(--background) 0%, transparent) 0%, color-mix(in oklch, var(--background) 75%, transparent) 50%, color-mix(in oklch, var(--background) 96%, transparent) 100%), url(${watermarkAsset.url})`,
           backgroundSize: "cover, min(60vmin, 640px) min(60vmin, 640px)",
           backgroundPosition: "center, center",
           backgroundRepeat: "no-repeat, no-repeat",

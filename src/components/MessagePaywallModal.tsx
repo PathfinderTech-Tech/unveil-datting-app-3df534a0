@@ -45,7 +45,7 @@ export function MessagePaywallModal({ open, onClose }: { open: boolean; onClose:
             className="flex items-center justify-between rounded-2xl bg-gradient-hero p-4 text-primary-foreground shadow-glow"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/20">
                 <Crown className="h-5 w-5" />
               </div>
               <div>
