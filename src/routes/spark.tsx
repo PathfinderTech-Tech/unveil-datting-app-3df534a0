@@ -238,7 +238,7 @@ function SparkPage() {
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
-          {(["all", "values", "emotional_intelligence", "humor", "lifestyle", "growth", "relationship_clarity"] as const).map((c) => {
+          {(["all", "personality", "creativity", "relationships", "fun", "values", "emotional_intelligence", "humor", "lifestyle", "growth", "relationship_clarity"] as const).map((c) => {
             const active = filter === c;
             return (
               <button key={c} onClick={() => { setFilter(c); setIdx(0); setDone(false); }}
