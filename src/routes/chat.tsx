@@ -411,7 +411,7 @@ function Chat() {
                 {typingPeer && (
                   <div className="px-2 text-xs italic text-muted-foreground">typing…</div>
                 )}
-                {msgs.length === 0 && <div className="text-center text-xs text-muted-foreground">Send the first thought.</div>}
+                {msgs.length === 0 && <div className="px-4 py-6 text-center text-xs italic text-muted-foreground">Your conversation is unfolding. Send the first thought when you're ready.</div>}
               </div>
 
               {ideasOpen && (
