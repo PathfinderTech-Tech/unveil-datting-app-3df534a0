@@ -554,8 +554,28 @@ function Onboarding() {
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">How would you like to appear?</h1>
-              <p className="mt-2 text-muted-foreground">Your public image. You can change this anytime in settings.</p>
+              <p className="mt-2 text-muted-foreground">Pick a discovery mode — you can change this anytime in settings.</p>
             </div>
+
+            {/* Discovery mode binary selector (Avatar / Photo) */}
+            <div className="grid gap-3 md:grid-cols-2">
+              {[
+                { id: "avatar" as const, title: "Avatar Mode", hint: "Show a generated avatar publicly. Your real selfie stays private until a mutual reveal." },
+                { id: "photo"  as const, title: "Photo Mode",  hint: "Show your real photo on your profile from the start." },
+              ].map((m) => {
+                const derived: "avatar" | "photo" = appearance === "real" ? "photo" : "avatar";
+                const active = derived === m.id;
+                return (
+                  <button key={m.id} type="button"
+                    onClick={() => setAppearance(m.id === "photo" ? "real" : "avatar")}
+                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
+                    <div className="font-display text-base font-semibold">{m.title}</div>
+                    <div className="text-xs text-muted-foreground">{m.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="grid gap-3 md:grid-cols-3">
               {APPEARANCE_MODES.map((m) => {
                 const active = appearance === m.id;
