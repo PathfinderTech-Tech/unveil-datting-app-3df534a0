@@ -126,6 +126,28 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
+  const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const ids = visible.map((m) => m.userId).filter((id) => !(id in avatarUrls));
+    if (ids.length === 0) return;
+    let alive = true;
+    supabase
+      .from("profiles")
+      .select("id, avatar_url")
+      .in("id", ids)
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        setAvatarUrls((prev) => {
+          const next = { ...prev };
+          for (const row of data as Array<{ id: string; avatar_url: string | null }>) {
+            if (row.avatar_url) next[row.id] = row.avatar_url;
+          }
+          return next;
+        });
+      });
+    return () => { alive = false; };
+  }, [visible]);
 
   if (checking || authLoading || (user && !profileState)) {
     return (
@@ -329,9 +351,18 @@ function Matches() {
                 <button onClick={() => setActive(m)} className="text-left">
                   <div className="flex items-start justify-between">
                     <div className="relative">
-                      <div style={{ filter: "blur(8px)" }}>
-                        <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
-                      </div>
+                      {avatarUrls[m.userId] ? (
+                        <img
+                          src={avatarUrls[m.userId]}
+                          alt={`${m.name} avatar`}
+                          className="h-14 w-14 rounded-full border-2 border-primary/35 object-cover shadow-glow"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div style={{ filter: "blur(8px)" }}>
+                          <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
+                        </div>
+                      )}
                       <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
                         <Lock className="h-3 w-3 text-muted-foreground" />
                       </div>
