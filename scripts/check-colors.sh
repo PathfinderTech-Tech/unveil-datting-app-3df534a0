@@ -11,7 +11,7 @@ echo
 # Allow-list intentional exceptions (SVG share card, OAuth brand marks, error page).
 ALLOW='ShareablePassportCard\.tsx|OAuthButtons\.tsx|error-page\.ts|avatar\.functions\.ts|chemistry-ledger\.ts|chart\.tsx|theme-color'
 
-HITS=$(rg -nP "#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])|\brgba?\(|\bhsl\(" src/ \
+HITS=$(rg -nP "#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])|\brgba?\(|\bhsl\(|\b(bg|text|border)-(white|black)(/|\b)|\bwhite/|\bblack/" src/ \
   -g '!*.gen.ts' -g '!styles.css' -g '!*.svg' -g '!*.asset.json' \
   | grep -vE "$ALLOW" || true)
 
