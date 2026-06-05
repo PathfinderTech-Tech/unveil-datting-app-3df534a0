@@ -101,13 +101,11 @@ const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
   personality:            { label: "Personality",           hue: "from-indigo-500/30 to-violet-500/10" },
   creativity:             { label: "Creativity",            hue: "from-pink-500/30 to-fuchsia-500/10" },
   relationships:          { label: "Relationships",         hue: "from-rose-500/30 to-red-500/10" },
-  fun:                    { label: "Fun",                   hue: "from-yellow-500/30 to-amber-500/10" },
   values:                 { label: "Values",                hue: "from-fuchsia-500/30 to-purple-500/10" },
   emotional_intelligence: { label: "Emotional Intelligence", hue: "from-cyan-500/30 to-blue-500/10" },
-  humor:                  { label: "Humor",                 hue: "from-amber-500/30 to-orange-500/10" },
+  humor:                  { label: "Humor & Fun",           hue: "from-amber-500/30 to-orange-500/10" },
   lifestyle:              { label: "Lifestyle",             hue: "from-emerald-500/30 to-teal-500/10" },
   growth:                 { label: "Growth",                hue: "from-lime-500/30 to-green-500/10" },
-  relationship_clarity:   { label: "Relationship Clarity",  hue: "from-rose-500/30 to-pink-500/10" },
 };
 
 
