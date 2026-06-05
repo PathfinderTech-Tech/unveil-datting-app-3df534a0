@@ -510,7 +510,7 @@ function Day3({
       {locked && !revealed && (
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" /> Sealed. Waiting for {peerName} to answer…
+            <Lock className="h-3.5 w-3.5" /> Sealed. Waiting for {peerName}'s response — they'll see your answer once they share.
           </div>
         </div>
       )}
