@@ -49,8 +49,8 @@
   --radius: 1rem;
 
   /* UNVEIL — dark luxury, deep purple/violet/magenta */
-  --background: oklch(0.08 0.02 295);
-  --foreground: oklch(0.97 0.01 295);
+  --background: oklch(0.22 0.12 290);
+  --foreground: oklch(0.98 0.01 295);
 
   --surface: oklch(0.12 0.03 295);
   --surface-2: oklch(0.17 0.045 295);
