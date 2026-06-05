@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Lock, Sparkles, Eye, Heart } from "lucide-react";
-import { Avatar } from "@/components/Avatar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import type { HiddenMatch } from "@/lib/hidden-matches.functions";
 
 const TAGLINES = [
