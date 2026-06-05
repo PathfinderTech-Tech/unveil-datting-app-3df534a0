@@ -281,19 +281,19 @@
    ============================================================ */
 
 :root {
-  --u-bg:            #0D0D0F;
-  --u-surface:       #161618;
-  --u-surface-alt:   #1E1E21;
-  --u-border:        #2A2A2E;
-  --u-text:          #F0EDE8;
-  --u-muted:         #7A7876;
+  --u-bg:            var(--logo-black);
+  --u-surface:       var(--logo-surface);
+  --u-surface-alt:   var(--logo-surface-2);
+  --u-border:        oklch(0.35 0.08 302 / 0.52);
+  --u-text:          var(--logo-ivory);
+  --u-muted:         var(--logo-muted);
 
-  --u-violet:        #8B5CF6;
-  --u-violet-bright: #A78BFA;
-  --u-violet-deep:   #6D28D9;
+  --u-violet:        var(--logo-violet);
+  --u-violet-bright: var(--logo-purple);
+  --u-violet-deep:   oklch(0.33 0.15 288);
 
-  --u-gold:          #C9A96E;
-  --u-gold-bright:   #E2C896;
+  --u-gold:          var(--logo-gold);
+  --u-gold-bright:   oklch(0.90 0.12 70);
 
   --u-emerald:       rgb(52,211,153);
   --u-red:           rgb(239,68,68);
@@ -314,32 +314,34 @@
   --popover: var(--u-surface);
   --popover-foreground: var(--u-text);
   --primary: var(--u-violet);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--logo-ivory);
   --secondary: var(--u-surface-alt);
   --secondary-foreground: var(--u-text);
   --muted: var(--u-surface-alt);
   --muted-foreground: var(--u-muted);
   --accent: var(--u-violet-bright);
-  --accent-foreground: #ffffff;
-  --border: rgba(42, 42, 46, 0.6);
+  --accent-foreground: var(--logo-ivory);
+  --border: oklch(0.35 0.08 302 / 0.52);
   --input: var(--u-surface-alt);
   --ring: var(--u-violet);
   --violet: var(--u-violet);
 
-  --gradient-hero:   linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
-  --gradient-aura:   linear-gradient(180deg, #A78BFA 0%, #8B5CF6 60%, #6D28D9 100%);
-  --gradient-deep:   linear-gradient(160deg, #1a1630 0%, #161624 55%, #0F0F1A 100%);
-  --gradient-indigo: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
-  --gradient-gold:   linear-gradient(135deg, #C9A96E 0%, #E2C896 100%);
+  --gradient-hero:   var(--gradient-logo);
+  --gradient-aura:   linear-gradient(180deg, var(--logo-rose) 0%, var(--logo-magenta) 38%, var(--logo-purple) 70%, var(--logo-violet) 100%);
+  --gradient-deep:   linear-gradient(160deg, var(--logo-surface-2) 0%, var(--logo-ink) 55%, var(--logo-black) 100%);
+  --gradient-indigo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 100%);
+  --gradient-gold:   linear-gradient(135deg, var(--logo-gold) 0%, var(--logo-amber) 100%);
 
-  --shadow-glow:         0 0 80px -10px rgba(139, 92, 246, 0.55);
-  --shadow-glow-magenta: 0 0 80px -10px rgba(167, 139, 250, 0.55);
-  --shadow-glow-indigo:  0 0 80px -10px rgba(109, 40, 217, 0.55);
+  --shadow-glow:         0 0 80px -10px oklch(0.67 0.27 310 / 0.58);
+  --shadow-glow-magenta: 0 0 80px -10px oklch(0.72 0.28 334 / 0.58);
+  --shadow-glow-indigo:  0 0 80px -10px oklch(0.61 0.27 292 / 0.58);
 }
 
 body {
   background:
-    radial-gradient(ellipse 70% 50% at 50% 20%, rgba(139,92,246,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 20%, oklch(0.67 0.27 310 / 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 42% at 85% 85%, oklch(0.82 0.16 67 / 0.10) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 44% at 12% 10%, oklch(0.61 0.27 292 / 0.14) 0%, transparent 62%),
     var(--u-bg) !important;
   background-attachment: fixed;
   font-family: var(--font-body-satoshi);
