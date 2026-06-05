@@ -750,6 +750,10 @@ export type Database = {
           matched_user_interested: boolean | null
           mutual_interest: boolean | null
           passed: boolean
+          photo_reveal_matched_consent: boolean
+          photo_reveal_unlocked: boolean
+          photo_reveal_unlocked_at: string | null
+          photo_reveal_user_consent: boolean
           reveal_stage: Database["public"]["Enums"]["reveal_stage"] | null
           saved: boolean
           share_matched_consent: boolean | null
@@ -769,6 +773,10 @@ export type Database = {
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
           passed?: boolean
+          photo_reveal_matched_consent?: boolean
+          photo_reveal_unlocked?: boolean
+          photo_reveal_unlocked_at?: string | null
+          photo_reveal_user_consent?: boolean
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
           saved?: boolean
           share_matched_consent?: boolean | null
@@ -788,6 +796,10 @@ export type Database = {
           matched_user_interested?: boolean | null
           mutual_interest?: boolean | null
           passed?: boolean
+          photo_reveal_matched_consent?: boolean
+          photo_reveal_unlocked?: boolean
+          photo_reveal_unlocked_at?: string | null
+          photo_reveal_user_consent?: boolean
           reveal_stage?: Database["public"]["Enums"]["reveal_stage"] | null
           saved?: boolean
           share_matched_consent?: boolean | null
@@ -1824,6 +1836,14 @@ export type Database = {
           strengths: string[]
         }[]
       }
+      consent_photo_reveal: {
+        Args: { _match_user: string }
+        Returns: {
+          they_consented: boolean
+          unlocked: boolean
+          you_consented: boolean
+        }[]
+      }
       consent_share_contact: {
         Args: { _match_user: string }
         Returns: {
@@ -1903,6 +1923,18 @@ export type Database = {
           resets_at: string
           unlimited: boolean
           used: number
+        }[]
+      }
+      get_photo_reveal_status: {
+        Args: { _match_user: string }
+        Returns: {
+          mutual: boolean
+          peer_photo_url: string
+          they_consented: boolean
+          they_verified: boolean
+          unlocked: boolean
+          you_consented: boolean
+          you_verified: boolean
         }[]
       }
       get_puzzle_round: {
