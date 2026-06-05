@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff, RotateCcw, Mail } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, Facebook, MessageCircle as WhatsAppIcon, Twitter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
@@ -198,7 +198,11 @@ export function ShareablePassportCard({
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/p/${userId}` : `/p/${userId}`;
   const shareText = `${data?.first_name ? `${data.first_name}'s` : "My"} UNVEIL Passport — slow love, real connection.`;
-  const mailtoHref = `mailto:?subject=${encodeURIComponent("My UNVEIL Passport")}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+  const enc = encodeURIComponent;
+  const mailtoHref = `mailto:?subject=${enc("My UNVEIL Passport")}&body=${enc(`${shareText}\n\n${shareUrl}`)}`;
+  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText)}`;
+  const twitterHref = `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareText)}`;
+  const whatsappHref = `https://wa.me/?text=${enc(`${shareText} ${shareUrl}`)}`;
 
 
   function setChoice(choice: PhotoChoice) {
@@ -380,6 +384,36 @@ export function ShareablePassportCard({
           >
             <Share2 className="h-3.5 w-3.5" /> Share
           </button>
+        </div>
+
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <a
+            href={facebookHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_facebook_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Facebook className="h-3.5 w-3.5" /> Facebook
+          </a>
+          <a
+            href={twitterHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_twitter_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Twitter className="h-3.5 w-3.5" /> X
+          </a>
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_whatsapp_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <WhatsAppIcon className="h-3.5 w-3.5" /> WhatsApp
+          </a>
         </div>
 
 
