@@ -156,6 +156,12 @@ function MatchInsights() {
           </div>
         )}
 
+        {matchId && (
+          <div className="mt-4">
+            <PhotoRevealPanel peerUserId={userId} peerName={profile.first_name} />
+          </div>
+        )}
+
 
 
         <div className="mt-4 rounded-3xl border border-border bg-card p-6">
