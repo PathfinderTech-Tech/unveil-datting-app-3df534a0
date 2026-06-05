@@ -361,8 +361,8 @@ h1, h2, h3, h4 {
 /* ---- Cards & surfaces ---- */
 .u-card {
   position: relative;
-  background: linear-gradient(160deg, #1a1630 0%, #161624 55%, #0F0F1A 100%);
-  border: 1px solid rgba(139, 92, 246, 0.18);
+  background: var(--gradient-deep);
+  border: 1px solid color-mix(in oklch, var(--logo-purple) 24%, transparent);
   border-radius: 20px;
   overflow: hidden;
 }
@@ -375,21 +375,21 @@ h1, h2, h3, h4 {
 }
 .u-card-glow::before {
   top: -50px; right: -50px; width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 65%);
+  background: radial-gradient(circle, oklch(0.67 0.27 310 / 0.20) 0%, transparent 65%);
 }
 .u-card-glow::after {
   bottom: -40px; left: -30px; width: 130px; height: 130px;
-  background: radial-gradient(circle, rgba(201,169,110,0.07) 0%, transparent 65%);
+  background: radial-gradient(circle, oklch(0.82 0.16 67 / 0.11) 0%, transparent 65%);
 }
 .u-card > * { position: relative; z-index: 1; }
 
-.u-divider { border-top: 1px solid rgba(42, 42, 46, 0.4); }
-.u-border-active { border-color: rgba(139, 92, 246, 0.40) !important; }
+.u-divider { border-top: 1px solid color-mix(in oklch, var(--border) 72%, transparent); }
+.u-border-active { border-color: color-mix(in oklch, var(--logo-magenta) 48%, transparent) !important; }
 
 .u-glass {
-  background: rgba(22, 22, 24, 0.7);
+  background: color-mix(in oklch, var(--logo-surface) 74%, transparent);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in oklch, var(--logo-purple) 18%, transparent);
 }
 
 /* ---- Buttons ---- */
