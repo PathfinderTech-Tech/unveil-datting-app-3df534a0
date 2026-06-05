@@ -9,7 +9,7 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
       width={size}
       height={size}
       className={`object-contain ${className}`}
-      style={{ filter: "drop-shadow(0 0 12px oklch(0.65 0.22 305 / 0.5))" }}
+      style={{ filter: "drop-shadow(0 0 14px oklch(0.72 0.28 334 / 0.55)) drop-shadow(0 0 10px oklch(0.82 0.16 67 / 0.35))" }}
     />
   );
 }
