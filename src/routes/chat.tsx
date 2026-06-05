@@ -124,6 +124,11 @@ function Chat() {
       if (!alive) return;
       setPeerName(prof?.first_name ?? "them");
       setPeerProfile(prof ? { avatar_url: prof.avatar_url, photo_url: prof.photo_url, discovery_mode: (prof.discovery_mode as "avatar" | "photo" | null) ?? null } : null);
+
+      // Check whether this pair has unlocked contact sharing (verified + mutual + Day 7 or premium).
+      const { data: canShare } = await (supabase as any).rpc("can_share_contacts", { _a: user.id, _b: peerId });
+      if (!alive) return;
+      setContactShareUnlocked(!!canShare);
     })();
 
     return () => { alive = false; };
