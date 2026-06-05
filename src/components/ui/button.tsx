@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const logoGradientButton =
-  "btn-gradient-primary border border-primary/25 text-primary-foreground transition-all duration-200";
+  "border border-primary/25 bg-[image:var(--gradient-logo)] text-primary-foreground shadow-[var(--shadow-logo)] transition-all duration-200 hover:bg-[image:var(--gradient-logo-hover)] hover:shadow-glow-magenta active:bg-[image:var(--gradient-logo-active)] active:scale-[0.98]";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
