@@ -79,7 +79,10 @@ function Chat() {
   const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
   const verification = useVerification();
-  const verifiedOk = verification.loading || verification.verified;
+  // Messaging gate per spec: Premium / Daily Pass => unlimited; Verified => 15/day; Free => 5/day.
+  // DB trigger enforce_message_quota is the source of truth for daily limits.
+  // Verification is no longer required to send messages — Free users get 5/day.
+  const verifiedOk = true;
   const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
   const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
