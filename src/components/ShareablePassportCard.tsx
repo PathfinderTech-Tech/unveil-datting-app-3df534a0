@@ -354,7 +354,7 @@ export function ShareablePassportCard({
           </div>
         )}
 
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
             onClick={download}
             className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
@@ -367,6 +367,13 @@ export function ShareablePassportCard({
           >
             <Copy className="h-3.5 w-3.5" /> Link
           </button>
+          <a
+            href={mailtoHref}
+            onClick={() => trackEvent("shareable_card_email_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Mail className="h-3.5 w-3.5" /> Email
+          </a>
           <button
             onClick={nativeShare}
             className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-hero px-3 py-2 text-xs font-medium text-primary-foreground shadow-glow"
@@ -374,6 +381,7 @@ export function ShareablePassportCard({
             <Share2 className="h-3.5 w-3.5" /> Share
           </button>
         </div>
+
 
         <p className="text-center text-[10px] text-muted-foreground">
           Your archetype and readiness only. No private data is shared.
