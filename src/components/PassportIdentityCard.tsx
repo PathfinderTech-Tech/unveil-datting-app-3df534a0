@@ -38,16 +38,25 @@ const ARCHETYPE_TAGLINES: Record<string, string> = {
 
 export function PassportIdentityCard({ userId, onShare }: { userId: string; onShare?: () => void }) {
   const [p, setP] = useState<PassportProfile | null>(null);
+  const [bp, setBp] = useState<Blueprint | null>(null);
 
   useEffect(() => {
     let alive = true;
     supabase
       .from("profiles")
-      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score")
+      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, discovery_mode, communication_style")
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
         if (alive) setP((data as PassportProfile) ?? null);
+      });
+    supabase
+      .from("personality_blueprint")
+      .select("communication_style, relationship_style")
+      .eq("user_id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (alive) setBp((data as Blueprint) ?? null);
       });
     return () => {
       alive = false;
@@ -56,11 +65,14 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
 
   const archetype = (p?.archetype || "signal").toLowerCase();
   const tagline = ARCHETYPE_TAGLINES[archetype] ?? "Your signature is still forming.";
+  const trustScore = p?.readiness_score ?? 0;
+  const trustLabel = trustScore >= 80 ? "High" : trustScore >= 50 ? "Building" : "New";
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-deep p-7 shadow-glow md:p-9">
       <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/20 blur-3xl" aria-hidden />
       <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-accent/15 blur-3xl" aria-hidden />
+
 
       <div className="relative flex items-start justify-between gap-3">
         <div>
