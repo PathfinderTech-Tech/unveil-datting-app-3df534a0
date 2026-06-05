@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
-import { Avatar } from "@/components/Avatar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { Sparkles, AlertTriangle, MessageCircle, Heart, ArrowLeft, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { ThoughtModal } from "@/components/ThoughtModal";
