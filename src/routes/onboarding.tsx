@@ -311,7 +311,10 @@ function Onboarding() {
         bio: bio || null,
         interests: interests as unknown as string[],
       });
-    } else if (step === 3 || step === 5 || step === 6 || step === 7 || step === 1) {
+    } else if (step === 3) {
+      const discovery_mode = appearance === "real" ? "photo" : "avatar";
+      await persist({}, { discovery_mode });
+    } else if (step === 5 || step === 6 || step === 7 || step === 1) {
       await persist();
     }
     setStep((s) => Math.min(TOTAL, s + 1));
