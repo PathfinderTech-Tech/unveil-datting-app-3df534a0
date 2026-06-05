@@ -47,6 +47,16 @@ function ContactShare() {
 
         <SafetyReminder />
 
+        {!verification.loading && !verification.verified && (
+          <div className="mt-6">
+            <VerificationGate
+              status={verification.status}
+              reason="Contact sharing requires verified identity for both members."
+            />
+          </div>
+        )}
+
+
         <div className="mt-6 rounded-3xl border border-border bg-card p-6">
           <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Choose a match</div>
           {loading
