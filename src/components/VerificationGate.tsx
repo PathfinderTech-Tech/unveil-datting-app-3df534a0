@@ -14,10 +14,11 @@ export function VerificationGate({
   reason?: string;
 }) {
   const pending = status === "pending";
-  const title = pending ? "Verification in review" : "Verification Required";
+  const title = pending ? "Verification in review" : "Trust comes first";
   const body = pending
     ? "Your identity is being reviewed. This usually takes under 24h. You'll unlock conversations as soon as it's approved."
-    : "UNVEIL protects meaningful connections by requiring identity verification before conversations begin.";
+    : "Only verified members can continue conversations. Verification helps protect meaningful connections.";
+
 
   if (variant === "inline") {
     return (
