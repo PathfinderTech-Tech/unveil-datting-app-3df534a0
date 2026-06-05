@@ -90,14 +90,15 @@ export const generateAvatar = createServerFn({ method: "POST" })
           imageUrl = `data:${dl.type || "image/jpeg"};base64,${b64src}`;
         }
 
-        // Image-edit pipeline using Gemini's multimodal chat-completions image shape
-        // (OpenRouter format). The selfie is sent as image_url; Gemini conditions
-        // generation on it, preserving identity instead of inventing a new person.
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        // Image-edit pipeline using Gemini 2.5 Flash Image Preview (nano-banana)
+        // via Lovable AI gateway chat-completions. The selfie is sent as image_url;
+        // Gemini conditions generation on it, preserving identity instead of
+        // inventing a new person.
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "google/gemini-3.1-flash-image-preview",
+            model: "google/gemini-2.5-flash-image-preview",
             messages: [
               {
                 role: "user",
@@ -116,9 +117,17 @@ export const generateAvatar = createServerFn({ method: "POST" })
           if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace settings.");
           throw new Error(`Generation failed (${res.status}) ${errText.slice(0, 160)}`);
         }
-        const json = (await res.json()) as { data?: Array<{ b64_json?: string }> };
-        const b64 = json.data?.[0]?.b64_json;
-        if (!b64) throw new Error("Empty image response — the model didn't return an image.");
+        const json = (await res.json()) as {
+          choices?: Array<{
+            message?: {
+              images?: Array<{ image_url?: { url?: string } }>;
+              content?: string;
+            };
+          }>;
+        };
+        const dataUrlOut = json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (!dataUrlOut) throw new Error("Empty image response — the model didn't return an image.");
+        const b64 = dataUrlOut.includes(",") ? dataUrlOut.split(",")[1] : dataUrlOut;
 
         const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
         const path = `${userId}/avatars/${data.style}-${Date.now()}.png`;
