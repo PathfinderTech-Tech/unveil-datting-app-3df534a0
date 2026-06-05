@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
@@ -19,6 +19,44 @@ type CardData = {
 };
 
 type PhotoChoice = "avatar" | "selfie" | "none";
+type Crop = { zoom: number; x: number; y: number }; // x,y in SVG units (~-130..130)
+type Prefs = { choice: PhotoChoice; crops: { avatar: Crop; selfie: Crop } };
+
+const DEFAULT_CROP: Crop = { zoom: 1, x: 0, y: 0 };
+const DEFAULT_PREFS: Prefs = {
+  choice: "avatar",
+  crops: { avatar: { ...DEFAULT_CROP }, selfie: { ...DEFAULT_CROP } },
+};
+
+const PREFS_VERSION = 1;
+const prefsKey = (uid: string) => `unveil-passport-share-prefs-v${PREFS_VERSION}:${uid}`;
+
+function loadPrefs(userId: string): Prefs {
+  if (typeof window === "undefined") return DEFAULT_PREFS;
+  try {
+    const raw = localStorage.getItem(prefsKey(userId));
+    if (!raw) return DEFAULT_PREFS;
+    const p = JSON.parse(raw);
+    return {
+      choice: (["avatar", "selfie", "none"].includes(p?.choice) ? p.choice : "avatar") as PhotoChoice,
+      crops: {
+        avatar: { ...DEFAULT_CROP, ...(p?.crops?.avatar || {}) },
+        selfie: { ...DEFAULT_CROP, ...(p?.crops?.selfie || {}) },
+      },
+    };
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+
+function savePrefs(userId: string, prefs: Prefs) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(prefsKey(userId), JSON.stringify(prefs));
+  } catch {
+    /* ignore */
+  }
+}
 
 async function urlToDataUrl(url: string | null): Promise<string | null> {
   if (!url) return null;
@@ -38,16 +76,30 @@ async function urlToDataUrl(url: string | null): Promise<string | null> {
   }
 }
 
-function buildSvg(d: CardData, badgeCount: number, totalBadges: number, photoDataUrl: string | null): string {
+function buildSvg(
+  d: CardData,
+  badgeCount: number,
+  totalBadges: number,
+  photoDataUrl: string | null,
+  crop: Crop,
+): string {
   const name = (d.first_name || "Your name").slice(0, 24);
   const loc = [d.city, d.country].filter(Boolean).join(" · ").slice(0, 32) || "Somewhere on Earth";
   const archetype = (d.archetype || "Signal").replace(/-/g, " ");
   const score = d.readiness_score ?? 0;
 
+  // Circle center (900, 220), radius 130. Image base box = 260x260.
+  const cx = 900;
+  const cy = 220;
+  const base = 260;
+  const size = base * crop.zoom;
+  const ix = cx - size / 2 + crop.x;
+  const iy = cy - size / 2 + crop.y;
+
   const photoBlock = photoDataUrl
-    ? `<defs><clipPath id="pclip"><circle cx="900" cy="220" r="130"/></clipPath></defs>
-       <circle cx="900" cy="220" r="138" fill="none" stroke="#a855f7" stroke-width="3"/>
-       <image href="${photoDataUrl}" x="770" y="90" width="260" height="260" preserveAspectRatio="xMidYMid slice" clip-path="url(#pclip)"/>`
+    ? `<defs><clipPath id="pclip"><circle cx="${cx}" cy="${cy}" r="130"/></clipPath></defs>
+       <circle cx="${cx}" cy="${cy}" r="138" fill="none" stroke="#a855f7" stroke-width="3"/>
+       <image href="${photoDataUrl}" x="${ix}" y="${iy}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#pclip)"/>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350">
@@ -94,10 +146,20 @@ export function ShareablePassportCard({
   totalBadges: number;
 }) {
   const [data, setData] = useState<CardData | null>(null);
-  const [choice, setChoice] = useState<PhotoChoice>("avatar");
+  const [prefs, setPrefs] = useState<Prefs>(() => loadPrefs(userId));
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [selfieData, setSelfieData] = useState<string | null>(null);
   const { isPremium } = useSubscription();
+
+  // Reload prefs whenever the user changes
+  useEffect(() => {
+    setPrefs(loadPrefs(userId));
+  }, [userId]);
+
+  // Persist on every change
+  useEffect(() => {
+    savePrefs(userId, prefs);
+  }, [userId, prefs]);
 
   useEffect(() => {
     if (!open) return;
@@ -110,29 +172,60 @@ export function ShareablePassportCard({
         const d = (data as CardData) ?? null;
         setData(d);
         if (d) {
-          // Avatar = avatar_url || photo_url (current profile photo, likely the avatar)
-          // Selfie = profile_photo_url (original uploaded selfie)
           const [a, s] = await Promise.all([
             urlToDataUrl(await getDisplayPhotoUrl(d.avatar_url || d.photo_url)),
             urlToDataUrl(await getDisplayPhotoUrl(d.profile_photo_url || d.photo_url)),
           ]);
           setAvatarData(a);
           setSelfieData(s);
-          // Default: avatar if available, else selfie, else none
-          setChoice(a ? "avatar" : s ? "selfie" : "none");
+          // Honor saved choice if the chosen photo exists; otherwise fall back.
+          setPrefs((p) => {
+            const c = p.choice;
+            if (c === "avatar" && a) return p;
+            if (c === "selfie" && s) return p;
+            if (c === "none") return p;
+            return { ...p, choice: a ? "avatar" : s ? "selfie" : "none" };
+          });
         }
       });
     trackEvent("shareable_card_opened", { premium: isPremium });
   }, [open, userId, isPremium]);
 
-  const activePhoto = choice === "avatar" ? avatarData : choice === "selfie" ? selfieData : null;
+  const activePhoto =
+    prefs.choice === "avatar" ? avatarData : prefs.choice === "selfie" ? selfieData : null;
+  const activeCrop =
+    prefs.choice === "selfie" ? prefs.crops.selfie : prefs.crops.avatar;
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/passport` : "/passport";
   const shareText = `My UNVEIL Passport — slow love, real connection.`;
 
+  function setChoice(choice: PhotoChoice) {
+    setPrefs((p) => ({ ...p, choice }));
+    trackEvent("shareable_card_photo_choice", { choice });
+  }
+
+  function updateCrop(patch: Partial<Crop>) {
+    setPrefs((p) => {
+      if (p.choice === "none") return p;
+      const key = p.choice;
+      return {
+        ...p,
+        crops: { ...p.crops, [key]: { ...p.crops[key], ...patch } },
+      };
+    });
+  }
+
+  function resetCrop() {
+    setPrefs((p) => {
+      if (p.choice === "none") return p;
+      const key = p.choice;
+      return { ...p, crops: { ...p.crops, [key]: { ...DEFAULT_CROP } } };
+    });
+  }
+
   function download() {
     if (!data) return;
-    const svg = buildSvg(data, badgeCount, totalBadges, activePhoto);
+    const svg = buildSvg(data, badgeCount, totalBadges, activePhoto, activeCrop);
     const blob = new Blob([svg], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -142,7 +235,7 @@ export function ShareablePassportCard({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    trackEvent("shareable_card_downloaded", { premium: isPremium, photo: choice });
+    trackEvent("shareable_card_downloaded", { premium: isPremium, photo: prefs.choice });
   }
 
   async function copyLink() {
@@ -168,7 +261,10 @@ export function ShareablePassportCard({
     }
   }
 
-  const svgPreview = data ? buildSvg(data, badgeCount, totalBadges, activePhoto) : "";
+  const svgPreview = useMemo(
+    () => (data ? buildSvg(data, badgeCount, totalBadges, activePhoto, activeCrop) : ""),
+    [data, badgeCount, totalBadges, activePhoto, activeCrop],
+  );
 
   const choices: { id: PhotoChoice; label: string; available: boolean }[] = [
     { id: "avatar", label: "Avatar", available: !!avatarData },
@@ -176,9 +272,11 @@ export function ShareablePassportCard({
     { id: "none", label: "No photo", available: true },
   ];
 
+  const showCropControls = prefs.choice !== "none" && !!activePhoto;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Share your Passport</DialogTitle>
         </DialogHeader>
@@ -187,7 +285,9 @@ export function ShareablePassportCard({
           {svgPreview ? (
             <div
               className="aspect-[4/5] w-full"
-              dangerouslySetInnerHTML={{ __html: svgPreview.replace('width="1080" height="1350"', 'width="100%" height="100%"') }}
+              dangerouslySetInnerHTML={{
+                __html: svgPreview.replace('width="1080" height="1350"', 'width="100%" height="100%"'),
+              }}
             />
           ) : (
             <div className="aspect-[4/5] w-full animate-pulse bg-surface" />
@@ -201,7 +301,7 @@ export function ShareablePassportCard({
               onClick={() => c.available && setChoice(c.id)}
               disabled={!c.available}
               className={`inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs transition ${
-                choice === c.id
+                prefs.choice === c.id
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-surface hover:border-primary/60"
               } disabled:opacity-40 disabled:cursor-not-allowed`}
@@ -211,6 +311,46 @@ export function ShareablePassportCard({
             </button>
           ))}
         </div>
+
+        {showCropControls && (
+          <div className="mt-2 space-y-2 rounded-2xl border border-border bg-surface/40 p-3">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                Fit the face
+              </span>
+              <button
+                onClick={resetCrop}
+                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary"
+              >
+                <RotateCcw className="h-3 w-3" /> Reset
+              </button>
+            </div>
+            <CropSlider
+              label="Zoom"
+              value={activeCrop.zoom}
+              min={1}
+              max={3}
+              step={0.05}
+              onChange={(zoom) => updateCrop({ zoom })}
+            />
+            <CropSlider
+              label="Left / Right"
+              value={activeCrop.x}
+              min={-180}
+              max={180}
+              step={2}
+              onChange={(x) => updateCrop({ x })}
+            />
+            <CropSlider
+              label="Up / Down"
+              value={activeCrop.y}
+              min={-180}
+              max={180}
+              step={2}
+              onChange={(y) => updateCrop({ y })}
+            />
+          </div>
+        )}
 
         <div className="mt-2 grid grid-cols-3 gap-2">
           <button
@@ -238,5 +378,39 @@ export function ShareablePassportCard({
         </p>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CropSlider({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <label className="block">
+      <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
+        <span>{label}</span>
+        <span className="font-mono">{value.toFixed(step < 1 ? 2 : 0)}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full accent-primary"
+      />
+    </label>
   );
 }
