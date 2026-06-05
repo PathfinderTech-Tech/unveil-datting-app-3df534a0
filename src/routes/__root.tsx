@@ -148,13 +148,13 @@ function RootComponent() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          backgroundImage: `radial-gradient(ellipse at center, rgba(13,13,15,0) 0%, rgba(13,13,15,0.6) 50%, rgba(13,13,15,0.92) 100%), url(${watermarkAsset.url})`,
-          backgroundSize: "cover, min(70vmin, 780px) min(70vmin, 780px)",
+          backgroundImage: `radial-gradient(ellipse at center, rgba(13,13,15,0) 0%, rgba(13,13,15,0.75) 50%, rgba(13,13,15,0.96) 100%), url(${watermarkAsset.url})`,
+          backgroundSize: "cover, min(60vmin, 640px) min(60vmin, 640px)",
           backgroundPosition: "center, center",
           backgroundRepeat: "no-repeat, no-repeat",
-          opacity: 0.06,
+          opacity: 0.03,
           mixBlendMode: "screen",
-          filter: "blur(1.5px)",
+          filter: "blur(2.5px)",
           animation: "unveil-watermark-pulse 16s ease-in-out infinite",
         }}
       />
