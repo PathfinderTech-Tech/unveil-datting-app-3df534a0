@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useUnreadCount } from "@/hooks/use-unread";
@@ -14,9 +14,11 @@ export function useNavBadges() {
   const messages = useUnreadCount();
   const [matches, setMatches] = useState(0);
   const [discover, setDiscover] = useState(0);
+  const channelSuffixRef = useRef(Math.random().toString(36).slice(2, 10));
+  const userId = user?.id;
 
   const refresh = useCallback(async () => {
-    if (!user) { setMatches(0); setDiscover(0); return; }
+    if (!userId) { setMatches(0); setDiscover(0); return; }
     const [{ data: mutuals }, { data: incoming }] = await Promise.all([
       supabase.from("matches")
         .select("id, created_at, user_id, matched_user_id")
@@ -24,23 +26,23 @@ export function useNavBadges() {
         .gte("created_at", new Date(Date.now() - 7 * 86400_000).toISOString()),
       supabase.from("matches")
         .select("id")
-        .eq("matched_user_id", user.id)
+        .eq("matched_user_id", userId)
         .eq("user_interested", true)
         .eq("mutual_interest", false)
         .eq("passed", false),
     ]);
     setMatches((mutuals ?? []).length);
     setDiscover((incoming ?? []).length);
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     refresh();
-    if (!user) return;
-    const ch = supabase.channel(`nav-badges-${user.id}`)
+    if (!userId) return;
+    const ch = supabase.channel(`nav-badges-${userId}-${channelSuffixRef.current}`)
       .on("postgres_changes" as any, { event: "*", schema: "public", table: "matches" }, refresh as any)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user, refresh]);
+  }, [userId, refresh]);
 
   return { messages, matches, discover };
 }
