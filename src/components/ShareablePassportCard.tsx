@@ -197,7 +197,7 @@ export function ShareablePassportCard({
     prefs.choice === "selfie" ? prefs.crops.selfie : prefs.crops.avatar;
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/p/${userId}` : `/p/${userId}`;
-  const shareText = `${data?.first_name ? `${data.first_name}'s` : "My"} UNVEIL Passport — slow love, real connection.`;
+  const shareText = "My Unveil Passport — Connection Beneath The Surface. Discover me on Unveil: unveil.best";
   const enc = encodeURIComponent;
   const mailtoHref = `mailto:?subject=${enc("My UNVEIL Passport")}&body=${enc(`${shareText}\n\n${shareUrl}`)}`;
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText)}`;
