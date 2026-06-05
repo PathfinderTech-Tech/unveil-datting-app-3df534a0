@@ -209,7 +209,7 @@ export function ThemeTokenSwitcher() {
                     onChange={(event) => {
                       const next = { ...draft, [name]: event.target.value };
                       setDraft(next);
-                      applyTokens(sanitizeTokens(next));
+                      scheduleApply(next);
                     }}
                     className="min-w-0 rounded-md border border-input bg-background px-2 py-1 font-mono text-[10px] text-foreground outline-none focus:border-primary"
                   />
