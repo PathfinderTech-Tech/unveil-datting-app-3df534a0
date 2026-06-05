@@ -22,13 +22,11 @@ type Category =
   | "personality"
   | "creativity"
   | "relationships"
-  | "fun"
   | "values"
   | "emotional_intelligence"
   | "humor"
   | "lifestyle"
-  | "growth"
-  | "relationship_clarity";
+  | "growth";
 
 const QUESTIONS: { id: string; category: Category; text: string; placeholder: string }[] = [
   // PERSONALITY (original)
