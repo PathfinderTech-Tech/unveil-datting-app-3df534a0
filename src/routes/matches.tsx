@@ -126,6 +126,28 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
+  const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const ids = visible.map((m) => m.userId).filter((id) => !(id in avatarUrls));
+    if (ids.length === 0) return;
+    let alive = true;
+    supabase
+      .from("profiles")
+      .select("id, avatar_url")
+      .in("id", ids)
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        setAvatarUrls((prev) => {
+          const next = { ...prev };
+          for (const row of data as Array<{ id: string; avatar_url: string | null }>) {
+            if (row.avatar_url) next[row.id] = row.avatar_url;
+          }
+          return next;
+        });
+      });
+    return () => { alive = false; };
+  }, [visible]);
 
   if (checking || authLoading || (user && !profileState)) {
     return (
