@@ -46,8 +46,8 @@ export function DesertIslandGame({ onComplete, onSkip }: {
   return (
     <div className="space-y-5">
       <GameHeader step={step + 1} total={STEPS.length} title="Desert Island" />
-      <p className="text-center text-sm" style={{ color: "#F0EDE8" }}>{cur.title}</p>
-      <p className="text-center text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+      <p className="text-center text-sm text-foreground">{cur.title}</p>
+      <p className="text-center text-[11px] uppercase tracking-wider text-muted-foreground">
         {selected.length} / {cur.max} chosen — be decisive
       </p>
       <div className="grid grid-cols-2 gap-2">
@@ -59,9 +59,9 @@ export function DesertIslandGame({ onComplete, onSkip }: {
               onClick={() => toggle(item)}
               className="rounded-2xl border px-3 py-3 text-left text-sm"
               style={{
-                background: on ? "rgba(139,92,246,0.12)" : "#1E1E21",
-                borderColor: on ? "rgba(139,92,246,0.4)" : "#2A2A2E",
-                color: on ? "#A78BFA" : "#F0EDE8",
+                background: on ? "color-mix(in oklch, var(--primary) 14%, transparent)" : "var(--surface-2)",
+                borderColor: on ? "color-mix(in oklch, var(--primary) 45%, transparent)" : "var(--border)",
+                color: on ? "var(--primary)" : "var(--foreground)",
               }}
             >
               {item}
@@ -72,8 +72,7 @@ export function DesertIslandGame({ onComplete, onSkip }: {
       <button
         onClick={next}
         disabled={selected.length !== cur.max}
-        className="w-full rounded-full px-4 py-3 text-sm font-semibold disabled:opacity-40"
-        style={{ background: "linear-gradient(135deg, #8B5CF6, #A78BFA)", color: "#0D0D0F" }}
+        className="w-full rounded-full bg-gradient-hero px-4 py-3 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-40"
       >
         {step + 1 >= STEPS.length ? "Finish" : "Continue"}
       </button>
