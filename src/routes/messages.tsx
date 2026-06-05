@@ -63,7 +63,7 @@ function MessagesPage() {
       const convIds = convs.map((c: any) => c.id);
 
       const [{ data: profs }, { data: msgs }, { data: reads }] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, photo_url, avatar_url").in("id", peerIds),
+        supabase.from("profiles").select("id, first_name, photo_url, avatar_url, discovery_mode").in("id", peerIds),
         supabase
           .from("messages")
           .select("id, conversation_id, content, sender_id, created_at")
