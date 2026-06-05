@@ -352,7 +352,32 @@ function ProfilePage() {
             </div>
           </Link>
         </div>
+
+        {/* Danger zone */}
+        <div className="mt-8 rounded-3xl border border-border bg-card p-6">
+          <div className="font-display text-lg font-bold">Start over</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Restart the profile setup from the beginning (your saved answers stay), or permanently delete your account in Settings.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              onClick={async () => {
+                if (!user) return;
+                if (!confirm("Restart profile setup? You'll be taken back to the first step.")) return;
+                await supabase.from("profiles").update({ onboarding_complete: false }).eq("id", user.id);
+                window.location.href = "/onboarding";
+              }}
+              className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-surface/80"
+            >
+              Restart profile setup
+            </button>
+            <Link to="/settings" className="rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
+              Delete account
+            </Link>
+          </div>
+        </div>
       </div>
+
       <MobileBottomNav />
     </div>
   );
