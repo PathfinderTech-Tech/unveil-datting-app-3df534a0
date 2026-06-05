@@ -268,10 +268,18 @@ function AvatarPage() {
               })}
             </div>
 
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <button onClick={runGenerateAll} disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary/10 px-5 py-2 text-xs font-medium text-foreground hover:bg-primary/20 disabled:opacity-50">
+                {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                Generate all 4 styles to compare
+              </button>
+            </div>
+
             <Nav
               onBack={() => setStep(0)}
               onSkip={() => navigate({ to: "/discover" })}
-              nextLabel={busy ? "Generating…" : "Generate avatar"}
+              nextLabel={busy ? "Generating…" : "Generate selected"}
               nextIcon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
               onNext={() => { if (!style) return toast.error("Pick a style."); runGenerate(style); }}
               disableNext={busy}
