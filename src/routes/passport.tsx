@@ -11,6 +11,7 @@ import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { PassportIdentityCard } from "@/components/PassportIdentityCard";
 import { ShareablePassportCard } from "@/components/ShareablePassportCard";
 import { GlobalPassportJourneys } from "@/components/GlobalPassportJourneys";
+import { ChemistryHistory } from "@/components/chemistry/ChemistryHistory";
 
 
 
@@ -67,6 +68,8 @@ function Passport() {
         </header>
 
         {uid && <PassportIdentityCard userId={uid} onShare={() => setShareOpen(true)} />}
+
+        <ChemistryHistory />
 
         <div className="rounded-3xl border border-border bg-gradient-hero p-6 text-primary-foreground shadow-glow">
           <div className="flex items-center gap-3">

@@ -24,6 +24,7 @@ import { Route as PuzzlesRouteImport } from './routes/puzzles'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as PlayfulRouteImport } from './routes/playful'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -130,6 +131,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayfulRoute = PlayfulRouteImport.update({
+  id: '/playful',
+  path: '/playful',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayRoute = PlayRouteImport.update({
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
+  '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -368,6 +375,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
+  '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -418,6 +426,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
   '/play': typeof PlayRouteWithChildren
+  '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -469,6 +478,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/play'
+    | '/playful'
     | '/premium'
     | '/privacy'
     | '/profile'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/play'
+    | '/playful'
     | '/premium'
     | '/privacy'
     | '/profile'
@@ -567,6 +578,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/passport'
     | '/play'
+    | '/playful'
     | '/premium'
     | '/privacy'
     | '/profile'
@@ -617,6 +629,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
   PlayRoute: typeof PlayRouteWithChildren
+  PlayfulRoute: typeof PlayfulRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -742,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playful': {
+      id: '/playful'
+      path: '/playful'
+      fullPath: '/playful'
+      preLoaderRoute: typeof PlayfulRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play': {
@@ -1025,6 +1045,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
   PlayRoute: PlayRouteWithChildren,
+  PlayfulRoute: PlayfulRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,

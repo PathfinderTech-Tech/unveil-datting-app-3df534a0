@@ -230,3 +230,33 @@
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
+
+/* Chemistry Points Economy animations */
+@keyframes chem-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(139,92,246,0); }
+  100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
+}
+@keyframes chem-bonus-float {
+  0%   { opacity: 0; transform: translate(-50%, 0px); }
+  20%  { opacity: 1; transform: translate(-50%, -12px); }
+  70%  { opacity: 1; transform: translate(-50%, -12px); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
+@keyframes chem-orb-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes chem-orb-counter-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes chem-pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes chem-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

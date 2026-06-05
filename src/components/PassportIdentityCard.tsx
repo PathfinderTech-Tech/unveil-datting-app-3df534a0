@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, MapPin, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { ChemistryBadge } from "@/components/chemistry/ChemistryBadge";
 
 type PassportProfile = {
   first_name: string | null;
@@ -98,6 +99,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
         </span>
         {p?.beta_member && <span className="rounded-full bg-accent/15 px-2 py-0.5 text-accent">Beta member</span>}
       </div>
+      <ChemistryBadge />
     </div>
   );
 }
