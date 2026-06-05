@@ -250,6 +250,6 @@
 }
 
 @keyframes unveil-watermark-pulse {
-  0%, 100% { opacity: 0.14; transform: scale(1); }
-  50%      { opacity: 0.22; transform: scale(1.03); }
+  0%, 100% { opacity: 0.02; transform: scale(1); }
+  50%      { opacity: 0.05; transform: scale(1.03); }
 }
