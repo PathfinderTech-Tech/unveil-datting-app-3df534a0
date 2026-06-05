@@ -9,6 +9,7 @@ import {
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
 import { Avatar } from "@/components/Avatar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -126,22 +127,23 @@ function Matches() {
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
-  const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
+  type PeerMeta = { avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null };
+  const [peerMeta, setPeerMeta] = useState<Record<string, PeerMeta>>({});
 
   useEffect(() => {
-    const ids = visible.map((m) => m.userId).filter((id) => !(id in avatarUrls));
+    const ids = visible.map((m) => m.userId).filter((id) => !(id in peerMeta));
     if (ids.length === 0) return;
     let alive = true;
     supabase
       .from("profiles")
-      .select("id, avatar_url")
+      .select("id, avatar_url, photo_url, discovery_mode")
       .in("id", ids)
       .then(({ data }) => {
         if (!alive || !data) return;
-        setAvatarUrls((prev) => {
+        setPeerMeta((prev) => {
           const next = { ...prev };
-          for (const row of data as Array<{ id: string; avatar_url: string | null }>) {
-            if (row.avatar_url) next[row.id] = row.avatar_url;
+          for (const row of data as Array<{ id: string } & PeerMeta>) {
+            next[row.id] = { avatar_url: row.avatar_url, photo_url: row.photo_url, discovery_mode: row.discovery_mode };
           }
           return next;
         });
@@ -351,18 +353,17 @@ function Matches() {
                 <button onClick={() => setActive(m)} className="text-left">
                   <div className="flex items-start justify-between">
                     <div className="relative">
-                      {avatarUrls[m.userId] ? (
-                        <img
-                          src={avatarUrls[m.userId]}
-                          alt={`${m.name} avatar`}
-                          className="h-14 w-14 rounded-full border-2 border-primary/35 object-cover shadow-glow"
-                          loading="lazy"
+                      <div style={{ filter: "blur(8px)" }}>
+                        <ProfileAvatar
+                          userId={m.userId}
+                          name={m.name}
+                          discoveryMode={peerMeta[m.userId]?.discovery_mode}
+                          avatarUrl={peerMeta[m.userId]?.avatar_url}
+                          photoUrl={peerMeta[m.userId]?.photo_url}
+                          size={56}
+                          className="border-2 border-primary/35 shadow-glow"
                         />
-                      ) : (
-                        <div style={{ filter: "blur(8px)" }}>
-                          <Avatar seed={m.avatar ?? "0-180"} size={56} label={m.name} />
-                        </div>
-                      )}
+                      </div>
                       <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
                         <Lock className="h-3 w-3 text-muted-foreground" />
                       </div>

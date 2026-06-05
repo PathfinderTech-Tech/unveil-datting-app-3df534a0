@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { SignedImage } from "@/components/SignedImage";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 
@@ -26,6 +26,8 @@ type Row = {
   peer_id: string;
   peer_name: string | null;
   peer_photo: string | null;
+  peer_avatar: string | null;
+  peer_discovery_mode: "avatar" | "photo" | null;
   last_text: string | null;
   unread: number;
 };
@@ -61,7 +63,7 @@ function MessagesPage() {
       const convIds = convs.map((c: any) => c.id);
 
       const [{ data: profs }, { data: msgs }, { data: reads }] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, photo_url, avatar_url").in("id", peerIds),
+        supabase.from("profiles").select("id, first_name, photo_url, avatar_url, discovery_mode").in("id", peerIds),
         supabase
           .from("messages")
           .select("id, conversation_id, content, sender_id, created_at")
@@ -94,7 +96,9 @@ function MessagesPage() {
           last_message_at: c.last_message_at,
           peer_id: peerId,
           peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.avatar_url ?? peer?.photo_url ?? null,
+          peer_photo: peer?.photo_url ?? null,
+          peer_avatar: peer?.avatar_url ?? null,
+          peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
           last_text: last?.content ?? null,
           unread: unreadByConv.get(c.id) ?? 0,
         };
@@ -178,17 +182,14 @@ function MessagesPage() {
                   className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
-                    {r.peer_photo ? (
-                      <SignedImage src={r.peer_photo} alt="" className="h-full w-full object-cover" fallback={
-                        <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
-                          {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}
-                        </div>
-                      } />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
-                        {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}
-                      </div>
-                    )}
+                    <ProfileAvatar
+                      userId={r.peer_id}
+                      name={r.peer_name}
+                      discoveryMode={r.peer_discovery_mode}
+                      avatarUrl={r.peer_avatar}
+                      photoUrl={r.peer_photo}
+                      size={48}
+                    />
                     {r.unread > 0 && (
                       <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                         {r.unread > 9 ? "9+" : r.unread}
