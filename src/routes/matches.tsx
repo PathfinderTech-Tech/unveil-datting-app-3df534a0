@@ -383,7 +383,9 @@ function Matches() {
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{cityLabel}</span>
                     {m.age ? <span>· {m.age}</span> : null}
-                    {m.verified && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">Verified</span>}
+                    {m.verified
+                      ? <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">✓ Verified</span>
+                      : <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">Unverified</span>}
                   </div>
 
                   {m.strengths.length > 0 && (
