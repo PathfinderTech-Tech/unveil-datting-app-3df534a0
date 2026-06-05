@@ -4,17 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+const gradientBase =
+  "bg-[linear-gradient(135deg,oklch(0.78_0.18_340)_0%,oklch(0.62_0.22_310)_55%,oklch(0.50_0.20_290)_100%)]";
+const gradientHover =
+  "hover:bg-[linear-gradient(135deg,oklch(0.82_0.19_340)_0%,oklch(0.66_0.23_310)_55%,oklch(0.54_0.21_290)_100%)]";
+const gradientActive =
+  "active:bg-[linear-gradient(135deg,oklch(0.70_0.18_340)_0%,oklch(0.55_0.22_310)_55%,oklch(0.42_0.20_290)_100%)]";
+const gradientShadow =
+  "shadow-[0_4px_20px_-4px_oklch(0.65_0.24_330/0.55)] hover:shadow-[0_6px_28px_-4px_oklch(0.65_0.24_330/0.75)]";
+const gradientAll = `text-white ${gradientBase} ${gradientHover} ${gradientActive} ${gradientShadow}`;
+
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "text-primary-foreground shadow-[0_4px_20px_-4px_oklch(0.65_0.24_330/0.55)] bg-[linear-gradient(135deg,oklch(0.78_0.18_340)_0%,oklch(0.62_0.22_310)_55%,oklch(0.50_0.20_290)_100%)] hover:opacity-90 transition-opacity",
+        default: gradientAll,
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        outline: `border border-white/10 ${gradientAll}`,
+        secondary: `${gradientAll} opacity-90 hover:opacity-100`,
+        ghost: `text-white ${gradientHover} ${gradientActive}`,
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
