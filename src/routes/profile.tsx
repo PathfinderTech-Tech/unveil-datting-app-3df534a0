@@ -183,12 +183,14 @@ function ProfilePage() {
                 </div>
               )}
             </div>
-            <Link
-              to="/onboarding"
+            <a
+              href="/onboarding?edit=1"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
             >
               <Pencil className="h-4 w-4" /> Edit profile
-            </Link>
+            </a>
+
+
           </div>
         </div>
 
@@ -247,9 +249,10 @@ function ProfilePage() {
               </div>
             </div>
             <div className="ml-auto flex flex-col gap-2">
-              <Link to="/onboarding" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface">Edit photos</Link>
-              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface">Edit avatar</Link>
+              <a href="/onboarding?edit=1" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit photos</a>
+              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit avatar</Link>
             </div>
+
           </div>
         </Section>
 
@@ -349,7 +352,32 @@ function ProfilePage() {
             </div>
           </Link>
         </div>
+
+        {/* Danger zone */}
+        <div className="mt-8 rounded-3xl border border-border bg-card p-6">
+          <div className="font-display text-lg font-bold">Start over</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Restart the profile setup from the beginning (your saved answers stay), or permanently delete your account in Settings.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              onClick={async () => {
+                if (!user) return;
+                if (!confirm("Restart profile setup? You'll be taken back to the first step.")) return;
+                await supabase.from("profiles").update({ onboarding_complete: false }).eq("id", user.id);
+                window.location.href = "/onboarding";
+              }}
+              className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-surface/80"
+            >
+              Restart profile setup
+            </button>
+            <Link to="/settings" className="rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
+              Delete account
+            </Link>
+          </div>
+        </div>
       </div>
+
       <MobileBottomNav />
     </div>
   );
