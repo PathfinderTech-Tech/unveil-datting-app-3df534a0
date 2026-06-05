@@ -67,7 +67,13 @@ function mergeCustomTokens(custom: Record<string, Record<string, string>>) {
 
 function applyTokens(tokens: Record<string, string>) {
   const root = document.documentElement;
-  Object.entries(tokens).forEach(([name, value]) => root.style.setProperty(name, value.trim()));
+  // Apply atomically in a single frame to prevent flicker / partial paints.
+  requestAnimationFrame(() => {
+    const sanitized = sanitizeTokens(tokens);
+    for (const [name, value] of Object.entries(sanitized)) {
+      root.style.setProperty(name, value.trim());
+    }
+  });
 }
 
 function isColorValue(value: string) {
