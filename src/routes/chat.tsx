@@ -76,11 +76,8 @@ function Chat() {
   const [peerName, setPeerName] = useState<string>("them");
   const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
-  const verification = useVerification();
-  // Messaging gate per spec: Premium / Daily Pass => unlimited; Verified => 15/day; Free => 5/day.
-  // DB trigger enforce_message_quota is the source of truth for daily limits.
-  // Verification is no longer required to send messages — Free users get 5/day.
-  const verifiedOk = true;
+  // Messaging entitlement: DB trigger enforce_message_quota is the sole source of truth.
+  // Free=5/day, Verified=15/day, Daily Pass / Premium=unlimited. No client-side verification gate.
   const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
   const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
