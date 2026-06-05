@@ -36,6 +36,9 @@ function AvatarPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const generate = useServerFn(generateAvatar);
+  const fetchHistory = useServerFn(listAvatarHistory);
+  const revertAvatar = useServerFn(setActiveAvatar);
+  const deleteAvatar = useServerFn(deleteAvatarHistoryItem);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<0 | 1 | 2>(0);
