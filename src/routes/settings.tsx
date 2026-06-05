@@ -99,7 +99,7 @@ function Settings() {
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">{t("common.language")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">Change the interface language anytime.</p>
-            <div className="mt-4"><LanguageSwitcher /></div>
+            <div className="mt-4"><LanguageSwitcher showSpoken /></div>
           </div>
           <NearbyDiscoverySettings />
           <div className="rounded-2xl border border-border bg-card p-6">
