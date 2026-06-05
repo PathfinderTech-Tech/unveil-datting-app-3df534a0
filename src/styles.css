@@ -48,53 +48,74 @@
 :root {
   --radius: 1rem;
 
-  /* UNVEIL — dark luxury, deep purple/violet/magenta */
-  --background: oklch(0.22 0.12 290);
-  --foreground: oklch(0.98 0.01 295);
+  /* UNVEIL logo palette — one source of truth for app-wide theme changes */
+  --logo-black: oklch(0.075 0.018 295);
+  --logo-ink: oklch(0.11 0.035 296);
+  --logo-surface: oklch(0.155 0.055 296);
+  --logo-surface-2: oklch(0.205 0.075 298);
+  --logo-ivory: oklch(0.955 0.018 72);
+  --logo-muted: oklch(0.72 0.055 305);
+  --logo-violet: oklch(0.61 0.27 292);
+  --logo-purple: oklch(0.67 0.27 310);
+  --logo-magenta: oklch(0.72 0.28 334);
+  --logo-rose: oklch(0.80 0.20 348);
+  --logo-gold: oklch(0.82 0.16 67);
+  --logo-amber: oklch(0.74 0.18 48);
 
-  --surface: oklch(0.26 0.13 290);
-  --surface-2: oklch(0.32 0.15 290);
+  --background: var(--logo-black);
+  --foreground: var(--logo-ivory);
 
-  --card: oklch(0.28 0.14 290);
-  --card-foreground: oklch(0.98 0.01 295);
-  --popover: oklch(0.24 0.13 290);
-  --popover-foreground: oklch(0.98 0.01 295);
+  --surface: var(--logo-surface);
+  --surface-2: var(--logo-surface-2);
 
-  --primary: oklch(0.65 0.22 305);            /* violet */
-  --primary-foreground: oklch(0.98 0.01 295);
+  --card: var(--logo-surface);
+  --card-foreground: var(--logo-ivory);
+  --popover: var(--logo-ink);
+  --popover-foreground: var(--logo-ivory);
 
-  --secondary: oklch(0.20 0.05 295);
-  --secondary-foreground: oklch(0.97 0.01 295);
+  --primary: var(--logo-purple);
+  --primary-foreground: var(--logo-ivory);
 
-  --muted: oklch(0.18 0.035 295);
-  --muted-foreground: oklch(0.68 0.04 295);
+  --secondary: var(--logo-surface-2);
+  --secondary-foreground: var(--logo-ivory);
 
-  --accent: oklch(0.70 0.24 340);             /* magenta */
-  --accent-foreground: oklch(0.98 0.01 295);
+  --muted: var(--logo-surface-2);
+  --muted-foreground: var(--logo-muted);
+
+  --accent: var(--logo-magenta);
+  --accent-foreground: var(--logo-ivory);
 
   --destructive: oklch(0.62 0.24 25);
-  --destructive-foreground: oklch(0.98 0.01 295);
+  --destructive-foreground: var(--logo-ivory);
 
-  --border: oklch(0.25 0.04 295 / 0.6);
-  --input: oklch(0.20 0.04 295);
-  --ring: oklch(0.65 0.22 305);
+  --border: oklch(0.35 0.08 302 / 0.52);
+  --input: var(--logo-surface-2);
+  --ring: var(--logo-magenta);
 
-  --violet: oklch(0.65 0.22 305);
-  --magenta: oklch(0.70 0.24 340);
+  --violet: var(--logo-violet);
+  --magenta: var(--logo-magenta);
   --softblue: oklch(0.70 0.16 260);
-  --lilac: oklch(0.80 0.14 310);
-  --indigo: oklch(0.58 0.20 275);
-  --indigo-deep: oklch(0.42 0.18 280);
+  --lilac: var(--logo-rose);
+  --indigo: var(--logo-violet);
+  --indigo-deep: oklch(0.33 0.15 288);
 
-  --gradient-hero: linear-gradient(135deg, oklch(0.70 0.24 340) 0%, oklch(0.65 0.22 305) 45%, oklch(0.58 0.20 275) 100%);
-  --gradient-aura: linear-gradient(180deg, oklch(0.80 0.14 310) 0%, oklch(0.65 0.22 305) 60%, oklch(0.58 0.20 275) 100%);
-  --gradient-deep: linear-gradient(135deg, oklch(0.15 0.05 295) 0%, oklch(0.10 0.05 280) 60%, oklch(0.08 0.02 295) 100%);
-  --gradient-indigo: linear-gradient(135deg, oklch(0.58 0.20 275) 0%, oklch(0.65 0.22 305) 100%);
+  --gradient-logo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 34%, var(--logo-magenta) 62%, var(--logo-gold) 100%);
+  --gradient-logo-hover: linear-gradient(135deg, oklch(0.68 0.29 292) 0%, oklch(0.74 0.29 312) 34%, oklch(0.78 0.29 334) 62%, oklch(0.88 0.17 67) 100%);
+  --gradient-logo-active: linear-gradient(135deg, oklch(0.50 0.24 292) 0%, oklch(0.56 0.24 310) 38%, oklch(0.61 0.25 334) 68%, oklch(0.70 0.16 62) 100%);
+  --gradient-hero: var(--gradient-logo);
+  --gradient-aura: linear-gradient(180deg, var(--logo-rose) 0%, var(--logo-magenta) 38%, var(--logo-purple) 70%, var(--logo-violet) 100%);
+  --gradient-deep: linear-gradient(135deg, var(--logo-surface-2) 0%, var(--logo-ink) 58%, var(--logo-black) 100%);
+  --gradient-indigo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 100%);
+  --gradient-gold: linear-gradient(135deg, var(--logo-gold) 0%, var(--logo-amber) 100%);
+  --gradient-mind: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 100%);
+  --gradient-face: linear-gradient(135deg, var(--logo-purple) 0%, var(--logo-magenta) 58%, var(--logo-gold) 100%);
+  --gradient-soul: linear-gradient(135deg, var(--logo-magenta) 0%, var(--logo-rose) 52%, var(--logo-gold) 100%);
 
-  --shadow-glow: 0 0 80px -10px oklch(0.65 0.22 305 / 0.55);
-  --shadow-glow-magenta: 0 0 80px -10px oklch(0.70 0.24 340 / 0.55);
-  --shadow-glow-indigo: 0 0 80px -10px oklch(0.58 0.20 275 / 0.55);
-  --shadow-card: 0 30px 80px -30px oklch(0 0 0 / 0.7);
+  --shadow-logo: 0 0 36px -8px oklch(0.72 0.28 334 / 0.62), 0 0 18px -8px oklch(0.82 0.16 67 / 0.55);
+  --shadow-glow: 0 0 80px -10px oklch(0.67 0.27 310 / 0.58);
+  --shadow-glow-magenta: 0 0 80px -10px oklch(0.72 0.28 334 / 0.58);
+  --shadow-glow-indigo: 0 0 80px -10px oklch(0.61 0.27 292 / 0.58);
+  --shadow-card: 0 30px 80px -30px oklch(0 0 0 / 0.8);
 }
 
 @layer base {
