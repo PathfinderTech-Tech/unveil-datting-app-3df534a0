@@ -87,7 +87,7 @@ function PlayfulSession() {
     if (next.length >= GAMES.length) {
       const { total: t } = sumSession(next);
       const tier = computeTier(next, t);
-      recordSession(t, tier);
+      recordSession(t, tier, next);
       setDone(true);
     } else {
       setIdx(next.length);

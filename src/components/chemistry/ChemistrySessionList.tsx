@@ -1,0 +1,168 @@
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import {
+  useChemistry,
+  relativeDate,
+  TIER_META,
+  GAMES,
+  sumGame,
+  SESSION_MAX,
+  type SessionRecord,
+  type GameResult,
+} from "@/lib/chemistry-ledger";
+
+const GAME_BY_ID = Object.fromEntries(GAMES.map((g) => [g.id, g]));
+
+export function ChemistrySessionList() {
+  const data = useChemistry();
+  const sessions = data?.sessions ?? [];
+  const [openId, setOpenId] = useState<string | null>(sessions[0]?.id ?? null);
+
+  if (!data || sessions.length === 0) return null;
+
+  return (
+    <section
+      className="rounded-2xl border p-5"
+      style={{ background: "#161618", borderColor: "#2A2A2E" }}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="font-display text-base font-bold" style={{ color: "#F0EDE8" }}>
+          Session History
+        </h3>
+        <span className="text-[11px]" style={{ color: "#7A7876" }}>
+          {sessions.length} session{sessions.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <ul className="space-y-2">
+        {sessions.map((s) => (
+          <SessionRow
+            key={s.id}
+            session={s}
+            open={openId === s.id}
+            onToggle={() => setOpenId(openId === s.id ? null : s.id)}
+          />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function SessionRow({
+  session,
+  open,
+  onToggle,
+}: {
+  session: SessionRecord;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const tierMeta = TIER_META[session.tier];
+  return (
+    <li
+      className="overflow-hidden rounded-xl border"
+      style={{ background: "#0D0D0F", borderColor: "#2A2A2E" }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.02]"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-flex h-5 items-center rounded-full px-2 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                background: `${tierMeta.color}22`,
+                color: tierMeta.color,
+                border: `1px solid ${tierMeta.color}55`,
+              }}
+            >
+              {tierMeta.emoji} {session.tier}
+            </span>
+            <span className="font-mono text-xs" style={{ color: "#7A7876" }}>
+              {session.score} / {SESSION_MAX}
+            </span>
+          </div>
+          <div className="mt-1 text-[11px]" style={{ color: "#7A7876" }}>
+            {relativeDate(session.date)}
+          </div>
+        </div>
+        <ChevronDown
+          className="h-4 w-4 shrink-0 transition-transform"
+          style={{
+            color: "#7A7876",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        />
+      </button>
+
+      {open && (
+        <div
+          className="border-t px-4 py-3"
+          style={{ borderColor: "#2A2A2E", background: "#101012" }}
+        >
+          {session.results.length === 0 ? (
+            <p className="text-[11px]" style={{ color: "#7A7876" }}>
+              No per-game breakdown stored for this session.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {session.results.map((r, i) => (
+                <GameRow key={`${r.id}-${i}`} result={r} />
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+function GameRow({ result }: { result: GameResult }) {
+  const meta = GAME_BY_ID[result.id];
+  const total = sumGame(result);
+  return (
+    <li className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.02)" }}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2 text-sm" style={{ color: "#F0EDE8" }}>
+          <span>{meta?.emoji}</span>
+          <span className="truncate">{meta?.name ?? result.id}</span>
+        </span>
+        {result.skipped ? (
+          <span className="font-mono text-[11px]" style={{ color: "#7A7876" }}>
+            Skipped
+          </span>
+        ) : (
+          <span className="font-mono text-[11px]" style={{ color: "#E2C896" }}>
+            +{total}
+          </span>
+        )}
+      </div>
+      {!result.skipped && result.bonuses.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1 pl-6">
+          <span
+            className="rounded-full px-1.5 py-0.5 text-[10px]"
+            style={{ background: "rgba(255,255,255,0.04)", color: "#7A7876" }}
+          >
+            base +{result.base}
+          </span>
+          {result.bonuses.map((b, i) => (
+            <span
+              key={i}
+              className="rounded-full px-1.5 py-0.5 text-[10px]"
+              style={{
+                background: "rgba(139,92,246,0.12)",
+                color: "#A78BFA",
+                border: "1px solid rgba(139,92,246,0.30)",
+              }}
+            >
+              +{b.points} {b.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+}

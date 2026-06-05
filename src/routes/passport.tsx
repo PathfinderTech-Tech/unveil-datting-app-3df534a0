@@ -12,6 +12,7 @@ import { PassportIdentityCard } from "@/components/PassportIdentityCard";
 import { ShareablePassportCard } from "@/components/ShareablePassportCard";
 import { GlobalPassportJourneys } from "@/components/GlobalPassportJourneys";
 import { ChemistryHistory } from "@/components/chemistry/ChemistryHistory";
+import { ChemistrySessionList } from "@/components/chemistry/ChemistrySessionList";
 
 
 
