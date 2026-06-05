@@ -96,7 +96,9 @@ function MessagesPage() {
           last_message_at: c.last_message_at,
           peer_id: peerId,
           peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.avatar_url ?? peer?.photo_url ?? null,
+          peer_photo: peer?.photo_url ?? null,
+          peer_avatar: peer?.avatar_url ?? null,
+          peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
           last_text: last?.content ?? null,
           unread: unreadByConv.get(c.id) ?? 0,
         };
