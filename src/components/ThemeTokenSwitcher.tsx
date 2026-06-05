@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type PresetName = "Logo" | "Cool Indigo" | "Sunset" | "Emerald";
 
