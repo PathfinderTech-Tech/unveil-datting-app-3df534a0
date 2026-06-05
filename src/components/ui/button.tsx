@@ -24,7 +24,7 @@ const buttonVariants = cva(
         outline: `border border-white/10 ${gradientAll}`,
         secondary: `${gradientAll} opacity-90 hover:opacity-100`,
         ghost: `text-white ${gradientHover} ${gradientActive}`,
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "underline-offset-4 hover:underline text-transparent bg-clip-text bg-[linear-gradient(135deg,oklch(0.78_0.18_340)_0%,oklch(0.62_0.22_310)_55%,oklch(0.50_0.20_290)_100%)] hover:bg-[linear-gradient(135deg,oklch(0.82_0.19_340)_0%,oklch(0.66_0.23_310)_55%,oklch(0.54_0.21_290)_100%)]",
       },
       size: {
         default: "h-9 px-4 py-2",
