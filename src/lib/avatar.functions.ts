@@ -229,3 +229,22 @@ function makeInitialsSvg(initials: string, style: string, archetype: string): st
 function escapeXml(s: string): string {
   return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
 }
+
+function extractBucketPath(input: string | null | undefined): string | null {
+  if (!input) return null;
+  if (input.startsWith("data:") || input.startsWith("blob:")) return null;
+  const m = input.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/profile-photos\/([^?]+)/);
+  if (m) return decodeURIComponent(m[1]);
+  if (!/^https?:/i.test(input) && /^[0-9a-f-]{8,}\//i.test(input)) return input;
+  return null;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = "";
+  const CHUNK = 8192;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK)));
+  }
+  return btoa(bin);
+}
+}
