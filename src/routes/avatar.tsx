@@ -115,9 +115,35 @@ function AvatarPage() {
       if (res.fallback && res.message) toast.message(res.message);
       else toast.success("Your UNVEIL avatar is ready.");
       setStep(2);
+      refreshHistory();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate");
     } finally { setBusy(false); }
+  }
+
+  async function revertTo(item: AvatarHistoryItem) {
+    setBusy(true);
+    try {
+      const res = await revertAvatar({ data: { path: item.path } });
+      setAvatarUrl(res.avatarUrl);
+      setStyle(item.style as Style);
+      setStep(2);
+      setFallback(false);
+      toast.success("Avatar restored.");
+      refreshHistory();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not restore");
+    } finally { setBusy(false); }
+  }
+
+  async function removeItem(item: AvatarHistoryItem) {
+    try {
+      await deleteAvatar({ data: { path: item.path } });
+      setHistory((h) => h.filter((x) => x.path !== item.path));
+      toast.success("Removed.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete");
+    }
   }
 
   if (loading) return null;
