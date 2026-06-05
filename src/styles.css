@@ -281,65 +281,34 @@
 }
 
 /* ============================================================
-   UNVEIL — Master Design Refresh
-   Tokens, keyframes, utilities. Visual layer only.
+   UNVEIL — Master Design Refresh (token aliases only)
+   The :root logo palette above is the single source of truth.
+   This block only adds aliases used by .u-* utilities.
    ============================================================ */
 
 :root {
   --u-bg:            var(--logo-black);
   --u-surface:       var(--logo-surface);
   --u-surface-alt:   var(--logo-surface-2);
-  --u-border:        oklch(0.35 0.08 302 / 0.52);
+  --u-border:        var(--border);
   --u-text:          var(--logo-ivory);
   --u-muted:         var(--logo-muted);
 
   --u-violet:        var(--logo-violet);
   --u-violet-bright: var(--logo-purple);
-  --u-violet-deep:   oklch(0.33 0.15 288);
+  --u-violet-deep:   var(--indigo-deep);
 
   --u-gold:          var(--logo-gold);
   --u-gold-bright:   oklch(0.90 0.12 70);
 
-  --u-emerald:       rgb(52,211,153);
-  --u-red:           rgb(239,68,68);
+  --u-emerald:       oklch(0.78 0.17 162);
+  --u-red:           oklch(0.62 0.24 25);
 
   --font-display-grotesk: "Cabinet Grotesk", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body-satoshi:    "Satoshi", "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Override theme tokens to align with the refreshed palette */
-  --background: var(--u-bg);
-  --foreground: var(--u-text);
-  --surface: var(--u-surface);
-  --surface-2: var(--u-surface-alt);
-  --card: var(--u-surface);
-  --card-foreground: var(--u-text);
-  --popover: var(--u-surface);
-  --popover-foreground: var(--u-text);
-  --primary: var(--u-violet);
-  --primary-foreground: var(--logo-ivory);
-  --secondary: var(--u-surface-alt);
-  --secondary-foreground: var(--u-text);
-  --muted: var(--u-surface-alt);
-  --muted-foreground: var(--u-muted);
-  --accent: var(--u-violet-bright);
-  --accent-foreground: var(--logo-ivory);
-  --border: oklch(0.35 0.08 302 / 0.52);
-  --input: var(--u-surface-alt);
-  --ring: var(--u-violet);
-  --violet: var(--u-violet);
-
-  --gradient-hero:   var(--gradient-logo);
-  --gradient-aura:   linear-gradient(180deg, var(--logo-rose) 0%, var(--logo-magenta) 38%, var(--logo-purple) 70%, var(--logo-violet) 100%);
-  --gradient-deep:   linear-gradient(160deg, var(--logo-surface-2) 0%, var(--logo-ink) 55%, var(--logo-black) 100%);
-  --gradient-indigo: linear-gradient(135deg, var(--logo-violet) 0%, var(--logo-purple) 100%);
-  --gradient-gold:   linear-gradient(135deg, var(--logo-gold) 0%, var(--logo-amber) 100%);
-
-  --shadow-glow:         0 0 80px -10px oklch(0.67 0.27 310 / 0.58);
-  --shadow-glow-magenta: 0 0 80px -10px oklch(0.72 0.28 334 / 0.58);
-  --shadow-glow-indigo:  0 0 80px -10px oklch(0.61 0.27 292 / 0.58);
 }
 
 body {
@@ -527,8 +496,8 @@ h1, h2, h3, h4 {
 @keyframes ctaRise        { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes optionPop      { from { opacity: 0; transform: scale(0.93) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes selectFlash    { 0% { background: oklch(0.67 0.27 310 / 0.06); } 40% { background: oklch(0.67 0.27 310 / 0.20); box-shadow: 0 0 16px oklch(0.72 0.28 334 / 0.25); } 100% { background: oklch(0.67 0.27 310 / 0.10); } }
-@keyframes breathe        { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(167,139,250,0.6); } 50% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 5px rgba(167,139,250,0); } }
-@keyframes emeraldPulse   { 0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } 50% { box-shadow: 0 0 16px 2px rgba(52,211,153,0.18); } }
+@keyframes breathe        { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 oklch(0.67 0.27 310 / 0.6); } 50% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 5px oklch(0.67 0.27 310 / 0); } }
+@keyframes emeraldPulse   { 0%, 100% { box-shadow: 0 0 0 0 oklch(0.78 0.17 162 / 0); } 50% { box-shadow: 0 0 16px 2px oklch(0.78 0.17 162 / 0.18); } }
 @keyframes orbitRing      { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes rippleOut      { from { transform: scale(0.8); opacity: 0.6; } to { transform: scale(2.2); opacity: 0; } }
 @keyframes typingBounce   { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
@@ -539,7 +508,7 @@ h1, h2, h3, h4 {
 @keyframes dotGlow        { 0%, 100% { box-shadow: 0 0 4px oklch(0.67 0.27 310 / 0.6); } 50% { box-shadow: 0 0 12px oklch(0.72 0.28 334 / 1); } }
 @keyframes progressFill   { from { width: 0%; } }
 @keyframes barFill        { from { width: 0%; } }
-@keyframes chemistryGlow  { 0%, 100% { text-shadow: 0 0 6px rgba(167,139,250,0.4); } 50% { text-shadow: 0 0 14px rgba(167,139,250,0.8); } }
+@keyframes chemistryGlow  { 0%, 100% { text-shadow: 0 0 6px oklch(0.67 0.27 310 / 0.4); } 50% { text-shadow: 0 0 14px oklch(0.67 0.27 310 / 0.8); } }
 @keyframes numberCount    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cardRise       { from { opacity: 0; transform: translateY(60px) scale(0.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes scanSweep      { 0% { top: -2px; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
@@ -570,7 +539,7 @@ h1, h2, h3, h4 {
 .animate-floatY        { animation: floatY 5s ease-in-out infinite; }
 .animate-chemistryGlow { animation: chemistryGlow 2.4s ease-in-out infinite; }
 .animate-goldSweep {
-  background: linear-gradient(90deg, transparent, rgba(226,200,150,0.4), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--logo-gold) 40%, transparent), transparent);
   background-size: 200% 100%;
   animation: goldSweep 2.6s linear infinite;
 }
