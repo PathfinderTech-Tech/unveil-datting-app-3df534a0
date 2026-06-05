@@ -11,6 +11,8 @@ import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { VerificationGate } from "@/components/VerificationGate";
 import { useVerification } from "@/hooks/use-verification";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
+
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
