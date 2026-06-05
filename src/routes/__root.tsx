@@ -166,7 +166,7 @@ function RootComponent() {
         </div>
         <SiteFooter />
         <MobileBottomNav />
-        <ThemeTokenSwitcher />
+        {import.meta.env.DEV && <ThemeTokenSwitcher />}
       </div>
     </QueryClientProvider>
   );
