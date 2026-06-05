@@ -22,13 +22,11 @@ type Category =
   | "personality"
   | "creativity"
   | "relationships"
-  | "fun"
   | "values"
   | "emotional_intelligence"
   | "humor"
   | "lifestyle"
-  | "growth"
-  | "relationship_clarity";
+  | "growth";
 
 const QUESTIONS: { id: string; category: Category; text: string; placeholder: string }[] = [
   // PERSONALITY (original)
@@ -50,11 +48,11 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
   { id: "r3", category: "relationships", text: "What is your perfect Sunday?", placeholder: "My perfect Sunday looks like..." },
   { id: "r4", category: "relationships", text: "When do you feel most yourself with someone?", placeholder: "I feel most myself when..." },
 
-  // FUN (original)
-  { id: "f1", category: "fun", text: "Pineapple on pizza?", placeholder: "My take on pineapple pizza..." },
-  { id: "f2", category: "fun", text: "If a penguin knocked on your door, what would you do?", placeholder: "First thing I'd do..." },
-  { id: "f3", category: "fun", text: "What's the funniest thing you've ever spent money on?", placeholder: "I once spent money on..." },
-  { id: "f4", category: "fun", text: "What's the most unhinged song on your playlist?", placeholder: "The unhinged song on my playlist is..." },
+  // FUN (merged into humor)
+  { id: "f1", category: "humor", text: "Pineapple on pizza?", placeholder: "My take on pineapple pizza..." },
+  { id: "f2", category: "humor", text: "If a penguin knocked on your door, what would you do?", placeholder: "First thing I'd do..." },
+  { id: "f3", category: "humor", text: "What's the funniest thing you've ever spent money on?", placeholder: "I once spent money on..." },
+  { id: "f4", category: "humor", text: "What's the most unhinged song on your playlist?", placeholder: "The unhinged song on my playlist is..." },
 
   // VALUES
   { id: "v1", category: "values", text: "What's something you're quietly proud of that most people would never guess?", placeholder: "Something most people don't know about me..." },
@@ -92,24 +90,22 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
   { id: "g3", category: "growth", text: "What kind of feedback is genuinely hard for you to receive — even when you know it's true?", placeholder: "I struggle most when someone tells me..." },
   { id: "g4", category: "growth", text: "What's something you've been trying to change about yourself for a long time that still isn't working?", placeholder: "I keep trying to... and it keeps not working because..." },
 
-  // RELATIONSHIP CLARITY
-  { id: "rc1", category: "relationship_clarity", text: "What's the most honest thing you could say about what you're looking for right now?", placeholder: "Right now, honestly, I want..." },
-  { id: "rc2", category: "relationship_clarity", text: "What did past partners always misunderstand about you — and are you still figuring out how to explain it?", placeholder: "People in relationships always seem to misread..." },
-  { id: "rc3", category: "relationship_clarity", text: "How do you show love when you don't know the right words?", placeholder: "When I don't know what to say I usually..." },
-  { id: "rc4", category: "relationship_clarity", text: "What does feeling truly seen by someone look like for you — specifically?", placeholder: "I feel most seen when someone..." },
+  // RELATIONSHIP CLARITY (merged into relationships)
+  { id: "rc1", category: "relationships", text: "What's the most honest thing you could say about what you're looking for right now?", placeholder: "Right now, honestly, I want..." },
+  { id: "rc2", category: "relationships", text: "What did past partners always misunderstand about you — and are you still figuring out how to explain it?", placeholder: "People in relationships always seem to misread..." },
+  { id: "rc3", category: "relationships", text: "How do you show love when you don't know the right words?", placeholder: "When I don't know what to say I usually..." },
+  { id: "rc4", category: "relationships", text: "What does feeling truly seen by someone look like for you — specifically?", placeholder: "I feel most seen when someone..." },
 ];
 
 const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
   personality:            { label: "Personality",           hue: "from-indigo-500/30 to-violet-500/10" },
   creativity:             { label: "Creativity",            hue: "from-pink-500/30 to-fuchsia-500/10" },
   relationships:          { label: "Relationships",         hue: "from-rose-500/30 to-red-500/10" },
-  fun:                    { label: "Fun",                   hue: "from-yellow-500/30 to-amber-500/10" },
   values:                 { label: "Values",                hue: "from-fuchsia-500/30 to-purple-500/10" },
   emotional_intelligence: { label: "Emotional Intelligence", hue: "from-cyan-500/30 to-blue-500/10" },
-  humor:                  { label: "Humor",                 hue: "from-amber-500/30 to-orange-500/10" },
+  humor:                  { label: "Humor & Fun",           hue: "from-amber-500/30 to-orange-500/10" },
   lifestyle:              { label: "Lifestyle",             hue: "from-emerald-500/30 to-teal-500/10" },
   growth:                 { label: "Growth",                hue: "from-lime-500/30 to-green-500/10" },
-  relationship_clarity:   { label: "Relationship Clarity",  hue: "from-rose-500/30 to-pink-500/10" },
 };
 
 
@@ -238,7 +234,7 @@ function SparkPage() {
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
-          {(["all", "personality", "creativity", "relationships", "fun", "values", "emotional_intelligence", "humor", "lifestyle", "growth", "relationship_clarity"] as const).map((c) => {
+          {(["all", "personality", "creativity", "relationships", "values", "emotional_intelligence", "humor", "lifestyle", "growth"] as const).map((c) => {
             const active = filter === c;
             return (
               <button key={c} onClick={() => { setFilter(c); setIdx(0); setDone(false); }}
