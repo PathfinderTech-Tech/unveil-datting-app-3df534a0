@@ -14,7 +14,7 @@ export function VerifiedBadge({
   return (
     <span className="inline-flex items-center gap-1.5 align-middle">
       <span
-        className={`inline-flex items-center justify-center rounded-full bg-gradient-to-br from-[oklch(0.65_0.16_240)] to-[oklch(0.55_0.22_270)] text-white shadow-glow ${dim}`}
+        className={`inline-flex items-center justify-center rounded-full bg-gradient-logo text-primary-foreground shadow-glow ${dim}`}
         title="Verified profile"
         aria-label="Verified profile"
       >
