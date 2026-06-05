@@ -35,6 +35,8 @@ const THEMES = [
 function DatePlanRoute() {
   const search = useSearch({ from: "/date-plan" }) as SearchParams;
   const { partner, partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+  const verification = useVerification();
+  const verifiedOk = verification.loading || verification.verified;
 
   const [theme, setTheme] = useState<string | null>(null);
   const [location, setLocation] = useState("");
