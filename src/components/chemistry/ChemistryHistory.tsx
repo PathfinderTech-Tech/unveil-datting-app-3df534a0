@@ -30,7 +30,7 @@ export function ChemistryHistory() {
           <div className="flex items-baseline justify-between gap-2">
             <span className="text-sm text-foreground">
               Last session:{" "}
-              <span style={{ color: tierMeta.color, fontWeight: 600 }}>
+              <span className="font-semibold text-primary">
                 {data.lastSessionTier}
               </span>
             </span>
@@ -50,7 +50,7 @@ export function ChemistryHistory() {
         </div>
         <div className="h-1 overflow-hidden rounded-full bg-primary/20">
           <div
-            className="h-full rounded-full transition-[width] duration-700"
+            className="h-full rounded-full bg-gradient-hero transition-[width] duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
