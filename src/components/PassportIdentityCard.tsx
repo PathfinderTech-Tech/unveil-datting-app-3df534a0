@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Sparkles, MapPin, ShieldCheck } from "lucide-react";
+import { Sparkles, MapPin, ShieldCheck, MessageCircle, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ChemistryBadge } from "@/components/chemistry/ChemistryBadge";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 type PassportProfile = {
   first_name: string | null;
@@ -14,6 +15,15 @@ type PassportProfile = {
   verified: boolean | null;
   beta_member: boolean | null;
   readiness_score: number | null;
+  avatar_url: string | null;
+  photo_url: string | null;
+  discovery_mode: "avatar" | "photo" | null;
+  communication_style: Record<string, unknown> | null;
+};
+
+type Blueprint = {
+  communication_style: string | null;
+  relationship_style: string | null;
 };
 
 const ARCHETYPE_TAGLINES: Record<string, string> = {
