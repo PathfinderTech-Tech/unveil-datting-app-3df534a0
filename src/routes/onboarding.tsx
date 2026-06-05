@@ -311,7 +311,10 @@ function Onboarding() {
         bio: bio || null,
         interests: interests as unknown as string[],
       });
-    } else if (step === 3 || step === 5 || step === 6 || step === 7 || step === 1) {
+    } else if (step === 3) {
+      const discovery_mode = appearance === "real" ? "photo" : "avatar";
+      await persist({}, { discovery_mode });
+    } else if (step === 5 || step === 6 || step === 7 || step === 1) {
       await persist();
     }
     setStep((s) => Math.min(TOTAL, s + 1));
@@ -333,6 +336,7 @@ function Onboarding() {
           intention: intent, relationship_intent: intent,
           preferred_language: lang,
           avatar_style: avatarStyle,
+          discovery_mode: (appearance === "real" ? "photo" : "avatar"),
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
           bio: bio || summary || null,
@@ -554,8 +558,28 @@ function Onboarding() {
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">How would you like to appear?</h1>
-              <p className="mt-2 text-muted-foreground">Your public image. You can change this anytime in settings.</p>
+              <p className="mt-2 text-muted-foreground">Pick a discovery mode — you can change this anytime in settings.</p>
             </div>
+
+            {/* Discovery mode binary selector (Avatar / Photo) */}
+            <div className="grid gap-3 md:grid-cols-2">
+              {[
+                { id: "avatar" as const, title: "Avatar Mode", hint: "Show a generated avatar publicly. Your real selfie stays private until a mutual reveal." },
+                { id: "photo"  as const, title: "Photo Mode",  hint: "Show your real photo on your profile from the start." },
+              ].map((m) => {
+                const derived: "avatar" | "photo" = appearance === "real" ? "photo" : "avatar";
+                const active = derived === m.id;
+                return (
+                  <button key={m.id} type="button"
+                    onClick={() => setAppearance(m.id === "photo" ? "real" : "avatar")}
+                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
+                    <div className="font-display text-base font-semibold">{m.title}</div>
+                    <div className="text-xs text-muted-foreground">{m.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="grid gap-3 md:grid-cols-3">
               {APPEARANCE_MODES.map((m) => {
                 const active = appearance === m.id;

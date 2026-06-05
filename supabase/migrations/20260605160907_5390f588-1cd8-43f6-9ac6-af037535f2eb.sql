@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS discovery_mode text NOT NULL DEFAULT 'photo' CHECK (discovery_mode IN ('avatar','photo'));
