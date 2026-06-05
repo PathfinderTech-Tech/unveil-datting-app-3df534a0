@@ -10,6 +10,7 @@ import { ThoughtModal } from "@/components/ThoughtModal";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { CompatibilityMap } from "@/components/CompatibilityMap";
 import { CoupleJourney } from "@/components/CoupleJourney";
+import { PhotoRevealPanel } from "@/components/PhotoRevealPanel";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match insights — UNVEIL" }] }),
