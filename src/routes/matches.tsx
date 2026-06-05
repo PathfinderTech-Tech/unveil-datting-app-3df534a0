@@ -8,7 +8,7 @@ import {
 } from "@/lib/synapse-store";
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
-import { Avatar } from "@/components/Avatar";
+
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
@@ -451,11 +451,13 @@ function Matches() {
         <MatchSheet
           match={active}
           you={profile}
+          peerMeta={peerMeta[active.userId]}
           onClose={() => setActive(null)}
           onLike={() => handleLike(active)}
           onThought={() => { setThoughtFor(active); setActive(null); }}
         />
       )}
+
       {thoughtFor && (
         <ThoughtModal
           targetUserId={thoughtFor.userId}
@@ -475,7 +477,7 @@ function Matches() {
 
 type Stage = 1 | 2 | 3;
 
-function MatchSheet({ match, you, onClose, onLike, onThought }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void; onThought: () => void }) {
+function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { match: RealMatch; you: SynapseProfile; peerMeta?: { avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null }; onClose: () => void; onLike: () => void; onThought: () => void }) {
   // Progressive reveal — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
   const arch = ARCHETYPES[normalizeArchetype(match.archetype)];
@@ -492,8 +494,16 @@ function MatchSheet({ match, you, onClose, onLike, onThought }: { match: Synapse
         <div className="relative p-8 pb-6" style={{ background: `radial-gradient(120% 80% at 20% 0%, ${arch.hue} 0%, transparent 60%)` }}>
           <div className="flex items-center gap-4">
             <div style={{ filter: blur, transition: "filter 0.6s ease" }}>
-              <Avatar seed={match.avatar ?? "0-180"} size={72} label={match.name} />
+              <ProfileAvatar
+                userId={match.userId}
+                name={match.name}
+                discoveryMode={peerMeta?.discovery_mode}
+                avatarUrl={peerMeta?.avatar_url}
+                photoUrl={peerMeta?.photo_url}
+                size={72}
+              />
             </div>
+
             <div className="flex-1">
               <div className="font-display text-xs uppercase tracking-wider opacity-80" style={{ color: arch.hue as string }}>
                 {arch.name}

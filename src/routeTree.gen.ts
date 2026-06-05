@@ -53,6 +53,7 @@ import { Route as PlayStoryRouteImport } from './routes/play.story'
 import { Route as PlayQuizRouteImport } from './routes/play.quiz'
 import { Route as PlayPredictRouteImport } from './routes/play.predict'
 import { Route as PlayEscapeRouteImport } from './routes/play.escape'
+import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -278,6 +279,11 @@ const PlayEscapeRoute = PlayEscapeRouteImport.update({
   path: '/escape',
   getParentRoute: () => PlayRoute,
 } as any)
+const PUserIdRoute = PUserIdRouteImport.update({
+  id: '/p/$userId',
+  path: '/p/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchUserIdRoute = MatchUserIdRouteImport.update({
   id: '/match/$userId',
   path: '/match/$userId',
@@ -343,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
+  '/p/$userId': typeof PUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
+  '/p/$userId': typeof PUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
+  '/p/$userId': typeof PUserIdRoute
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
@@ -496,6 +505,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/checkout/return'
     | '/match/$userId'
+    | '/p/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -546,6 +556,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/checkout/return'
     | '/match/$userId'
+    | '/p/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/checkout/return'
     | '/match/$userId'
+    | '/p/$userId'
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
@@ -646,6 +658,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
+  PUserIdRoute: typeof PUserIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -960,6 +973,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayEscapeRouteImport
       parentRoute: typeof PlayRoute
     }
+    '/p/$userId': {
+      id: '/p/$userId'
+      path: '/p/$userId'
+      fullPath: '/p/$userId'
+      preLoaderRoute: typeof PUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/match/$userId': {
       id: '/match/$userId'
       path: '/match/$userId'
@@ -1062,19 +1082,10 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   MatchUserIdRoute: MatchUserIdRoute,
+  PUserIdRoute: PUserIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

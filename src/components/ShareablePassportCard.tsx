@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff, RotateCcw } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
@@ -196,8 +196,10 @@ export function ShareablePassportCard({
   const activeCrop =
     prefs.choice === "selfie" ? prefs.crops.selfie : prefs.crops.avatar;
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/passport` : "/passport";
-  const shareText = `My UNVEIL Passport — slow love, real connection.`;
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/p/${userId}` : `/p/${userId}`;
+  const shareText = `${data?.first_name ? `${data.first_name}'s` : "My"} UNVEIL Passport — slow love, real connection.`;
+  const mailtoHref = `mailto:?subject=${encodeURIComponent("My UNVEIL Passport")}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+
 
   function setChoice(choice: PhotoChoice) {
     setPrefs((p) => ({ ...p, choice }));
@@ -352,7 +354,7 @@ export function ShareablePassportCard({
           </div>
         )}
 
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
             onClick={download}
             className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
@@ -365,6 +367,13 @@ export function ShareablePassportCard({
           >
             <Copy className="h-3.5 w-3.5" /> Link
           </button>
+          <a
+            href={mailtoHref}
+            onClick={() => trackEvent("shareable_card_email_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Mail className="h-3.5 w-3.5" /> Email
+          </a>
           <button
             onClick={nativeShare}
             className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-hero px-3 py-2 text-xs font-medium text-primary-foreground shadow-glow"
@@ -372,6 +381,7 @@ export function ShareablePassportCard({
             <Share2 className="h-3.5 w-3.5" /> Share
           </button>
         </div>
+
 
         <p className="text-center text-[10px] text-muted-foreground">
           Your archetype and readiness only. No private data is shared.

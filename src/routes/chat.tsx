@@ -11,6 +11,8 @@ import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { VerificationGate } from "@/components/VerificationGate";
 import { useVerification } from "@/hooks/use-verification";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
+
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -65,8 +67,10 @@ function Chat() {
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
   const [peerName, setPeerName] = useState<string>("them");
+  const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
   const verification = useVerification();
   const verifiedOk = verification.loading || verification.verified;
+
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
@@ -104,10 +108,12 @@ function Chat() {
       const row = data?.[0];
       setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
 
-      const { data: prof } = await supabase.from("profiles").select("first_name").eq("id", peerId).maybeSingle();
+      const { data: prof } = await supabase.from("profiles").select("first_name, avatar_url, photo_url, discovery_mode").eq("id", peerId).maybeSingle();
       if (!alive) return;
       setPeerName(prof?.first_name ?? "them");
+      setPeerProfile(prof ? { avatar_url: prof.avatar_url, photo_url: prof.photo_url, discovery_mode: (prof.discovery_mode as "avatar" | "photo" | null) ?? null } : null);
     })();
+
     return () => { alive = false; };
   }, [user, peerId]);
 
@@ -318,7 +324,22 @@ function Chat() {
           ) : (
             <>
               <div className="relative flex items-center justify-between border-b border-border p-4">
-                <div className="text-sm font-medium">Thread · {active.id.slice(0, 6)}</div>
+                <div className="flex items-center gap-3">
+                  {peerId && (
+                    <ProfileAvatar
+                      userId={peerId}
+                      name={peerName}
+                      discoveryMode={peerProfile?.discovery_mode}
+                      avatarUrl={peerProfile?.avatar_url}
+                      photoUrl={peerProfile?.photo_url}
+                      size={40}
+                    />
+                  )}
+                  <div>
+                    <div className="text-sm font-medium leading-tight">{peerName}</div>
+                    <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Slow reveal · in progress</div>
+                  </div>
+                </div>
                 <button onClick={() => setShowMenu((v) => !v)} className="rounded-full p-2 hover:bg-surface">
                   <MoreVertical className="h-4 w-4" />
                 </button>
@@ -330,6 +351,7 @@ function Chat() {
                   </div>
                 )}
               </div>
+
 
               {matchInfo && user && peerId && (
                 <ConversationScaffold
@@ -389,7 +411,7 @@ function Chat() {
                 {typingPeer && (
                   <div className="px-2 text-xs italic text-muted-foreground">typing…</div>
                 )}
-                {msgs.length === 0 && <div className="text-center text-xs text-muted-foreground">Send the first thought.</div>}
+                {msgs.length === 0 && <div className="px-4 py-6 text-center text-xs italic text-muted-foreground">Your conversation is unfolding. Send the first thought when you're ready.</div>}
               </div>
 
               {ideasOpen && (
