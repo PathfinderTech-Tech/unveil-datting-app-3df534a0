@@ -480,7 +480,8 @@ function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { matc
   const chem = chemistryFor(match.name + match.city);
   const matchPercent = Math.max(60, 100 - Math.abs(you.composite - match.composite) * 4);
 
-  const blur = stage === 1 ? "blur(14px)" : stage === 2 ? "blur(4px)" : "none";
+  // Photos are visible from Day 1 — the reward is contact reveal, not photo reveal.
+  const blur = "none";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-md md:items-center" onClick={onClose}>
