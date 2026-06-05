@@ -61,6 +61,7 @@ function SparkPage() {
   const [answer, setAnswer] = useState("");
   const [saving, setSaving] = useState(false);
   const [answered, setAnswered] = useState<{ q: string; a: string; cat: Category }[]>([]);
+  const [done, setDone] = useState(false);
 
   // Hydrate previously saved answers from the database.
   useEffect(() => {
@@ -72,27 +73,78 @@ function SparkPage() {
     );
   }, [uid]);
 
-  const next = () => { setIdx((i) => (i + 1) % pool.length); setAnswer(""); };
-  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); setAnswer(""); };
-  const save = async () => {
-    if (!answer.trim()) return;
-    const entry = { q: q.text, a: answer.trim(), cat: q.category };
-    setAnswered((a) => [entry, ...a].slice(0, 50));
-    if (uid) {
-      setSaving(true);
-      const { error } = await saveSparkAnswer({
-        question: entry.q, answer: entry.a, category: entry.cat,
-      });
-      setSaving(false);
-      if (error) toast.error("Couldn't save answer", { description: error });
-      else {
-        // Earn a badge after 5 spark answers.
-        if (answered.length + 1 >= 5) await awardBadge("storyteller");
+  // Track which questions in current pool are answered (by question text).
+  const answeredSet = useMemo(() => new Set(answered.map((a) => a.q)), [answered]);
+  const remainingCount = pool.filter((p) => !answeredSet.has(p.text)).length;
+  const allAnswered = remainingCount === 0 && pool.length > 0;
+
+  // Auto-advance to next unanswered question when filter/pool changes.
+  useEffect(() => {
+    if (!pool.length) return;
+    const firstUnanswered = pool.findIndex((p) => !answeredSet.has(p.text));
+    if (firstUnanswered >= 0) setIdx(firstUnanswered);
+  }, [filter, pool.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const goToNextUnanswered = (fromIdx: number) => {
+    for (let step = 1; step <= pool.length; step++) {
+      const i = (fromIdx + step) % pool.length;
+      if (!answeredSet.has(pool[i].text)) {
+        setIdx(i);
+        setAnswer("");
+        return true;
       }
-    } else {
-      toast.info("Sign in to save your answers.");
     }
-    next();
+    return false;
+  };
+
+  const next = () => {
+    const found = goToNextUnanswered(idx);
+    if (!found) setDone(true);
+  };
+  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); setAnswer(""); };
+
+  // Auto-save: debounced save while typing.
+  useEffect(() => {
+    if (!answer.trim()) return;
+    if (answeredSet.has(q.text)) return; // already saved
+    const trimmed = answer.trim();
+    const handle = setTimeout(async () => {
+      const entry = { q: q.text, a: trimmed, cat: q.category };
+      if (uid) {
+        setSaving(true);
+        const { error } = await saveSparkAnswer({
+          question: entry.q, answer: entry.a, category: entry.cat,
+        });
+        setSaving(false);
+        if (error) {
+          toast.error("Couldn't save answer", { description: error });
+          return;
+        }
+        setAnswered((a) => [entry, ...a].slice(0, 50));
+        if (answered.length + 1 >= 5) await awardBadge("storyteller");
+      } else {
+        setAnswered((a) => [entry, ...a].slice(0, 50));
+      }
+    }, 900);
+    return () => clearTimeout(handle);
+  }, [answer, q.text, q.category, uid]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const saveAndNext = async () => {
+    if (!answer.trim()) { next(); return; }
+    if (!answeredSet.has(q.text)) {
+      const entry = { q: q.text, a: answer.trim(), cat: q.category };
+      if (uid) {
+        setSaving(true);
+        const { error } = await saveSparkAnswer({
+          question: entry.q, answer: entry.a, category: entry.cat,
+        });
+        setSaving(false);
+        if (error) { toast.error("Couldn't save answer", { description: error }); return; }
+      }
+      setAnswered((a) => [entry, ...a].slice(0, 50));
+    }
+    const found = goToNextUnanswered(idx);
+    if (!found) setDone(true);
   };
 
   if (checking) {
@@ -115,7 +167,7 @@ function SparkPage() {
             Answer to be <span className="text-gradient-hero italic">unforgettable.</span>
           </h1>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            Short, curious questions that reveal personality, humor, and values. Matches see your answers side-by-side with theirs.
+            Short, curious questions that reveal personality, humor, and values. Your answers save automatically as you type.
           </p>
         </div>
 
@@ -123,7 +175,7 @@ function SparkPage() {
           {(["all", "personality", "creativity", "relationships", "fun"] as const).map((c) => {
             const active = filter === c;
             return (
-              <button key={c} onClick={() => { setFilter(c); setIdx(0); }}
+              <button key={c} onClick={() => { setFilter(c); setIdx(0); setDone(false); }}
                 className={`rounded-full border px-4 py-1.5 text-xs transition-colors ${
                   active ? "border-primary bg-primary/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:text-foreground"
                 }`}>
@@ -133,40 +185,67 @@ function SparkPage() {
           })}
         </div>
 
-        <div className={`relative overflow-hidden rounded-3xl border border-border bg-card p-8`}>
-          <div className={`absolute inset-0 bg-gradient-to-br ${CAT_LABEL[q.category].hue} opacity-40`} />
-          <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              <Sparkles className="h-3 w-3" /> {CAT_LABEL[q.category].label}
-            </div>
-            <div className="font-display text-3xl font-light leading-snug md:text-4xl">{q.text}</div>
-            <textarea value={answer} onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type your answer… honesty travels farthest."
-              rows={3}
-              className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button onClick={prev}
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
-                <ChevronLeft className="h-3 w-3" /> Previous
-              </button>
-              <button onClick={save} disabled={!answer.trim() || saving}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-40">
-                <Send className="h-4 w-4" /> {saving ? "Saving…" : "Save & next"}
-              </button>
-              <button onClick={next}
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
-                <RefreshCcw className="h-3 w-3" /> Skip
-              </button>
-              <button onClick={next}
-                className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
-                Next <ChevronRight className="h-3 w-3" />
-              </button>
-            </div>
-            <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              Question {(idx % pool.length) + 1} of {pool.length}
+        {done || allAnswered ? (
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 opacity-50" />
+            <div className="relative">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Sparkles className="h-3 w-3" /> All done
+              </div>
+              <div className="font-display text-3xl font-light leading-snug md:text-4xl">
+                You've answered every spark question.
+              </div>
+              <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+                Happy with your answers? You can review them below or head to the next challenges. Want to tweak something? Just pick a question and your edits save automatically.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                <button onClick={() => { setDone(false); setIdx(0); }}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                  <RefreshCcw className="h-3 w-3" /> Review & edit
+                </button>
+                <Link to="/challenges"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
+                  I'm happy — go to Challenges <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className={`relative overflow-hidden rounded-3xl border border-border bg-card p-8`}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${CAT_LABEL[q.category].hue} opacity-40`} />
+            <div className="relative">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Sparkles className="h-3 w-3" /> {CAT_LABEL[q.category].label}
+              </div>
+              <div className="font-display text-3xl font-light leading-snug md:text-4xl">{q.text}</div>
+              <textarea value={answer} onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Type your answer… it saves automatically."
+                rows={3}
+                className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
+              <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                {saving ? "Saving…" : answeredSet.has(q.text) ? "Saved ✓" : answer.trim() ? "Saves as you type" : "Auto-saves"}
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button onClick={prev}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                  <ChevronLeft className="h-3 w-3" /> Previous
+                </button>
+                <button onClick={saveAndNext}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
+                  <Send className="h-4 w-4" /> Next question
+                </button>
+                <button onClick={next}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
+                  <RefreshCcw className="h-3 w-3" /> Skip
+                </button>
+              </div>
+              <div className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span>Question {(idx % pool.length) + 1} of {pool.length}</span>
+                <span>{pool.length - remainingCount}/{pool.length} answered</span>
+              </div>
+            </div>
+          </div>
+        )}
 
 
         {answered.length > 0 && (
@@ -197,3 +276,4 @@ function SparkPage() {
     </div>
   );
 }
+
