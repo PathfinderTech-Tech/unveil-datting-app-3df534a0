@@ -26,6 +26,8 @@ type Row = {
   peer_id: string;
   peer_name: string | null;
   peer_photo: string | null;
+  peer_avatar: string | null;
+  peer_discovery_mode: "avatar" | "photo" | null;
   last_text: string | null;
   unread: number;
 };
