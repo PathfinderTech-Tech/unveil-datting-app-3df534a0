@@ -30,9 +30,7 @@ export function HiddenMatchCard({
         <div className="relative">
           <div className="flex items-start justify-between">
             <div className="relative">
-              <div style={{ filter: "blur(10px)" }}>
-                <ProfileAvatar userId={match.id} name="Opposite" photoUrl={match.photoUrl} size={56} />
-              </div>
+              <ProfileAvatar userId={match.id} name="Opposite" photoUrl={match.photoUrl} size={56} />
               <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
                 <Lock className="h-3 w-3 text-muted-foreground" />
               </div>

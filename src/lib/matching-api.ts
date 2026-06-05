@@ -17,7 +17,7 @@ type DiscoverRow = {
   bio: string | null;
   archetype: string | null;
   photo_url: string | null;
-  photo_reveal_stage: string | null;
+  
   compatibility_score: number | null;
   curiosity_level: number | null;
   emotional_rhythm: Record<string, number> | null;

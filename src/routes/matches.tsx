@@ -332,7 +332,7 @@ function Matches() {
               {loading ? "Loading minds…" : `${visible.length} ${visible.length === 1 ? "person" : "people"} to discover`}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Photos and details reveal as mutual engagement deepens. No swiping.
+              Photos are visible from Day 1. The 7-day journey unlocks contact sharing, not photos.
             </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
@@ -480,35 +480,31 @@ function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { matc
   const chem = chemistryFor(match.name + match.city);
   const matchPercent = Math.max(60, 100 - Math.abs(you.composite - match.composite) * 4);
 
-  // Photos are visible from Day 1 — the reward is contact reveal, not photo reveal.
-  const blur = "none";
-
+  // Photos and identity are visible from Day 1 — the journey reward is Contact Sharing.
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-md md:items-center" onClick={onClose}>
       <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-glow" onClick={(e) => e.stopPropagation()}>
         {/* Aura header */}
         <div className="relative p-8 pb-6" style={{ background: `radial-gradient(120% 80% at 20% 0%, ${arch.hue} 0%, transparent 60%)` }}>
           <div className="flex items-center gap-4">
-            <div style={{ filter: blur, transition: "filter 0.6s ease" }}>
-              <ProfileAvatar
-                userId={match.userId}
-                name={match.name}
-                discoveryMode={peerMeta?.discovery_mode}
-                avatarUrl={peerMeta?.avatar_url}
-                photoUrl={peerMeta?.photo_url}
-                size={72}
-              />
-            </div>
+            <ProfileAvatar
+              userId={match.userId}
+              name={match.name}
+              discoveryMode={peerMeta?.discovery_mode}
+              avatarUrl={peerMeta?.avatar_url}
+              photoUrl={peerMeta?.photo_url}
+              size={72}
+            />
 
             <div className="flex-1">
               <div className="font-display text-xs uppercase tracking-wider opacity-80" style={{ color: arch.hue as string }}>
                 {arch.name}
               </div>
               <div className="font-display text-2xl font-bold">
-                {stage >= 3 ? `${match.name}, ${match.age}` : "Identity revealed at Stage 3"}
+                {match.name}, {match.age}
               </div>
               <div className="text-sm text-muted-foreground">
-                {stage >= 2 ? `${match.city} · ${match.professionLabel}` : "City revealed at Stage 2"}
+                {match.city} · {match.professionLabel}
               </div>
             </div>
             <div className="text-right">
@@ -602,7 +598,7 @@ function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { matc
             </button>
           </div>
           <p className="mt-1 text-center text-[11px] text-muted-foreground">
-            <Eye className="mr-1 inline h-3 w-3" /> Reveals are mutual. Nothing is shared without consent.
+            <Eye className="mr-1 inline h-3 w-3" /> Contact sharing is mutual. Nothing is shared without consent.
           </p>
         </div>
       </div>
