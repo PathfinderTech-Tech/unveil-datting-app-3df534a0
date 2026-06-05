@@ -71,7 +71,7 @@ export function RevealProgressCard({ userId }: { userId: string }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Contact reveal progress
+            Contact Sharing Progress
           </div>
           <div className="mt-1 font-display text-lg font-bold">
             {unlocked ? "Contact sharing available" : "Direct contact unlocks through real connection"}

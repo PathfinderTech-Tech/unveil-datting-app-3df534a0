@@ -3,6 +3,7 @@ import { Lock, Sparkles, ShieldCheck, Phone, Link as LinkIcon } from "lucide-rea
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { JourneyCompletionCard } from "@/components/SlowRevealTimeline";
 
 type Status = {
   mutual: boolean;
@@ -93,11 +94,13 @@ export function ContactRevealPanel({
   }
 
   return (
-    <div className="rounded-3xl border border-primary/20 bg-card p-6 shadow-glow">
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
-        {status.shareUnlocked ? <LinkIcon className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-        Contact reveal
-      </div>
+    <div className="space-y-4">
+      {status.eligible && <JourneyCompletionCard eligible />}
+      <div className="rounded-3xl border border-primary/20 bg-card p-6 shadow-glow">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+          {status.shareUnlocked ? <LinkIcon className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+          Contact sharing
+        </div>
 
       {status.shareUnlocked ? (
         <div className="mt-3">
@@ -162,6 +165,8 @@ export function ContactRevealPanel({
           </button>
         </>
       )}
+      </div>
     </div>
   );
 }
+

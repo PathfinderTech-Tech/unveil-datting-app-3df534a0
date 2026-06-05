@@ -111,17 +111,14 @@ function MatchInsights() {
         <div className="rounded-3xl border border-border bg-card p-8">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div style={{ filter: "blur(6px)" }}>
-                <ProfileAvatar
-                  userId={profile.id}
-                  name={profile.first_name}
-                  discoveryMode={(profile as any).discovery_mode ?? null}
-                  avatarUrl={(profile as any).avatar_url ?? null}
-                  photoUrl={(profile as any).photo_url ?? null}
-                  size={72}
-                />
-
-              </div>
+              <ProfileAvatar
+                userId={profile.id}
+                name={profile.first_name}
+                discoveryMode={(profile as any).discovery_mode ?? null}
+                avatarUrl={(profile as any).avatar_url ?? null}
+                photoUrl={(profile as any).photo_url ?? null}
+                size={72}
+              />
               <div>
                 <div className="font-display text-2xl font-bold">{profile.first_name}, {profile.age}</div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
