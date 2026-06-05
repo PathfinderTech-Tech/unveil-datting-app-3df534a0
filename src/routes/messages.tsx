@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { SignedImage } from "@/components/SignedImage";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 
