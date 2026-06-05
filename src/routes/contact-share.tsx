@@ -64,7 +64,7 @@ function ContactShare() {
             : <PartnerPicker partners={partners} value={partnerId} onChange={setPartnerId} />}
         </div>
 
-        {partner && <SharePanel key={partner.userId} partner={partner} onRefresh={refresh} />}
+        {partner && verification.verified && <SharePanel key={partner.userId} partner={partner} onRefresh={refresh} />}
       </div>
     </div>
   );
