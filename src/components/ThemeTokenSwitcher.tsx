@@ -70,6 +70,17 @@ function applyTokens(tokens: Record<string, string>) {
   Object.entries(tokens).forEach(([name, value]) => root.style.setProperty(name, value.trim()));
 }
 
+function isColorValue(value: string) {
+  const trimmed = value.trim();
+  return Boolean(trimmed) && (typeof CSS === "undefined" || CSS.supports("color", trimmed));
+}
+
+function sanitizeTokens(tokens: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(tokens).filter(([name, value]) => TOKEN_NAME_RE.test(name) && isColorValue(value)),
+  );
+}
+
 function readCustomTokens() {
   try {
     const saved = localStorage.getItem(CUSTOM_KEY);
@@ -110,9 +121,7 @@ export function ThemeTokenSwitcher() {
   }
 
   function saveDraft() {
-    const sanitized = Object.fromEntries(
-      Object.entries(draft).filter(([name, value]) => TOKEN_NAME_RE.test(name) && value.trim()),
-    );
+    const sanitized = sanitizeTokens(draft);
     const nextCustom = { ...custom, [activePreset.name]: sanitized };
     setCustom(nextCustom);
     localStorage.setItem(CUSTOM_KEY, JSON.stringify(nextCustom));
@@ -132,10 +141,10 @@ export function ThemeTokenSwitcher() {
   function addToken() {
     const name = newName.trim();
     const value = newValue.trim();
-    if (!TOKEN_NAME_RE.test(name) || !value) return;
+    if (!TOKEN_NAME_RE.test(name) || !isColorValue(value)) return;
     const next = { ...draft, [name]: value };
     setDraft(next);
-    applyTokens(next);
+    applyTokens(sanitizeTokens(next));
   }
 
   return (
@@ -184,7 +193,7 @@ export function ThemeTokenSwitcher() {
                     onChange={(event) => {
                       const next = { ...draft, [name]: event.target.value };
                       setDraft(next);
-                      applyTokens(next);
+                      applyTokens(sanitizeTokens(next));
                     }}
                     className="min-w-0 rounded-md border border-input bg-background px-2 py-1 font-mono text-[10px] text-foreground outline-none focus:border-primary"
                   />
