@@ -8,7 +8,7 @@ export type FailureRow = {
   severity: string;
   user_id: string | null;
   message: string;
-  context: unknown;
+  context: string | null;
   created_at: string;
 };
 
@@ -44,5 +44,15 @@ export const getFailureStats = createServerFn({ method: "GET" })
       .select("id,category,severity,user_id,message,context,created_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    return { stats, recent: (recent.data ?? []) as FailureRow[] };
+    const recentRows = (recent.data ?? []) as any[];
+    const recentSerialized: FailureRow[] = recentRows.map((r) => ({
+      id: String(r.id),
+      category: String(r.category),
+      severity: String(r.severity),
+      user_id: r.user_id ?? null,
+      message: String(r.message ?? ""),
+      context: r.context == null ? null : JSON.stringify(r.context),
+      created_at: String(r.created_at),
+    }));
+    return { stats, recent: recentSerialized };
   });
