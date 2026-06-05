@@ -166,7 +166,7 @@ function MatchInsights() {
 
         {matchId && (
           <div className="mt-4">
-            <PhotoRevealPanel peerUserId={userId} peerName={profile.first_name} />
+            <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
           </div>
         )}
 
