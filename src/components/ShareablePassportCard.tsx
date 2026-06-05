@@ -203,6 +203,21 @@ export function ShareablePassportCard({
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText)}`;
   const twitterHref = `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareText)}`;
   const whatsappHref = `https://wa.me/?text=${enc(`${shareText} ${shareUrl}`)}`;
+  const telegramHref = `https://t.me/share/url?url=${enc(shareUrl)}&text=${enc(shareText)}`;
+  const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl)}`;
+
+  async function copyAndOpen(appUrl: string | null, platform: string) {
+    try {
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      toast.success(`Link copied — paste it into ${platform}`);
+    } catch {
+      toast.error("Could not copy link");
+    }
+    trackEvent(`shareable_card_${platform.toLowerCase()}_clicked`, { premium: isPremium });
+    if (appUrl && typeof window !== "undefined") {
+      window.open(appUrl, "_blank", "noopener,noreferrer");
+    }
+  }
 
 
   function setChoice(choice: PhotoChoice) {
