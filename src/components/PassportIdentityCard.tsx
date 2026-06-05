@@ -48,7 +48,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
   const tagline = ARCHETYPE_TAGLINES[archetype] ?? "Your signature is still forming.";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-[oklch(0.15_0.06_300)] via-[oklch(0.12_0.05_310)] to-[oklch(0.10_0.06_340)] p-7 shadow-glow md:p-9">
+    <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-deep p-7 shadow-glow md:p-9">
       <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/20 blur-3xl" aria-hidden />
       <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-accent/15 blur-3xl" aria-hidden />
 
@@ -73,7 +73,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
         {onShare && (
           <button
             onClick={onShare}
-            className="rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary"
+            className="rounded-full border border-primary/30 bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-[var(--shadow-logo)] hover:opacity-95"
           >
             Share
           </button>
