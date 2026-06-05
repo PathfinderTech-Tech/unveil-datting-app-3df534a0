@@ -5,12 +5,12 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { generateAvatar } from "@/lib/avatar.functions";
+import { generateAvatar, listAvatarHistory, setActiveAvatar, deleteAvatarHistoryItem, type AvatarHistoryItem } from "@/lib/avatar.functions";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, X, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Image as ImageIcon, Wand2,
-} from "lucide-react";
+  Sparkles, RefreshCw, Image as ImageIcon, Wand2, History, Trash2,
+}  from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
   head: () => ({
@@ -36,6 +36,9 @@ function AvatarPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const generate = useServerFn(generateAvatar);
+  const fetchHistory = useServerFn(listAvatarHistory);
+  const revertAvatar = useServerFn(setActiveAvatar);
+  const deleteAvatar = useServerFn(deleteAvatarHistoryItem);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<0 | 1 | 2>(0);
@@ -44,6 +47,14 @@ function AvatarPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [fallback, setFallback] = useState(false);
+  const [history, setHistory] = useState<AvatarHistoryItem[]>([]);
+
+  async function refreshHistory() {
+    try {
+      const res = await fetchHistory({});
+      setHistory(res.items);
+    } catch { /* ignore */ }
+  }
 
   // Preload existing values so users can re-roll without re-uploading.
   useEffect(() => {
@@ -65,7 +76,7 @@ function AvatarPage() {
         // re-uploading their selfie.
         setStep(2);
       }
-
+      refreshHistory();
     })();
   }, [user]);
 
@@ -104,9 +115,35 @@ function AvatarPage() {
       if (res.fallback && res.message) toast.message(res.message);
       else toast.success("Your UNVEIL avatar is ready.");
       setStep(2);
+      refreshHistory();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate");
     } finally { setBusy(false); }
+  }
+
+  async function revertTo(item: AvatarHistoryItem) {
+    setBusy(true);
+    try {
+      const res = await revertAvatar({ data: { path: item.path } });
+      setAvatarUrl(res.avatarUrl);
+      setStyle(item.style as Style);
+      setStep(2);
+      setFallback(false);
+      toast.success("Avatar restored.");
+      refreshHistory();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not restore");
+    } finally { setBusy(false); }
+  }
+
+  async function removeItem(item: AvatarHistoryItem) {
+    try {
+      await deleteAvatar({ data: { path: item.path } });
+      setHistory((h) => h.filter((x) => x.path !== item.path));
+      toast.success("Removed.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete");
+    }
   }
 
   if (loading) return null;
@@ -254,6 +291,53 @@ function AvatarPage() {
                 <ArrowLeft className="h-4 w-4" /> Change style
               </button>
             </div>
+
+            {history.length > 0 && (
+              <div className="mt-8 border-t border-border pt-6">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <History className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-display">Avatar history</span>
+                    <span className="text-xs text-muted-foreground">({history.length})</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Tap to restore</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+                  {history.map((item) => {
+                    const isActive = avatarUrl === item.url || avatarUrl?.split("?")[0] === item.url.split("?")[0];
+                    return (
+                      <div key={item.path} className="group relative">
+                        <button
+                          onClick={() => revertTo(item)}
+                          disabled={busy}
+                          className={`block aspect-square w-full overflow-hidden rounded-xl border transition ${
+                            isActive ? "border-primary ring-2 ring-primary shadow-glow" : "border-border hover:border-primary/50"
+                          } disabled:opacity-50`}
+                          title={`${item.style} · ${new Date(item.createdAt).toLocaleString()}`}
+                        >
+                          <img src={item.url} alt={item.style} className="h-full w-full object-cover" />
+                        </button>
+                        <div className="mt-1 text-center font-mono text-[9px] uppercase tracking-luxury text-muted-foreground">
+                          {item.style}
+                        </div>
+                        <button
+                          onClick={() => removeItem(item)}
+                          aria-label="Delete"
+                          className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                        {isActive && (
+                          <div className="absolute left-1 top-1 rounded-full bg-primary p-0.5 text-primary-foreground">
+                            <Check className="h-3 w-3" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

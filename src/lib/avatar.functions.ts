@@ -247,3 +247,68 @@ function bytesToBase64(bytes: Uint8Array): string {
   }
   return btoa(bin);
 }
+
+export type AvatarHistoryItem = {
+  path: string;
+  url: string;
+  style: string;
+  createdAt: string;
+};
+
+export const listAvatarHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ items: AvatarHistoryItem[]; activeUrl: string | null }> => {
+    const { userId, supabase } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: files } = await supabaseAdmin.storage
+      .from("profile-photos")
+      .list(`${userId}/avatars`, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+
+    const items: AvatarHistoryItem[] = [];
+    for (const f of files ?? []) {
+      if (!f.name || f.name.startsWith(".")) continue;
+      const path = `${userId}/avatars/${f.name}`;
+      const { data: signed } = await supabaseAdmin.storage
+        .from("profile-photos").createSignedUrl(path, 3600);
+      const style = (f.name.split("-")[0] || "stylized").toLowerCase();
+      const createdAt = (f as any).created_at ?? new Date().toISOString();
+      if (signed?.signedUrl) items.push({ path, url: signed.signedUrl, style, createdAt });
+    }
+    items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+
+    const { data: prof } = await supabase
+      .from("profiles").select("avatar_url").eq("id", userId).maybeSingle();
+    return { items, activeUrl: prof?.avatar_url ?? null };
+  });
+
+export const setActiveAvatar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ path: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!data.path.startsWith(`${userId}/`)) throw new Error("Not your avatar.");
+    const { data: pub } = supabaseAdmin.storage.from("profile-photos").getPublicUrl(data.path);
+    const url = pub.publicUrl;
+    const style = (data.path.split("/").pop()?.split("-")[0] || "stylized") as z.infer<typeof AvatarStyle>;
+    await supabase.from("profiles").update({
+      photo_url: url, avatar_url: url, avatar_style: style,
+      avatar_generated_at: new Date().toISOString(),
+    }).eq("id", userId);
+    const { data: signed } = await supabaseAdmin.storage
+      .from("profile-photos").createSignedUrl(data.path, 3600);
+    return { avatarUrl: signed?.signedUrl ?? url };
+  });
+
+export const deleteAvatarHistoryItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ path: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!data.path.startsWith(`${userId}/`)) throw new Error("Not your avatar.");
+    await supabaseAdmin.storage.from("profile-photos").remove([data.path]);
+    return { ok: true };
+  });
+
