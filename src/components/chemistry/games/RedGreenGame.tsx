@@ -55,12 +55,12 @@ export function RedGreenGame({ onComplete, onSkip }: {
         <button
           onClick={() => pick("red")}
           className="rounded-2xl border py-4 text-sm font-medium"
-          style={{ background: "rgba(239,68,68,0.10)", borderColor: "rgba(239,68,68,0.4)", color: "rgb(239,68,68)" }}
+          style={{ background: "color-mix(in oklch, var(--destructive) 12%, transparent)", borderColor: "color-mix(in oklch, var(--destructive) 45%, transparent)", color: "var(--destructive)" }}
         >🚩 Red Flag</button>
         <button
           onClick={() => pick("green")}
           className="rounded-2xl border py-4 text-sm font-medium"
-          style={{ background: "rgba(52,211,153,0.10)", borderColor: "rgba(52,211,153,0.4)", color: "rgb(52,211,153)" }}
+          style={{ background: "color-mix(in oklch, var(--logo-gold) 12%, transparent)", borderColor: "color-mix(in oklch, var(--logo-gold) 45%, transparent)", color: "var(--logo-gold)" }}
         >🟢 Green Flag</button>
       </div>
       <SkipButton onSkip={onSkip} />
