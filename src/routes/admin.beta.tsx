@@ -4,8 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
 import { getBetaStats, type BetaStats } from "@/lib/admin-beta.functions";
+import { getFailureStats, type FailureStat, type FailureRow } from "@/lib/admin-failures.functions";
 import {
-  Users, ShieldCheck, Crown, Heart, MessageCircle, Activity, FileCheck, DollarSign, Loader2,
+  Users, ShieldCheck, Crown, Heart, MessageCircle, Activity, FileCheck, DollarSign, Loader2, AlertTriangle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/beta")({
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/admin/beta")({
 function BetaDashboard() {
   const { user, loading } = useAuth();
   const fetchStats = useServerFn(getBetaStats);
+  const fetchFailures = useServerFn(getFailureStats);
   const [stats, setStats] = useState<BetaStats | null>(null);
+  const [failures, setFailures] = useState<{ stats: FailureStat[]; recent: FailureRow[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +27,10 @@ function BetaDashboard() {
     fetchStats({})
       .then(setStats)
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"));
-  }, [user, fetchStats]);
+    fetchFailures({})
+      .then(setFailures)
+      .catch(() => {/* failure panel is optional */});
+  }, [user, fetchStats, fetchFailures]);
 
   if (loading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   if (!user) {
@@ -75,6 +81,53 @@ function BetaDashboard() {
             <Stat icon={<DollarSign className="h-4 w-4" />} label="Revenue" value={revenue} />
           </div>
         )}
+
+        <div className="mt-10">
+          <div className="mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <h2 className="font-display text-xl">Failures · last 24h</h2>
+          </div>
+          {!failures ? (
+            <div className="text-xs text-muted-foreground">Loading failures…</div>
+          ) : failures.stats.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+              No failures recorded in the last 24 hours. ✓
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-2 grid-cols-2 lg:grid-cols-4">
+                {failures.stats.map((s) => (
+                  <div key={`${s.category}-${s.severity}`} className="rounded-2xl border border-border bg-card p-4">
+                    <div className="text-xs text-muted-foreground">{s.category}</div>
+                    <div className="mt-1 flex items-baseline gap-2">
+                      <span className="font-display text-2xl">{s.count}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.severity}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {failures.recent.length > 0 && (
+                <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card">
+                  <table className="w-full text-xs">
+                    <thead className="bg-surface-2 text-muted-foreground">
+                      <tr><th className="p-2 text-left">When</th><th className="p-2 text-left">Category</th><th className="p-2 text-left">Severity</th><th className="p-2 text-left">Message</th></tr>
+                    </thead>
+                    <tbody>
+                      {failures.recent.slice(0, 15).map((r) => (
+                        <tr key={r.id} className="border-t border-border">
+                          <td className="p-2 whitespace-nowrap text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
+                          <td className="p-2">{r.category}</td>
+                          <td className="p-2">{r.severity}</td>
+                          <td className="p-2 max-w-md truncate" title={r.message}>{r.message}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </section>
     </div>
   );

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logFailure } from "@/lib/failure-log.server";
 
 const AvatarStyle = z.enum(["real", "anime", "stylized", "realistic", "mystery"]);
 const Input = z.object({
@@ -158,6 +159,13 @@ export const generateAvatar = createServerFn({ method: "POST" })
         return { avatarUrl, style: data.style, fallback: false };
       } catch (e) {
         const message = e instanceof Error ? e.message : "Generation failed";
+        await logFailure({
+          category: "avatar_generation",
+          severity: "error",
+          userId,
+          message,
+          context: { style: data.style, hasSelfie: Boolean(data.selfieUrl) },
+        });
         return await savePlaceholder(userId, data.style, data.selfieUrl, supabase, message);
       }
     }

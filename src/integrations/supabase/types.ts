@@ -546,6 +546,36 @@ export type Database = {
         }
         Relationships: []
       }
+      failure_logs: {
+        Row: {
+          category: string
+          context: Json | null
+          created_at: string
+          id: string
+          message: string
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          message: string
+          severity?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          message?: string
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -1792,6 +1822,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_failure_stats: {
+        Args: { _hours?: number }
+        Returns: {
+          category: string
+          count: number
+          last_at: string
+          severity: string
+        }[]
+      }
       admin_monetization_stats: {
         Args: never
         Returns: {
