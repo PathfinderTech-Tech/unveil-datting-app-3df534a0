@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { NoMatchHub } from "@/components/NoMatchHub";
 import {
   ARCHETYPES, PRESENCE_LABELS, chemistryFor,
-  type SynapseProfile,
+  type Archetype, type SynapseProfile,
 } from "@/lib/synapse-store";
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
@@ -34,12 +34,16 @@ export const Route = createFileRoute("/matches")({
 type ProfileState = {
   onboardingComplete: boolean;
   baseScore: number;
-  archetype: string | null;
+  archetype: Archetype;
   archetypeName: string;
   completionPct: number;
   questionsRemaining: number;
   photosRemaining: number;
 };
+
+function normalizeArchetype(value: unknown): Archetype {
+  return typeof value === "string" && value in ARCHETYPES ? (value as Archetype) : "signal";
+}
 
 function Matches() {
   const { checking } = useRequireOnboarding();
@@ -68,7 +72,7 @@ function Matches() {
           .select("answers").eq("user_id", user.id).maybeSingle(),
       ]);
       if (!alive) return;
-      const arch = (data?.archetype ?? null) as string | null;
+      const arch = normalizeArchetype(data?.archetype);
 
       // Compute resume progress for the "Finish your profile" card.
       const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
@@ -90,7 +94,7 @@ function Matches() {
         onboardingComplete: !!data?.onboarding_complete,
         baseScore: data?.compatibility_score ?? 70,
         archetype: arch,
-        archetypeName: arch && (ARCHETYPES as Record<string, { name: string }>)[arch]?.name || "Your resonance",
+        archetypeName: ARCHETYPES[arch].name,
         completionPct,
         questionsRemaining: Math.max(0, discoveryKeys.length - discoveryAnswered),
         photosRemaining: hasPhoto ? 0 : 1,
@@ -270,7 +274,7 @@ function Matches() {
     mindScore: profileState!.baseScore,
     character: { warmth: 50, curiosity: 50, adventure: 50, loyalty: 50, humor: 50, ambition: 50 },
     composite: profileState!.baseScore,
-    archetype: (profileState!.archetype as SynapseProfile["archetype"]) ?? "signal",
+    archetype: profileState!.archetype,
   };
 
   async function handleLike(m: RealMatch) {
@@ -474,7 +478,7 @@ type Stage = 1 | 2 | 3;
 function MatchSheet({ match, you, onClose, onLike, onThought }: { match: SynapseProfile; you: SynapseProfile; onClose: () => void; onLike: () => void; onThought: () => void }) {
   // Progressive reveal — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
-  const arch = ARCHETYPES[match.archetype];
+  const arch = ARCHETYPES[normalizeArchetype(match.archetype)];
   const presence = match.presence ? PRESENCE_LABELS[match.presence] : null;
   const chem = chemistryFor(match.name + match.city);
   const matchPercent = Math.max(60, 100 - Math.abs(you.composite - match.composite) * 4);
