@@ -38,7 +38,7 @@ export const loadPublicPassport = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<PublicPassport | null> => {
     const { data: row } = await supabaseAdmin
       .from("profiles")
-      .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, profile_photo_url")
+      .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, profile_photo_url, verified")
       .eq("id", data.userId)
       .maybeSingle();
     if (!row) return null;
@@ -57,5 +57,6 @@ export const loadPublicPassport = createServerFn({ method: "GET" })
       avatarUrl: avatar,
       photoUrl: photo,
       profilePhotoUrl: profilePhoto,
+      verified: !!row.verified,
     };
   });
