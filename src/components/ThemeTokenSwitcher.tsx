@@ -107,6 +107,16 @@ export function ThemeTokenSwitcher() {
   const presets = useMemo(() => mergeCustomTokens(custom), [custom]);
   const activePreset = presets.find((preset) => preset.name === active) ?? presets[0];
 
+  // Debounce live edits so rapid keystrokes coalesce into a single atomic CSS write.
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleApply = useCallback((tokens: Record<string, string>) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => applyTokens(tokens), 90);
+  }, []);
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
+
   useEffect(() => {
     const savedCustom = readCustomTokens();
     const savedActive = localStorage.getItem(ACTIVE_KEY) as PresetName | null;
