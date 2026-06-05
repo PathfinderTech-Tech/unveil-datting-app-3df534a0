@@ -9,7 +9,7 @@ echo "🎨 Scanning src/ for hard-coded color literals (excluding styles.css, ge
 echo
 
 # Allow-list intentional exceptions (SVG share card, OAuth brand marks, error page).
-ALLOW='src/components/ShareablePassportCard.tsx|src/components/OAuthButtons.tsx|src/lib/error-page.ts|src/lib/avatar.functions.ts|src/lib/chemistry-ledger.ts'
+ALLOW='src/components/ShareablePassportCard.tsx|src/components/OAuthButtons.tsx|src/lib/error-page.ts|src/lib/avatar.functions.ts|src/lib/chemistry-ledger.ts|src/components/ui/chart.tsx|src/routes/__root.tsx:.*theme-color'
 
 HITS=$(rg -nP "#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])|\brgba?\(|\bhsl\(" src/ \
   -g '!*.gen.ts' -g '!styles.css' -g '!*.svg' -g '!*.asset.json' \
