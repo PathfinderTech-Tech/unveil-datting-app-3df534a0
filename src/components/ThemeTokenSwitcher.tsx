@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type PresetName = "Logo" | "Cool Indigo" | "Sunset" | "Emerald";
 
@@ -67,7 +67,13 @@ function mergeCustomTokens(custom: Record<string, Record<string, string>>) {
 
 function applyTokens(tokens: Record<string, string>) {
   const root = document.documentElement;
-  Object.entries(tokens).forEach(([name, value]) => root.style.setProperty(name, value.trim()));
+  // Apply atomically in a single frame to prevent flicker / partial paints.
+  requestAnimationFrame(() => {
+    const sanitized = sanitizeTokens(tokens);
+    for (const [name, value] of Object.entries(sanitized)) {
+      root.style.setProperty(name, value.trim());
+    }
+  });
 }
 
 function isColorValue(value: string) {
@@ -100,6 +106,16 @@ export function ThemeTokenSwitcher() {
 
   const presets = useMemo(() => mergeCustomTokens(custom), [custom]);
   const activePreset = presets.find((preset) => preset.name === active) ?? presets[0];
+
+  // Debounce live edits so rapid keystrokes coalesce into a single atomic CSS write.
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleApply = useCallback((tokens: Record<string, string>) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => applyTokens(tokens), 90);
+  }, []);
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
 
   useEffect(() => {
     const savedCustom = readCustomTokens();
@@ -193,7 +209,7 @@ export function ThemeTokenSwitcher() {
                     onChange={(event) => {
                       const next = { ...draft, [name]: event.target.value };
                       setDraft(next);
-                      applyTokens(sanitizeTokens(next));
+                      scheduleApply(next);
                     }}
                     className="min-w-0 rounded-md border border-input bg-background px-2 py-1 font-mono text-[10px] text-foreground outline-none focus:border-primary"
                   />
