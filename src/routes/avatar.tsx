@@ -76,7 +76,7 @@ function AvatarPage() {
         // re-uploading their selfie.
         setStep(2);
       }
-
+      refreshHistory();
     })();
   }, [user]);
 
