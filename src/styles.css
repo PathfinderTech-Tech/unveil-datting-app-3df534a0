@@ -112,20 +112,8 @@
     min-height: 100vh;
     position: relative;
   }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("/__l5e/assets-v1/fc47f23b-c33c-4bdb-adce-2c00fe4a4f02/unveil-logo-v2.png");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: min(75vmin, 760px);
-    opacity: 0.07;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(0.5px);
-  }
   body > * { position: relative; z-index: 1; }
+
 
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
 
