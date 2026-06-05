@@ -54,6 +54,7 @@ function DatePlanRoute() {
   }, []);
 
   async function submit() {
+    if (!verifiedOk) { toast.error("Verification required to plan a date."); return; }
     if (!partner || !theme) return;
     setBusy(true);
     const res = await proposeDate({
