@@ -48,11 +48,11 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
   { id: "r3", category: "relationships", text: "What is your perfect Sunday?", placeholder: "My perfect Sunday looks like..." },
   { id: "r4", category: "relationships", text: "When do you feel most yourself with someone?", placeholder: "I feel most myself when..." },
 
-  // FUN (original)
-  { id: "f1", category: "fun", text: "Pineapple on pizza?", placeholder: "My take on pineapple pizza..." },
-  { id: "f2", category: "fun", text: "If a penguin knocked on your door, what would you do?", placeholder: "First thing I'd do..." },
-  { id: "f3", category: "fun", text: "What's the funniest thing you've ever spent money on?", placeholder: "I once spent money on..." },
-  { id: "f4", category: "fun", text: "What's the most unhinged song on your playlist?", placeholder: "The unhinged song on my playlist is..." },
+  // FUN (merged into humor)
+  { id: "f1", category: "humor", text: "Pineapple on pizza?", placeholder: "My take on pineapple pizza..." },
+  { id: "f2", category: "humor", text: "If a penguin knocked on your door, what would you do?", placeholder: "First thing I'd do..." },
+  { id: "f3", category: "humor", text: "What's the funniest thing you've ever spent money on?", placeholder: "I once spent money on..." },
+  { id: "f4", category: "humor", text: "What's the most unhinged song on your playlist?", placeholder: "The unhinged song on my playlist is..." },
 
   // VALUES
   { id: "v1", category: "values", text: "What's something you're quietly proud of that most people would never guess?", placeholder: "Something most people don't know about me..." },
