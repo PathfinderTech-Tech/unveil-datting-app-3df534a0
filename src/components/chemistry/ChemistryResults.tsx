@@ -20,11 +20,10 @@ export function ChemistryResults({
 }) {
   const { total, bonusTotal } = sumSession(results);
   const tier = computeTier(results, total);
-  const meta = TIER_META[tier];
   const pct = Math.round((total / SESSION_MAX) * 100);
 
   return (
-    <div className="min-h-screen" style={{ background: "#0D0D0F", color: "#F0EDE8" }}>
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-md px-5 py-10 space-y-6">
         {/* Section 1 — Tier reveal */}
         <div
@@ -32,49 +31,42 @@ export function ChemistryResults({
           style={{ animation: "chem-pop 0.5s cubic-bezier(0.2,0.8,0.2,1.2)" }}
         >
           <TierOrb tier={tier} size="lg" />
-          <h1
-            className="mt-5 font-display text-3xl font-extrabold"
-            style={{ color: meta.color }}
-          >
+          <h1 className="mt-5 font-display text-3xl font-extrabold text-gradient-hero">
             {tier === "Incomplete" ? "Incomplete Session" : tier}
           </h1>
-          <p className="mt-2 text-sm" style={{ color: "#7A7876" }}>
-            {meta.desc}
+          <p className="mt-2 text-sm text-muted-foreground">
+            {TIER_META[tier].desc}
           </p>
         </div>
 
         {/* Section 2 — Score card */}
-        <div
-          className="rounded-2xl border p-5"
-          style={{ background: "#161618", borderColor: "#2A2A2E" }}
-        >
-          <div className="text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
             Chemistry Score
           </div>
           <div className="mt-1 flex items-baseline gap-1">
             <span
               className="font-display font-black"
-              style={{ fontSize: 48, color: meta.color, lineHeight: 1 }}
+              style={{ fontSize: 48, lineHeight: 1 }}
             >
               {total}
             </span>
-            <span className="text-base" style={{ color: "#7A7876" }}>/ {SESSION_MAX}</span>
+            <span className="text-base text-muted-foreground">/ {SESSION_MAX}</span>
           </div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: "#2A2A2E" }}>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
             <div
-              className="h-full rounded-full"
+              className="h-full rounded-full bg-gradient-hero"
               style={{
                 width: `${pct}%`,
-                background: "linear-gradient(90deg, #8B5CF6, #E2C896)",
                 transition: "width 800ms ease-out",
               }}
             />
           </div>
-          <div className="mt-2 text-[11px]" style={{ color: "#7A7876" }}>
+          <div className="mt-2 text-[11px] text-muted-foreground">
             {pct}% compatibility signal strength
           </div>
           {bonusTotal > 0 && (
-            <div className="mt-1 text-[11px]" style={{ color: "#E2C896" }}>
+            <div className="mt-1 text-[11px] text-primary">
               Includes +{bonusTotal} streak bonuses
             </div>
           )}
@@ -82,7 +74,7 @@ export function ChemistryResults({
 
         {/* Section 3 — Game breakdown */}
         <div className="space-y-3">
-          <div className="text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
             Session Breakdown
           </div>
           <div className="space-y-2">
@@ -94,13 +86,12 @@ export function ChemistryResults({
               return (
                 <div
                   key={g.id}
-                  className="rounded-2xl border px-4 py-3"
-                  style={{ background: "#161618", borderColor: "#2A2A2E" }}
+                  className="rounded-2xl border border-border bg-card px-4 py-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <span className="text-xl">{g.emoji}</span>
-                      <span className="text-sm" style={{ color: "#F0EDE8" }}>{g.name}</span>
+                      <span className="text-sm text-foreground">{g.name}</span>
                     </div>
                     {skipped ? (
                       <PointsBadge variant="skip" />
@@ -111,7 +102,7 @@ export function ChemistryResults({
                   {hasBonus && r && (
                     <div className="mt-2 space-y-0.5">
                       {r.bonuses.map((b, i) => (
-                        <div key={i} className="text-[11px]" style={{ color: "#E2C896" }}>
+                        <div key={i} className="text-[11px] text-primary">
                           ✦ +{b.points} pts — {b.label}
                         </div>
                       ))}
@@ -124,18 +115,12 @@ export function ChemistryResults({
         </div>
 
         {/* Section 4 — Passport callout */}
-        <div
-          className="rounded-2xl border px-4 py-3"
-          style={{
-            background: "rgba(201,169,110,0.06)",
-            borderColor: "rgba(201,169,110,0.18)",
-          }}
-        >
-          <div className="flex items-center gap-2 text-sm" style={{ color: "#E2C896" }}>
-            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "#E2C896" }} />
+        <div className="rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-primary">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
             Chemistry score added to your Passport
           </div>
-          <div className="mt-1 text-[11px]" style={{ color: "#7A7876" }}>
+          <div className="mt-1 text-[11px] text-muted-foreground">
             Signals shape how UNVEIL matches you with depth-aligned partners.
           </div>
         </div>
@@ -144,18 +129,13 @@ export function ChemistryResults({
         <div className="space-y-2">
           <button
             onClick={onPlayAgain}
-            className="w-full rounded-full px-4 py-3 text-sm font-semibold"
-            style={{
-              background: "linear-gradient(135deg, #8B5CF6, #A78BFA)",
-              color: "#0D0D0F",
-            }}
+            className="w-full rounded-full bg-gradient-hero px-4 py-3 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
           >
             Play Again
           </button>
           <Link
             to="/passport"
-            className="block w-full rounded-full border px-4 py-3 text-center text-sm"
-            style={{ color: "#7A7876", borderColor: "#2A2A2E" }}
+            className="block w-full rounded-full border border-border px-4 py-3 text-center text-sm text-muted-foreground hover:border-primary/40 hover:text-primary"
           >
             Back to Passport
           </Link>
