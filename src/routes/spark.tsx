@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, RefreshCcw, Send, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { saveSparkAnswer, loadSparkAnswers, useUserId, awardBadge } from "@/lib/games-api";
+import { saveSparkAnswer, loadSparkAnswers, deleteSparkAnswer, useUserId, awardBadge } from "@/lib/games-api";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { toast } from "sonner";
 
@@ -135,8 +135,13 @@ function SparkPage() {
     );
   }, [uid]);
 
-  // Track which questions in current pool are answered (by question text).
+  // Track answered questions: set (for membership) and map (for current value).
   const answeredSet = useMemo(() => new Set(answered.map((a) => a.q)), [answered]);
+  const answeredMap = useMemo(() => {
+    const m = new Map<string, string>();
+    answered.forEach((a) => m.set(a.q, a.a));
+    return m;
+  }, [answered]);
   const remainingCount = pool.filter((p) => !answeredSet.has(p.text)).length;
   const allAnswered = remainingCount === 0 && pool.length > 0;
 
@@ -147,12 +152,16 @@ function SparkPage() {
     if (firstUnanswered >= 0) setIdx(firstUnanswered);
   }, [filter, pool.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // When question changes, prefill textarea with any existing saved answer.
+  useEffect(() => {
+    setAnswer(answeredMap.get(q.text) ?? "");
+  }, [q.text]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const goToNextUnanswered = (fromIdx: number) => {
     for (let step = 1; step <= pool.length; step++) {
       const i = (fromIdx + step) % pool.length;
       if (!answeredSet.has(pool[i].text)) {
         setIdx(i);
-        setAnswer("");
         return true;
       }
     }
@@ -163,13 +172,13 @@ function SparkPage() {
     const found = goToNextUnanswered(idx);
     if (!found) setDone(true);
   };
-  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); setAnswer(""); };
+  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); };
 
-  // Auto-save: debounced save while typing.
+  // Auto-save: debounced save while typing. Saves on first answer AND edits.
   useEffect(() => {
-    if (!answer.trim()) return;
-    if (answeredSet.has(q.text)) return; // already saved
     const trimmed = answer.trim();
+    if (!trimmed) return;
+    if (answeredMap.get(q.text) === trimmed) return; // no change
     const handle = setTimeout(async () => {
       const entry = { q: q.text, a: trimmed, cat: q.category };
       if (uid) {
@@ -182,10 +191,10 @@ function SparkPage() {
           toast.error("Couldn't save answer", { description: error });
           return;
         }
-        setAnswered((a) => [entry, ...a].slice(0, 50));
+        setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
         if (answered.length + 1 >= 5) await awardBadge("storyteller");
       } else {
-        setAnswered((a) => [entry, ...a].slice(0, 50));
+        setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
       }
     }, 900);
     return () => clearTimeout(handle);
@@ -193,8 +202,9 @@ function SparkPage() {
 
   const saveAndNext = async () => {
     if (!answer.trim()) { next(); return; }
-    if (!answeredSet.has(q.text)) {
-      const entry = { q: q.text, a: answer.trim(), cat: q.category };
+    const trimmed = answer.trim();
+    if (answeredMap.get(q.text) !== trimmed) {
+      const entry = { q: q.text, a: trimmed, cat: q.category };
       if (uid) {
         setSaving(true);
         const { error } = await saveSparkAnswer({
@@ -203,11 +213,43 @@ function SparkPage() {
         setSaving(false);
         if (error) { toast.error("Couldn't save answer", { description: error }); return; }
       }
-      setAnswered((a) => [entry, ...a].slice(0, 50));
+      setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
     }
     const found = goToNextUnanswered(idx);
     if (!found) setDone(true);
   };
+
+  const editAnswer = (questionText: string) => {
+    setDone(false);
+    // Switch to "all" so the question is in pool regardless of current filter.
+    const inPool = pool.findIndex((p) => p.text === questionText);
+    if (inPool >= 0) {
+      setIdx(inPool);
+    } else {
+      setFilter("all");
+      const i = QUESTIONS.findIndex((p) => p.text === questionText);
+      if (i >= 0) setIdx(i);
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const removeAnswer = async (questionText: string) => {
+    const prev = answered;
+    setAnswered((a) => a.filter((x) => x.q !== questionText));
+    if (uid) {
+      const { error } = await deleteSparkAnswer(questionText);
+      if (error) {
+        toast.error("Couldn't delete answer", { description: error });
+        setAnswered(prev);
+        return;
+      }
+    }
+    if (q.text === questionText) setAnswer("");
+    toast.success("Answer deleted");
+  };
+
 
   if (checking) {
     return (
@@ -284,8 +326,24 @@ function SparkPage() {
                 placeholder={q.placeholder}
                 rows={3}
                 className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
-              <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {saving ? "Saving…" : answeredSet.has(q.text) ? "Saved ✓" : answer.trim() ? "Saves as you type" : "Auto-saves"}
+              <div className="mt-2 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span>
+                  {saving
+                    ? "Saving…"
+                    : answeredMap.get(q.text) === answer.trim() && answer.trim()
+                    ? "Saved ✓"
+                    : answer.trim()
+                    ? "Saves as you type"
+                    : "Auto-saves"}
+                </span>
+                {answeredSet.has(q.text) && (
+                  <button
+                    onClick={() => removeAnswer(q.text)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 normal-case tracking-normal text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete answer
+                  </button>
+                )}
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <button onClick={prev}
@@ -312,13 +370,41 @@ function SparkPage() {
 
         {answered.length > 0 && (
           <div className="mt-10">
-            <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Your spark feed</div>
+            <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              Your spark feed · tap any answer to edit
+            </div>
             <div className="space-y-3">
               {answered.map((it, i) => (
-                <div key={i} className="rounded-2xl border border-border bg-card p-4">
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{CAT_LABEL[it.cat].label}</div>
-                  <div className="mt-1 font-display text-lg">{it.q}</div>
-                  <div className="mt-1 text-sm text-foreground/85">{it.a}</div>
+                <div key={i} className="group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/60">
+                  <div className="flex items-start justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => editAnswer(it.q)}
+                      className="flex-1 text-left"
+                    >
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{CAT_LABEL[it.cat].label}</div>
+                      <div className="mt-1 font-display text-lg">{it.q}</div>
+                      <div className="mt-1 text-sm text-foreground/85 whitespace-pre-wrap">{it.a}</div>
+                    </button>
+                    <div className="flex shrink-0 flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => editAnswer(it.q)}
+                        aria-label="Edit answer"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeAnswer(it.q)}
+                        aria-label="Delete answer"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

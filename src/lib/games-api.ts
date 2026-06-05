@@ -28,10 +28,28 @@ export async function saveSparkAnswer(input: {
 }) {
   const uid = await getUserId();
   if (!uid) return { error: "not-signed-in" as const };
+  // Upsert by (user_id, question): remove any previous answer for this
+  // question first so editing the same question doesn't pile up rows.
+  await supabase
+    .from("spark_answers")
+    .delete()
+    .eq("user_id", uid)
+    .eq("question", input.question);
   const { error } = await supabase.from("spark_answers").insert({
     user_id: uid,
     ...input,
   });
+  return { error: error?.message ?? null };
+}
+
+export async function deleteSparkAnswer(question: string) {
+  const uid = await getUserId();
+  if (!uid) return { error: "not-signed-in" as const };
+  const { error } = await supabase
+    .from("spark_answers")
+    .delete()
+    .eq("user_id", uid)
+    .eq("question", question);
   return { error: error?.message ?? null };
 }
 
