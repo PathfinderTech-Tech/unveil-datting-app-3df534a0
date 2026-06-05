@@ -26,11 +26,13 @@ type Style = "real" | "anime" | "stylized" | "realistic" | "mystery";
 
 const STYLES: { id: Style; label: string; sub: string; icon: any }[] = [
   { id: "real", label: "Real Photo", sub: "Use your selfie as-is", icon: ImageIcon },
+  { id: "realistic", label: "Realistic Avatar", sub: "Cinematic studio portrait", icon: Camera },
   { id: "anime", label: "Anime Avatar", sub: "Soft, expressive, friendly", icon: Sparkles },
-  { id: "stylized", label: "Stylized Avatar", sub: "Painted, modern, premium", icon: Wand2 },
-  { id: "realistic", label: "Realistic Portrait", sub: "Cinematic studio look", icon: Camera },
-  { id: "mystery", label: "Mystery Avatar", sub: "Silhouette, intriguing", icon: Sparkles },
+  { id: "stylized", label: "Artistic Avatar", sub: "Painted, modern, premium", icon: Wand2 },
+  { id: "mystery", label: "Premium Portrait", sub: "Elegant backlit silhouette", icon: Sparkles },
 ];
+
+const GENERATABLE_STYLES: Style[] = ["realistic", "anime", "stylized", "mystery"];
 
 function AvatarPage() {
   const { user, loading } = useAuth();
@@ -118,6 +120,30 @@ function AvatarPage() {
       refreshHistory();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate");
+    } finally { setBusy(false); }
+  }
+
+  async function runGenerateAll() {
+    if (!selfieUrl) { toast.error("Add a selfie first."); return; }
+    setBusy(true);
+    setAvatarUrl(null);
+    try {
+      // Generate all four styles in parallel so the user can compare them.
+      const results = await Promise.allSettled(
+        GENERATABLE_STYLES.map((s) => generate({ data: { style: s, selfieUrl } })),
+      );
+      const ok = results.find((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof generate>>> => r.status === "fulfilled");
+      if (ok) {
+        setAvatarUrl(ok.value.avatarUrl);
+        setStyle(ok.value.style as Style);
+        setFallback(ok.value.fallback);
+      }
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed === GENERATABLE_STYLES.length) toast.error("All generations failed. Try again.");
+      else if (failed > 0) toast.message(`${GENERATABLE_STYLES.length - failed} of ${GENERATABLE_STYLES.length} avatars ready.`);
+      else toast.success("Your avatars are ready — compare and pick one.");
+      setStep(2);
+      refreshHistory();
     } finally { setBusy(false); }
   }
 
@@ -242,10 +268,18 @@ function AvatarPage() {
               })}
             </div>
 
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <button onClick={runGenerateAll} disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary/10 px-5 py-2 text-xs font-medium text-foreground hover:bg-primary/20 disabled:opacity-50">
+                {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                Generate all 4 styles to compare
+              </button>
+            </div>
+
             <Nav
               onBack={() => setStep(0)}
               onSkip={() => navigate({ to: "/discover" })}
-              nextLabel={busy ? "Generating…" : "Generate avatar"}
+              nextLabel={busy ? "Generating…" : "Generate selected"}
               nextIcon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
               onNext={() => { if (!style) return toast.error("Pick a style."); runGenerate(style); }}
               disableNext={busy}
