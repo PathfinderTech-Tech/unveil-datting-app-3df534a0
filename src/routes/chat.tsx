@@ -324,7 +324,22 @@ function Chat() {
           ) : (
             <>
               <div className="relative flex items-center justify-between border-b border-border p-4">
-                <div className="text-sm font-medium">Thread · {active.id.slice(0, 6)}</div>
+                <div className="flex items-center gap-3">
+                  {peerId && (
+                    <ProfileAvatar
+                      userId={peerId}
+                      name={peerName}
+                      discoveryMode={peerProfile?.discovery_mode}
+                      avatarUrl={peerProfile?.avatar_url}
+                      photoUrl={peerProfile?.photo_url}
+                      size={40}
+                    />
+                  )}
+                  <div>
+                    <div className="text-sm font-medium leading-tight">{peerName}</div>
+                    <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Slow reveal · in progress</div>
+                  </div>
+                </div>
                 <button onClick={() => setShowMenu((v) => !v)} className="rounded-full p-2 hover:bg-surface">
                   <MoreVertical className="h-4 w-4" />
                 </button>
@@ -336,6 +351,7 @@ function Chat() {
                   </div>
                 )}
               </div>
+
 
               {matchInfo && user && peerId && (
                 <ConversationScaffold
