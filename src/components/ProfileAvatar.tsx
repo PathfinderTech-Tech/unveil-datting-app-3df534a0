@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAvatarFallback, resolveProfileImage } from "@/lib/avatar-fallback";
+import { getDisplayPhotoUrl } from "@/lib/photos";
 
 type Props = {
   userId?: string | null;
@@ -17,6 +18,11 @@ type Props = {
  * Universal profile image renderer. Never blank: when no URL is available
  * or the network image fails to load, we fall back to a deterministic
  * gradient + initial SVG via `getAvatarFallback`.
+ *
+ * Storage-bucket aware: when the resolved URL points at the private
+ * `profile-photos` bucket (legacy public URL or bare path), we sign it
+ * via `getDisplayPhotoUrl` before rendering. Data URLs and external URLs
+ * pass through unchanged.
  */
 export function ProfileAvatar({
   userId,
@@ -29,6 +35,7 @@ export function ProfileAvatar({
   rounded = "full",
   alt,
 }: Props) {
+  const fallback = getAvatarFallback(userId ?? name ?? "unveil", name ?? null);
   const initial = resolveProfileImage({
     discoveryMode: discoveryMode ?? null,
     avatarUrl: avatarUrl ?? null,
@@ -39,8 +46,19 @@ export function ProfileAvatar({
   const [src, setSrc] = useState<string>(initial);
 
   useEffect(() => {
+    let alive = true;
     setSrc(initial);
-  }, [initial]);
+    if (initial.startsWith("data:")) return;
+    (async () => {
+      try {
+        const signed = await getDisplayPhotoUrl(initial);
+        if (alive && signed) setSrc(signed);
+      } catch {
+        if (alive) setSrc(fallback);
+      }
+    })();
+    return () => { alive = false; };
+  }, [initial, fallback]);
 
   const radius = rounded === "full" ? "rounded-full" : "rounded-2xl";
 
@@ -51,9 +69,7 @@ export function ProfileAvatar({
       width={size}
       height={size}
       loading="lazy"
-      onError={() =>
-        setSrc(getAvatarFallback(userId ?? name ?? "unveil", name ?? null))
-      }
+      onError={() => setSrc(fallback)}
       className={`${radius} object-cover ${className}`}
       style={{ width: size, height: size }}
     />
