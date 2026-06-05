@@ -60,7 +60,12 @@ function AvatarPage() {
       if (data?.avatar_url) {
         setAvatarUrl(data.avatar_url);
         if (data.avatar_style) setStyle(data.avatar_style as Style);
+        // User already has an avatar — jump straight to the result step so
+        // they can regenerate, swap style, or use their real photo without
+        // re-uploading their selfie.
+        setStep(2);
       }
+
     })();
   }, [user]);
 
