@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
 import { SignedImage } from "@/components/SignedImage";
+import { RevealProgressCard } from "@/components/RevealProgressCard";
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
