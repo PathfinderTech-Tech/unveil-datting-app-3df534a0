@@ -123,6 +123,30 @@ function AvatarPage() {
     } finally { setBusy(false); }
   }
 
+  async function runGenerateAll() {
+    if (!selfieUrl) { toast.error("Add a selfie first."); return; }
+    setBusy(true);
+    setAvatarUrl(null);
+    try {
+      // Generate all four styles in parallel so the user can compare them.
+      const results = await Promise.allSettled(
+        GENERATABLE_STYLES.map((s) => generate({ data: { style: s, selfieUrl } })),
+      );
+      const ok = results.find((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof generate>>> => r.status === "fulfilled");
+      if (ok) {
+        setAvatarUrl(ok.value.avatarUrl);
+        setStyle(ok.value.style as Style);
+        setFallback(ok.value.fallback);
+      }
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed === GENERATABLE_STYLES.length) toast.error("All generations failed. Try again.");
+      else if (failed > 0) toast.message(`${GENERATABLE_STYLES.length - failed} of ${GENERATABLE_STYLES.length} avatars ready.`);
+      else toast.success("Your avatars are ready — compare and pick one.");
+      setStep(2);
+      refreshHistory();
+    } finally { setBusy(false); }
+  }
+
   async function revertTo(item: AvatarHistoryItem) {
     setBusy(true);
     try {
