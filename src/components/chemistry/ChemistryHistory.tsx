@@ -11,18 +11,14 @@ export function ChemistryHistory() {
   const tierMeta = TIER_META[data.lastSessionTier];
 
   return (
-    <section
-      className="rounded-2xl border p-5"
-      style={{ background: "#161618", borderColor: "#2A2A2E" }}
-    >
+    <section className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-base font-bold" style={{ color: "#F0EDE8" }}>
+        <h3 className="font-display text-base font-bold text-foreground">
           Chemistry History
         </h3>
         <Link
           to="/playful"
-          className="text-xs hover:underline"
-          style={{ color: "#7A7876" }}
+          className="text-xs text-muted-foreground hover:text-primary hover:underline"
         >
           Play Again →
         </Link>
@@ -32,34 +28,34 @@ export function ChemistryHistory() {
         <TierOrb tier={data.lastSessionTier} size="sm" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm" style={{ color: "#F0EDE8" }}>
+            <span className="text-sm text-foreground">
               Last session:{" "}
               <span style={{ color: tierMeta.color, fontWeight: 600 }}>
                 {data.lastSessionTier}
               </span>
             </span>
-            <span className="font-mono text-xs" style={{ color: "#7A7876" }}>
+            <span className="font-mono text-xs text-muted-foreground">
               {data.lastSessionScore} / {SESSION_MAX}
             </span>
           </div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "#7A7876" }}>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">
             {relativeDate(data.lastSessionDate)}
           </div>
         </div>
       </div>
 
       <div className="mt-5">
-        <div className="mb-1 text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+        <div className="mb-1 text-[11px] uppercase tracking-wider text-muted-foreground">
           Cumulative chemistry score
         </div>
-        <div className="h-1 overflow-hidden rounded-full" style={{ background: "rgba(139,92,246,0.25)" }}>
+        <div className="h-1 overflow-hidden rounded-full bg-primary/20">
           <div
             className="h-full rounded-full transition-[width] duration-700"
-            style={{ width: `${pct}%`, background: "#8B5CF6" }}
+            style={{ width: `${pct}%` }}
           />
         </div>
-        <div className="mt-2 text-xs" style={{ color: "#7A7876" }}>
-          <span style={{ color: "#F0EDE8", fontWeight: 600 }}>{data.cumulativeScore}</span> pts across{" "}
+        <div className="mt-2 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">{data.cumulativeScore}</span> pts across{" "}
           {data.sessionCount} session{data.sessionCount === 1 ? "" : "s"}
         </div>
       </div>
