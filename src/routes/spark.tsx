@@ -326,8 +326,24 @@ function SparkPage() {
                 placeholder={q.placeholder}
                 rows={3}
                 className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
-              <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {saving ? "Saving…" : answeredSet.has(q.text) ? "Saved ✓" : answer.trim() ? "Saves as you type" : "Auto-saves"}
+              <div className="mt-2 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span>
+                  {saving
+                    ? "Saving…"
+                    : answeredMap.get(q.text) === answer.trim() && answer.trim()
+                    ? "Saved ✓"
+                    : answer.trim()
+                    ? "Saves as you type"
+                    : "Auto-saves"}
+                </span>
+                {answeredSet.has(q.text) && (
+                  <button
+                    onClick={() => removeAnswer(q.text)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 normal-case tracking-normal text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete answer
+                  </button>
+                )}
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <button onClick={prev}
