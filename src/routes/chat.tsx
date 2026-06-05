@@ -35,6 +35,19 @@ type Reaction = { message_id: string; user_id: string; emoji: string };
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
 
+// Mirror of server-side enforce_contact_sharing regex so we can warn the user BEFORE they hit send.
+const PII_PATTERNS: RegExp[] = [
+  /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i,
+  /(?:\+?\d[\s().-]*){7,}\d/,
+  /(https?:\/\/|www\.)[a-z0-9.-]+/i,
+  /\b(?:instagram|insta|ig|whatsapp|wa|telegram|tg|snapchat|snap|facebook|fb|tiktok|twitter|x\.com)\b[\s:@/]*[a-z0-9._-]+/i,
+  /(^|\s)@[A-Za-z0-9._]{3,}/,
+  /(wa\.me\/|t\.me\/|instagram\.com\/|fb\.com\/|facebook\.com\/|snapchat\.com\/)/i,
+];
+function looksLikeContactShare(s: string): boolean {
+  return PII_PATTERNS.some((re) => re.test(s));
+}
+
 // PII detection/blocking now lives server-side in the enforce_contact_sharing trigger.
 // Messages with phone/email/social handles are rejected with CONTACT_SHARING_LOCKED
 // unless the pair has cleared the trust milestones.
