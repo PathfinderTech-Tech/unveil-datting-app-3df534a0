@@ -22,8 +22,6 @@ export const Route = createFileRoute("/p/$userId")({
         links: [{ rel: "canonical", href: url }],
       };
     }
-    const name = p.firstName ?? "Someone";
-    const archetype = (p.archetype ?? "Signal").replace(/-/g, " ");
     const title = "My Unveil Passport — Connection Beneath The Surface";
     const description = "Discover my personality, values, communication style, and relationship insights on Unveil.";
     const image = p.avatarUrl ?? p.photoUrl ?? p.profilePhotoUrl ?? undefined;
