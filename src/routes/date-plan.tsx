@@ -172,7 +172,7 @@ function DatePlanRoute() {
               </Field>
             </section>
 
-            <button disabled={!theme || busy} onClick={submit}
+            <button disabled={!theme || busy || !verifiedOk} onClick={submit}
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow disabled:opacity-40">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               Send proposal to {partner.name}
