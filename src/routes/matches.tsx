@@ -451,11 +451,13 @@ function Matches() {
         <MatchSheet
           match={active}
           you={profile}
+          peerMeta={peerMeta[active.userId]}
           onClose={() => setActive(null)}
           onLike={() => handleLike(active)}
           onThought={() => { setThoughtFor(active); setActive(null); }}
         />
       )}
+
       {thoughtFor && (
         <ThoughtModal
           targetUserId={thoughtFor.userId}
