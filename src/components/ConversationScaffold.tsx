@@ -471,7 +471,7 @@ function Day3({
       peer_already_submitted: !!peerDay3,
       length: val.trim().length,
     });
-    toast.success("Your answer is locked in.");
+    celebrate();
   }
 
   return (
