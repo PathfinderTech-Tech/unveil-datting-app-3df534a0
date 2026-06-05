@@ -185,10 +185,12 @@ function ProfilePage() {
             </div>
             <Link
               to="/onboarding"
+              search={{ edit: 1 } as never}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
             >
               <Pencil className="h-4 w-4" /> Edit profile
             </Link>
+
           </div>
         </div>
 
