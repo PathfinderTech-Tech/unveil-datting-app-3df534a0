@@ -318,29 +318,37 @@ function Day1({
 
   return (
     <div className="space-y-4">
-      {/* Their card */}
-      <div>
-        <div className="mb-1.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Who they are</div>
-        <div className="space-y-2 rounded-2xl border border-border bg-card p-4">
-          {PROMPT_LABELS.map((label, i) => {
-            const key = `prompt_${i + 1}` as keyof IntroRow;
-            const answer = peerIntro?.[key] as string | null | undefined;
-            return (
-              <div key={i}>
-                <div className="text-[11px] text-muted-foreground">{label}</div>
-                <div className={`mt-0.5 text-sm ${answer ? "text-foreground" : "italic text-muted-foreground/70"}`}>
-                  {answer ?? `${peerName} hasn't answered this yet.`}
-                </div>
-              </div>
-            );
-          })}
+      {/* Their reveal cards */}
+      <div className="space-y-3">
+        <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+          {peerIntro ? `What ${peerName} shared` : `Waiting for ${peerName}'s response`}
         </div>
+        {PROMPT_LABELS.map((label, i) => {
+          const key = `prompt_${i + 1}` as keyof IntroRow;
+          const answer = peerIntro?.[key] as string | null | undefined;
+          return (
+            <div
+              key={i}
+              className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-1 duration-500"
+            >
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-hero/50" />
+              <div className="font-display text-[15px] italic leading-snug text-foreground/80">
+                "{label}"
+              </div>
+              <div className={`mt-2 text-[14px] leading-relaxed ${answer ? "text-foreground" : "italic text-muted-foreground/70"}`}>
+                {answer ?? (submitted
+                  ? `Waiting for their response — they'll see your answer too.`
+                  : `They'll see your answer once you share.`)}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Your card */}
       <div>
         <div className="mb-1.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-          {submitted ? "What you shared" : `Your turn — ${peerName} will see this`}
+          {submitted ? "What you shared" : `Your turn — share something honest`}
         </div>
         <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
           {PROMPT_LABELS.map((label, i) => {
@@ -350,9 +358,9 @@ function Day1({
             const remaining = 120 - val.length;
             return (
               <div key={i}>
-                <label className="text-[11px] text-muted-foreground">{label}</label>
+                <label className="font-display text-[13px] italic text-foreground/80">"{label}"</label>
                 {submitted ? (
-                  <div className="mt-0.5 text-sm">{answer}</div>
+                  <div className="mt-1 text-sm">{answer}</div>
                 ) : (
                   <>
                     <input
@@ -365,7 +373,7 @@ function Day1({
                         setVals(next);
                       }}
                       placeholder={PROMPT_PLACEHOLDERS[i]}
-                      className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-[13px] outline-none placeholder:italic placeholder:text-muted-foreground/70 focus:border-primary"
+                      className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3 py-2 text-[13px] outline-none placeholder:italic placeholder:text-muted-foreground/70 focus:border-primary"
                     />
                     {val.length >= 80 && (
                       <div className="mt-1 text-[11px] text-muted-foreground">{remaining} left</div>
@@ -379,14 +387,14 @@ function Day1({
             <button
               onClick={submit}
               disabled={!canSubmit || busy}
-              className="w-full rounded-full bg-gradient-hero py-2.5 text-[15px] font-semibold text-primary-foreground shadow-glow disabled:opacity-50"
+              className="w-full rounded-full bg-gradient-hero py-2.5 text-[15px] font-semibold text-primary-foreground shadow-glow disabled:opacity-50 transition-transform hover:scale-[1.01]"
             >
               Share my answers →
             </button>
           )}
           {submitted && (
             <div className="inline-flex items-center gap-1.5 text-xs text-accent">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Shared. {peerName} will see them when they open this conversation.
+              <CheckCircle2 className="h-3.5 w-3.5" /> Shared. Your conversation is unfolding.
             </div>
           )}
         </div>
@@ -394,6 +402,7 @@ function Day1({
     </div>
   );
 }
+
 
 /* ───────────────── Day 2 ───────────────── */
 
