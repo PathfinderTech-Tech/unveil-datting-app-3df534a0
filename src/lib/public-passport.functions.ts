@@ -14,6 +14,7 @@ export type PublicPassport = {
   avatarUrl: string | null;
   photoUrl: string | null;
   profilePhotoUrl: string | null;
+  verified: boolean;
 };
 
 async function signIfNeeded(input: string | null): Promise<string | null> {
