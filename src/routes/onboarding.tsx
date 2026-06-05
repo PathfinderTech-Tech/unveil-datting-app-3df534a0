@@ -727,12 +727,20 @@ function Onboarding() {
                     <span className="font-display text-base font-medium">{q.prompt}</span>
                     {q.optional && <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 text-[10px] text-muted-foreground">Optional</span>}
                   </div>
+                  <div className="mb-2 text-[11px] text-muted-foreground">Pick up to 2.</div>
                   <div className="grid gap-2 md:grid-cols-2">
                     {q.options.map((opt) => {
-                      const active = compat[q.key as CompatKey] === opt;
+                      const current = (compat[q.key as CompatKey] || "").split(" · ").filter(Boolean);
+                      const active = current.includes(opt);
                       return (
                         <button key={opt} type="button"
-                          onClick={() => setCompat({ ...compat, [q.key]: opt })}
+                          onClick={() => {
+                            let next: string[];
+                            if (active) next = current.filter((c) => c !== opt);
+                            else if (current.length >= 2) next = [current[1], opt];
+                            else next = [...current, opt];
+                            setCompat({ ...compat, [q.key]: next.join(" · ") });
+                          }}
                           className={`rounded-2xl border p-3 text-left text-sm transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
                           {opt}
                         </button>
