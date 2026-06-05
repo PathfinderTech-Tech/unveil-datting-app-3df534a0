@@ -26,11 +26,13 @@ type Style = "real" | "anime" | "stylized" | "realistic" | "mystery";
 
 const STYLES: { id: Style; label: string; sub: string; icon: any }[] = [
   { id: "real", label: "Real Photo", sub: "Use your selfie as-is", icon: ImageIcon },
+  { id: "realistic", label: "Realistic Avatar", sub: "Cinematic studio portrait", icon: Camera },
   { id: "anime", label: "Anime Avatar", sub: "Soft, expressive, friendly", icon: Sparkles },
-  { id: "stylized", label: "Stylized Avatar", sub: "Painted, modern, premium", icon: Wand2 },
-  { id: "realistic", label: "Realistic Portrait", sub: "Cinematic studio look", icon: Camera },
-  { id: "mystery", label: "Mystery Avatar", sub: "Silhouette, intriguing", icon: Sparkles },
+  { id: "stylized", label: "Artistic Avatar", sub: "Painted, modern, premium", icon: Wand2 },
+  { id: "mystery", label: "Premium Portrait", sub: "Elegant backlit silhouette", icon: Sparkles },
 ];
+
+const GENERATABLE_STYLES: Style[] = ["realistic", "anime", "stylized", "mystery"];
 
 function AvatarPage() {
   const { user, loading } = useAuth();
