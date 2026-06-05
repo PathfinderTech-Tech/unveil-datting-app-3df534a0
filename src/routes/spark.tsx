@@ -100,6 +100,10 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
 ];
 
 const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
+  personality:            { label: "Personality",           hue: "from-indigo-500/30 to-violet-500/10" },
+  creativity:             { label: "Creativity",            hue: "from-pink-500/30 to-fuchsia-500/10" },
+  relationships:          { label: "Relationships",         hue: "from-rose-500/30 to-red-500/10" },
+  fun:                    { label: "Fun",                   hue: "from-yellow-500/30 to-amber-500/10" },
   values:                 { label: "Values",                hue: "from-fuchsia-500/30 to-purple-500/10" },
   emotional_intelligence: { label: "Emotional Intelligence", hue: "from-cyan-500/30 to-blue-500/10" },
   humor:                  { label: "Humor",                 hue: "from-amber-500/30 to-orange-500/10" },
