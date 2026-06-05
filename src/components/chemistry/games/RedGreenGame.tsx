@@ -47,8 +47,7 @@ export function RedGreenGame({ onComplete, onSkip }: {
     <div className="space-y-5">
       <GameHeader step={i + 1} total={items.length} title="Red Flag / Green Flag" />
       <div
-        className="rounded-2xl border p-6 text-center text-lg"
-        style={{ background: "#1E1E21", borderColor: "#2A2A2E", color: "#F0EDE8" }}
+        className="rounded-2xl border border-border bg-surface-2 p-6 text-center text-lg text-foreground"
       >
         {cur.text}
       </div>
