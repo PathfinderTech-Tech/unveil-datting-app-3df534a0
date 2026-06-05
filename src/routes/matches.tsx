@@ -362,20 +362,15 @@ function Matches() {
                 <button onClick={() => setActive(m)} className="text-left">
                   <div className="flex items-start justify-between">
                     <div className="relative">
-                      <div style={{ filter: "blur(8px)" }}>
-                        <ProfileAvatar
-                          userId={m.userId}
-                          name={m.name}
-                          discoveryMode={peerMeta[m.userId]?.discovery_mode}
-                          avatarUrl={peerMeta[m.userId]?.avatar_url}
-                          photoUrl={peerMeta[m.userId]?.photo_url}
-                          size={56}
-                          className="border-2 border-primary/35 shadow-glow"
-                        />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
-                        <Lock className="h-3 w-3 text-muted-foreground" />
-                      </div>
+                      <ProfileAvatar
+                        userId={m.userId}
+                        name={m.name}
+                        discoveryMode={peerMeta[m.userId]?.discovery_mode}
+                        avatarUrl={peerMeta[m.userId]?.avatar_url}
+                        photoUrl={peerMeta[m.userId]?.photo_url}
+                        size={56}
+                        className="border-2 border-primary/35 shadow-glow"
+                      />
                     </div>
                     <div className="text-right">
                       <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Compatibility</div>
