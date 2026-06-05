@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, MapPin, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { ChemistryBadge } from "@/components/chemistry/ChemistryBadge";
 
 type PassportProfile = {
   first_name: string | null;
