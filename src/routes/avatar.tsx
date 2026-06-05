@@ -47,6 +47,14 @@ function AvatarPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [fallback, setFallback] = useState(false);
+  const [history, setHistory] = useState<AvatarHistoryItem[]>([]);
+
+  async function refreshHistory() {
+    try {
+      const res = await fetchHistory({});
+      setHistory(res.items);
+    } catch { /* ignore */ }
+  }
 
   // Preload existing values so users can re-roll without re-uploading.
   useEffect(() => {
