@@ -313,9 +313,9 @@
 
 body {
   background:
-    radial-gradient(ellipse 70% 50% at 50% 20%, oklch(0.67 0.27 310 / 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 42% at 85% 85%, oklch(0.82 0.16 67 / 0.10) 0%, transparent 62%),
-    radial-gradient(ellipse 55% 44% at 12% 10%, oklch(0.61 0.27 292 / 0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 50% at 50% 20%, color-mix(in oklch, var(--logo-purple) 12%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 42% at 85% 85%, color-mix(in oklch, var(--logo-gold) 9%, transparent) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 44% at 12% 10%, color-mix(in oklch, var(--logo-violet) 12%, transparent) 0%, transparent 62%),
     var(--u-bg) !important;
   background-attachment: fixed;
   font-family: var(--font-body-satoshi);
@@ -344,11 +344,11 @@ h1, h2, h3, h4 {
 }
 .u-card-glow::before {
   top: -50px; right: -50px; width: 180px; height: 180px;
-  background: radial-gradient(circle, oklch(0.67 0.27 310 / 0.20) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--logo-purple) 18%, transparent) 0%, transparent 65%);
 }
 .u-card-glow::after {
   bottom: -40px; left: -30px; width: 130px; height: 130px;
-  background: radial-gradient(circle, oklch(0.82 0.16 67 / 0.11) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--logo-gold) 10%, transparent) 0%, transparent 65%);
 }
 .u-card > * { position: relative; z-index: 1; }
 
@@ -375,7 +375,7 @@ h1, h2, h3, h4 {
   padding: 12px 24px;
   transition: background 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
-.u-btn-primary:hover  { background: var(--gradient-logo-hover); box-shadow: 0 14px 42px -10px oklch(0.72 0.28 334 / 0.74); }
+.u-btn-primary:hover  { background: var(--gradient-logo-hover); box-shadow: 0 14px 42px -12px color-mix(in oklch, var(--logo-magenta) 68%, transparent); }
 .u-btn-primary:active { background: var(--gradient-logo-active); transform: scale(0.97); }
 
 .u-btn-ghost {
@@ -436,10 +436,10 @@ h1, h2, h3, h4 {
   border-radius: 999px;
   background: conic-gradient(
     from 0deg,
-    oklch(0.80 0.20 348 / 0.85),
-    oklch(0.72 0.28 334 / 0.62),
-    oklch(0.82 0.16 67 / 0.62),
-    oklch(0.67 0.27 310 / 0.85)
+    color-mix(in oklch, var(--logo-rose) 82%, transparent),
+    color-mix(in oklch, var(--logo-magenta) 62%, transparent),
+    color-mix(in oklch, var(--logo-gold) 62%, transparent),
+    color-mix(in oklch, var(--logo-purple) 82%, transparent)
   );
   animation: orbitRing 4s linear infinite;
   z-index: -1;
