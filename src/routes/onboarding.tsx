@@ -336,6 +336,7 @@ function Onboarding() {
           intention: intent, relationship_intent: intent,
           preferred_language: lang,
           avatar_style: avatarStyle,
+          discovery_mode: (appearance === "real" ? "photo" : "avatar"),
           curiosity_level: character.curiosity,
           emotional_rhythm: character as unknown as Record<string, number>,
           bio: bio || summary || null,
