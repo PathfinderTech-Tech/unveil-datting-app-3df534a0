@@ -6,8 +6,9 @@ export const Route = createFileRoute("/p/$userId")({
     const passport = await loadPublicPassport({ data: { userId: params.userId } });
     return { passport };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     const p = loaderData?.passport as PublicPassport | null | undefined;
+    const url = `https://unveil.best/p/${params.userId}`;
     if (!p) {
       return {
         meta: [
@@ -15,7 +16,10 @@ export const Route = createFileRoute("/p/$userId")({
           { name: "description", content: "Slow love, real connection — UNVEIL." },
           { property: "og:title", content: "UNVEIL Passport" },
           { property: "og:description", content: "Slow love, real connection." },
+          { property: "og:url", content: url },
+          { property: "og:type", content: "profile" },
         ],
+        links: [{ rel: "canonical", href: url }],
       };
     }
     const name = p.firstName ?? "Someone";
@@ -34,12 +38,14 @@ export const Route = createFileRoute("/p/$userId")({
         { property: "og:type", content: "profile" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:url", content: url },
         ...(image ? [{ property: "og:image", content: image }] : []),
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
         ...(image ? [{ name: "twitter:image", content: image }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   component: PublicPassportPage,
