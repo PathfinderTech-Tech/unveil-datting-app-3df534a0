@@ -69,9 +69,9 @@ export function MobileBottomNav() {
       <svg width="0" height="0" className="absolute" aria-hidden>
         <defs>
           <linearGradient id="mbn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="oklch(0.61 0.27 292)" />
-            <stop offset="50%" stopColor="oklch(0.72 0.28 334)" />
-            <stop offset="100%" stopColor="oklch(0.82 0.16 67)" />
+            <stop offset="0%" style={{ stopColor: "var(--logo-violet)" }} />
+            <stop offset="50%" style={{ stopColor: "var(--logo-magenta)" }} />
+            <stop offset="100%" style={{ stopColor: "var(--logo-gold)" }} />
           </linearGradient>
         </defs>
       </svg>
