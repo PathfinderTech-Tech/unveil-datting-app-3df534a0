@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useChemistry, relativeDate, TIER_META, SESSION_MAX } from "@/lib/chemistry-ledger";
+import { useChemistry, relativeDate, SESSION_MAX } from "@/lib/chemistry-ledger";
 import { TierOrb } from "./TierOrb";
 
 export function ChemistryHistory() {
@@ -8,8 +8,6 @@ export function ChemistryHistory() {
 
   const max = data.sessionCount * SESSION_MAX;
   const pct = Math.min(100, (data.cumulativeScore / max) * 100);
-  const tierMeta = TIER_META[data.lastSessionTier];
-
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
