@@ -165,6 +165,8 @@ export function ContactRevealPanel({
           </button>
         </>
       )}
+      </div>
     </div>
   );
 }
+
