@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Compass, Heart, MessageCircle, Sparkles, User } from "lucide-react";
-import { useUnreadCount } from "@/hooks/use-unread";
+import { useNavBadges } from "@/hooks/use-nav-badges";
 
 const ITEMS = [
-  { to: "/discover", label: "Discover", icon: Compass },
-  { to: "/messages", label: "Messages", icon: MessageCircle, badge: true as const },
-  { to: "/matches", label: "Matches", icon: Heart },
+  { to: "/discover", label: "Discover", icon: Compass, badge: "discover" as const },
+  { to: "/messages", label: "Messages", icon: MessageCircle, badge: "messages" as const },
+  { to: "/matches", label: "Matches", icon: Heart, badge: "matches" as const },
   { to: "/insights", label: "Insights", icon: Sparkles },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
@@ -16,7 +16,7 @@ const ITEMS = [
  */
 export function MobileBottomNav() {
   const { location } = useRouterState();
-  const unread = useUnreadCount();
+  const badges = useNavBadges();
   return (
     <nav
       aria-label="Primary mobile navigation"
@@ -27,7 +27,8 @@ export function MobileBottomNav() {
         {ITEMS.map((item) => {
           const active = location.pathname === item.to;
           const Icon = item.icon;
-          const showBadge = "badge" in item && item.badge && unread > 0;
+          const count = "badge" in item && item.badge ? badges[item.badge] : 0;
+          const showBadge = count > 0;
           return (
             <li key={item.to} className="flex">
               <Link
@@ -52,10 +53,10 @@ export function MobileBottomNav() {
                   />
                   {showBadge && (
                     <span
-                      aria-label={`${unread} unread`}
+                      aria-label={`${count} new`}
                       className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-logo px-1 text-[9px] font-semibold text-primary-foreground shadow-glow-magenta"
                     >
-                      {unread > 9 ? "9+" : unread}
+                      {count > 9 ? "9+" : count}
                     </span>
                   )}
                 </span>
