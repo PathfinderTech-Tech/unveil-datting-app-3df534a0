@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
+import { VerificationGate } from "@/components/VerificationGate";
+import { useVerification } from "@/hooks/use-verification";
 import { giveShareConsent, saveMyContact, loadMyContact, loadPartnerContact } from "@/lib/social-api";
 import { Phone, Lock, Unlock, Check, MessageSquare, Instagram, Send, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
