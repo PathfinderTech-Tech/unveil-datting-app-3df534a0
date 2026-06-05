@@ -448,9 +448,19 @@ function Chat() {
                 </div>
               )}
 
-              <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled) send(); }}
+              {!verification.loading && !verification.verified && (
+                <div className="border-t border-border p-4">
+                  <VerificationGate
+                    status={verification.status}
+                    variant="inline"
+                    reason="Verified members only can send and reply to messages."
+                  />
+                </div>
+              )}
+
+              <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled && verifiedOk) send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled || !verifiedOk}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />
@@ -458,11 +468,11 @@ function Chat() {
                 <input
                   value={draft}
                   onChange={(e) => onDraftChange(e.target.value)}
-                  disabled={!chatGate.enabled}
-                  placeholder={chatGate.enabled ? "A thought, gently…" : (chatGate.placeholder ?? "Chat is locked until your slow reveal unlocks it")}
+                  disabled={!chatGate.enabled || !verifiedOk}
+                  placeholder={!verifiedOk ? "Verification required to message" : chatGate.enabled ? "A thought, gently…" : (chatGate.placeholder ?? "Chat is locked until your slow reveal unlocks it")}
                   className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary disabled:opacity-60"
                 />
-                <button type="submit" disabled={!chatGate.enabled} className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
+                <button type="submit" disabled={!chatGate.enabled || !verifiedOk} className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
                   <Send className="h-4 w-4" />
                 </button>
               </form>
