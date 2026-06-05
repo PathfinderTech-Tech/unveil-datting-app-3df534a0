@@ -9,8 +9,6 @@ import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
-import { VerificationGate } from "@/components/VerificationGate";
-import { useVerification } from "@/hooks/use-verification";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 
@@ -78,11 +76,8 @@ function Chat() {
   const [peerName, setPeerName] = useState<string>("them");
   const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
-  const verification = useVerification();
-  // Messaging gate per spec: Premium / Daily Pass => unlimited; Verified => 15/day; Free => 5/day.
-  // DB trigger enforce_message_quota is the source of truth for daily limits.
-  // Verification is no longer required to send messages — Free users get 5/day.
-  const verifiedOk = true;
+  // Messaging entitlement: DB trigger enforce_message_quota is the sole source of truth.
+  // Free=5/day, Verified=15/day, Daily Pass / Premium=unlimited. No client-side verification gate.
   const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
   const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
@@ -495,17 +490,7 @@ function Chat() {
                 </div>
               )}
 
-              {!verification.loading && !verification.verified && (
-                <div className="border-t border-border p-4">
-                  <VerificationGate
-                    status={verification.status}
-                    variant="inline"
-                    reason="Verify to unlock 15 messages/day, the verified badge, and the verified-only matching pool."
-                  />
-                </div>
-              )}
-
-              {showContactWarning && verifiedOk && (
+              {showContactWarning && (
                 <div className="border-t border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
                   <div className="font-medium">Contact sharing unlocks after trust milestones have been completed.</div>
                   <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-100/80">
@@ -517,9 +502,11 @@ function Chat() {
               )}
 
 
-              <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled && verifiedOk) send(); }}
+              {/* Messaging entitlement: DB trigger enforce_message_quota is the sole source of truth.
+                  Free=5/day, Verified=15/day, Daily Pass / Premium=unlimited. No client-side gate. */}
+              <form onSubmit={(e) => { e.preventDefault(); send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled || !verifiedOk}
+                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
                   title="AI Icebreakers"
                   className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
                   <Sparkles className="h-4 w-4 text-accent" />
@@ -527,11 +514,10 @@ function Chat() {
                 <input
                   value={draft}
                   onChange={(e) => onDraftChange(e.target.value)}
-                  disabled={!chatGate.enabled || !verifiedOk}
-                  placeholder={!verifiedOk ? "Verification required to message" : chatGate.enabled ? "A thought, gently…" : (chatGate.placeholder ?? "Chat is locked until your slow reveal unlocks it")}
-                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary disabled:opacity-60"
+                  placeholder="A thought, gently…"
+                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary"
                 />
-                <button type="submit" disabled={!chatGate.enabled || !verifiedOk} className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
+                <button type="submit" className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
                   <Send className="h-4 w-4" />
                 </button>
               </form>
