@@ -207,12 +207,12 @@ function ProfilePage() {
           {missing.length > 0 && (
             <div className="mt-3 text-sm text-muted-foreground">
               Still missing: <span className="text-foreground">{missing.join(" · ")}</span>
+            </div>
+          )}
         </div>
 
         {/* Reveal progress — gates when real photos unlock */}
         {profile?.id && <RevealProgressCard userId={profile.id} />}
-          )}
-        </div>
 
         {/* About */}
         <Section title="About me">
