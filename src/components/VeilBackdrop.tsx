@@ -53,7 +53,7 @@ export function VeilPulse({ size = 64 }: { size?: number }) {
         style={{
           width: size * 0.8,
           height: size * 0.8,
-          filter: "drop-shadow(0 0 16px oklch(0.65 0.22 305 / 0.7))",
+          filter: "drop-shadow(0 0 16px oklch(0.72 0.28 334 / 0.7)) drop-shadow(0 0 10px oklch(0.82 0.16 67 / 0.4))",
         }}
       />
     </div>

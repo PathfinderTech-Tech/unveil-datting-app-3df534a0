@@ -206,10 +206,10 @@ function Membership() {
         </div>
 
         {/* VERIFIED */}
-        <div className="mt-10 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-[oklch(0.14_0.05_260)] to-card p-7 md:p-10">
+        <div className="mt-10 overflow-hidden rounded-3xl border border-border bg-gradient-deep p-7 md:p-10">
           <div className="grid items-start gap-8 md:grid-cols-[1.2fr_1fr]">
             <div>
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[oklch(0.65_0.16_240)] to-[oklch(0.55_0.22_270)] text-white shadow-glow">
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-logo text-primary-foreground shadow-glow">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div className="flex items-center gap-2">

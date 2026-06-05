@@ -109,28 +109,27 @@ function PlayfulSession() {
         setFlashes((f) => f.filter((x) => x.id !== id))
       } gameIndex={0}>
         <div className="space-y-5 text-center">
-          <h1 className="font-display text-3xl font-extrabold" style={{ color: "#F0EDE8" }}>
+          <h1 className="font-display text-3xl font-extrabold text-foreground">
             Playful Prototypes
           </h1>
-          <p className="text-sm" style={{ color: "#7A7876" }}>
+          <p className="text-sm text-muted-foreground">
             Five short games. Each adds to a single chemistry score that lives on your Passport.
-            Up to <span style={{ color: "#E2C896" }}>160 pts</span> per session.
+            Up to <span className="text-primary">160 pts</span> per session.
           </p>
-          <ul className="space-y-1 text-sm" style={{ color: "#F0EDE8" }}>
+          <ul className="space-y-1 text-sm text-foreground">
             {GAMES.map((g) => (
               <li key={g.id}>
-                <span className="mr-2">{g.emoji}</span>{g.name} · <span style={{ color: "#7A7876" }}>+{g.base} pts base</span>
+                <span className="mr-2">{g.emoji}</span>{g.name} · <span className="text-muted-foreground">+{g.base} pts base</span>
               </li>
             ))}
           </ul>
           <button
             onClick={() => setIdx(0)}
-            className="w-full rounded-full px-4 py-3 text-sm font-semibold"
-            style={{ background: "linear-gradient(135deg, #8B5CF6, #A78BFA)", color: "#0D0D0F" }}
+            className="w-full rounded-full bg-gradient-hero px-4 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
           >
             Begin session
           </button>
-          <Link to="/passport" className="block text-[11px]" style={{ color: "#7A7876" }}>
+          <Link to="/passport" className="block text-[11px] text-muted-foreground hover:text-primary">
             Back to Passport
           </Link>
         </div>
@@ -171,21 +170,21 @@ function Shell({
   gameIndex: number;
 }) {
   return (
-    <div className="min-h-screen" style={{ background: "#0D0D0F", color: "#F0EDE8" }}>
+    <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 backdrop-blur-md"
-        style={{ background: "rgba(13,13,15,0.85)", borderBottom: "1px solid #2A2A2E" }}
+        style={{ background: "color-mix(in oklch, var(--background) 86%, transparent)", borderBottom: "1px solid var(--border)" }}
       >
         <div className="mx-auto flex max-w-md items-center justify-between px-5 py-3">
-          <div className="text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
             {gameIndex > 0 ? `Game ${gameIndex} / ${GAMES.length}` : "Session"}
           </div>
           <div className="relative">
             <span
               className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
               style={{
-                background: "rgba(201,169,110,0.12)",
-                borderColor: "rgba(201,169,110,0.30)",
-                color: "#E2C896",
+                background: "color-mix(in oklch, var(--logo-gold) 14%, transparent)",
+                borderColor: "color-mix(in oklch, var(--logo-gold) 34%, transparent)",
+                color: "var(--logo-gold)",
               }}
             >
               ⚗ {totalDisplay} pts

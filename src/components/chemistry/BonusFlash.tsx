@@ -12,9 +12,9 @@ export function BonusFlash({ label, onDone }: { label: string; onDone?: () => vo
       className="pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium"
       style={{
         top: "-28px",
-        color: "#A78BFA",
-        borderColor: "rgba(139,92,246,0.35)",
-        background: "rgba(139,92,246,0.14)",
+        color: "var(--logo-rose)",
+        borderColor: "color-mix(in oklch, var(--logo-purple) 35%, transparent)",
+        background: "color-mix(in oklch, var(--logo-purple) 16%, transparent)",
         animation: "chem-bonus-float 1.6s ease-out forwards",
       }}
     >

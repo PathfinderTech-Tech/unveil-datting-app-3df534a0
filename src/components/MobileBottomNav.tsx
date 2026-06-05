@@ -20,7 +20,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#2A2A2E] bg-background/90 backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur-xl lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto grid h-16 max-w-md grid-cols-5">
@@ -35,7 +35,7 @@ export function MobileBottomNav() {
                 className={`relative flex w-full flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
                   active
                     ? "font-semibold text-primary"
-                    : "font-normal text-[#7A7876] hover:text-foreground"
+                    : "font-normal text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <span className="relative flex items-center justify-center">

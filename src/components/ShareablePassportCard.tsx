@@ -98,37 +98,37 @@ function buildSvg(
 
   const photoBlock = photoDataUrl
     ? `<defs><clipPath id="pclip"><circle cx="${cx}" cy="${cy}" r="130"/></clipPath></defs>
-       <circle cx="${cx}" cy="${cy}" r="138" fill="none" stroke="#a855f7" stroke-width="3"/>
+       <circle cx="${cx}" cy="${cy}" r="138" fill="none" stroke="#cf3ee3" stroke-width="3"/>
        <image href="${photoDataUrl}" x="${ix}" y="${iy}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#pclip)"/>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a0d2e"/>
-      <stop offset="60%" stop-color="#2a1248"/>
-      <stop offset="100%" stop-color="#3a0f3a"/>
+      <stop offset="0%" stop-color="#13091f"/>
+      <stop offset="60%" stop-color="#261044"/>
+      <stop offset="100%" stop-color="#09070d"/>
     </linearGradient>
     <radialGradient id="g1" cx="0.8" cy="0.1" r="0.6">
-      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#cf3ee3" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#f2b861" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="1080" height="1350" fill="url(#bg)"/>
   <rect width="1080" height="1350" fill="url(#g1)"/>
   ${photoBlock}
-  <text x="60" y="110" fill="#c4b5fd" font-family="monospace" font-size="22" letter-spacing="8">UNVEIL IDENTITY</text>
-  <text x="60" y="240" fill="#ffffff" font-family="Georgia, serif" font-size="96" font-weight="300">${name}</text>
-  <text x="60" y="290" fill="#cbd5e1" font-family="Inter, sans-serif" font-size="28">${loc}</text>
-  <line x1="60" y1="360" x2="200" y2="360" stroke="#a855f7" stroke-width="2"/>
-  <text x="60" y="430" fill="#a855f7" font-family="monospace" font-size="18" letter-spacing="6">ARCHETYPE</text>
-  <text x="60" y="510" fill="#ffffff" font-family="Georgia, serif" font-size="72" font-weight="300" text-transform="capitalize">${archetype}</text>
-  <text x="60" y="900" fill="#94a3b8" font-family="Inter, sans-serif" font-size="22">Relationship readiness</text>
-  <text x="60" y="980" fill="#ffffff" font-family="Georgia, serif" font-size="110" font-weight="300">${score}<tspan fill="#94a3b8" font-size="40">/100</tspan></text>
-  <text x="60" y="1080" fill="#94a3b8" font-family="Inter, sans-serif" font-size="22">Passport badges</text>
-  <text x="60" y="1140" fill="#ffffff" font-family="Georgia, serif" font-size="72" font-weight="300">${badgeCount}<tspan fill="#94a3b8" font-size="32"> / ${totalBadges}</tspan></text>
-  <text x="60" y="1280" fill="#c4b5fd" font-family="monospace" font-size="18" letter-spacing="6">UNVEIL.BEST</text>
-  <text x="1020" y="1280" fill="#c4b5fd" font-family="monospace" font-size="18" letter-spacing="4" text-anchor="end">SLOW LOVE · REAL CONNECTION</text>
+  <text x="60" y="110" fill="#e877f0" font-family="monospace" font-size="22" letter-spacing="8">UNVEIL IDENTITY</text>
+  <text x="60" y="240" fill="#f7f0e2" font-family="Georgia, serif" font-size="96" font-weight="300">${name}</text>
+  <text x="60" y="290" fill="#d6badf" font-family="Inter, sans-serif" font-size="28">${loc}</text>
+  <line x1="60" y1="360" x2="200" y2="360" stroke="#cf3ee3" stroke-width="2"/>
+  <text x="60" y="430" fill="#f2b861" font-family="monospace" font-size="18" letter-spacing="6">ARCHETYPE</text>
+  <text x="60" y="510" fill="#f7f0e2" font-family="Georgia, serif" font-size="72" font-weight="300" text-transform="capitalize">${archetype}</text>
+  <text x="60" y="900" fill="#d6badf" font-family="Inter, sans-serif" font-size="22">Relationship readiness</text>
+  <text x="60" y="980" fill="#f7f0e2" font-family="Georgia, serif" font-size="110" font-weight="300">${score}<tspan fill="#d6badf" font-size="40">/100</tspan></text>
+  <text x="60" y="1080" fill="#d6badf" font-family="Inter, sans-serif" font-size="22">Passport badges</text>
+  <text x="60" y="1140" fill="#f7f0e2" font-family="Georgia, serif" font-size="72" font-weight="300">${badgeCount}<tspan fill="#d6badf" font-size="32"> / ${totalBadges}</tspan></text>
+  <text x="60" y="1280" fill="#e877f0" font-family="monospace" font-size="18" letter-spacing="6">UNVEIL.BEST</text>
+  <text x="1020" y="1280" fill="#e877f0" font-family="monospace" font-size="18" letter-spacing="4" text-anchor="end">SLOW LOVE · REAL CONNECTION</text>
 </svg>`;
 }
 

@@ -131,9 +131,9 @@ export function UnveilNav() {
             {SECTIONS.map((section, idx) => (
               <div
                 key={section.label}
-                className={idx > 0 ? "mt-4 border-t border-[#2A2A2E] pt-4" : ""}
+                className={idx > 0 ? "mt-4 border-t border-border pt-4" : ""}
               >
-                <div className="px-2 pb-2 text-[13px] font-medium uppercase tracking-[0.1em] text-[#7A7876]">
+                <div className="px-2 pb-2 text-[13px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
                   {section.label}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -156,7 +156,7 @@ export function UnveilNav() {
               </div>
             ))}
             {!user && (
-              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[#2A2A2E] pt-4">
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
                 <Link to="/login" onClick={() => setOpen(false)} className="rounded-xl border border-border px-3 py-2 text-center text-sm">Log in</Link>
                 <Link to="/signup" onClick={() => setOpen(false)} className="rounded-xl bg-gradient-hero px-3 py-2 text-center text-sm text-primary-foreground">Sign up</Link>
               </div>

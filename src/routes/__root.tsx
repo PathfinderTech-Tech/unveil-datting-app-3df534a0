@@ -29,7 +29,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
           >
             Go home
           </Link>
@@ -58,13 +58,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
           >
             Try again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
           >
             Go home
           </a>
@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "UNVEIL — Connection Starts Beneath the Surface" },
       { name: "description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
       { name: "author", content: "UNVEIL" },
-      { name: "theme-color", content: "#0F172A" },
+      { name: "theme-color", content: "#09070d" },
       { property: "og:site_name", content: "UNVEIL" },
       { property: "og:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
       { property: "og:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
@@ -149,7 +149,7 @@ function RootComponent() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          backgroundImage: `radial-gradient(ellipse at center, rgba(13,13,15,0) 0%, rgba(13,13,15,0.75) 50%, rgba(13,13,15,0.96) 100%), url(${watermarkAsset.url})`,
+          backgroundImage: `radial-gradient(ellipse at center, oklch(0.075 0.018 295 / 0) 0%, oklch(0.075 0.018 295 / 0.75) 50%, oklch(0.075 0.018 295 / 0.96) 100%), url(${watermarkAsset.url})`,
           backgroundSize: "cover, min(60vmin, 640px) min(60vmin, 640px)",
           backgroundPosition: "center, center",
           backgroundRepeat: "no-repeat, no-repeat",

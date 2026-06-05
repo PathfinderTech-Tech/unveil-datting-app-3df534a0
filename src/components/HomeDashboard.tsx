@@ -136,7 +136,7 @@ export function HomeDashboard({ user }: { user: User }) {
 
       {/* 2. Profile completion */}
       {showCompletion && (
-        <section className="rounded-2xl border border-[#2A2A2E] bg-[#161618] p-4">
+        <section className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               Your Passport is <span className="font-medium text-foreground">{completion}%</span> complete
@@ -147,7 +147,7 @@ export function HomeDashboard({ user }: { user: User }) {
               </Link>
             )}
           </div>
-          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[#2A2A2E]">
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-surface-2">
             <div
               className="h-full rounded-full bg-gradient-hero transition-all"
               style={{ width: `${Math.max(4, completion)}%` }}
@@ -160,7 +160,7 @@ export function HomeDashboard({ user }: { user: User }) {
       <section className="grid grid-cols-2 gap-3">
         <Link
           to="/matches"
-          className="rounded-2xl border border-[#2A2A2E] bg-[#1E1E21] px-4 py-4 transition-colors hover:border-primary/40"
+          className="rounded-2xl border border-border bg-surface-2 px-4 py-4 transition-colors hover:border-primary/40"
         >
           <div className="text-[22px] font-semibold text-primary leading-none">{newMatches}</div>
           <div className="mt-1.5 text-[12px] text-muted-foreground">
@@ -169,7 +169,7 @@ export function HomeDashboard({ user }: { user: User }) {
         </Link>
         <Link
           to="/messages"
-          className="rounded-2xl border border-[#2A2A2E] bg-[#1E1E21] px-4 py-4 transition-colors hover:border-primary/40"
+          className="rounded-2xl border border-border bg-surface-2 px-4 py-4 transition-colors hover:border-primary/40"
         >
           <div className="text-[22px] font-semibold text-primary leading-none">{unread}</div>
           <div className="mt-1.5 text-[12px] text-muted-foreground">
@@ -179,7 +179,7 @@ export function HomeDashboard({ user }: { user: User }) {
       </section>
 
       {/* 4. Today's challenge */}
-      <section className="rounded-2xl border border-[#2A2A2E] bg-[#161618] p-5">
+      <section className="rounded-2xl border border-border bg-card p-5">
         <div className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
           {featured?.category ?? "Today's Challenge"}
         </div>
@@ -200,7 +200,7 @@ export function HomeDashboard({ user }: { user: User }) {
       {/* 6. Rotating contextual nudge (max one) */}
 
       {nudge && (
-        <section className="rounded-2xl border border-[#2A2A2E] bg-[#161618] p-5">
+        <section className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
               <Sparkles className="h-4 w-4 text-primary" />

@@ -47,8 +47,7 @@ export function RedGreenGame({ onComplete, onSkip }: {
     <div className="space-y-5">
       <GameHeader step={i + 1} total={items.length} title="Red Flag / Green Flag" />
       <div
-        className="rounded-2xl border p-6 text-center text-lg"
-        style={{ background: "#1E1E21", borderColor: "#2A2A2E", color: "#F0EDE8" }}
+        className="rounded-2xl border border-border bg-surface-2 p-6 text-center text-lg text-foreground"
       >
         {cur.text}
       </div>
@@ -56,12 +55,12 @@ export function RedGreenGame({ onComplete, onSkip }: {
         <button
           onClick={() => pick("red")}
           className="rounded-2xl border py-4 text-sm font-medium"
-          style={{ background: "rgba(239,68,68,0.10)", borderColor: "rgba(239,68,68,0.4)", color: "rgb(239,68,68)" }}
+          style={{ background: "color-mix(in oklch, var(--destructive) 12%, transparent)", borderColor: "color-mix(in oklch, var(--destructive) 45%, transparent)", color: "var(--destructive)" }}
         >🚩 Red Flag</button>
         <button
           onClick={() => pick("green")}
           className="rounded-2xl border py-4 text-sm font-medium"
-          style={{ background: "rgba(52,211,153,0.10)", borderColor: "rgba(52,211,153,0.4)", color: "rgb(52,211,153)" }}
+          style={{ background: "color-mix(in oklch, var(--logo-gold) 12%, transparent)", borderColor: "color-mix(in oklch, var(--logo-gold) 45%, transparent)", color: "var(--logo-gold)" }}
         >🟢 Green Flag</button>
       </div>
       <SkipButton onSkip={onSkip} />

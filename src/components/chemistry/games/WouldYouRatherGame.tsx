@@ -34,7 +34,7 @@ export function WouldYouRatherGame({ onComplete, onSkip }: {
   return (
     <div className="space-y-5">
       <GameHeader step={i + 1} total={WOULD_YOU_RATHER.length} title="Would You Rather" />
-      <p className="text-center text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+      <p className="text-center text-[11px] uppercase tracking-wider text-muted-foreground">
         Trust your gut. Quick answers earn a streak bonus.
       </p>
       <div className="grid gap-3">
@@ -42,8 +42,7 @@ export function WouldYouRatherGame({ onComplete, onSkip }: {
           <button
             key={k}
             onClick={() => pick(k)}
-            className="rounded-2xl border p-5 text-left transition-all hover:-translate-y-0.5"
-            style={{ background: "#1E1E21", borderColor: "#2A2A2E", color: "#F0EDE8" }}
+            className="rounded-2xl border border-border bg-surface-2 p-5 text-left text-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40"
           >
             {q[k]}
           </button>
