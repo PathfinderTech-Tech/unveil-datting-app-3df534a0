@@ -313,7 +313,7 @@ function Day1({
       peer_already_submitted: !!peerIntro,
       avg_length: Math.round(vals.reduce((s, v) => s + v.trim().length, 0) / 3),
     });
-    toast.success("Your answers are shared.");
+    celebrate();
   }
 
   return (
