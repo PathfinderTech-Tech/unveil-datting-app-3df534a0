@@ -249,9 +249,10 @@ function ProfilePage() {
               </div>
             </div>
             <div className="ml-auto flex flex-col gap-2">
-              <Link to="/onboarding" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface">Edit photos</Link>
-              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface">Edit avatar</Link>
+              <a href="/onboarding?edit=1" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit photos</a>
+              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit avatar</Link>
             </div>
+
           </div>
         </Section>
 
