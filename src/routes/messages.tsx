@@ -149,11 +149,9 @@ function MessagesPage() {
           </p>
         </header>
 
-        {!verification.loading && !verification.verified && (
-          <div className="mb-6">
-            <VerificationGate status={verification.status} />
-          </div>
-        )}
+        {/* Verification is NOT required to message. Free users get 5/day, verified get 15/day,
+            Daily Pass / Premium are unlimited. DB trigger enforces quota. */}
+
 
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
