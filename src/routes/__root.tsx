@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "UNVEIL — Connection Starts Beneath the Surface" },
       { name: "description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
       { name: "author", content: "UNVEIL" },
-      { name: "theme-color", content: "#0F172A" },
+      { name: "theme-color", content: "#09070d" },
       { property: "og:site_name", content: "UNVEIL" },
       { property: "og:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
       { property: "og:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
@@ -149,7 +149,7 @@ function RootComponent() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          backgroundImage: `radial-gradient(ellipse at center, rgba(13,13,15,0) 0%, rgba(13,13,15,0.75) 50%, rgba(13,13,15,0.96) 100%), url(${watermarkAsset.url})`,
+          backgroundImage: `radial-gradient(ellipse at center, oklch(0.075 0.018 295 / 0) 0%, oklch(0.075 0.018 295 / 0.75) 50%, oklch(0.075 0.018 295 / 0.96) 100%), url(${watermarkAsset.url})`,
           backgroundSize: "cover, min(60vmin, 640px) min(60vmin, 640px)",
           backgroundPosition: "center, center",
           backgroundRepeat: "no-repeat, no-repeat",
