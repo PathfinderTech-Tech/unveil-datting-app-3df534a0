@@ -108,10 +108,12 @@ function Chat() {
       const row = data?.[0];
       setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
 
-      const { data: prof } = await supabase.from("profiles").select("first_name").eq("id", peerId).maybeSingle();
+      const { data: prof } = await supabase.from("profiles").select("first_name, avatar_url, photo_url, discovery_mode").eq("id", peerId).maybeSingle();
       if (!alive) return;
       setPeerName(prof?.first_name ?? "them");
+      setPeerProfile(prof ? { avatar_url: prof.avatar_url, photo_url: prof.photo_url, discovery_mode: (prof.discovery_mode as "avatar" | "photo" | null) ?? null } : null);
     })();
+
     return () => { alive = false; };
   }, [user, peerId]);
 
