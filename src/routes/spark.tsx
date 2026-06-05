@@ -135,8 +135,13 @@ function SparkPage() {
     );
   }, [uid]);
 
-  // Track which questions in current pool are answered (by question text).
+  // Track answered questions: set (for membership) and map (for current value).
   const answeredSet = useMemo(() => new Set(answered.map((a) => a.q)), [answered]);
+  const answeredMap = useMemo(() => {
+    const m = new Map<string, string>();
+    answered.forEach((a) => m.set(a.q, a.a));
+    return m;
+  }, [answered]);
   const remainingCount = pool.filter((p) => !answeredSet.has(p.text)).length;
   const allAnswered = remainingCount === 0 && pool.length > 0;
 
@@ -147,12 +152,16 @@ function SparkPage() {
     if (firstUnanswered >= 0) setIdx(firstUnanswered);
   }, [filter, pool.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // When question changes, prefill textarea with any existing saved answer.
+  useEffect(() => {
+    setAnswer(answeredMap.get(q.text) ?? "");
+  }, [q.text]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const goToNextUnanswered = (fromIdx: number) => {
     for (let step = 1; step <= pool.length; step++) {
       const i = (fromIdx + step) % pool.length;
       if (!answeredSet.has(pool[i].text)) {
         setIdx(i);
-        setAnswer("");
         return true;
       }
     }
@@ -163,13 +172,13 @@ function SparkPage() {
     const found = goToNextUnanswered(idx);
     if (!found) setDone(true);
   };
-  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); setAnswer(""); };
+  const prev = () => { setIdx((i) => (i - 1 + pool.length) % pool.length); };
 
-  // Auto-save: debounced save while typing.
+  // Auto-save: debounced save while typing. Saves on first answer AND edits.
   useEffect(() => {
-    if (!answer.trim()) return;
-    if (answeredSet.has(q.text)) return; // already saved
     const trimmed = answer.trim();
+    if (!trimmed) return;
+    if (answeredMap.get(q.text) === trimmed) return; // no change
     const handle = setTimeout(async () => {
       const entry = { q: q.text, a: trimmed, cat: q.category };
       if (uid) {
@@ -182,10 +191,10 @@ function SparkPage() {
           toast.error("Couldn't save answer", { description: error });
           return;
         }
-        setAnswered((a) => [entry, ...a].slice(0, 50));
+        setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
         if (answered.length + 1 >= 5) await awardBadge("storyteller");
       } else {
-        setAnswered((a) => [entry, ...a].slice(0, 50));
+        setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
       }
     }, 900);
     return () => clearTimeout(handle);
@@ -193,8 +202,9 @@ function SparkPage() {
 
   const saveAndNext = async () => {
     if (!answer.trim()) { next(); return; }
-    if (!answeredSet.has(q.text)) {
-      const entry = { q: q.text, a: answer.trim(), cat: q.category };
+    const trimmed = answer.trim();
+    if (answeredMap.get(q.text) !== trimmed) {
+      const entry = { q: q.text, a: trimmed, cat: q.category };
       if (uid) {
         setSaving(true);
         const { error } = await saveSparkAnswer({
@@ -203,11 +213,43 @@ function SparkPage() {
         setSaving(false);
         if (error) { toast.error("Couldn't save answer", { description: error }); return; }
       }
-      setAnswered((a) => [entry, ...a].slice(0, 50));
+      setAnswered((a) => [entry, ...a.filter((x) => x.q !== entry.q)].slice(0, 50));
     }
     const found = goToNextUnanswered(idx);
     if (!found) setDone(true);
   };
+
+  const editAnswer = (questionText: string) => {
+    setDone(false);
+    // Switch to "all" so the question is in pool regardless of current filter.
+    const inPool = pool.findIndex((p) => p.text === questionText);
+    if (inPool >= 0) {
+      setIdx(inPool);
+    } else {
+      setFilter("all");
+      const i = QUESTIONS.findIndex((p) => p.text === questionText);
+      if (i >= 0) setIdx(i);
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const removeAnswer = async (questionText: string) => {
+    const prev = answered;
+    setAnswered((a) => a.filter((x) => x.q !== questionText));
+    if (uid) {
+      const { error } = await deleteSparkAnswer(questionText);
+      if (error) {
+        toast.error("Couldn't delete answer", { description: error });
+        setAnswered(prev);
+        return;
+      }
+    }
+    if (q.text === questionText) setAnswer("");
+    toast.success("Answer deleted");
+  };
+
 
   if (checking) {
     return (
