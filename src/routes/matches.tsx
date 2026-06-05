@@ -122,8 +122,9 @@ function Matches() {
 
   const baseScore = profileState?.baseScore ?? 70;
   const visible = useMemo(() => {
-    if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
-    return matches;
+    const pool = tab === "band" ? matches.filter((m) => Math.abs(m.composite - baseScore) <= 10) : matches;
+    // Trust-first: verified members ranked above unverified in Discover/Matches.
+    return [...pool].sort((a, b) => Number(b.verified) - Number(a.verified) || b.pairScore - a.pairScore);
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
