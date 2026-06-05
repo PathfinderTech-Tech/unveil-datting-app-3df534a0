@@ -502,6 +502,18 @@ function Chat() {
                 </div>
               )}
 
+              {showContactWarning && verifiedOk && (
+                <div className="border-t border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+                  <div className="font-medium">Contact sharing unlocks after trust milestones have been completed.</div>
+                  <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-100/80">
+                    <li>Both members verified</li>
+                    <li>Mutual match</li>
+                    <li>7 days of connection — or either side on Premium</li>
+                  </ul>
+                </div>
+              )}
+
+
               <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled && verifiedOk) send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
                 <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading || !chatGate.enabled || !verifiedOk}
