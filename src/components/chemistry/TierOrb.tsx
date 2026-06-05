@@ -4,7 +4,7 @@ import { TIER_META } from "@/lib/chemistry-ledger";
 const TIER_RING: Record<Tier, string> = {
   Magnetic:   "conic-gradient(from 0deg, var(--logo-violet), var(--logo-purple), var(--logo-magenta), var(--logo-gold), var(--logo-violet))",
   Resonant:   "conic-gradient(from 0deg, var(--logo-gold), var(--logo-amber), var(--logo-magenta), var(--logo-gold))",
-  Emerging:   "conic-gradient(from 0deg, rgb(52,211,153), rgb(16,185,129), rgb(52,211,153))",
+  Emerging:   "conic-gradient(from 0deg, oklch(0.78 0.17 162), oklch(0.68 0.16 170), oklch(0.78 0.17 162))",
   Curious:    "conic-gradient(from 0deg, var(--muted-foreground), var(--surface-2), var(--muted-foreground))",
   Incomplete: "var(--border)",
 };
