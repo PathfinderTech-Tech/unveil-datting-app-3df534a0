@@ -449,14 +449,14 @@ h1, h2, h3, h4 {
 
 /* ---- Avatars ---- */
 .u-avatar {
-  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
-  border: 2px solid rgba(139, 92, 246, 0.35);
+  background: var(--gradient-logo);
+  border: 2px solid color-mix(in oklch, var(--logo-purple) 42%, transparent);
   box-shadow:
-    0 0 14px rgba(139, 92, 246, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    var(--shadow-logo),
+    inset 0 1px 0 oklch(1 0 0 / 0.12);
   font-family: var(--font-display-grotesk);
   font-weight: 900;
-  color: #fff;
+  color: var(--primary-foreground);
   border-radius: 999px;
 }
 .avatar-aura { position: relative; }
@@ -467,10 +467,10 @@ h1, h2, h3, h4 {
   border-radius: 999px;
   background: conic-gradient(
     from 0deg,
-    rgba(167, 139, 250, 0.8),
-    rgba(52, 211, 153, 0.4),
-    rgba(201, 169, 110, 0.3),
-    rgba(167, 139, 250, 0.8)
+    oklch(0.80 0.20 348 / 0.85),
+    oklch(0.72 0.28 334 / 0.62),
+    oklch(0.82 0.16 67 / 0.62),
+    oklch(0.67 0.27 310 / 0.85)
   );
   animation: orbitRing 4s linear infinite;
   z-index: -1;
@@ -488,7 +488,7 @@ h1, h2, h3, h4 {
 }
 
 .u-text-gradient {
-  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #E2C896 100%);
+  background: var(--gradient-logo);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -496,19 +496,19 @@ h1, h2, h3, h4 {
 
 /* ---- Modal & nav helpers ---- */
 .modal-sheet {
-  background: linear-gradient(180deg, #1C1025 0%, #0D0D0F 100%);
-  border: 1px solid rgba(139, 92, 246, 0.20);
+  background: linear-gradient(180deg, var(--logo-surface-2) 0%, var(--logo-black) 100%);
+  border: 1px solid color-mix(in oklch, var(--logo-purple) 26%, transparent);
   border-radius: 28px 28px 0 0;
-  box-shadow: 0 -8px 48px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 -8px 48px oklch(0.67 0.27 310 / 0.18);
 }
 .modal-handle {
   width: 36px; height: 4px;
-  background: rgba(42, 42, 46, 0.8);
+  background: color-mix(in oklch, var(--border) 86%, transparent);
   border-radius: 999px;
   margin: 14px auto 20px;
 }
 .modal-backdrop {
-  background: rgba(0, 0, 0, 0.7);
+  background: oklch(0 0 0 / 0.72);
   backdrop-filter: blur(8px);
 }
 
