@@ -8,7 +8,7 @@ import {
 } from "@/lib/synapse-store";
 import { loadRealMatches, likeProfile, passProfile, toggleSaveProfile, distanceLabel, bandLabel, type RealMatch } from "@/lib/matching-api";
 import { MatchFilters, DEFAULT_FILTERS, type FilterState } from "@/components/MatchFilters";
-import { Avatar } from "@/components/Avatar";
+
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { supabase } from "@/integrations/supabase/client";
