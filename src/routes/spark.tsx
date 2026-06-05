@@ -252,7 +252,7 @@ function SparkPage() {
               </div>
               <div className="font-display text-3xl font-light leading-snug md:text-4xl">{q.text}</div>
               <textarea value={answer} onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Type your answer… it saves automatically."
+                placeholder={q.placeholder}
                 rows={3}
                 className="mt-6 w-full resize-none rounded-2xl border border-border bg-background/60 p-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary" />
               <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
