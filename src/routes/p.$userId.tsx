@@ -21,10 +21,11 @@ export const Route = createFileRoute("/p/$userId")({
     const name = p.firstName ?? "Someone";
     const archetype = (p.archetype ?? "Signal").replace(/-/g, " ");
     const loc = [p.city, p.country].filter(Boolean).join(", ");
-    const title = `${name}'s UNVEIL Passport — ${archetype}`;
+    const verifiedTag = p.verified ? " · Verified" : "";
+    const title = `${name}'s UNVEIL Passport — ${archetype}${verifiedTag}`;
     const description = loc
-      ? `${name} · ${archetype} · ${loc}. Slow love, real connection on UNVEIL.`
-      : `${name} · ${archetype}. Slow love, real connection on UNVEIL.`;
+      ? `${name} · ${archetype}${verifiedTag} · ${loc}. Slow love, real connection on UNVEIL.`
+      : `${name} · ${archetype}${verifiedTag}. Slow love, real connection on UNVEIL.`;
     const image = p.avatarUrl ?? p.photoUrl ?? p.profilePhotoUrl ?? undefined;
     return {
       meta: [
@@ -91,7 +92,12 @@ function PublicPassportPage() {
               />
             )}
             <div className="absolute inset-x-0 bottom-0 p-6 text-foreground">
-              <div className="font-mono text-[11px] uppercase tracking-luxury text-accent">UNVEIL Identity</div>
+              <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-luxury text-accent">
+                <span>UNVEIL Identity</span>
+                {passport.verified && (
+                  <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[9px] text-accent">✓ Verified</span>
+                )}
+              </div>
               <h1 className="mt-2 font-display text-4xl font-light leading-tight text-foreground">{name}</h1>
               <div className="mt-1 text-sm text-muted-foreground">{loc}</div>
 

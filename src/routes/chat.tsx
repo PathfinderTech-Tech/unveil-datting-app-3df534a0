@@ -35,6 +35,19 @@ type Reaction = { message_id: string; user_id: string; emoji: string };
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
 
+// Mirror of server-side enforce_contact_sharing regex so we can warn the user BEFORE they hit send.
+const PII_PATTERNS: RegExp[] = [
+  /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i,
+  /(?:\+?\d[\s().-]*){7,}\d/,
+  /(https?:\/\/|www\.)[a-z0-9.-]+/i,
+  /\b(?:instagram|insta|ig|whatsapp|wa|telegram|tg|snapchat|snap|facebook|fb|tiktok|twitter|x\.com)\b[\s:@/]*[a-z0-9._-]+/i,
+  /(^|\s)@[A-Za-z0-9._]{3,}/,
+  /(wa\.me\/|t\.me\/|instagram\.com\/|fb\.com\/|facebook\.com\/|snapchat\.com\/)/i,
+];
+function looksLikeContactShare(s: string): boolean {
+  return PII_PATTERNS.some((re) => re.test(s));
+}
+
 // PII detection/blocking now lives server-side in the enforce_contact_sharing trigger.
 // Messages with phone/email/social handles are rejected with CONTACT_SHARING_LOCKED
 // unless the pair has cleared the trust milestones.
@@ -64,8 +77,11 @@ function Chat() {
   const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
   const [peerName, setPeerName] = useState<string>("them");
   const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
+  const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
   const verification = useVerification();
   const verifiedOk = verification.loading || verification.verified;
+  const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
+  const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
@@ -108,6 +124,11 @@ function Chat() {
       if (!alive) return;
       setPeerName(prof?.first_name ?? "them");
       setPeerProfile(prof ? { avatar_url: prof.avatar_url, photo_url: prof.photo_url, discovery_mode: (prof.discovery_mode as "avatar" | "photo" | null) ?? null } : null);
+
+      // Check whether this pair has unlocked contact sharing (verified + mutual + Day 7 or premium).
+      const { data: canShare } = await (supabase as any).rpc("can_share_contacts", { _a: user.id, _b: peerId });
+      if (!alive) return;
+      setContactShareUnlocked(!!canShare);
     })();
 
     return () => { alive = false; };
@@ -480,6 +501,18 @@ function Chat() {
                   />
                 </div>
               )}
+
+              {showContactWarning && verifiedOk && (
+                <div className="border-t border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+                  <div className="font-medium">Contact sharing unlocks after trust milestones have been completed.</div>
+                  <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-100/80">
+                    <li>Both members verified</li>
+                    <li>Mutual match</li>
+                    <li>7 days of connection — or either side on Premium</li>
+                  </ul>
+                </div>
+              )}
+
 
               <form onSubmit={(e) => { e.preventDefault(); if (chatGate.enabled && verifiedOk) send(); }}
                 className="flex items-center gap-2 border-t border-border p-4">
