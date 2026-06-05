@@ -963,6 +963,7 @@ export type Database = {
           curiosity_level: number | null
           daily_message_count: number
           daily_message_reset_at: string
+          discovery_mode: string
           discovery_radius_km: number
           emotional_rhythm: Json | null
           first_name: string | null
@@ -1014,6 +1015,7 @@ export type Database = {
           curiosity_level?: number | null
           daily_message_count?: number
           daily_message_reset_at?: string
+          discovery_mode?: string
           discovery_radius_km?: number
           emotional_rhythm?: Json | null
           first_name?: string | null
@@ -1067,6 +1069,7 @@ export type Database = {
           curiosity_level?: number | null
           daily_message_count?: number
           daily_message_reset_at?: string
+          discovery_mode?: string
           discovery_radius_km?: number
           emotional_rhythm?: Json | null
           first_name?: string | null
