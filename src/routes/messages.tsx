@@ -35,7 +35,7 @@ type Row = {
 function MessagesPage() {
   const { checking } = useRequireOnboarding();
   const { user, loading } = useAuth();
-  const verification = useVerification();
+  
 
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
