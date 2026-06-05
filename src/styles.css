@@ -52,13 +52,13 @@
   --background: oklch(0.22 0.12 290);
   --foreground: oklch(0.98 0.01 295);
 
-  --surface: oklch(0.12 0.03 295);
-  --surface-2: oklch(0.17 0.045 295);
+  --surface: oklch(0.26 0.13 290);
+  --surface-2: oklch(0.32 0.15 290);
 
-  --card: oklch(0.11 0.03 295);
-  --card-foreground: oklch(0.97 0.01 295);
-  --popover: oklch(0.11 0.03 295);
-  --popover-foreground: oklch(0.97 0.01 295);
+  --card: oklch(0.28 0.14 290);
+  --card-foreground: oklch(0.98 0.01 295);
+  --popover: oklch(0.24 0.13 290);
+  --popover-foreground: oklch(0.98 0.01 295);
 
   --primary: oklch(0.65 0.22 305);            /* violet */
   --primary-foreground: oklch(0.98 0.01 295);
