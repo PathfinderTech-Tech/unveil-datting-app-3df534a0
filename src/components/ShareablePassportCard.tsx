@@ -1,11 +1,52 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
 import { useSubscription } from "@/hooks/use-subscription";
 import { getDisplayPhotoUrl } from "@/lib/photos";
+
+type PhotoChoice = "avatar" | "selfie" | "none";
+type Crop = { zoom: number; x: number; y: number }; // x,y in SVG units, ~-130..130
+type Prefs = { choice: PhotoChoice; crops: { avatar: Crop; selfie: Crop } };
+
+const DEFAULT_CROP: Crop = { zoom: 1, x: 0, y: 0 };
+const DEFAULT_PREFS: Prefs = {
+  choice: "avatar",
+  crops: { avatar: DEFAULT_CROP, selfie: DEFAULT_CROP },
+};
+
+function prefsKey(userId: string) {
+  return `unveil-passport-share-prefs:${userId}`;
+}
+
+function loadPrefs(userId: string): Prefs {
+  if (typeof window === "undefined") return DEFAULT_PREFS;
+  try {
+    const raw = localStorage.getItem(prefsKey(userId));
+    if (!raw) return DEFAULT_PREFS;
+    const p = JSON.parse(raw);
+    return {
+      choice: (["avatar", "selfie", "none"].includes(p?.choice) ? p.choice : "avatar") as PhotoChoice,
+      crops: {
+        avatar: { ...DEFAULT_CROP, ...(p?.crops?.avatar || {}) },
+        selfie: { ...DEFAULT_CROP, ...(p?.crops?.selfie || {}) },
+      },
+    };
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+
+function savePrefs(userId: string, prefs: Prefs) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(prefsKey(userId), JSON.stringify(prefs));
+  } catch {
+    /* ignore */
+  }
+}
 
 type CardData = {
   first_name: string | null;
