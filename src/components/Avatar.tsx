@@ -9,8 +9,8 @@ export function Avatar({ seed, size = 64, label }: { seed: string; size?: number
         width: size,
         height: size,
         fontSize: size * 0.4,
-        background: `conic-gradient(from ${hue}deg, oklch(0.74 0.22 ${hue}), oklch(0.82 0.18 ${(hue + 120) % 360}), oklch(0.7 0.28 ${(hue + 240) % 360}), oklch(0.74 0.22 ${hue}))`,
-        boxShadow: `0 0 ${size / 2}px -${size / 4}px oklch(0.74 0.22 ${hue} / 0.8)`,
+        background: `conic-gradient(from ${hue}deg, var(--logo-violet), var(--logo-magenta), var(--logo-gold), var(--logo-purple))`,
+        boxShadow: `0 0 ${size / 2}px -${size / 4}px color-mix(in oklch, var(--logo-purple) 70%, transparent)`,
       }}
     >
       {initials}
