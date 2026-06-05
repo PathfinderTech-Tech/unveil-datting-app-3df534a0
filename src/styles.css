@@ -394,24 +394,24 @@ h1, h2, h3, h4 {
 
 /* ---- Buttons ---- */
 .u-btn-primary {
-  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  background: var(--gradient-logo);
   border: none;
   border-radius: 999px;
-  color: #fff;
+  color: var(--primary-foreground);
   box-shadow:
-    0 0 24px rgba(139, 92, 246, 0.40),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    var(--shadow-logo),
+    inset 0 1px 0 oklch(1 0 0 / 0.14);
   font-family: var(--font-display-grotesk);
   font-weight: 900;
   padding: 12px 24px;
-  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+  transition: background 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
-.u-btn-primary:hover  { opacity: 0.95; }
-.u-btn-primary:active { opacity: 0.88; transform: scale(0.97); }
+.u-btn-primary:hover  { background: var(--gradient-logo-hover); box-shadow: 0 14px 42px -10px oklch(0.72 0.28 334 / 0.74); }
+.u-btn-primary:active { background: var(--gradient-logo-active); transform: scale(0.97); }
 
 .u-btn-ghost {
   background: transparent;
-  border: 1px solid rgba(42, 42, 46, 0.9);
+  border: 1px solid color-mix(in oklch, var(--border) 86%, transparent);
   border-radius: 999px;
   color: var(--u-muted);
   backdrop-filter: blur(8px);
@@ -420,11 +420,11 @@ h1, h2, h3, h4 {
   font-weight: 700;
   transition: all 200ms var(--ease-out);
 }
-.u-btn-ghost:hover { border-color: rgba(139, 92, 246, 0.35); color: var(--u-violet-bright); }
+.u-btn-ghost:hover { border-color: color-mix(in oklch, var(--logo-magenta) 44%, transparent); color: var(--logo-gold); background: color-mix(in oklch, var(--logo-purple) 10%, transparent); }
 
 .u-btn-destructive {
   background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid color-mix(in oklch, var(--u-red) 30%, transparent);
   color: var(--u-red);
   border-radius: 999px;
   padding: 10px 20px;
@@ -442,10 +442,10 @@ h1, h2, h3, h4 {
   gap: 4px;
   backdrop-filter: blur(4px);
 }
-.pill-violet  { background: rgba(139,92,246,0.12);  border: 1px solid rgba(139,92,246,0.28);  color: #A78BFA; }
-.pill-gold    { background: rgba(201,169,110,0.10); border: 1px solid rgba(201,169,110,0.28); color: #E2C896; }
-.pill-emerald { background: rgba(52,211,153,0.10);  border: 1px solid rgba(52,211,153,0.28);  color: rgb(52,211,153); }
-.pill-muted   { background: rgba(255,255,255,0.04); border: 1px solid rgba(42,42,46,0.9);     color: #7A7876; }
+.pill-violet  { background: color-mix(in oklch, var(--logo-purple) 16%, transparent);  border: 1px solid color-mix(in oklch, var(--logo-purple) 34%, transparent);  color: var(--logo-rose); }
+.pill-gold    { background: color-mix(in oklch, var(--logo-gold) 13%, transparent); border: 1px solid color-mix(in oklch, var(--logo-gold) 34%, transparent); color: var(--logo-gold); }
+.pill-emerald { background: color-mix(in oklch, var(--logo-magenta) 13%, transparent);  border: 1px solid color-mix(in oklch, var(--logo-magenta) 34%, transparent);  color: var(--logo-magenta); }
+.pill-muted   { background: color-mix(in oklch, var(--logo-ivory) 5%, transparent); border: 1px solid color-mix(in oklch, var(--border) 86%, transparent); color: var(--logo-muted); }
 
 /* ---- Avatars ---- */
 .u-avatar {
