@@ -69,6 +69,8 @@ function Passport() {
 
         {uid && <PassportIdentityCard userId={uid} onShare={() => setShareOpen(true)} />}
 
+        <ChemistryHistory />
+
         <div className="rounded-3xl border border-border bg-gradient-hero p-6 text-primary-foreground shadow-glow">
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5" />
