@@ -35,13 +35,9 @@ type Reaction = { message_id: string; user_id: string; emoji: string };
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
 
-// Strip phone/email/social handles for safety until consent is given.
-function scrubPII(text: string): string {
-  return text
-    .replace(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/gi, "[contact hidden]")
-    .replace(/(?:\+?\d[\s().-]{0,2}){7,}/g, "[contact hidden]")
-    .replace(/(@|instagram\.com\/|t\.me\/|wa\.me\/)\w+/gi, "[contact hidden]");
-}
+// PII detection/blocking now lives server-side in the enforce_contact_sharing trigger.
+// Messages with phone/email/social handles are rejected with CONTACT_SHARING_LOCKED
+// unless the pair has cleared the trust milestones.
 
 function Chat() {
   const { user, loading } = useAuth();
