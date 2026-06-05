@@ -77,8 +77,11 @@ function Chat() {
   const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
   const [peerName, setPeerName] = useState<string>("them");
   const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
+  const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
   const verification = useVerification();
   const verifiedOk = verification.loading || verification.verified;
+  const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
+  const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
