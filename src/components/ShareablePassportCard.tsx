@@ -429,6 +429,38 @@ export function ShareablePassportCard({
           >
             <WhatsAppIcon className="h-3.5 w-3.5" /> WhatsApp
           </a>
+          <a
+            href={telegramHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_telegram_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Send className="h-3.5 w-3.5" /> Telegram
+          </a>
+          <a
+            href={linkedinHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_linkedin_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+          </a>
+          <button
+            type="button"
+            onClick={() => copyAndOpen("https://www.instagram.com/", "Instagram")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Instagram className="h-3.5 w-3.5" /> Instagram
+          </button>
+          <button
+            type="button"
+            onClick={() => copyAndOpen("https://www.tiktok.com/", "TikTok")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Music2 className="h-3.5 w-3.5" /> TikTok
+          </button>
         </div>
 
 
