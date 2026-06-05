@@ -122,8 +122,9 @@ function Matches() {
 
   const baseScore = profileState?.baseScore ?? 70;
   const visible = useMemo(() => {
-    if (tab === "band") return matches.filter((m) => Math.abs(m.composite - baseScore) <= 10);
-    return matches;
+    const pool = tab === "band" ? matches.filter((m) => Math.abs(m.composite - baseScore) <= 10) : matches;
+    // Trust-first: verified members ranked above unverified in Discover/Matches.
+    return [...pool].sort((a, b) => Number(b.verified) - Number(a.verified) || b.pairScore - a.pairScore);
   }, [matches, tab, baseScore]);
   const [active, setActive] = useState<RealMatch | null>(null);
   const [thoughtFor, setThoughtFor] = useState<RealMatch | null>(null);
@@ -274,7 +275,11 @@ function Matches() {
 
   async function handleLike(m: RealMatch) {
     const res = await likeProfile(m.userId);
-    if (res.error) { toast.error(res.error); return; }
+    if (res.error) {
+      console.error("[unveil] like_profile failed", res.error);
+      toast.error(res.error);
+      return;
+    }
     if (res.mutual) {
       toast.success(`It's mutual with ${m.name} — a conversation is open.`);
       if (res.conversationId) navigate({ to: "/chat", search: { c: res.conversationId } as never });
@@ -378,7 +383,9 @@ function Matches() {
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{cityLabel}</span>
                     {m.age ? <span>· {m.age}</span> : null}
-                    {m.verified && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">Verified</span>}
+                    {m.verified
+                      ? <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">✓ Verified</span>
+                      : <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">Unverified</span>}
                   </div>
 
                   {m.strengths.length > 0 && (

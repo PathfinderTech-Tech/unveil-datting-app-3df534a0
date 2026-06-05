@@ -12,10 +12,11 @@ export async function sendThought(targetUserId: string, content: string) {
 
   const { data, error } = await supabase.rpc("send_thought", { _target: targetUserId, _content: trimmed } as never);
   if (error) {
+    console.error("[unveil] send_thought failed", error);
     if (error.message?.includes("THOUGHT_RATE_LIMIT")) {
       return { error: "You've sent a lot of thoughts. Take a breath and try again later.", mutual: false, conversationId: null };
     }
-    return { error: error.message, mutual: false, conversationId: null };
+    return { error: error.message || "Couldn't send thought.", mutual: false, conversationId: null };
   }
   const row = Array.isArray(data) ? data[0] : data;
   return {

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
+import { VerificationGate } from "@/components/VerificationGate";
+import { useVerification } from "@/hooks/use-verification";
 import { giveShareConsent, saveMyContact, loadMyContact, loadPartnerContact } from "@/lib/social-api";
 import { Phone, Lock, Unlock, Check, MessageSquare, Instagram, Send, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,6 +29,7 @@ type Channel = "phone" | "whatsapp" | "instagram" | "telegram";
 function ContactShare() {
   const search = useSearch({ from: "/contact-share" }) as SearchParams;
   const { partner, partners, partnerId, setPartnerId, loading, refresh } = usePartner(search.u);
+  const verification = useVerification();
 
   return (
     <div className="min-h-screen">
@@ -44,6 +47,16 @@ function ContactShare() {
 
         <SafetyReminder />
 
+        {!verification.loading && !verification.verified && (
+          <div className="mt-6">
+            <VerificationGate
+              status={verification.status}
+              reason="Contact sharing requires verified identity for both members."
+            />
+          </div>
+        )}
+
+
         <div className="mt-6 rounded-3xl border border-border bg-card p-6">
           <div className="mb-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Choose a match</div>
           {loading
@@ -51,7 +64,7 @@ function ContactShare() {
             : <PartnerPicker partners={partners} value={partnerId} onChange={setPartnerId} />}
         </div>
 
-        {partner && <SharePanel key={partner.userId} partner={partner} onRefresh={refresh} />}
+        {partner && verification.verified && <SharePanel key={partner.userId} partner={partner} onRefresh={refresh} />}
       </div>
     </div>
   );

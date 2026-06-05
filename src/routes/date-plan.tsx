@@ -4,6 +4,8 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { GuidedFirstDate } from "@/components/GuidedFirstDate";
+import { VerificationGate } from "@/components/VerificationGate";
+import { useVerification } from "@/hooks/use-verification";
 import { proposeDate, loadDatePlans, respondToDatePlan, type DatePlan } from "@/lib/social-api";
 import { Coffee, Utensils, BookOpen, Mountain, Image, Trees, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,6 +35,8 @@ const THEMES = [
 function DatePlanRoute() {
   const search = useSearch({ from: "/date-plan" }) as SearchParams;
   const { partner, partners, partnerId, setPartnerId, loading } = usePartner(search.u);
+  const verification = useVerification();
+  const verifiedOk = verification.loading || verification.verified;
 
   const [theme, setTheme] = useState<string | null>(null);
   const [location, setLocation] = useState("");
@@ -50,6 +54,7 @@ function DatePlanRoute() {
   }, []);
 
   async function submit() {
+    if (!verifiedOk) { toast.error("Verification required to plan a date."); return; }
     if (!partner || !theme) return;
     setBusy(true);
     const res = await proposeDate({
@@ -89,6 +94,16 @@ function DatePlanRoute() {
         </div>
 
         <SafetyReminder compact />
+
+        {!verification.loading && !verification.verified && (
+          <div className="mt-6">
+            <VerificationGate
+              status={verification.status}
+              reason="Date planning unlocks once both members are verified."
+            />
+          </div>
+        )}
+
 
         {incoming.length > 0 && (
           <section className="mt-6 rounded-3xl border border-primary/40 bg-primary/5 p-6">
@@ -157,7 +172,7 @@ function DatePlanRoute() {
               </Field>
             </section>
 
-            <button disabled={!theme || busy} onClick={submit}
+            <button disabled={!theme || busy || !verifiedOk} onClick={submit}
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow disabled:opacity-40">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               Send proposal to {partner.name}
