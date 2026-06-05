@@ -36,12 +36,12 @@ export function ChemistryBadge() {
       <span
         className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full"
         style={{
-          background: "rgba(139,92,246,0.12)",
-          border: "1px solid rgba(139,92,246,0.30)",
+          background: "color-mix(in oklch, var(--primary) 14%, transparent)",
+          border: "1px solid color-mix(in oklch, var(--primary) 35%, transparent)",
           padding: "4px 10px 4px 8px",
           fontSize: 11,
           fontWeight: 600,
-          color: "#A78BFA",
+          color: "var(--primary)",
         }}
       >
         <span
@@ -50,7 +50,7 @@ export function ChemistryBadge() {
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: "#8B5CF6",
+            background: "var(--primary)",
             animation: "chem-pulse 2s ease-out infinite",
           }}
         />
@@ -61,7 +61,7 @@ export function ChemistryBadge() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(90deg, transparent, rgba(201,169,110,0.18), transparent)",
+                "linear-gradient(90deg, transparent, color-mix(in oklch, var(--logo-gold) 22%, transparent), transparent)",
               animation: "chem-shimmer 0.4s ease-out forwards",
             }}
           />
