@@ -64,7 +64,7 @@ export function MemoryMatchGame({ onComplete, onSkip }: {
   return (
     <div className="space-y-5">
       <GameHeader step={1} total={1} title="Memory Match" />
-      <p className="text-center text-[11px] uppercase tracking-wider" style={{ color: "#7A7876" }}>
+      <p className="text-center text-[11px] uppercase tracking-wider text-muted-foreground">
         Moves: {moves} · Match pairs in ≤ 16 for the sharp memory bonus
       </p>
       <div className="grid grid-cols-4 gap-2">
@@ -76,8 +76,8 @@ export function MemoryMatchGame({ onComplete, onSkip }: {
               onClick={() => flip(i)}
               className="aspect-square rounded-xl border text-2xl transition-transform"
               style={{
-                background: c.matched ? "rgba(52,211,153,0.10)" : shown ? "#1E1E21" : "#161618",
-                borderColor: c.matched ? "rgba(52,211,153,0.4)" : "#2A2A2E",
+                background: c.matched ? "color-mix(in oklch, var(--logo-gold) 14%, transparent)" : shown ? "var(--surface-2)" : "var(--card)",
+                borderColor: c.matched ? "color-mix(in oklch, var(--logo-gold) 45%, transparent)" : "var(--border)",
               }}
             >
               {shown ? c.icon : ""}
