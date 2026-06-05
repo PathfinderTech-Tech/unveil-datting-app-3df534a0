@@ -10,6 +10,7 @@ import { ThoughtModal } from "@/components/ThoughtModal";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { CompatibilityMap } from "@/components/CompatibilityMap";
 import { CoupleJourney } from "@/components/CoupleJourney";
+import { PhotoRevealPanel } from "@/components/PhotoRevealPanel";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match insights — UNVEIL" }] }),
@@ -152,6 +153,12 @@ function MatchInsights() {
         {matchId && meId && (
           <div className="mt-4">
             <CoupleJourney matchId={matchId} userId={meId} />
+          </div>
+        )}
+
+        {matchId && (
+          <div className="mt-4">
+            <PhotoRevealPanel peerUserId={userId} peerName={profile.first_name} />
           </div>
         )}
 
