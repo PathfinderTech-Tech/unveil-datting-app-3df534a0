@@ -8,7 +8,7 @@ export type FailureRow = {
   severity: string;
   user_id: string | null;
   message: string;
-  context: Record<string, unknown> | null;
+  context: unknown;
   created_at: string;
 };
 
