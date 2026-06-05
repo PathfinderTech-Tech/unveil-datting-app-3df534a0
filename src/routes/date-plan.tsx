@@ -4,6 +4,8 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { GuidedFirstDate } from "@/components/GuidedFirstDate";
+import { VerificationGate } from "@/components/VerificationGate";
+import { useVerification } from "@/hooks/use-verification";
 import { proposeDate, loadDatePlans, respondToDatePlan, type DatePlan } from "@/lib/social-api";
 import { Coffee, Utensils, BookOpen, Mountain, Image, Trees, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
