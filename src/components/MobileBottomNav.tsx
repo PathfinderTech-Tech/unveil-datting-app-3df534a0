@@ -11,8 +11,8 @@ const ITEMS = [
 ] as const;
 
 /**
- * Mobile-only bottom navigation bar with UNVEIL purple gradient accents.
- * Hidden on lg+ where the top UnveilNav has full reach.
+ * Mobile-only bottom navigation. Inherits the logo palette via tokens —
+ * active items get a gradient text + glow, inactive items use muted-foreground.
  */
 export function MobileBottomNav() {
   const { location } = useRouterState();
@@ -34,16 +34,26 @@ export function MobileBottomNav() {
                 to={item.to}
                 className={`relative flex w-full flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
                   active
-                    ? "font-semibold text-primary"
+                    ? "font-semibold u-text-gradient"
                     : "font-normal text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-gradient-logo shadow-glow-magenta"
+                  />
+                )}
                 <span className="relative flex items-center justify-center">
-                  <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.2 : 1.8} />
+                  <Icon
+                    className="h-[22px] w-[22px]"
+                    strokeWidth={active ? 2.2 : 1.8}
+                    style={active ? { stroke: "url(#mbn-grad)" } : undefined}
+                  />
                   {showBadge && (
                     <span
                       aria-label={`${unread} unread`}
-                      className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground"
+                      className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-logo px-1 text-[9px] font-semibold text-primary-foreground shadow-glow-magenta"
                     >
                       {unread > 9 ? "9+" : unread}
                     </span>
@@ -55,6 +65,16 @@ export function MobileBottomNav() {
           );
         })}
       </ul>
+      {/* SVG gradient definition reused by active lucide icons */}
+      <svg width="0" height="0" className="absolute" aria-hidden>
+        <defs>
+          <linearGradient id="mbn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="oklch(0.61 0.27 292)" />
+            <stop offset="50%" stopColor="oklch(0.72 0.28 334)" />
+            <stop offset="100%" stopColor="oklch(0.82 0.16 67)" />
+          </linearGradient>
+        </defs>
+      </svg>
     </nav>
   );
 }

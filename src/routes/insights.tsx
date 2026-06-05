@@ -230,7 +230,7 @@ function ReadinessTab({ userId }: { userId: string }) {
         <p className="text-sm uppercase tracking-wide text-muted-foreground">Relationship readiness</p>
         <div className="relative mt-3 flex h-40 w-40 items-center justify-center">
           <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
+            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" strokeWidth="8" />
             <circle
               cx="50"
               cy="50"
@@ -243,8 +243,8 @@ function ReadinessTab({ userId }: { userId: string }) {
             />
             <defs>
               <linearGradient id="g1" x1="0" x2="1">
-                <stop offset="0%" stopColor="hsl(var(--primary))" />
-                <stop offset="100%" stopColor="hsl(var(--accent, var(--primary)))" />
+                <stop offset="0%" stopColor="var(--primary)" />
+                <stop offset="100%" stopColor="var(--accent)" />
               </linearGradient>
             </defs>
           </svg>
