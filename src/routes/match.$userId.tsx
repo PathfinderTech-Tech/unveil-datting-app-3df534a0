@@ -50,7 +50,7 @@ function MatchInsights() {
         return;
       }
       const { data: p } = await supabase.from("profiles")
-        .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests")
+        .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, discovery_mode")
         .eq("id", userId).maybeSingle();
       const { data: me } = await supabase.from("profiles")
         .select("interests").eq("id", u.user?.id ?? "").maybeSingle();
