@@ -67,8 +67,10 @@ function Chat() {
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
   const [peerName, setPeerName] = useState<string>("them");
+  const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
   const verification = useVerification();
   const verifiedOk = verification.loading || verification.verified;
+
 
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
