@@ -145,6 +145,10 @@
   .bg-gradient-aura { background: var(--gradient-aura); }
   .bg-gradient-deep { background: var(--gradient-deep); }
   .bg-gradient-indigo { background: var(--gradient-indigo); }
+  .bg-gradient-logo { background: var(--gradient-logo); }
+  .bg-gradient-mind { background: var(--gradient-mind); }
+  .bg-gradient-face { background: var(--gradient-face); }
+  .bg-gradient-soul { background: var(--gradient-soul); }
   .text-gradient-hero {
     background: var(--gradient-hero);
     -webkit-background-clip: text;
@@ -158,14 +162,14 @@
     color: transparent;
   }
   .glass {
-    background: oklch(0.12 0.03 295 / 0.6);
+    background: color-mix(in oklch, var(--logo-ink) 72%, transparent);
     backdrop-filter: blur(20px);
-    border: 1px solid oklch(1 0 0 / 0.06);
+    border: 1px solid color-mix(in oklch, var(--logo-purple) 22%, transparent);
   }
   .glass-strong {
-    background: oklch(0.10 0.03 295 / 0.85);
+    background: color-mix(in oklch, var(--logo-black) 88%, transparent);
     backdrop-filter: blur(28px);
-    border: 1px solid oklch(0.65 0.22 305 / 0.2);
+    border: 1px solid color-mix(in oklch, var(--logo-purple) 26%, transparent);
   }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-glow-magenta { box-shadow: var(--shadow-glow-magenta); }
@@ -204,16 +208,17 @@
     opacity: 0.07;
   }
   .btn-gradient-primary {
-    background: var(--gradient-hero);
+    background: var(--gradient-logo);
     color: var(--primary-foreground);
-    box-shadow: 0 10px 30px -10px oklch(0.65 0.22 305 / 0.55);
+    box-shadow: var(--shadow-logo);
     transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
   }
   .btn-gradient-primary:hover {
-    filter: brightness(1.08);
-    box-shadow: 0 14px 40px -12px oklch(0.70 0.24 340 / 0.65);
+    background: var(--gradient-logo-hover);
+    box-shadow: 0 14px 42px -10px oklch(0.72 0.28 334 / 0.74);
     transform: translateY(-1px);
   }
+  .btn-gradient-primary:active { background: var(--gradient-logo-active); transform: translateY(0) scale(0.98); }
 }
 
 
