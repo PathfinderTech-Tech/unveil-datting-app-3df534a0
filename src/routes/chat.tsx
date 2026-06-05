@@ -188,13 +188,18 @@ function Chat() {
       setPaywallOpen(true);
       return;
     }
-    const content = scrubPII(draft.trim());
+    const content = draft.trim();
     setDraft("");
     const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
     if (error) {
       if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
         setPaywallOpen(true);
         await refreshQuota();
+        return;
+      }
+      if (error.message?.includes("CONTACT_SHARING_LOCKED")) {
+        setDraft(content); // restore so user can edit
+        toast.error("Contact sharing unlocks after trust milestones have been completed.");
         return;
       }
       toast.error(error.message);
