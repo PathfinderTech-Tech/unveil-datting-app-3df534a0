@@ -4,6 +4,18 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { Lock, Sparkles, X, CheckCircle2, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
+import { RevealStageBadge } from "@/components/RevealStageBadge";
+
+const REWARD_LINES = [
+  "Great answer.",
+  "You've shared something meaningful.",
+  "Trust is growing.",
+  "Your conversation is unfolding.",
+];
+function celebrate() {
+  toast.success(REWARD_LINES[Math.floor(Math.random() * REWARD_LINES.length)]);
+}
+
 
 /**
  * Day 1–4 Structured Conversation Scaffolding for a mutual match thread.
