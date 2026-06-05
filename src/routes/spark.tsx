@@ -19,6 +19,10 @@ export const Route = createFileRoute("/spark")({
 });
 
 type Category =
+  | "personality"
+  | "creativity"
+  | "relationships"
+  | "fun"
   | "values"
   | "emotional_intelligence"
   | "humor"
@@ -27,6 +31,31 @@ type Category =
   | "relationship_clarity";
 
 const QUESTIONS: { id: string; category: Category; text: string; placeholder: string }[] = [
+  // PERSONALITY (original)
+  { id: "p1", category: "personality", text: "What is something that is both sweet and sour?", placeholder: "Something that's both sweet and sour to me is..." },
+  { id: "p2", category: "personality", text: "What smells like home to you?", placeholder: "Home smells like..." },
+  { id: "p3", category: "personality", text: "What makes someone unforgettable?", placeholder: "Someone unforgettable is..." },
+  { id: "p4", category: "personality", text: "What is something most people take too seriously?", placeholder: "People take this way too seriously..." },
+  { id: "p5", category: "personality", text: "What's a small thing that instantly improves your day?", placeholder: "The small thing that always lifts my day..." },
+
+  // CREATIVITY (original)
+  { id: "c1", category: "creativity", text: "If your life were a movie, what would the title be?", placeholder: "The title would be..." },
+  { id: "c2", category: "creativity", text: "If happiness had a color, what color would it be?", placeholder: "Happiness would be..." },
+  { id: "c3", category: "creativity", text: "What animal best represents your personality?", placeholder: "I'm basically a..." },
+  { id: "c4", category: "creativity", text: "Describe yourself using only one sentence — but make it weird.", placeholder: "I am..." },
+
+  // RELATIONSHIPS (original)
+  { id: "r1", category: "relationships", text: "What makes you feel appreciated?", placeholder: "I feel appreciated when..." },
+  { id: "r2", category: "relationships", text: "What does trust mean to you?", placeholder: "Trust to me is..." },
+  { id: "r3", category: "relationships", text: "What is your perfect Sunday?", placeholder: "My perfect Sunday looks like..." },
+  { id: "r4", category: "relationships", text: "When do you feel most yourself with someone?", placeholder: "I feel most myself when..." },
+
+  // FUN (original)
+  { id: "f1", category: "fun", text: "Pineapple on pizza?", placeholder: "My take on pineapple pizza..." },
+  { id: "f2", category: "fun", text: "If a penguin knocked on your door, what would you do?", placeholder: "First thing I'd do..." },
+  { id: "f3", category: "fun", text: "What's the funniest thing you've ever spent money on?", placeholder: "I once spent money on..." },
+  { id: "f4", category: "fun", text: "What's the most unhinged song on your playlist?", placeholder: "The unhinged song on my playlist is..." },
+
   // VALUES
   { id: "v1", category: "values", text: "What's something you're quietly proud of that most people would never guess?", placeholder: "Something most people don't know about me..." },
   { id: "v2", category: "values", text: "What's a belief you hold that most people in your life disagree with — and what made you stick with it anyway?", placeholder: "I genuinely believe... and I've stayed with it because..." },
@@ -71,6 +100,10 @@ const QUESTIONS: { id: string; category: Category; text: string; placeholder: st
 ];
 
 const CAT_LABEL: Record<Category, { label: string; hue: string }> = {
+  personality:            { label: "Personality",           hue: "from-indigo-500/30 to-violet-500/10" },
+  creativity:             { label: "Creativity",            hue: "from-pink-500/30 to-fuchsia-500/10" },
+  relationships:          { label: "Relationships",         hue: "from-rose-500/30 to-red-500/10" },
+  fun:                    { label: "Fun",                   hue: "from-yellow-500/30 to-amber-500/10" },
   values:                 { label: "Values",                hue: "from-fuchsia-500/30 to-purple-500/10" },
   emotional_intelligence: { label: "Emotional Intelligence", hue: "from-cyan-500/30 to-blue-500/10" },
   humor:                  { label: "Humor",                 hue: "from-amber-500/30 to-orange-500/10" },
@@ -205,7 +238,7 @@ function SparkPage() {
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
-          {(["all", "values", "emotional_intelligence", "humor", "lifestyle", "growth", "relationship_clarity"] as const).map((c) => {
+          {(["all", "personality", "creativity", "relationships", "fun", "values", "emotional_intelligence", "humor", "lifestyle", "growth", "relationship_clarity"] as const).map((c) => {
             const active = filter === c;
             return (
               <button key={c} onClick={() => { setFilter(c); setIdx(0); setDone(false); }}
