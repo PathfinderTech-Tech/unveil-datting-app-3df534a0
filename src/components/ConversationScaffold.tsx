@@ -171,11 +171,10 @@ export function ConversationScaffold({
   }
 
   return (
-    <div className="border-b border-border bg-surface/30 p-4">
-      <div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-        <Sparkles className="h-3 w-3 text-accent" />
-        Day {day} of your slow reveal
-      </div>
+    <div className="border-b border-border bg-surface/30 p-4 space-y-3">
+      <RevealStageBadge day={day} />
+
+
 
       {day === 1 && (
         <Day1 matchId={matchId} selfId={selfId} peerName={peerName} selfIntro={selfIntro} peerIntro={peerIntro} />
