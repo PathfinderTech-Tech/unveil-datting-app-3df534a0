@@ -74,8 +74,18 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
       <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-accent/15 blur-3xl" aria-hidden />
 
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div>
+      <div className="relative flex items-start gap-4">
+        <ProfileAvatar
+          userId={userId}
+          name={p?.first_name}
+          discoveryMode={p?.discovery_mode}
+          avatarUrl={p?.avatar_url}
+          photoUrl={p?.photo_url}
+          size={80}
+          rounded="2xl"
+          className="border border-primary/30 shadow-glow"
+        />
+        <div className="min-w-0 flex-1">
           <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             UNVEIL Identity
           </div>
@@ -95,7 +105,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
         {onShare && (
           <button
             onClick={onShare}
-            className="rounded-full border border-primary/30 bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-[var(--shadow-logo)] hover:opacity-95"
+            className="shrink-0 rounded-full border border-primary/30 bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-[var(--shadow-logo)] hover:opacity-95"
           >
             Share
           </button>
@@ -110,6 +120,25 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
         <p className="mt-1 text-sm italic text-foreground/70">{tagline}</p>
       </div>
 
+      <div className="relative mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-background/40 p-4">
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <MessageCircle className="h-3.5 w-3.5" /> Communication
+          </div>
+          <div className="mt-1 text-sm capitalize text-foreground/85">
+            {bp?.communication_style || "Still discovering"}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-border bg-background/40 p-4">
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <Heart className="h-3.5 w-3.5" /> Relationship
+          </div>
+          <div className="mt-1 text-sm capitalize text-foreground/85">
+            {bp?.relationship_style || "Still discovering"}
+          </div>
+        </div>
+      </div>
+
       {p?.bio && (
         <p className="relative mt-4 text-sm leading-relaxed text-foreground/80 line-clamp-3">{p.bio}</p>
       )}
@@ -117,10 +146,12 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
       <div className="relative mt-5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-          Readiness {p?.readiness_score ?? 0}/100
+          Trust: <span className="text-foreground/85">{trustLabel}</span>
+          <span className="text-foreground/40">· {trustScore}/100</span>
         </span>
         {p?.beta_member && <span className="rounded-full bg-accent/15 px-2 py-0.5 text-accent">Beta member</span>}
       </div>
+
       <ChemistryBadge />
     </div>
   );
