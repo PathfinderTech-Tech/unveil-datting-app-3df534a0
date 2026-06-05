@@ -199,7 +199,9 @@ function Onboarding() {
       ]);
       if (!alive) return;
 
-      if (prof?.onboarding_complete) { navigate({ to: "/matches", replace: true }); return; }
+      const isEditing = typeof window !== "undefined" && /[?&]edit=1\b/.test(window.location.search);
+      if (prof?.onboarding_complete && !isEditing) { navigate({ to: "/matches", replace: true }); return; }
+
 
       if (prof?.first_name) setName(prof.first_name);
       if (typeof prof?.age === "number") setAge(prof.age);
