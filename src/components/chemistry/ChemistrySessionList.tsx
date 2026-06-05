@@ -120,18 +120,18 @@ function GameRow({ result }: { result: GameResult }) {
   const meta = GAME_BY_ID[result.id];
   const total = sumGame(result);
   return (
-    <li className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.02)" }}>
+    <li className="rounded-lg bg-surface/60 p-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm" style={{ color: "#F0EDE8" }}>
+        <span className="flex items-center gap-2 text-sm text-foreground">
           <span>{meta?.emoji}</span>
           <span className="truncate">{meta?.name ?? result.id}</span>
         </span>
         {result.skipped ? (
-          <span className="font-mono text-[11px]" style={{ color: "#7A7876" }}>
+          <span className="font-mono text-[11px] text-muted-foreground">
             Skipped
           </span>
         ) : (
-          <span className="font-mono text-[11px]" style={{ color: "#E2C896" }}>
+          <span className="font-mono text-[11px] text-primary">
             +{total}
           </span>
         )}
@@ -140,7 +140,7 @@ function GameRow({ result }: { result: GameResult }) {
         <div className="mt-1 flex flex-wrap gap-1 pl-6">
           <span
             className="rounded-full px-1.5 py-0.5 text-[10px]"
-            style={{ background: "rgba(255,255,255,0.04)", color: "#7A7876" }}
+            style={{ background: "color-mix(in oklch, var(--foreground) 5%, transparent)", color: "var(--muted-foreground)" }}
           >
             base +{result.base}
           </span>
@@ -149,9 +149,9 @@ function GameRow({ result }: { result: GameResult }) {
               key={i}
               className="rounded-full px-1.5 py-0.5 text-[10px]"
               style={{
-                background: "rgba(139,92,246,0.12)",
-                color: "#A78BFA",
-                border: "1px solid rgba(139,92,246,0.30)",
+                background: "color-mix(in oklch, var(--primary) 14%, transparent)",
+                color: "var(--primary)",
+                border: "1px solid color-mix(in oklch, var(--primary) 35%, transparent)",
               }}
             >
               +{b.points} {b.label}
