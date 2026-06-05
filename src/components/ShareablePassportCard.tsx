@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, Facebook, MessageCircle as WhatsAppIcon, Twitter } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, Facebook, MessageCircle as WhatsAppIcon, Twitter, Send, Linkedin, Instagram, Music2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
@@ -203,6 +203,21 @@ export function ShareablePassportCard({
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText)}`;
   const twitterHref = `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareText)}`;
   const whatsappHref = `https://wa.me/?text=${enc(`${shareText} ${shareUrl}`)}`;
+  const telegramHref = `https://t.me/share/url?url=${enc(shareUrl)}&text=${enc(shareText)}`;
+  const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl)}`;
+
+  async function copyAndOpen(appUrl: string | null, platform: string) {
+    try {
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      toast.success(`Link copied — paste it into ${platform}`);
+    } catch {
+      toast.error("Could not copy link");
+    }
+    trackEvent(`shareable_card_${platform.toLowerCase()}_clicked`, { premium: isPremium });
+    if (appUrl && typeof window !== "undefined") {
+      window.open(appUrl, "_blank", "noopener,noreferrer");
+    }
+  }
 
 
   function setChoice(choice: PhotoChoice) {
@@ -414,6 +429,38 @@ export function ShareablePassportCard({
           >
             <WhatsAppIcon className="h-3.5 w-3.5" /> WhatsApp
           </a>
+          <a
+            href={telegramHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_telegram_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Send className="h-3.5 w-3.5" /> Telegram
+          </a>
+          <a
+            href={linkedinHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("shareable_card_linkedin_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+          </a>
+          <button
+            type="button"
+            onClick={() => copyAndOpen("https://www.instagram.com/", "Instagram")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Instagram className="h-3.5 w-3.5" /> Instagram
+          </button>
+          <button
+            type="button"
+            onClick={() => copyAndOpen("https://www.tiktok.com/", "TikTok")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <Music2 className="h-3.5 w-3.5" /> TikTok
+          </button>
         </div>
 
 
