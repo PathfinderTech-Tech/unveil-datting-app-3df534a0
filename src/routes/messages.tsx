@@ -182,17 +182,14 @@ function MessagesPage() {
                   className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
-                    {r.peer_photo ? (
-                      <SignedImage src={r.peer_photo} alt="" className="h-full w-full object-cover" fallback={
-                        <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
-                          {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}
-                        </div>
-                      } />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
-                        {(r.peer_name ?? "?").slice(0, 1).toUpperCase()}
-                      </div>
-                    )}
+                    <ProfileAvatar
+                      userId={r.peer_id}
+                      name={r.peer_name}
+                      discoveryMode={r.peer_discovery_mode}
+                      avatarUrl={r.peer_avatar}
+                      photoUrl={r.peer_photo}
+                      size={48}
+                    />
                     {r.unread > 0 && (
                       <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                         {r.unread > 9 ? "9+" : r.unread}
