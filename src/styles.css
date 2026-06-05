@@ -253,3 +253,296 @@
   0%, 100% { opacity: 0.02; transform: scale(1); }
   50%      { opacity: 0.05; transform: scale(1.03); }
 }
+
+/* ============================================================
+   UNVEIL — Master Design Refresh
+   Tokens, keyframes, utilities. Visual layer only.
+   ============================================================ */
+
+:root {
+  --u-bg:            #0D0D0F;
+  --u-surface:       #161618;
+  --u-surface-alt:   #1E1E21;
+  --u-border:        #2A2A2E;
+  --u-text:          #F0EDE8;
+  --u-muted:         #7A7876;
+
+  --u-violet:        #8B5CF6;
+  --u-violet-bright: #A78BFA;
+  --u-violet-deep:   #6D28D9;
+
+  --u-gold:          #C9A96E;
+  --u-gold-bright:   #E2C896;
+
+  --u-emerald:       rgb(52,211,153);
+  --u-red:           rgb(239,68,68);
+
+  --font-display-grotesk: "Cabinet Grotesk", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body-satoshi:    "Satoshi", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Override theme tokens to align with the refreshed palette */
+  --background: var(--u-bg);
+  --foreground: var(--u-text);
+  --surface: var(--u-surface);
+  --surface-2: var(--u-surface-alt);
+  --card: var(--u-surface);
+  --card-foreground: var(--u-text);
+  --popover: var(--u-surface);
+  --popover-foreground: var(--u-text);
+  --primary: var(--u-violet);
+  --primary-foreground: #ffffff;
+  --secondary: var(--u-surface-alt);
+  --secondary-foreground: var(--u-text);
+  --muted: var(--u-surface-alt);
+  --muted-foreground: var(--u-muted);
+  --accent: var(--u-violet-bright);
+  --accent-foreground: #ffffff;
+  --border: rgba(42, 42, 46, 0.6);
+  --input: var(--u-surface-alt);
+  --ring: var(--u-violet);
+  --violet: var(--u-violet);
+
+  --gradient-hero:   linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  --gradient-aura:   linear-gradient(180deg, #A78BFA 0%, #8B5CF6 60%, #6D28D9 100%);
+  --gradient-deep:   linear-gradient(160deg, #1a1630 0%, #161624 55%, #0F0F1A 100%);
+  --gradient-indigo: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
+  --gradient-gold:   linear-gradient(135deg, #C9A96E 0%, #E2C896 100%);
+
+  --shadow-glow:         0 0 80px -10px rgba(139, 92, 246, 0.55);
+  --shadow-glow-magenta: 0 0 80px -10px rgba(167, 139, 250, 0.55);
+  --shadow-glow-indigo:  0 0 80px -10px rgba(109, 40, 217, 0.55);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 20%, rgba(139,92,246,0.10) 0%, transparent 60%),
+    var(--u-bg) !important;
+  background-attachment: fixed;
+  font-family: var(--font-body-satoshi);
+  color: var(--u-text);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display-grotesk);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Cards & surfaces ---- */
+.u-card {
+  position: relative;
+  background: linear-gradient(160deg, #1a1630 0%, #161624 55%, #0F0F1A 100%);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.u-card-glow::before,
+.u-card-glow::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+.u-card-glow::before {
+  top: -50px; right: -50px; width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 65%);
+}
+.u-card-glow::after {
+  bottom: -40px; left: -30px; width: 130px; height: 130px;
+  background: radial-gradient(circle, rgba(201,169,110,0.07) 0%, transparent 65%);
+}
+.u-card > * { position: relative; z-index: 1; }
+
+.u-divider { border-top: 1px solid rgba(42, 42, 46, 0.4); }
+.u-border-active { border-color: rgba(139, 92, 246, 0.40) !important; }
+
+.u-glass {
+  background: rgba(22, 22, 24, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ---- Buttons ---- */
+.u-btn-primary {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  box-shadow:
+    0 0 24px rgba(139, 92, 246, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-family: var(--font-display-grotesk);
+  font-weight: 900;
+  padding: 12px 24px;
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.u-btn-primary:hover  { opacity: 0.95; }
+.u-btn-primary:active { opacity: 0.88; transform: scale(0.97); }
+
+.u-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(42, 42, 46, 0.9);
+  border-radius: 999px;
+  color: var(--u-muted);
+  backdrop-filter: blur(8px);
+  padding: 10px 20px;
+  font-family: var(--font-display-grotesk);
+  font-weight: 700;
+  transition: all 200ms var(--ease-out);
+}
+.u-btn-ghost:hover { border-color: rgba(139, 92, 246, 0.35); color: var(--u-violet-bright); }
+
+.u-btn-destructive {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--u-red);
+  border-radius: 999px;
+  padding: 10px 20px;
+}
+
+/* ---- Pills ---- */
+.pill {
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-family: var(--font-display-grotesk);
+  font-weight: 700;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+}
+.pill-violet  { background: rgba(139,92,246,0.12);  border: 1px solid rgba(139,92,246,0.28);  color: #A78BFA; }
+.pill-gold    { background: rgba(201,169,110,0.10); border: 1px solid rgba(201,169,110,0.28); color: #E2C896; }
+.pill-emerald { background: rgba(52,211,153,0.10);  border: 1px solid rgba(52,211,153,0.28);  color: rgb(52,211,153); }
+.pill-muted   { background: rgba(255,255,255,0.04); border: 1px solid rgba(42,42,46,0.9);     color: #7A7876; }
+
+/* ---- Avatars ---- */
+.u-avatar {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  border: 2px solid rgba(139, 92, 246, 0.35);
+  box-shadow:
+    0 0 14px rgba(139, 92, 246, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  font-family: var(--font-display-grotesk);
+  font-weight: 900;
+  color: #fff;
+  border-radius: 999px;
+}
+.avatar-aura { position: relative; }
+.avatar-aura::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(167, 139, 250, 0.8),
+    rgba(52, 211, 153, 0.4),
+    rgba(201, 169, 110, 0.3),
+    rgba(167, 139, 250, 0.8)
+  );
+  animation: orbitRing 4s linear infinite;
+  z-index: -1;
+}
+
+/* ---- Section labels & text ---- */
+.section-label {
+  font-family: var(--font-display-grotesk);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--u-muted);
+  margin-bottom: 14px;
+}
+
+.u-text-gradient {
+  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #E2C896 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Modal & nav helpers ---- */
+.modal-sheet {
+  background: linear-gradient(180deg, #1C1025 0%, #0D0D0F 100%);
+  border: 1px solid rgba(139, 92, 246, 0.20);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 48px rgba(139, 92, 246, 0.15);
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: rgba(42, 42, 46, 0.8);
+  border-radius: 999px;
+  margin: 14px auto 20px;
+}
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+/* ============================================================
+   Master keyframe library
+   ============================================================ */
+@keyframes fadeIn         { from { opacity: 0; transform: translateY(8px); }  to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeSlideUp    { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes screenEnter    { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes cardEntrance   { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes popIn          { from { opacity: 0; transform: scale(0.85) translateY(6px); filter: blur(4px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
+@keyframes wordRise       { from { opacity: 0; transform: translateY(10px) skewY(1deg); filter: blur(3px); } to { opacity: 1; transform: translateY(0) skewY(0); filter: blur(0); } }
+@keyframes headlineWipe   { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0% 0 0); } }
+@keyframes logoReveal     { 0% { opacity: 0; transform: scale(0.7); filter: blur(16px); } 60% { opacity: 1; transform: scale(1.04); filter: blur(0); } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes taglineUp      { from { opacity: 0; transform: translateY(12px); letter-spacing: 0.3em; } to { opacity: 1; transform: translateY(0); letter-spacing: 0.12em; } }
+@keyframes ctaRise        { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes optionPop      { from { opacity: 0; transform: scale(0.93) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes selectFlash    { 0% { background: rgba(139,92,246,0.06); } 40% { background: rgba(139,92,246,0.20); box-shadow: 0 0 16px rgba(139,92,246,0.25); } 100% { background: rgba(139,92,246,0.10); } }
+@keyframes breathe        { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(167,139,250,0.6); } 50% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 5px rgba(167,139,250,0); } }
+@keyframes emeraldPulse   { 0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } 50% { box-shadow: 0 0 16px 2px rgba(52,211,153,0.18); } }
+@keyframes orbitRing      { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes rippleOut      { from { transform: scale(0.8); opacity: 0.6; } to { transform: scale(2.2); opacity: 0; } }
+@keyframes typingBounce   { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+@keyframes floatY         { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes shake          { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes goldSweep      { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+@keyframes sonarRing      { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.0); } }
+@keyframes dotGlow        { 0%, 100% { box-shadow: 0 0 4px rgba(139,92,246,0.6); } 50% { box-shadow: 0 0 12px rgba(139,92,246,1); } }
+@keyframes progressFill   { from { width: 0%; } }
+@keyframes barFill        { from { width: 0%; } }
+@keyframes chemistryGlow  { 0%, 100% { text-shadow: 0 0 6px rgba(167,139,250,0.4); } 50% { text-shadow: 0 0 14px rgba(167,139,250,0.8); } }
+@keyframes numberCount    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardRise       { from { opacity: 0; transform: translateY(60px) scale(0.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes scanSweep      { 0% { top: -2px; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
+@keyframes pillFloat      { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes actionBarUp    { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes textWipe       { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0% 0 0); } }
+@keyframes particleFloat  { 0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; } 50% { transform: translateY(-12px) translateX(4px); opacity: 0.7; } }
+@keyframes passportReveal { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes blurReveal     { from { filter: blur(12px); opacity: 0.3; } to { filter: blur(4px); opacity: 1; } }
+@keyframes scanLine       { 0% { top: 0%; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
+@keyframes backdropIn     { from { opacity: 0; } to { opacity: 1; } }
+@keyframes chemCount      { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes orbitSpin      { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes inputReveal    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes compatCountUp  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes passReveal     { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }
+
+.animate-fadeIn        { animation: fadeIn 400ms var(--ease-out) both; }
+.animate-fadeSlideUp   { animation: fadeSlideUp 450ms var(--ease-out) both; }
+.animate-screenEnter   { animation: screenEnter 350ms var(--ease-out) 60ms both; }
+.animate-cardEntrance  { animation: cardEntrance 500ms var(--ease-out) both; }
+.animate-popIn         { animation: popIn 380ms var(--spring) both; }
+.animate-wordRise      { animation: wordRise 550ms var(--ease-out) both; }
+.animate-breathe       { animation: breathe 2.4s ease-in-out infinite; }
+.animate-emeraldPulse  { animation: emeraldPulse 2.6s ease-in-out infinite; }
+.animate-dotGlow       { animation: dotGlow 1.8s ease-in-out infinite; }
+.animate-orbitRing     { animation: orbitRing 4s linear infinite; }
+.animate-floatY        { animation: floatY 5s ease-in-out infinite; }
+.animate-chemistryGlow { animation: chemistryGlow 2.4s ease-in-out infinite; }
+.animate-goldSweep {
+  background: linear-gradient(90deg, transparent, rgba(226,200,150,0.4), transparent);
+  background-size: 200% 100%;
+  animation: goldSweep 2.6s linear infinite;
+}
