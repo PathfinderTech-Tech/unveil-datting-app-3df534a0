@@ -3,7 +3,7 @@ import { useState } from "react";
 import { LogoMark, LogoWordmark } from "./LogoHeader";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/use-auth";
-import { useUnreadCount } from "@/hooks/use-unread";
+import { useNavBadges } from "@/hooks/use-nav-badges";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Settings as SettingsIcon } from "lucide-react";
 
@@ -60,7 +60,7 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
 export function UnveilNav() {
   const { location } = useRouterState();
   const { user } = useAuth();
-  const unread = useUnreadCount();
+  const badges = useNavBadges();
   const [open, setOpen] = useState(false);
 
   return (
@@ -73,7 +73,10 @@ export function UnveilNav() {
         <nav className="hidden gap-1 lg:flex">
           {PRIMARY.map((l) => {
             const active = location.pathname === l.to;
-            const showBadge = l.to === "/messages" && unread > 0;
+            const count = l.to === "/messages" ? badges.messages
+              : l.to === "/matches" ? badges.matches
+              : l.to === "/discover" ? badges.discover
+              : 0;
             return (
               <Link
                 key={l.to}
@@ -83,12 +86,12 @@ export function UnveilNav() {
                 }`}
               >
                 {l.label}
-                {showBadge && (
+                {count > 0 && (
                   <span
-                    aria-label={`${unread} unread`}
+                    aria-label={`${count} new`}
                     className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground"
                   >
-                    {unread > 9 ? "9+" : unread}
+                    {count > 9 ? "9+" : count}
                   </span>
                 )}
               </Link>

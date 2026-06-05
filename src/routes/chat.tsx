@@ -35,13 +35,9 @@ type Reaction = { message_id: string; user_id: string; emoji: string };
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
 
-// Strip phone/email/social handles for safety until consent is given.
-function scrubPII(text: string): string {
-  return text
-    .replace(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/gi, "[contact hidden]")
-    .replace(/(?:\+?\d[\s().-]{0,2}){7,}/g, "[contact hidden]")
-    .replace(/(@|instagram\.com\/|t\.me\/|wa\.me\/)\w+/gi, "[contact hidden]");
-}
+// PII detection/blocking now lives server-side in the enforce_contact_sharing trigger.
+// Messages with phone/email/social handles are rejected with CONTACT_SHARING_LOCKED
+// unless the pair has cleared the trust milestones.
 
 function Chat() {
   const { user, loading } = useAuth();
@@ -188,13 +184,18 @@ function Chat() {
       setPaywallOpen(true);
       return;
     }
-    const content = scrubPII(draft.trim());
+    const content = draft.trim();
     setDraft("");
     const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
     if (error) {
       if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
         setPaywallOpen(true);
         await refreshQuota();
+        return;
+      }
+      if (error.message?.includes("CONTACT_SHARING_LOCKED")) {
+        setDraft(content); // restore so user can edit
+        toast.error("Contact sharing unlocks after trust milestones have been completed.");
         return;
       }
       toast.error(error.message);

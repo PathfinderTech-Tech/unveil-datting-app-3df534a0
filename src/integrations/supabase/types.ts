@@ -1802,6 +1802,7 @@ export type Database = {
           verified_badges: number
         }[]
       }
+      can_share_contacts: { Args: { _a: string; _b: string }; Returns: boolean }
       check_email_cooldown: { Args: { _email: string }; Returns: string }
       check_puzzle: {
         Args: { _id: string; _pick: string }
