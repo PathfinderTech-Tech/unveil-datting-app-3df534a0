@@ -64,7 +64,9 @@ function validateReturnUrl(raw: string): string {
   const ok =
     ALLOWED_RETURN_HOSTS.has(host) ||
     host.endsWith(".lovable.app") ||
-    host.endsWith(".lovable.dev");
+    host.endsWith(".lovable.dev") ||
+    host.endsWith(".lovableproject.com") ||
+    host.endsWith(".lovable.host");
   if (!ok) throw new Error("returnUrl host not allowed");
   return u.toString();
 }
