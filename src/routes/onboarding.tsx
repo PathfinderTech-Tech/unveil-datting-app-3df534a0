@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X,
-  ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2,
+  ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
