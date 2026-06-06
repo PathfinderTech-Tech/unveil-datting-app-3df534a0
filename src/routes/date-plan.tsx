@@ -95,14 +95,6 @@ function DatePlanRoute() {
 
         <SafetyReminder compact />
 
-        {!verification.loading && !verification.verified && (
-          <div className="mt-6">
-            <VerificationGate
-              status={verification.status}
-              reason="Date planning unlocks once both members are verified."
-            />
-          </div>
-        )}
 
 
         {incoming.length > 0 && (

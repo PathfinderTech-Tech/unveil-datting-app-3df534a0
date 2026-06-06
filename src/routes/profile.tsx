@@ -350,11 +350,11 @@ function ProfilePage() {
               <div className="text-xs text-muted-foreground">Privacy, account, subscription</div>
             </div>
           </Link>
-          <Link to="/verify" className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 hover:bg-surface/60">
+          <Link to="/avatar" className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 hover:bg-surface/60">
             <span className="h-5 w-5 text-primary"><VerifiedBadge /></span>
             <div>
-              <div className="text-sm font-medium">{profile?.verified ? "Verified" : "Get verified"}</div>
-              <div className="text-xs text-muted-foreground">Trust badge for your profile</div>
+              <div className="text-sm font-medium">Photo Studio</div>
+              <div className="text-xs text-muted-foreground">Refresh your profile photo & filters</div>
             </div>
           </Link>
         </div>
