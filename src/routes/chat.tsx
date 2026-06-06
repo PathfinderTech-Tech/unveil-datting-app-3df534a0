@@ -421,7 +421,11 @@ function Chat() {
   return (
     <div className="min-h-screen bg-background">
       <UnveilNav />
-      <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
+      <MessagePaywallModal
+        open={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        returnTo={active ? `/chat?c=${active.id}` : "/chat"}
+      />
 
       <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
