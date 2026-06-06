@@ -1,86 +1,81 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { generateAvatar, listAvatarHistory, setActiveAvatar, deleteAvatarHistoryItem, type AvatarHistoryItem } from "@/lib/avatar.functions";
 import { toast } from "sonner";
 import {
-  Camera, Loader2, Upload, X, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Image as ImageIcon, Wand2, History, Trash2,
-}  from "lucide-react";
+  Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
+  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck,
+} from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
   head: () => ({
     meta: [
-      { title: "Your Avatar — UNVEIL" },
-      { name: "description", content: "Turn your selfie into your UNVEIL avatar." },
+      { title: "Photo Studio — UNVEIL" },
+      { name: "description", content: "Polish your profile photo with subtle, natural enhancements." },
     ],
   }),
-  component: AvatarPage,
+  component: PhotoStudioPage,
 });
 
-type Style = "real" | "anime" | "stylized" | "realistic" | "mystery";
+type Adjustments = {
+  brightness: number; // 0.5 - 1.5 (1 = neutral)
+  contrast: number;   // 0.5 - 1.5
+  warmth: number;     // -30 - 30 (sepia-ish warm tint)
+  smooth: number;     // 0 - 10 px blur
+  saturation: number; // 0 - 2
+};
 
-const STYLES: { id: Style; label: string; sub: string; icon: any }[] = [
-  { id: "real", label: "Real Photo", sub: "Use your selfie as-is", icon: ImageIcon },
-  { id: "realistic", label: "Realistic Avatar", sub: "Cinematic studio portrait", icon: Camera },
-  { id: "anime", label: "Anime Avatar", sub: "Soft, expressive, friendly", icon: Sparkles },
-  { id: "stylized", label: "Artistic Avatar", sub: "Painted, modern, premium", icon: Wand2 },
-  { id: "mystery", label: "Premium Portrait", sub: "Elegant backlit silhouette", icon: Sparkles },
+const NEUTRAL: Adjustments = { brightness: 1, contrast: 1, warmth: 0, smooth: 0, saturation: 1 };
+
+type Preset = { id: string; label: string; hint: string; adj: Adjustments };
+
+const PRESETS: Preset[] = [
+  { id: "original", label: "Original",   hint: "No filter",                     adj: { ...NEUTRAL } },
+  { id: "natural",  label: "Natural",    hint: "Slight brightness & smoothing", adj: { brightness: 1.06, contrast: 1.03, warmth: 4,  smooth: 0.6, saturation: 1.02 } },
+  { id: "glow",     label: "Glow",       hint: "Soft skin, warm tone",          adj: { brightness: 1.1,  contrast: 1.05, warmth: 12, smooth: 1.4, saturation: 1.08 } },
+  { id: "confident",label: "Confident",  hint: "Sharper, better contrast",      adj: { brightness: 1.05, contrast: 1.18, warmth: 2,  smooth: 0.2, saturation: 1.1  } },
+  { id: "elegant",  label: "Elegant",    hint: "Softer, premium portrait",      adj: { brightness: 1.04, contrast: 0.96, warmth: 8,  smooth: 1.0, saturation: 0.9  } },
+  { id: "radiant",  label: "Radiant",    hint: "Bright & vibrant",              adj: { brightness: 1.14, contrast: 1.08, warmth: 10, smooth: 0.8, saturation: 1.2  } },
 ];
 
-const GENERATABLE_STYLES: Style[] = ["realistic", "anime", "stylized", "mystery"];
-
-function AvatarPage() {
+function PhotoStudioPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const generate = useServerFn(generateAvatar);
-  const fetchHistory = useServerFn(listAvatarHistory);
-  const revertAvatar = useServerFn(setActiveAvatar);
-  const deleteAvatar = useServerFn(deleteAvatarHistoryItem);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<0 | 1 | 2>(0);
-  const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
-  const [style, setStyle] = useState<Style | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  const [sourceBlobUrl, setSourceBlobUrl] = useState<string | null>(null);
+  const [presetId, setPresetId] = useState<string>("natural");
+  const [adj, setAdj] = useState<Adjustments>(PRESETS[1].adj);
   const [busy, setBusy] = useState(false);
-  const [fallback, setFallback] = useState(false);
-  const [history, setHistory] = useState<AvatarHistoryItem[]>([]);
+  const [savedUrl, setSavedUrl] = useState<string | null>(null);
 
-  async function refreshHistory() {
-    try {
-      const res = await fetchHistory({});
-      setHistory(res.items);
-    } catch { /* ignore */ }
-  }
-
-  // Preload existing values so users can re-roll without re-uploading.
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("photo_url, profile_photo_url, avatar_url, avatar_style")
+        .select("photo_url, profile_photo_url")
         .eq("id", user.id)
         .maybeSingle();
-      if (data?.profile_photo_url || data?.photo_url) {
-        setSelfieUrl(data.profile_photo_url ?? data.photo_url);
-      }
-      if (data?.avatar_url) {
-        setAvatarUrl(data.avatar_url);
-        if (data.avatar_style) setStyle(data.avatar_style as Style);
-        // User already has an avatar — jump straight to the result step so
-        // they can regenerate, swap style, or use their real photo without
-        // re-uploading their selfie.
-        setStep(2);
-      }
-      refreshHistory();
+      const existing = data?.photo_url ?? data?.profile_photo_url ?? null;
+      if (existing) setSourceUrl(existing);
     })();
   }, [user]);
+
+  function applyPreset(p: Preset) {
+    setPresetId(p.id);
+    setAdj(p.adj);
+  }
+
+  function patchAdj(patch: Partial<Adjustments>) {
+    setAdj((a) => ({ ...a, ...patch }));
+    setPresetId("custom");
+  }
 
   async function uploadSelfie(file: File) {
     if (!user) { toast.error("Please sign in."); return; }
@@ -95,82 +90,73 @@ function AvatarPage() {
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
       if (error) throw error;
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
-      setSelfieUrl(pub.publicUrl);
-      await supabase
-        .from("profiles")
-        .update({ photo_url: pub.publicUrl, profile_photo_url: pub.publicUrl })
-        .eq("id", user.id);
-      toast.success("Selfie saved.");
+      setSourceUrl(pub.publicUrl);
+      if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
+      setSourceBlobUrl(URL.createObjectURL(file));
+      setStep(1);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally { setBusy(false); }
   }
 
-  async function runGenerate(chosen: Style) {
-    setStyle(chosen);
+  async function saveEditedPhoto() {
+    if (!user || !sourceUrl) { toast.error("Add a photo first."); return; }
     setBusy(true);
-    setAvatarUrl(null);
     try {
-      const res = await generate({ data: { style: chosen, selfieUrl } });
-      setAvatarUrl(res.avatarUrl);
-      setFallback(res.fallback);
-      if (res.fallback && res.message) toast.message(res.message);
-      else toast.success("Your UNVEIL avatar is ready.");
-      setStep(2);
-      refreshHistory();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not generate");
-    } finally { setBusy(false); }
-  }
-
-  async function runGenerateAll() {
-    if (!selfieUrl) { toast.error("Add a selfie first."); return; }
-    setBusy(true);
-    setAvatarUrl(null);
-    try {
-      // Generate all four styles in parallel so the user can compare them.
-      const results = await Promise.allSettled(
-        GENERATABLE_STYLES.map((s) => generate({ data: { style: s, selfieUrl } })),
-      );
-      const ok = results.find((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof generate>>> => r.status === "fulfilled");
-      if (ok) {
-        setAvatarUrl(ok.value.avatarUrl);
-        setStyle(ok.value.style as Style);
-        setFallback(ok.value.fallback);
+      // Render the current source image with adjustments onto a canvas.
+      const img = await loadImage(sourceBlobUrl ?? sourceUrl);
+      const maxSide = 1280;
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas not supported");
+      ctx.filter = cssFilter(adj);
+      ctx.drawImage(img, 0, 0, w, h);
+      // Warm overlay (subtle multiply of warm color) — CSS filter sepia can
+      // wash skin out, so we keep warmth as a soft tint here.
+      if (adj.warmth !== 0) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(0.18, Math.abs(adj.warmth) / 100);
+        ctx.fillStyle = adj.warmth > 0 ? "#ffb070" : "#7090ff";
+        ctx.globalCompositeOperation = "soft-light";
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
       }
-      const failed = results.filter((r) => r.status === "rejected").length;
-      if (failed === GENERATABLE_STYLES.length) toast.error("All generations failed. Try again.");
-      else if (failed > 0) toast.message(`${GENERATABLE_STYLES.length - failed} of ${GENERATABLE_STYLES.length} avatars ready.`);
-      else toast.success("Your avatars are ready — compare and pick one.");
+
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej(new Error("Encode failed"))), "image/jpeg", 0.92),
+      );
+      const path = `${user.id}/photo-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-photos")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
+      const url = pub.publicUrl;
+      await supabase
+        .from("profiles")
+        .update({
+          photo_url: url,
+          profile_photo_url: url,
+          avatar_url: url,
+          avatar_style: "real",
+          avatar_generated_at: new Date().toISOString(),
+          discovery_mode: "photo",
+        })
+        .eq("id", user.id);
+      setSavedUrl(url);
       setStep(2);
-      refreshHistory();
+      toast.success("Profile photo saved.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save");
     } finally { setBusy(false); }
   }
 
-  async function revertTo(item: AvatarHistoryItem) {
-    setBusy(true);
-    try {
-      const res = await revertAvatar({ data: { path: item.path } });
-      setAvatarUrl(res.avatarUrl);
-      setStyle(item.style as Style);
-      setStep(2);
-      setFallback(false);
-      toast.success("Avatar restored.");
-      refreshHistory();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not restore");
-    } finally { setBusy(false); }
-  }
-
-  async function removeItem(item: AvatarHistoryItem) {
-    try {
-      await deleteAvatar({ data: { path: item.path } });
-      setHistory((h) => h.filter((x) => x.path !== item.path));
-      toast.success("Removed.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not delete");
-    }
-  }
+  const previewFilter = useMemo(() => cssFilter(adj), [adj]);
+  const previewSrc = sourceBlobUrl ?? sourceUrl ?? null;
 
   if (loading) return null;
 
@@ -180,7 +166,7 @@ function AvatarPage() {
         <UnveilNav />
         <div className="mx-auto max-w-2xl px-6 py-20 text-center">
           <p className="text-sm text-muted-foreground">
-            Please <Link to="/login" className="text-primary underline">sign in</Link> to create your avatar.
+            Please <Link to="/login" className="text-primary underline">sign in</Link> to set your profile photo.
           </p>
         </div>
       </div>
@@ -190,17 +176,22 @@ function AvatarPage() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
-      <section className="mx-auto max-w-4xl px-5 py-12 md:py-16">
+      <section className="mx-auto max-w-5xl px-5 py-12 md:py-16">
         <header className="text-center">
           <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
-            <Wand2 className="h-6 w-6" />
+            <Sparkles className="h-6 w-6" />
           </div>
           <h1 className="font-display text-4xl font-light md:text-5xl">
-            Your <span className="text-gradient-aura italic">UNVEIL</span> avatar
+            <span className="text-gradient-aura italic">Photo</span> Studio
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-            Upload a selfie, choose a style, and we'll create your avatar. You can always regenerate or use your real photo.
+            Take or upload a real selfie, polish it with subtle filters, and use it across UNVEIL.
+            Stays recognizable — no face swaps, no AI avatars.
           </p>
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-medium text-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Selfie Checked — basic authenticity for beta
+          </div>
         </header>
 
         <div className="mt-8 flex items-center gap-2">
@@ -209,169 +200,160 @@ function AvatarPage() {
           ))}
         </div>
 
-        {/* STEP 0 — Selfie */}
+        {/* STEP 0 — capture / upload */}
         {step === 0 && (
           <div className="mt-8 rounded-3xl border border-border bg-card p-6 md:p-8">
             <div className="text-center">
               <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Step 1 of 3</div>
-              <h2 className="mt-1 font-display text-2xl">Add a selfie</h2>
+              <h2 className="mt-1 font-display text-2xl">Take a selfie or upload a photo</h2>
               <p className="mt-1 text-sm text-muted-foreground">Front-facing, good light, no sunglasses.</p>
             </div>
 
             <div className="mx-auto mt-6 flex max-w-sm flex-col items-center gap-3">
-              <SelfieFrame url={selfieUrl} busy={busy} onClear={() => setSelfieUrl(null)} />
-              <input ref={fileRef} type="file" accept="image/*" capture="user" className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSelfie(f); e.target.value = ""; }} />
-              <button onClick={() => fileRef.current?.click()} disabled={busy}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60">
-                {selfieUrl ? <><Upload className="h-3.5 w-3.5" /> Replace</> : <><Camera className="h-3.5 w-3.5" /> Take or upload selfie</>}
+              <SelfieFrame url={sourceUrl} busy={busy} />
+              <input
+                ref={fileRef} type="file" accept="image/*" capture="user" className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSelfie(f); e.target.value = ""; }}
+              />
+              <button
+                onClick={() => fileRef.current?.click()} disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60"
+              >
+                {sourceUrl ? <><Upload className="h-3.5 w-3.5" /> Replace photo</> : <><Camera className="h-3.5 w-3.5" /> Take or upload photo</>}
               </button>
             </div>
 
             <Nav
               onBack={() => navigate({ to: "/onboarding" })}
               onSkip={() => navigate({ to: "/discover" })}
-              onNext={() => { if (!selfieUrl) return toast.error("Add a selfie to continue."); setStep(1); }}
+              onNext={() => { if (!sourceUrl) return toast.error("Add a photo to continue."); setStep(1); }}
             />
           </div>
         )}
 
-        {/* STEP 1 — Style choice */}
-        {step === 1 && (
+        {/* STEP 1 — edit */}
+        {step === 1 && previewSrc && (
           <div className="mt-8 rounded-3xl border border-border bg-card p-6 md:p-8">
             <div className="text-center">
               <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Step 2 of 3</div>
-              <h2 className="mt-1 font-display text-2xl">Choose an avatar style</h2>
-              <p className="mt-1 text-sm text-muted-foreground">You can change this later.</p>
+              <h2 className="mt-1 font-display text-2xl">Edit your photo</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Subtle, natural enhancements. Live preview.</p>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {STYLES.map((s) => {
-                const Icon = s.icon;
-                const selected = style === s.id;
-                return (
-                  <button key={s.id} onClick={() => setStyle(s.id)}
-                    className={`group rounded-2xl border p-4 text-left transition ${
-                      selected ? "border-primary bg-primary/5 shadow-glow" : "border-border bg-surface hover:bg-surface-2"
-                    }`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${selected ? "bg-gradient-hero text-primary-foreground" : "bg-surface-2 text-muted-foreground"}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <div className="font-display text-sm">{s.label}</div>
-                        <div className="text-xs text-muted-foreground">{s.sub}</div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <div className="mt-6 grid gap-6 md:grid-cols-[1fr_320px]">
+              {/* Live preview */}
+              <div className="space-y-3">
+                <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-3xl border border-border bg-surface-2 shadow-glow">
+                  <img
+                    src={previewSrc}
+                    alt="Preview"
+                    className="h-full w-full object-cover transition-[filter] duration-150"
+                    style={{ filter: previewFilter }}
+                  />
+                  {adj.warmth !== 0 && (
+                    <div
+                      className="pointer-events-none absolute inset-0 mix-blend-soft-light"
+                      style={{
+                        backgroundColor: adj.warmth > 0 ? "#ffb070" : "#7090ff",
+                        opacity: Math.min(0.18, Math.abs(adj.warmth) / 100),
+                      }}
+                    />
+                  )}
+                </div>
+                <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                  Live preview — saved photo will look exactly like this
+                </p>
+              </div>
 
-            <div className="mt-6 flex flex-col items-center gap-3">
-              <button onClick={runGenerateAll} disabled={busy}
-                className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary/10 px-5 py-2 text-xs font-medium text-foreground hover:bg-primary/20 disabled:opacity-50">
-                {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                Generate all 4 styles to compare
-              </button>
+              {/* Controls */}
+              <div className="space-y-5">
+                <div>
+                  <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-luxury text-muted-foreground">
+                    <Sun className="h-3.5 w-3.5" /> Filters
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PRESETS.map((p) => {
+                      const sel = presetId === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() => applyPreset(p)}
+                          className={`rounded-xl border px-2 py-2 text-left transition ${
+                            sel ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:bg-surface-2"
+                          }`}
+                        >
+                          <div className="font-display text-xs">{p.label}</div>
+                          <div className="text-[10px] text-muted-foreground line-clamp-2">{p.hint}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-luxury text-muted-foreground">
+                    <Sliders className="h-3.5 w-3.5" /> Fine tune
+                  </div>
+                  <div className="space-y-3">
+                    <Slider label="Brightness"     min={0.5} max={1.5} step={0.01} value={adj.brightness} onChange={(v) => patchAdj({ brightness: v })} />
+                    <Slider label="Contrast"       min={0.5} max={1.5} step={0.01} value={adj.contrast}   onChange={(v) => patchAdj({ contrast: v })} />
+                    <Slider label="Warmth"         min={-30} max={30}  step={1}    value={adj.warmth}     onChange={(v) => patchAdj({ warmth: v })} />
+                    <Slider label="Skin smoothing" min={0}   max={6}   step={0.1}  value={adj.smooth}     onChange={(v) => patchAdj({ smooth: v })} />
+                    <Slider label="Saturation"     min={0}   max={2}   step={0.01} value={adj.saturation} onChange={(v) => patchAdj({ saturation: v })} />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => { setAdj(NEUTRAL); setPresetId("original"); }}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
+                >
+                  <RefreshCw className="h-3 w-3" /> Reset
+                </button>
+              </div>
             </div>
 
             <Nav
               onBack={() => setStep(0)}
-              onSkip={() => navigate({ to: "/discover" })}
-              nextLabel={busy ? "Generating…" : "Generate selected"}
-              nextIcon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              onNext={() => { if (!style) return toast.error("Pick a style."); runGenerate(style); }}
+              nextLabel={busy ? "Saving…" : "Save profile photo"}
+              nextIcon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              onNext={saveEditedPhoto}
               disableNext={busy}
             />
           </div>
         )}
 
-        {/* STEP 2 — Result */}
+        {/* STEP 2 — done */}
         {step === 2 && (
           <div className="mt-8 rounded-3xl border border-primary bg-card p-6 shadow-glow md:p-8">
             <div className="text-center">
               <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground">
                 <Check className="h-5 w-5" />
               </div>
-              <h2 className="mt-3 font-display text-2xl">Your UNVEIL avatar is ready</h2>
-              {fallback && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  AI avatar generation will be available soon — using a polished placeholder for now.
-                </p>
-              )}
+              <h2 className="mt-3 font-display text-2xl">Profile photo saved</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                It will appear on Discover, Matches, Messages, your Profile, Passport and share cards.
+              </p>
             </div>
 
             <div className="mx-auto mt-6 grid max-w-2xl gap-4 md:grid-cols-2">
-              <Preview title="Original selfie" url={selfieUrl} />
-              <Preview title={`Avatar · ${STYLES.find((s) => s.id === style)?.label ?? ""}`} url={avatarUrl} highlight />
+              <Preview title="Original" url={sourceUrl} />
+              <Preview title="Saved profile photo" url={savedUrl} highlight />
             </div>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button onClick={() => navigate({ to: "/discover" })}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
-                Use this avatar <ArrowRight className="h-4 w-4" />
-              </button>
-              <button onClick={() => style && runGenerate(style)} disabled={busy || !style}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm hover:bg-surface-2 disabled:opacity-50">
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Generate again
-              </button>
-              <button onClick={() => runGenerate("real")} disabled={busy || !selfieUrl}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm hover:bg-surface-2 disabled:opacity-50">
-                <ImageIcon className="h-4 w-4" /> Use real photo instead
+                Continue <ArrowRight className="h-4 w-4" />
               </button>
               <button onClick={() => setStep(1)}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm hover:bg-surface-2">
-                <ArrowLeft className="h-4 w-4" /> Change style
+                <ArrowLeft className="h-4 w-4" /> Keep editing
+              </button>
+              <button onClick={() => { setStep(0); setSavedUrl(null); }}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm hover:bg-surface-2">
+                <Camera className="h-4 w-4" /> New photo
               </button>
             </div>
-
-            {history.length > 0 && (
-              <div className="mt-8 border-t border-border pt-6">
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm">
-                    <History className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-display">Avatar history</span>
-                    <span className="text-xs text-muted-foreground">({history.length})</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">Tap to restore</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
-                  {history.map((item) => {
-                    const isActive = avatarUrl === item.url || avatarUrl?.split("?")[0] === item.url.split("?")[0];
-                    return (
-                      <div key={item.path} className="group relative">
-                        <button
-                          onClick={() => revertTo(item)}
-                          disabled={busy}
-                          className={`block aspect-square w-full overflow-hidden rounded-xl border transition ${
-                            isActive ? "border-primary ring-2 ring-primary shadow-glow" : "border-border hover:border-primary/50"
-                          } disabled:opacity-50`}
-                          title={`${item.style} · ${new Date(item.createdAt).toLocaleString()}`}
-                        >
-                          <img src={item.url} alt={item.style} className="h-full w-full object-cover" />
-                        </button>
-                        <div className="mt-1 text-center font-mono text-[9px] uppercase tracking-luxury text-muted-foreground">
-                          {item.style}
-                        </div>
-                        <button
-                          onClick={() => removeItem(item)}
-                          aria-label="Delete"
-                          className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                        {isActive && (
-                          <div className="absolute left-1 top-1 rounded-full bg-primary p-0.5 text-primary-foreground">
-                            <Check className="h-3 w-3" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </section>
@@ -379,16 +361,59 @@ function AvatarPage() {
   );
 }
 
-function SelfieFrame({ url, busy, onClear }: { url: string | null; busy: boolean; onClear: () => void }) {
+/* ---------- helpers & subcomponents ---------- */
+
+function cssFilter(a: Adjustments): string {
+  return [
+    `brightness(${a.brightness})`,
+    `contrast(${a.contrast})`,
+    `saturate(${a.saturation})`,
+    a.smooth > 0 ? `blur(${(a.smooth * 0.35).toFixed(2)}px)` : "",
+  ].filter(Boolean).join(" ");
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not load image"));
+    img.src = src;
+  });
+}
+
+function Slider({ label, value, min, max, step, onChange }: {
+  label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
+}) {
   return (
-    <div className="relative flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface">
-      {url ? <SignedImage src={url} alt="Selfie" className="h-full w-full object-cover" fallback={<Camera className="h-7 w-7 text-muted-foreground" />} /> : <Camera className="h-7 w-7 text-muted-foreground" />}
-      {busy && <div className="absolute inset-0 flex items-center justify-center bg-background/60"><Loader2 className="h-5 w-5 animate-spin" /></div>}
-      {url && !busy && (
-        <button onClick={onClear} type="button" aria-label="Remove"
-          className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-muted-foreground hover:text-foreground">
-          <X className="h-4 w-4" />
-        </button>
+    <label className="block">
+      <div className="mb-1 flex items-center justify-between text-[11px]">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-mono text-foreground">{value.toFixed(2)}</span>
+      </div>
+      <input
+        type="range" min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full accent-[var(--primary)]"
+      />
+    </label>
+  );
+}
+
+function SelfieFrame({ url, busy }: { url: string | null; busy: boolean }) {
+  return (
+    <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-3xl border border-border bg-surface-2">
+      {url ? (
+        <SignedImage src={url} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center text-muted-foreground"><Camera className="h-10 w-10" /></div>} />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+          <Camera className="h-10 w-10" />
+        </div>
+      )}
+      {busy && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
       )}
     </div>
   );
@@ -396,40 +421,38 @@ function SelfieFrame({ url, busy, onClear }: { url: string | null; busy: boolean
 
 function Preview({ title, url, highlight }: { title: string; url: string | null; highlight?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-3 ${highlight ? "border-primary bg-primary/5" : "border-border bg-surface"}`}>
-      <div className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">{title}</div>
-      <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-surface-2">
-        {url ? <SignedImage src={url} alt={title} className="h-full w-full object-cover" fallback={<span className="text-xs text-muted-foreground">Loading…</span>} />
-             : <span className="text-xs text-muted-foreground">Not available</span>}
+    <div className={`overflow-hidden rounded-2xl border ${highlight ? "border-primary shadow-glow" : "border-border"} bg-surface`}>
+      <div className="aspect-square w-full bg-surface-2">
+        {url ? (
+          <SignedImage src={url} alt={title} className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>} />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>
+        )}
       </div>
+      <div className="px-3 py-2 text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">{title}</div>
     </div>
   );
 }
 
-function Nav({
-  onBack, onSkip, onNext, disableNext, nextLabel = "Continue", nextIcon = <ArrowRight className="h-4 w-4" />,
-}: {
-  onBack?: () => void;
-  onSkip?: () => void;
-  onNext?: () => void;
-  disableNext?: boolean;
-  nextLabel?: string;
-  nextIcon?: React.ReactNode;
+function Nav({ onBack, onNext, onSkip, nextLabel = "Continue", nextIcon = <ArrowRight className="h-4 w-4" />, disableNext }: {
+  onBack?: () => void; onNext?: () => void; onSkip?: () => void;
+  nextLabel?: string; nextIcon?: React.ReactNode; disableNext?: boolean;
 }) {
   return (
-    <div className="mt-8 flex items-center justify-between gap-3">
-      <button onClick={onBack} disabled={!onBack}
-        className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-xs hover:bg-surface-2 disabled:opacity-30">
-        <ArrowLeft className="h-3 w-3" /> Back
+    <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+      <button onClick={onBack} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-xs hover:bg-surface-2">
+        <ArrowLeft className="h-3.5 w-3.5" /> Back
       </button>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         {onSkip && (
-          <button onClick={onSkip} className="rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground">
-            Skip
+          <button onClick={onSkip} className="rounded-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground">
+            Skip for now
           </button>
         )}
-        <button onClick={onNext} disabled={disableNext}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-60">
+        <button
+          onClick={onNext} disabled={disableNext}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60"
+        >
           {nextLabel} {nextIcon}
         </button>
       </div>
