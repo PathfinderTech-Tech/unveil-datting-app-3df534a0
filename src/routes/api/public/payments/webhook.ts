@@ -156,68 +156,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     description: session.metadata?.description ?? null,
   });
 
-  // Branch by kind
-  if (kind === "verification_badge") {
-    await getSupabase().from("verification_payments").upsert(
-      {
-        user_id: userId,
-        stripe_session_id: session.id,
-        stripe_payment_intent_id: session.payment_intent ?? null,
-        amount_cents: amount,
-        currency,
-        status: session.payment_status === "paid" ? "paid" : "pending",
-        environment: env,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "stripe_session_id" }
-    );
-
-    if (session.payment_status === "paid") {
-      // Activate verified status and reset daily counter so the user
-      // immediately gets the verified 15/day quota in their current window.
-      await getSupabase()
-        .from("profiles")
-        .update({
-          badge_paid: true,
-          verified: true,
-          daily_message_count: 0,
-          daily_message_reset_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId);
-      // Mark any existing verification_request as approved (best-effort).
-      await getSupabase()
-        .from("verification_requests")
-        .update({ status: "approved", updated_at: new Date().toISOString() })
-        .eq("user_id", userId);
-    }
-    return;
-  }
-
-  if (kind === "premium_one_time") {
-    const days = Number(session.metadata?.durationDays ?? 0);
-    if (days > 0 && session.payment_status === "paid") {
-      // Extend premium_until from MAX(now, current) + days
-      const { data: prof } = await getSupabase()
-        .from("profiles")
-        .select("premium_until")
-        .eq("id", userId)
-        .maybeSingle();
-      const base = prof?.premium_until && new Date(prof.premium_until) > new Date()
-        ? new Date(prof.premium_until)
-        : new Date();
-      const newEnd = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
-      await getSupabase()
-        .from("profiles")
-        .update({
-          premium_until: newEnd.toISOString(),
-          subscription_tier: "premium",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId);
-    }
-    return;
-  }
+  // Branch by kind (verified badge + premium one-time retired)
 
   if (kind === "message_pass_24h") {
     const hours = Number(session.metadata?.durationHours ?? 24);

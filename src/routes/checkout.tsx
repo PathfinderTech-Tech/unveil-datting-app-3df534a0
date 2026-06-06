@@ -8,39 +8,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Lock, ArrowLeft } from "lucide-react";
 
-// Allowed beta products only. Anything else is redirected to /messages with
-// a toast — legacy URLs like ?product=verified or ?plan=3 cannot reach Stripe.
-type Product = "premium" | "message_pass" | "contact_reveal";
-type Search = {
-  product?: Product;
-  plan?: "1";
-  returnTo?: string;
-};
+type Product = "premium" | "premium_quarterly" | "premium_annual" | "message_pass";
+type Search = { product?: Product; returnTo?: string };
 
-const ALLOWED_PRODUCTS: Product[] = ["premium", "message_pass", "contact_reveal"];
+const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_quarterly", "premium_annual", "message_pass"];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),
   validateSearch: (s: Record<string, unknown>): Search => {
-    const rawProduct = s.product as string | undefined;
-    const product = (ALLOWED_PRODUCTS as string[]).includes(rawProduct ?? "")
-      ? (rawProduct as Product)
+    const raw = s.product as string | undefined;
+    const product = (ALLOWED_PRODUCTS as string[]).includes(raw ?? "")
+      ? (raw as Product)
       : "premium";
     const rt = typeof s.returnTo === "string" && s.returnTo.startsWith("/") ? s.returnTo : undefined;
-    return { product, plan: "1", returnTo: rt };
+    return { product, returnTo: rt };
   },
   component: Checkout,
 });
 
 const PRICE_LABEL: Record<string, string> = {
-  premium_monthly: "UNVEIL Premium — $15.99 / mo",
+  premium_monthly: "UNVEIL Premium — $15.99 / month",
+  premium_quarterly: "UNVEIL Premium — $39.99 every 3 months",
+  premium_annual: "UNVEIL Premium — $149.99 / year",
   message_pass_24h: "UNVEIL 24-Hour Unlimited Pass — $1.99",
-  contact_reveal: "UNVEIL Contact Reveal — $19.99",
 };
 
 function priceIdFor(product: Product): string {
   if (product === "message_pass") return "message_pass_24h";
-  if (product === "contact_reveal") return "contact_reveal";
+  if (product === "premium_quarterly") return "premium_quarterly";
+  if (product === "premium_annual") return "premium_annual";
   return "premium_monthly";
 }
 
@@ -51,11 +47,9 @@ function Checkout() {
   const [email, setEmail] = useState<string | undefined>();
   const [ready, setReady] = useState(false);
 
-  // Guard against disallowed legacy products reaching this route via raw URLs
-  // (e.g. ?product=verified, ?plan=3). Surface a toast and bounce home.
   useEffect(() => {
-    const rawProduct = new URLSearchParams(window.location.search).get("product");
-    if (rawProduct && !(ALLOWED_PRODUCTS as string[]).includes(rawProduct)) {
+    const raw = new URLSearchParams(window.location.search).get("product");
+    if (raw && !(ALLOWED_PRODUCTS as string[]).includes(raw)) {
       toast.error("This product is no longer available.");
       navigate({ to: returnTo?.startsWith("/chat") ? "/chat" : "/messages" });
     }

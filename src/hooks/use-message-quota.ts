@@ -13,9 +13,9 @@ export type MessageQuota = {
 };
 
 const DEFAULT: MessageQuota = {
-  dailyLimit: 15,
+  dailyLimit: 5,
   used: 0,
-  remaining: 15,
+  remaining: 5,
   resetsAt: null,
   unlimited: false,
   premiumUntil: null,
@@ -36,9 +36,9 @@ export function useMessageQuota() {
     const row = Array.isArray(data) ? data[0] : data;
     if (row) {
       setQuota({
-        dailyLimit: row.daily_limit ?? 15,
+        dailyLimit: row.daily_limit ?? 5,
         used: row.used ?? 0,
-        remaining: row.remaining ?? 15,
+        remaining: row.remaining ?? 5,
         resetsAt: row.resets_at ?? null,
         unlimited: !!row.unlimited,
         premiumUntil: row.premium_until ?? null,

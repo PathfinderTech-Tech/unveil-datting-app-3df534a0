@@ -43,8 +43,9 @@ async function resolveOrCreateCustomer(
 // premium_semiannual, premium_yearly) cannot be reached even via a crafted URL.
 const PRICE_META: Record<string, { kind: string; durationDays?: number; durationHours?: number }> = {
   premium_monthly: { kind: "premium_subscription" },
+  premium_quarterly: { kind: "premium_subscription" },
+  premium_annual: { kind: "premium_subscription" },
   message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
-  contact_reveal: { kind: "contact_reveal" },
 };
 
 const ALLOWED_RETURN_HOSTS = new Set([
