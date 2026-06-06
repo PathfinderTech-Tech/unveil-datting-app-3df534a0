@@ -1,6 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import {
@@ -9,11 +8,9 @@ import {
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { generateAvatar } from "@/lib/avatar.functions";
 import {
   Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X,
-  Wand2, RefreshCw, ShieldCheck, Eye, Lock, Save, MapPin, Languages,
-  Briefcase, Heart,
+  ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,20 +39,8 @@ const INTENTS = [
   { id: "exploring", label: "Just exploring" },
 ];
 
-const APPEARANCE_MODES = [
-  { id: "real",    label: "Real Photo",            hint: "Show the actual you." },
-  { id: "avatar",  label: "Avatar First",          hint: "Generated avatar publicly, selfie stays private." },
-  { id: "private", label: "Verified but Private",  hint: "Silhouette avatar — identity revealed only on match." },
-] as const;
-type AppearanceMode = (typeof APPEARANCE_MODES)[number]["id"];
-
-const AVATAR_STYLES = [
-  { id: "anime",      label: "Anime Avatar" },
-  { id: "stylized",   label: "Stylized Avatar" },
-  { id: "realistic",  label: "Realistic AI Portrait" },
-  { id: "mystery",    label: "Mystery Avatar" },
-] as const;
-type AvatarStyleId = "real" | (typeof AVATAR_STYLES)[number]["id"];
+// Photo Studio is the only profile-photo flow. No avatar modes, no AI styles.
+type AppearanceMode = "real";
 
 const INTERESTS = [
   "Travel","Music","Books","Movies","Fitness","Yoga","Cooking","Foodie","Coffee","Wine",
@@ -105,15 +90,15 @@ const SPARK_PROMPTS = [
 ];
 
 const STEPS = [
-  { id: 1, label: "Welcome",               minutes: 1 },
-  { id: 2, label: "Identity Basics",       minutes: 2 },
-  { id: 3, label: "Public Appearance",     minutes: 2 },
-  { id: 4, label: "Profile Essentials",    minutes: 3 },
-  { id: 5, label: "Compatibility",         minutes: 3 },
-  { id: 6, label: "Personality & Spark",   minutes: 3 },
-  { id: 7, label: "Safety & Verification", minutes: 1 },
-  { id: 8, label: "Profile Preview",       minutes: 1 },
-  { id: 9, label: "Complete",              minutes: 0 },
+  { id: 1, label: "Welcome",              minutes: 1 },
+  { id: 2, label: "Identity Basics",      minutes: 2 },
+  { id: 3, label: "Profile Photo Studio", minutes: 2 },
+  { id: 4, label: "Profile Essentials",   minutes: 3 },
+  { id: 5, label: "Compatibility",        minutes: 3 },
+  { id: 6, label: "Personality & Spark",  minutes: 3 },
+  { id: 7, label: "Safety Basics",        minutes: 1 },
+  { id: 8, label: "Profile Preview",      minutes: 1 },
+  { id: 9, label: "Complete",             minutes: 0 },
 ] as const;
 
 const TOTAL = STEPS.length;
