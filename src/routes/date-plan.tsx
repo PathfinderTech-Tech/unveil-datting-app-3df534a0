@@ -33,8 +33,6 @@ const THEMES = [
 function DatePlanRoute() {
   const search = useSearch({ from: "/date-plan" }) as SearchParams;
   const { partner, partners, partnerId, setPartnerId, loading } = usePartner(search.u);
-  const verification = useVerification();
-  const verifiedOk = verification.loading || verification.verified;
 
   const [theme, setTheme] = useState<string | null>(null);
   const [location, setLocation] = useState("");
@@ -52,7 +50,6 @@ function DatePlanRoute() {
   }, []);
 
   async function submit() {
-    if (!verifiedOk) { toast.error("Verification required to plan a date."); return; }
     if (!partner || !theme) return;
     setBusy(true);
     const res = await proposeDate({
@@ -162,7 +159,7 @@ function DatePlanRoute() {
               </Field>
             </section>
 
-            <button disabled={!theme || busy || !verifiedOk} onClick={submit}
+            <button disabled={!theme || busy} onClick={submit}
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow disabled:opacity-40">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               Send proposal to {partner.name}
