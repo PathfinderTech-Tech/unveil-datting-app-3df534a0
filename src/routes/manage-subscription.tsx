@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { createPortalSession } from "@/lib/payments.functions";
@@ -14,18 +13,19 @@ export const Route = createFileRoute("/manage-subscription")({
   component: Manage,
 });
 
-type Plan = "1" | "3" | "6" | "12";
-const PRICES: Record<Plan, string> = { "1": "$19.99", "3": "$49.99", "6": "$89.99", "12": "$149.99" };
-
 const PRICE_LABEL: Record<string, string> = {
-  verified_badge_onetime: "Verified Badge",
-  premium_monthly: "Premium · Monthly",
-  premium_quarterly: "Premium · 3 Months",
-  premium_semiannual: "Premium · 6 Months",
-  premium_yearly: "Premium · Yearly",
+  premium_monthly: "Premium · Monthly — $15.99/mo",
+  message_pass_24h: "24-Hour Unlimited Pass — $1.99",
+  contact_reveal: "Contact Reveal — $19.99",
 };
 
 function Manage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<any>(null);
+  const [sub, setSub] = useState<any>(null);
+  const [tx, setTx] = useState<any[]>([]);
+  const [portalBusy, setPortalBusy] = useState(false);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
