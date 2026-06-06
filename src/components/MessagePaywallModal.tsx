@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { X, Zap, Crown, ShieldCheck } from "lucide-react";
+import { X, Zap, Crown } from "lucide-react";
 
 type Props = {
   open: boolean;
@@ -26,30 +26,12 @@ export function MessagePaywallModal({ open, onClose, returnTo }: Props) {
           <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Daily limit reached</p>
           <h2 className="mt-2 font-display text-2xl font-light">Keep the conversation going.</h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            Pick what fits — verify for daily messages, grab a 24h pass, or go Premium.
+            Grab a 24-hour pass, go Premium, or wait until tomorrow for your free messages to reset.
           </p>
         </div>
 
         <div className="mt-6 space-y-3">
-          {/* Verify Identity */}
-          <Link
-            to="/checkout"
-            search={{ product: "verified", ...(rt ? { returnTo: rt } : {}) } as any}
-            className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:bg-primary/10"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="font-medium">Verify Identity</div>
-                <div className="text-xs text-muted-foreground">Verified badge · 15 messages/day · higher trust</div>
-              </div>
-            </div>
-            <div className="font-display text-lg">$9.99</div>
-          </Link>
-
-          {/* Daily Pass */}
+          {/* 24h Pass — $1.99 */}
           <Link
             to="/checkout"
             search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
@@ -60,14 +42,14 @@ export function MessagePaywallModal({ open, onClose, returnTo }: Props) {
                 <Zap className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <div className="font-medium">24-Hour Conversation Pass</div>
+                <div className="font-medium">24-Hour Unlimited Pass</div>
                 <div className="text-xs text-muted-foreground">Unlimited messaging for 24 hours</div>
               </div>
             </div>
             <div className="font-display text-lg">$1.99</div>
           </Link>
 
-          {/* Premium Monthly */}
+          {/* Premium Monthly — $15.99 */}
           <Link
             to="/checkout"
             search={{ product: "premium", plan: "1", ...(rt ? { returnTo: rt } : {}) } as any}
@@ -79,14 +61,14 @@ export function MessagePaywallModal({ open, onClose, returnTo }: Props) {
               </div>
               <div>
                 <div className="font-medium">Premium Monthly</div>
-                <div className="text-xs opacity-90">Verified · unlimited · insights+ · priority</div>
+                <div className="text-xs opacity-90">Unlimited messages · insights+ · priority</div>
               </div>
             </div>
-            <div className="font-display text-lg">$19.99<span className="text-xs opacity-80">/mo</span></div>
+            <div className="font-display text-lg">$15.99<span className="text-xs opacity-80">/mo</span></div>
           </Link>
 
           <p className="pt-1 text-center text-[11px] text-muted-foreground">
-            Or wait until tomorrow for free messages to reset.
+            Or wait until tomorrow — free messages reset every day.
           </p>
 
           <button
