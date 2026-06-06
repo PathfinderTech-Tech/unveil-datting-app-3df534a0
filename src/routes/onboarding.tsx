@@ -132,8 +132,8 @@ function Onboarding() {
   const [intent, setIntent] = useState("");
   const [email, setEmail] = useState("");
 
-  // Step 3
-  const [appearance, setAppearance] = useState<AppearanceMode>("real");
+  // Photo Studio is the only flow; appearance is fixed to "real".
+  const appearance: AppearanceMode = "real";
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -161,7 +161,8 @@ function Onboarding() {
   const [spark, setSpark] = useState<Record<string, string>>({});
 
   // Step 7
-  const [verifyChoice, setVerifyChoice] = useState<"skip" | "verify" | null>(null);
+  // Paid verification removed — auto-skip step 7.
+  const verifyChoice = "skip" as const;
 
   const allDiscoveryAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allDiscoveryAnswered
@@ -370,41 +371,22 @@ function Onboarding() {
     }
   }
 
-  async function handleGenerateAvatar() {
-    if (!photoUrl) { toast.error("Add a selfie first."); return; }
-    const style = (avatarStyle === "real" ? "stylized" : avatarStyle) as Exclude<AvatarStyleId, "real">;
-    setAvatarStyle(style);
-    setGeneratingAvatar(true);
-    try {
-      const res = await runGenerateAvatar({ data: { style, selfieUrl: photoUrl } });
-      setAvatarUrl(res.avatarUrl);
-      if (res.fallback && res.message) toast.message(res.message);
-      else toast.success("Your avatar is ready.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not generate avatar");
-    } finally {
-      setGeneratingAvatar(false);
-    }
-  }
+  // AI avatar generation removed — Photo Studio is the only profile photo flow.
 
   // ---------- Validation per step ----------
   const canNext = useMemo(() => {
     switch (step) {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
       case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
-      case 3: {
-        if (appearance === "real") return !!photoUrl;
-        if (appearance === "avatar") return !!avatarUrl;
-        return true; // private — no upload required
-      }
+      case 3: return !!photoUrl;
       case 4: return bio.trim().length >= 20 && interests.length >= 3;
       case 5: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
       case 6: return allDiscoveryAnswered;
-      case 7: return verifyChoice !== null;
+      case 7: return true;
       case 8: return true;
       default: return true;
     }
-  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, appearance, photoUrl, avatarUrl, bio, interests, compat, allDiscoveryAnswered, verifyChoice]);
+  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
 
   // ---------- Render ----------
   if (authLoading || (user && !hydrated)) {
