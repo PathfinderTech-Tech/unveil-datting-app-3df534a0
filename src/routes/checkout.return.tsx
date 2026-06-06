@@ -24,7 +24,7 @@ const SUCCESS_BANNER: Record<ProductKey, string> = {
 };
 
 function CheckoutReturn() {
-  const { session_id, product, returnTo } = Route.useSearch();
+  const { session_id, product, returnTo } = Route.useSearch() as { session_id?: string; product?: ProductKey; returnTo?: string };
   const navigate = useNavigate();
 
   useEffect(() => {
