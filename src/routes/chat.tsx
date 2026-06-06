@@ -45,6 +45,10 @@ type PeerProfile = {
   verified: boolean | null;
   last_seen_at: string | null;
 };
+type PeerRow = Omit<PeerProfile, "last_seen_at" | "discovery_mode"> & {
+  updated_at: string | null;
+  discovery_mode: string | null;
+};
 type Compat = Awaited<ReturnType<typeof loadCompatibility>>;
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
@@ -136,7 +140,7 @@ function Chat() {
         const [{ data: profs }, { data: lastMsgs }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, last_seen_at")
+            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, updated_at")
             .in("id", peerIds),
           supabase
             .from("messages")
@@ -146,7 +150,17 @@ function Chat() {
         ]);
         if (!alive) return;
         const pmap: Record<string, PeerProfile> = {};
-        for (const p of (profs ?? []) as PeerProfile[]) pmap[p.id] = p;
+        for (const p of (profs ?? []) as PeerRow[]) {
+          pmap[p.id] = {
+            id: p.id,
+            first_name: p.first_name,
+            avatar_url: p.avatar_url,
+            photo_url: p.photo_url,
+            discovery_mode: (p.discovery_mode as "avatar" | "photo" | null) ?? null,
+            verified: p.verified,
+            last_seen_at: p.updated_at,
+          };
+        }
         setPeers(pmap);
         const last: Record<string, string> = {};
         for (const m of (lastMsgs ?? []) as { conversation_id: string; content: string }[]) {
@@ -368,50 +382,80 @@ function Chat() {
   const metrics = compat
     ? [
         { label: "Values", value: compat.values_score ?? 0 },
-        { label: "Lifestyle", value: compat.lifestyle ?? 0 },
         { label: "Communication", value: compat.communication ?? 0 },
+        { label: "Lifestyle", value: compat.lifestyle ?? 0 },
         { label: "Future Goals", value: compat.goals ?? 0 },
       ]
     : [];
+
+  // Derive "Why You Matched" insights from compatibility metrics
+  const insights: string[] = [];
+  if (compat) {
+    const v = compat.values_score ?? 0;
+    const c = compat.communication ?? 0;
+    const l = compat.lifestyle ?? 0;
+    const g = compat.goals ?? 0;
+    if (v >= 75) insights.push("Both value honesty and authenticity");
+    if (c >= 75) insights.push("Both prefer meaningful conversations");
+    if (l >= 75) insights.push("Aligned daily rhythms and lifestyle");
+    if (g >= 75) insights.push("Both want intentional relationships");
+    if (insights.length === 0) {
+      // fallback: surface the top two metrics
+      const top = [...metrics].sort((a, b) => b.value - a.value).slice(0, 2);
+      for (const t of top) insights.push(`Strong overlap on ${t.label.toLowerCase()}`);
+    }
+  }
+
+  // Online-now heuristic: last_seen within 3 minutes
+  const isOnline = (iso: string | null | undefined) => {
+    if (!iso) return false;
+    return Date.now() - new Date(iso).getTime() < 3 * 60_000;
+  };
+
+  const SUGGESTED_OPENERS = [
+    "What does your ideal Sunday look like?",
+    "What's one value you'd never compromise on?",
+    "What are you currently building in your life?",
+  ];
 
   return (
     <div className="min-h-screen bg-background">
       <UnveilNav />
       <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
 
-      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-4 lg:px-6 lg:py-4">
+      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
         <aside
-          className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[340px] shrink-0 flex-col border-r border-border bg-card/40 backdrop-blur-xl lg:rounded-3xl lg:border lg:bg-card/60`}
-          style={{ height: "calc(100vh - 64px)" }}
+          className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
+          style={{ height: "calc(100vh - 72px)" }}
         >
-          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-border/40 px-5 py-5">
             <div>
-              <h1 className="font-display text-xl font-light tracking-tight">Messages</h1>
-              <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                {convs.length} {convs.length === 1 ? "match" : "matches"}
+              <h1 className="font-display text-2xl font-light tracking-tight">Messages</h1>
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/80">
+                {convs.length} {convs.length === 1 ? "connection" : "connections"}
               </p>
             </div>
-            <Link to="/matches" className="rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow">
+            <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
               <Heart className="h-4 w-4" />
             </Link>
           </div>
 
           {!quota.loading && !quota.unlimited && (
-            <div className="border-b border-border/60 px-4 py-2 text-[11px] text-muted-foreground">
-              {quota.remaining}/{quota.dailyLimit} messages today ·{" "}
-              <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline">Unlock</Link>
+            <div className="border-b border-border/40 px-5 py-2.5 text-[11px] text-muted-foreground">
+              <span className="font-medium text-foreground/80">{quota.remaining}</span>/{quota.dailyLimit} messages today ·{" "}
+              <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline-offset-2 hover:underline">Unlock</Link>
             </div>
           )}
           {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
-            <div className="border-b border-accent/30 bg-accent/10 px-4 py-2 text-[11px] text-accent">
-              Unlimited · {formatRemainingTime(quota.messagePassUntil)} left
+            <div className="border-b border-accent/30 bg-accent/10 px-5 py-2.5 text-[11px] text-accent">
+              ✦ Unlimited · {formatRemainingTime(quota.messagePassUntil)} left
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-2">
+          <div className="flex-1 overflow-y-auto p-2.5">
             {convs.length === 0 ? (
-              <div className="m-2 rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              <div className="m-2 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
                 No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.
               </div>
             ) : convs.map((c) => {
@@ -419,45 +463,53 @@ function Chat() {
               const p = peers[pid];
               const pct = convCompat[c.id];
               const isActive = active?.id === c.id;
+              const online = isOnline(p?.last_seen_at);
               return (
                 <button
                   key={c.id}
                   onClick={() => setActive(c)}
-                  className={`group mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-all ${
-                    isActive ? "bg-primary/15 ring-1 ring-primary/30" : "hover:bg-surface"
+                  className={`group mb-1.5 flex w-full items-center gap-3.5 rounded-2xl p-3 text-left transition-all ${
+                    isActive
+                      ? "bg-gradient-to-r from-primary/20 to-accent/10 ring-1 ring-primary/40 shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.4)]"
+                      : "hover:bg-surface/70"
                   }`}
                 >
-                  <div className="relative">
-                    <ProfileAvatar
-                      userId={pid}
-                      name={p?.first_name}
-                      discoveryMode={p?.discovery_mode}
-                      avatarUrl={p?.avatar_url}
-                      photoUrl={p?.photo_url}
-                      size={52}
-                    />
+                  <div className="relative shrink-0">
+                    <div className="rounded-full ring-2 ring-border/40 ring-offset-2 ring-offset-background/0 transition-all group-hover:ring-primary/30">
+                      <ProfileAvatar
+                        userId={pid}
+                        name={p?.first_name}
+                        discoveryMode={p?.discovery_mode}
+                        avatarUrl={p?.avatar_url}
+                        photoUrl={p?.photo_url}
+                        size={56}
+                      />
+                    </div>
                     {pct ? (
-                      <span className="absolute -bottom-1 -right-1 rounded-full bg-gradient-hero px-1.5 py-0.5 font-mono text-[9px] font-semibold text-primary-foreground shadow-glow">
+                      <span className="absolute -bottom-1 -right-1 rounded-full bg-gradient-hero px-1.5 py-0.5 font-mono text-[9px] font-semibold text-primary-foreground shadow-glow ring-2 ring-card">
                         {pct}%
                       </span>
                     ) : null}
+                    {online && (
+                      <span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card)),0_0_10px_rgba(52,211,153,0.6)]" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1 truncate text-sm font-medium">
+                      <span className="flex items-center gap-1 truncate text-[15px] font-semibold tracking-tight">
                         {p?.first_name ?? "Match"}
                         {p?.verified ? <VerifiedBadge size="xs" /> : null}
                       </span>
-                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground/80">
                         {timeAgo(c.last_message_at)}
                       </span>
                     </div>
-                    <div className="mt-0.5 flex items-center justify-between gap-2">
-                      <p className="truncate text-xs text-muted-foreground">
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className="truncate text-xs text-muted-foreground/90">
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
-                      <span className="shrink-0 text-[10px] text-muted-foreground/80">
-                        Active {timeAgo(p?.last_seen_at ?? null)}
+                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground/70"}`}>
+                        {online ? "Online now" : `Active ${timeAgo(p?.last_seen_at ?? null)}`}
                       </span>
                     </div>
                   </div>
@@ -469,20 +521,22 @@ function Chat() {
 
         {/* ============ CHAT PANEL ============ */}
         <section
-          className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/40 backdrop-blur-xl lg:rounded-3xl lg:border lg:border-border lg:bg-card/60`}
-          style={{ height: "calc(100vh - 64px)" }}
+          className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
+          style={{ height: "calc(100vh - 72px)" }}
         >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
-              <MessageCircle className="mx-auto mb-3 h-10 w-10 text-primary/40" />
-              <h2 className="font-display text-2xl font-light">Select a conversation</h2>
-              <p className="mt-2 text-sm">Slow, intentional, voice-first.</p>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/10 backdrop-blur-xl">
+                <MessageCircle className="h-7 w-7 text-primary/70" />
+              </div>
+              <h2 className="font-display text-2xl font-light tracking-tight">Select a conversation</h2>
+              <p className="mt-2 text-sm text-muted-foreground/80">Slow, intentional, voice-first.</p>
             </div>
           ) : (
             <>
-              {/* ============ COMPACT HEADER ============ */}
-              <header className="relative shrink-0 border-b border-border/60 bg-card/80 backdrop-blur-xl">
-                <div className="flex items-center gap-3 px-4 py-3">
+              {/* ============ HERO HEADER ============ */}
+              <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
+                <div className="flex items-center gap-4 px-5 py-4">
                   <button
                     onClick={() => setActive(null)}
                     className="rounded-full p-1.5 hover:bg-surface lg:hidden"
@@ -491,28 +545,42 @@ function Chat() {
                     <ChevronLeft className="h-5 w-5" />
                   </button>
                   {peerId && (
-                    <ProfileAvatar
-                      userId={peerId}
-                      name={peerName}
-                      discoveryMode={peer?.discovery_mode}
-                      avatarUrl={peer?.avatar_url}
-                      photoUrl={peer?.photo_url}
-                      size={48}
-                      className="ring-2 ring-primary/40"
-                    />
+                    <div className="relative shrink-0">
+                      <div className="rounded-full bg-gradient-to-br from-primary/40 to-accent/30 p-[2px] shadow-glow">
+                        <div className="rounded-full bg-card p-[2px]">
+                          <ProfileAvatar
+                            userId={peerId}
+                            name={peerName}
+                            discoveryMode={peer?.discovery_mode}
+                            avatarUrl={peer?.avatar_url}
+                            photoUrl={peer?.photo_url}
+                            size={56}
+                          />
+                        </div>
+                      </div>
+                      {isOnline(peer?.last_seen_at) && (
+                        <span className="absolute -bottom-0.5 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card)),0_0_12px_rgba(52,211,153,0.7)]" />
+                      )}
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="truncate text-base font-semibold">{peerName}</span>
+                      <span className="truncate text-lg font-semibold tracking-tight">{peerName}</span>
                       {peer?.verified ? <VerifiedBadge size="xs" /> : null}
                     </div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
                       {overallScore != null && band && (
-                        <span className={`font-mono font-semibold ${band.tone}`}>
-                          {overallScore}% · {band.label}
+                        <span className={`inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-mono font-semibold ${band.tone}`}>
+                          <Heart className="h-2.5 w-2.5 fill-current" /> {overallScore}% Compatible
                         </span>
                       )}
-                      {dayN && <span>· Day {dayN} of 7</span>}
+                      {isOnline(peer?.last_seen_at) ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
+                        </span>
+                      ) : peer?.last_seen_at ? (
+                        <span className="text-muted-foreground/80">Active {timeAgo(peer.last_seen_at)} ago</span>
+                      ) : null}
                       {typingPeer && <span className="italic text-primary">typing…</span>}
                     </div>
                   </div>
@@ -524,7 +592,7 @@ function Chat() {
                     <MoreVertical className="h-4 w-4" />
                   </button>
                   {showMenu && (
-                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
+                    <div className="absolute right-4 top-20 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
                       <button onClick={reportPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
                       <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
                       <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
@@ -532,12 +600,16 @@ function Chat() {
                   )}
                 </div>
 
-                {/* Day progress bar */}
+                {/* Day progress */}
                 {dayN && (
-                  <div className="px-4 pb-2">
-                    <div className="h-1 overflow-hidden rounded-full bg-surface">
+                  <div className="px-5 pb-3">
+                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground/80">
+                      <span className="font-mono uppercase tracking-luxury">Day {dayN} of 7</span>
+                      <span className="text-muted-foreground/60">{7 - dayN} days to contact unlock</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
                       <div
-                        className="h-full rounded-full bg-gradient-hero transition-all"
+                        className="h-full rounded-full bg-gradient-hero shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-all duration-700"
                         style={{ width: `${(dayN / 7) * 100}%` }}
                       />
                     </div>
@@ -546,64 +618,95 @@ function Chat() {
 
                 {/* Compatibility dashboard (collapsible) */}
                 {metrics.length > 0 && (
-                  <div className="border-t border-border/40">
+                  <div className="border-t border-border/30">
                     <button
                       onClick={() => setCompatOpen((v) => !v)}
-                      className="flex w-full items-center justify-between px-4 py-2 text-left"
+                      className="flex w-full items-center justify-between px-5 py-2.5 text-left transition-colors hover:bg-surface/30"
                     >
-                      <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                        Why you match
+                      <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                        <Sparkles className="h-3 w-3 text-accent" /> Why you match
                       </span>
-                      <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
                     </button>
                     {compatOpen && (
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 px-4 pb-3">
-                        {metrics.map((m) => (
-                          <div key={m.label}>
-                            <div className="mb-0.5 flex items-center justify-between">
-                              <span className="text-[11px] text-muted-foreground">{m.label}</span>
-                              <span className="font-mono text-[11px] font-semibold">{m.value}%</span>
-                            </div>
-                            <div className="h-1 overflow-hidden rounded-full bg-surface">
-                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
+                      <div className="px-5 pb-4 pt-1">
+                        {/* Insights */}
+                        {insights.length > 0 && (
+                          <ul className="mb-3 grid gap-1.5 sm:grid-cols-2">
+                            {insights.map((line) => (
+                              <li key={line} className="flex items-start gap-2 text-[12px] text-foreground/85">
+                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                                  <Check className="h-2.5 w-2.5" />
+                                </span>
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {/* Overall + metric cards */}
+                        {overallScore != null && (
+                          <div className="mb-2.5 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-3.5 backdrop-blur-xl">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</span>
+                              <span className="font-display text-2xl font-light tracking-tight text-foreground">{overallScore}%</span>
                             </div>
                           </div>
-                        ))}
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          {metrics.map((m) => (
+                            <div
+                              key={m.label}
+                              className="rounded-2xl border border-border/60 bg-surface/40 p-3 backdrop-blur-xl transition-colors hover:border-primary/30"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-muted-foreground">{m.label}</span>
+                                <span className="font-mono text-sm font-semibold text-foreground">{m.value}%</span>
+                              </div>
+                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                                <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Collapsible discovery cards */}
+                {/* Collapsible discovery chips */}
                 {matchInfo && peerId && (
-                  <div className="border-t border-border/40 px-4 py-2">
+                  <div className="border-t border-border/30 px-5 py-2.5">
                     <div className="flex flex-wrap gap-1.5">
                       <button
                         onClick={() => setScaffoldOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors ${
-                          scaffoldOpen ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
+                          scaffoldOpen
+                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
+                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
                         }`}
                       >
-                        <Sparkles className="h-3 w-3" /> Discovery prompts
-                      </button>
-                      <button
-                        onClick={() => setRevealOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors ${
-                          revealOpen ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        <LockIcon className="h-3 w-3" /> Contact reveal
+                        <Sparkles className="h-3 w-3" /> Day {dayN ?? 1} discovery
                       </button>
                       <button
                         onClick={() => fetchIcebreakers(ideaCategory)}
                         disabled={ideasLoading}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground disabled:opacity-50"
                       >
                         <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Icebreakers
                       </button>
+                      <button
+                        onClick={() => setRevealOpen((v) => !v)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
+                          revealOpen
+                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
+                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        }`}
+                      >
+                        <LockIcon className="h-3 w-3" /> Contact reveal
+                      </button>
                     </div>
                     {scaffoldOpen && (
-                      <div className="mt-2 rounded-2xl border border-border bg-surface/40 p-3">
+                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
                         <ConversationScaffold
                           matchId={matchInfo.id}
                           matchCreatedAt={matchInfo.created_at}
@@ -615,7 +718,7 @@ function Chat() {
                       </div>
                     )}
                     {revealOpen && (
-                      <div className="mt-2 rounded-2xl border border-border bg-surface/40 p-3">
+                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
                         <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
                       </div>
                     )}
@@ -623,12 +726,32 @@ function Chat() {
                 )}
               </header>
 
-              {/* ============ MESSAGES (dominant, ≥70% of column) ============ */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+              {/* ============ MESSAGES ============ */}
+              <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
                 {msgs.length === 0 && (
-                  <div className="mx-auto max-w-md py-12 text-center text-sm text-muted-foreground">
-                    <Sparkles className="mx-auto mb-3 h-6 w-6 text-primary/60" />
-                    Your conversation is unfolding. Send the first thought when you're ready.
+                  <div className="mx-auto max-w-md py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/25 to-accent/15 backdrop-blur-xl">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-display text-xl font-light tracking-tight">Start your first conversation</h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground/85">
+                      Meaningful connections begin with curiosity.
+                    </p>
+                    <div className="mt-5 space-y-2 text-left">
+                      <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/70">
+                        Suggested icebreakers
+                      </p>
+                      {SUGGESTED_OPENERS.map((line) => (
+                        <button
+                          key={line}
+                          type="button"
+                          onClick={() => setDraft(line)}
+                          className="block w-full rounded-2xl border border-border/60 bg-surface/40 px-4 py-3 text-left text-sm text-foreground/90 backdrop-blur-xl transition-all hover:border-primary/40 hover:bg-surface/60"
+                        >
+                          {line}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
                 <div className="space-y-2">
@@ -638,14 +761,16 @@ function Chat() {
                     const seenByPeer = peerId ? (reads[m.id] ?? []).includes(peerId) : false;
                     const prev = msgs[idx - 1];
                     const grouped = prev && prev.sender_id === m.sender_id && (new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < 60_000);
+                    const ts = new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
                     return (
-                      <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2"}`}>
-                        <div className="relative flex items-end gap-1">
+                      <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2.5"}`}>
+                        <div className="relative flex items-end gap-1.5">
                           <div
-                            className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm leading-snug shadow-sm ${
+                            title={ts}
+                            className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
                               mine
-                                ? "bg-gradient-hero text-primary-foreground rounded-br-md"
-                                : "bg-surface text-foreground rounded-bl-md"
+                                ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
+                                : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
                             }`}
                           >
                             {m.content}
@@ -675,7 +800,9 @@ function Chat() {
                           </div>
                         )}
                         {mine && (
-                          <div className="mt-0.5 flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80 opacity-0 transition-opacity group-hover:opacity-100">
+                            <span>{ts}</span>
+                            <span>·</span>
                             {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
                               : m.delivered_at ? <><CheckCheck className="h-3 w-3" /> Delivered</>
                               : <><Check className="h-3 w-3" /> Sent</>}
@@ -686,10 +813,10 @@ function Chat() {
                   })}
                   {typingPeer && (
                     <div className="flex items-center gap-1 px-2">
-                      <span className="inline-flex gap-1 rounded-2xl bg-surface px-3 py-2">
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                      <span className="inline-flex gap-1 rounded-2xl border border-border/50 bg-surface/70 px-3.5 py-2.5 backdrop-blur-xl">
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.3s]" />
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.15s]" />
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/60" />
                       </span>
                     </div>
                   )}
@@ -699,7 +826,7 @@ function Chat() {
 
               {/* ============ ICEBREAKERS DRAWER ============ */}
               {ideasOpen && (
-                <div className="shrink-0 border-t border-border bg-surface/60 p-3 backdrop-blur-xl">
+                <div className="shrink-0 border-t border-border/50 bg-surface/50 p-3.5 backdrop-blur-2xl">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                       <Sparkles className="h-3 w-3 text-accent" /> AI Icebreakers
@@ -749,10 +876,10 @@ function Chat() {
                 </div>
               )}
 
-              {/* ============ COMPOSER (fixed to bottom of panel) ============ */}
+              {/* ============ COMPOSER ============ */}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="shrink-0 border-t border-border bg-card/90 p-3 backdrop-blur-xl"
+                className="shrink-0 border-t border-border/50 bg-card/80 p-3.5 backdrop-blur-2xl"
               >
                 <div className="flex items-center gap-2">
                   <button
@@ -760,7 +887,7 @@ function Chat() {
                     onClick={() => fetchIcebreakers(ideaCategory)}
                     disabled={!peerId || ideasLoading}
                     title="AI Icebreakers"
-                    className="rounded-full border border-border bg-surface p-2.5 hover:border-primary disabled:opacity-50"
+                    className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
@@ -768,18 +895,18 @@ function Chat() {
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
                     placeholder={`Message ${peerName}…`}
-                    className="flex-1 rounded-full border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
+                    className="flex-1 rounded-full border border-border/60 bg-surface/70 px-5 py-3 text-[15px] outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:bg-surface/90 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                   />
                   <button
                     type="submit"
                     disabled={!draft.trim()}
-                    className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow disabled:opacity-50"
+                    className="rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     aria-label="Send"
                   >
                     <Send className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
+                <p className="mt-2 text-center text-[10px] text-muted-foreground/70">
                   Phone numbers, emails, and social handles are hidden until you both choose to share.
                 </p>
               </form>
