@@ -173,10 +173,23 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     );
 
     if (session.payment_status === "paid") {
+      // Activate verified status and reset daily counter so the user
+      // immediately gets the verified 15/day quota in their current window.
       await getSupabase()
         .from("profiles")
-        .update({ badge_paid: true, updated_at: new Date().toISOString() })
+        .update({
+          badge_paid: true,
+          verified: true,
+          daily_message_count: 0,
+          daily_message_reset_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", userId);
+      // Mark any existing verification_request as approved (best-effort).
+      await getSupabase()
+        .from("verification_requests")
+        .update({ status: "approved", updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
     }
     return;
   }
