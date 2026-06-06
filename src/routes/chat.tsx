@@ -45,6 +45,10 @@ type PeerProfile = {
   verified: boolean | null;
   last_seen_at: string | null;
 };
+type PeerRow = Omit<PeerProfile, "last_seen_at" | "discovery_mode"> & {
+  updated_at: string | null;
+  discovery_mode: string | null;
+};
 type Compat = Awaited<ReturnType<typeof loadCompatibility>>;
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
