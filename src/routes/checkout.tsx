@@ -41,7 +41,7 @@ function priceIdFor(product: string, plan: string): string {
   if (plan === "3") return "premium_quarterly";
   if (plan === "6") return "premium_semiannual";
   if (plan === "12") return "premium_yearly";
-  return "premium_quarterly";
+  return "premium_monthly";
 }
 
 function Checkout() {
