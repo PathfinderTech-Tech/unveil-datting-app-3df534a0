@@ -735,22 +735,18 @@ function Onboarding() {
         {step === 7 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Safety & verification.</h1>
-              <p className="mt-2 text-muted-foreground">Verified profiles attract better matches and signal trust. You can verify later — beta members can skip for now.</p>
+              <h1 className="font-display text-4xl font-bold">Safety basics.</h1>
+              <p className="mt-2 text-muted-foreground">
+                Your selfie acts as your trust check. There's no paid verification — every profile starts with the same 15 daily messages.
+              </p>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <button type="button" onClick={() => setVerifyChoice("verify")}
-                className={`flex flex-col items-start gap-2 rounded-3xl border p-5 text-left transition-all ${verifyChoice === "verify" ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-card hover:border-foreground/30"}`}>
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <div className="font-display text-base font-medium">Get verified now</div>
-                <div className="text-xs text-muted-foreground">Submit a quick ID + selfie. We'll open the verification flow after onboarding.</div>
-              </button>
-              <button type="button" onClick={() => setVerifyChoice("skip")}
-                className={`flex flex-col items-start gap-2 rounded-3xl border p-5 text-left transition-all ${verifyChoice === "skip" ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-card hover:border-foreground/30"}`}>
-                <Eye className="h-6 w-6 text-muted-foreground" />
-                <div className="font-display text-base font-medium">Skip for beta</div>
-                <div className="text-xs text-muted-foreground">Available during beta. You can verify anytime from Settings.</div>
-              </button>
+            <div className="rounded-3xl border border-primary/30 bg-primary/5 p-5 text-sm">
+              <div className="mb-2 flex items-center gap-2 font-display text-base">
+                <ShieldCheck className="h-4 w-4 text-primary" /> Selfie Checked
+              </div>
+              <p className="text-muted-foreground">
+                Profiles with a real selfie display a Selfie Checked badge so other members know it's really you.
+              </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 text-sm">
               <div className="mb-1 font-display text-base">Safety basics</div>
@@ -763,6 +759,7 @@ function Onboarding() {
           </div>
         )}
 
+
         {/* ---------- STEP 8: Profile preview ---------- */}
         {step === 8 && (
           <div className="space-y-6">
@@ -773,10 +770,10 @@ function Onboarding() {
             <ProfilePreview
               name={name} age={age} city={city} country={country}
               bio={bio} interests={interests}
-              appearance={appearance}
-              avatarUrl={avatarUrl} photoUrl={photoUrl}
-              intent={intent} verified={verifyChoice === "verify"}
+              photoUrl={photoUrl}
+              intent={intent} verified={!!photoUrl}
             />
+
             <div className="text-center text-xs text-muted-foreground">
               Want to change something? Use Back to edit any previous step.
             </div>
@@ -840,20 +837,17 @@ function Onboarding() {
 function computeResumeStep(s: {
   agree18: boolean; agreeTerms: boolean; agreePrivacy: boolean; agreeCommunity: boolean;
   name: string; gender: string; country: string; interestedIn: string; intent: string; email: string;
-  appearance: AppearanceMode; photoUrl: string | null; avatarUrl: string | null;
+  photoUrl: string | null;
   bio: string; interests: string[];
   compat: Record<CompatKey, string>;
   discovery: Partial<DiscoveryProfile>;
-  verifyChoice: "skip" | "verify" | null;
 }): number {
   if (!(s.agree18 && s.agreeTerms && s.agreePrivacy && s.agreeCommunity)) return 1;
   if (!(s.name.length > 1 && s.gender && s.country && s.interestedIn && s.intent && /\S+@\S+\.\S+/.test(s.email))) return 2;
-  if (s.appearance === "real" && !s.photoUrl) return 3;
-  if (s.appearance === "avatar" && !s.avatarUrl) return 3;
+  if (!s.photoUrl) return 3;
   if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 4;
   if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 5;
   if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 6;
-  if (s.verifyChoice === null) return 7;
   return 8;
 }
 
@@ -882,15 +876,10 @@ function Agree({ v, onChange, label }: { v: boolean; onChange: (b: boolean) => v
 function ProfilePreview(props: {
   name: string; age: number; city: string; country: string;
   bio: string; interests: string[];
-  appearance: AppearanceMode;
-  avatarUrl: string | null; photoUrl: string | null;
+  photoUrl: string | null;
   intent: string; verified: boolean;
 }) {
-  const display = props.appearance === "avatar"
-    ? props.avatarUrl
-    : props.appearance === "private"
-      ? null
-      : props.photoUrl;
+  const display = props.photoUrl;
   const intentLabel = INTENTS.find((i) => i.id === props.intent)?.label ?? props.intent;
   return (
     <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-glow">
@@ -904,12 +893,7 @@ function ProfilePreview(props: {
         )}
         {props.verified && (
           <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-primary backdrop-blur">
-            <ShieldCheck className="h-3 w-3" /> Verified
-          </div>
-        )}
-        {props.appearance === "private" && (
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground backdrop-blur">
-            <Lock className="h-3 w-3" /> Private until match
+            <ShieldCheck className="h-3 w-3" /> Selfie Checked
           </div>
         )}
       </div>
