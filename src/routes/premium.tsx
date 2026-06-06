@@ -64,7 +64,7 @@ const VERIFIED_BENEFITS = [
 
 function Membership() {
   const navigate = useNavigate();
-  const [plan, setPlan] = useState<Plan>("3");
+  const [plan, setPlan] = useState<Plan>("1");
   const selected = PRICES[plan];
 
   const goCheckout = (product: "premium" | "verified") => {
