@@ -27,7 +27,7 @@ type Channel = "phone" | "whatsapp" | "instagram" | "telegram";
 function ContactShare() {
   const search = useSearch({ from: "/contact-share" }) as SearchParams;
   const { partner, partners, partnerId, setPartnerId, loading, refresh } = usePartner(search.u);
-  const verification = useVerification();
+  
 
   return (
     <div className="min-h-screen">
