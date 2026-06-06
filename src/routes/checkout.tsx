@@ -45,7 +45,7 @@ function priceIdFor(product: string, plan: string): string {
 }
 
 function Checkout() {
-  const { product, plan } = useSearch({ from: "/checkout" }) as Search;
+  const { product, plan, returnTo } = useSearch({ from: "/checkout" }) as Search;
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | undefined>();
   const [email, setEmail] = useState<string | undefined>();
