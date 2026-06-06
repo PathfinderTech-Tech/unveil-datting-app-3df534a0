@@ -518,122 +518,68 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 3: Public appearance ---------- */}
+        {/* ---------- STEP 3: Profile Photo Studio ---------- */}
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">How would you like to appear?</h1>
-              <p className="mt-2 text-muted-foreground">Pick a discovery mode — you can change this anytime in settings.</p>
+              <h1 className="font-display text-4xl font-bold">Profile Photo Studio</h1>
+              <p className="mt-2 text-muted-foreground">
+                Take a selfie or upload a photo. Real profile photo shows from Day 1 — no AI avatars.
+              </p>
             </div>
 
-            {/* Discovery mode binary selector (Avatar / Photo) */}
-            <div className="grid gap-3 md:grid-cols-2">
-              {[
-                { id: "avatar" as const, title: "Avatar Mode", hint: "Show a generated avatar publicly. Your real selfie stays private until a mutual reveal." },
-                { id: "photo"  as const, title: "Photo Mode",  hint: "Show your real photo on your profile from the start." },
-              ].map((m) => {
-                const derived: "avatar" | "photo" = appearance === "real" ? "photo" : "avatar";
-                const active = derived === m.id;
-                return (
-                  <button key={m.id} type="button"
-                    onClick={() => setAppearance(m.id === "photo" ? "real" : "avatar")}
-                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
-                    <div className="font-display text-base font-semibold">{m.title}</div>
-                    <div className="text-xs text-muted-foreground">{m.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => { e.preventDefault(); setDragActive(false); const f = e.dataTransfer.files?.[0]; if (f) handlePhotoFile(f); }}
+              className={`flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed p-8 transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+            >
+              <input ref={selfieInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
+              <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
 
-            <div className="grid gap-3 md:grid-cols-3">
-              {APPEARANCE_MODES.map((m) => {
-                const active = appearance === m.id;
-                return (
-                  <button key={m.id} type="button" onClick={() => setAppearance(m.id)}
-                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
-                    <div className="font-display text-sm font-medium">{m.label}</div>
-                    <div className="text-xs text-muted-foreground">{m.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Selfie upload — needed for real & avatar; private for avatar */}
-            {(appearance === "real" || appearance === "avatar") && (
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                onDragLeave={() => setDragActive(false)}
-                onDrop={(e) => { e.preventDefault(); setDragActive(false); const f = e.dataTransfer.files?.[0]; if (f) handlePhotoFile(f); }}
-                className={`flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed p-8 transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-border bg-card"}`}
-              >
-                <input ref={selfieInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
-                <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
-
-                <div className="relative h-32 w-32 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
-                  {(appearance === "avatar" && avatarUrl) ? (
-                    <SignedImage src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
-                  ) : photoUrl ? (
-                    <SignedImage src={photoUrl} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>
-                  )}
-                  {photoUploading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
-                      <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button type="button" onClick={() => selfieInputRef.current?.click()} disabled={photoUploading}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50">
-                    <Camera className="h-4 w-4" /> {photoUrl ? "Retake" : "Take selfie"}
-                  </button>
-                  <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={photoUploading}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-foreground/30 disabled:opacity-50">
-                    <Upload className="h-4 w-4" /> Upload
-                  </button>
-                </div>
-
-                {appearance === "avatar" && (
-                  <div className="w-full">
-                    <div className="mt-2 mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Pick an avatar style</div>
-                    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                      {AVATAR_STYLES.map((s) => {
-                        const active = avatarStyle === s.id;
-                        return (
-                          <button key={s.id} type="button" onClick={() => setAvatarStyle(s.id)}
-                            className={`rounded-2xl border p-3 text-left text-xs transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-foreground/30"}`}>
-                            <div className="font-display font-medium">{s.label}</div>
-                            {active && <Check className="mt-1 h-3 w-3 text-primary" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button type="button" onClick={handleGenerateAvatar} disabled={generatingAvatar || !photoUrl}
-                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50">
-                      {generatingAvatar
-                        ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Generating…</>
-                        : avatarUrl
-                          ? <><RefreshCw className="h-3.5 w-3.5" /> Regenerate avatar</>
-                          : <><Wand2 className="h-3.5 w-3.5" /> Generate avatar</>}
-                    </button>
-                    {avatarUrl && (
-                      <p className="mt-2 text-[11px] text-muted-foreground">Selfie stays private. Your avatar is what others see.</p>
-                    )}
+              <div className="relative h-32 w-32 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
+                {photoUrl ? (
+                  <SignedImage src={photoUrl} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>
+                )}
+                {photoUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
                   </div>
                 )}
               </div>
-            )}
 
-            {appearance === "private" && (
-              <div className="rounded-2xl border border-border bg-card p-5 text-sm">
-                <div className="mb-1 flex items-center gap-2 font-display text-base"><Lock className="h-4 w-4" /> Verified but Private</div>
-                <p className="text-muted-foreground">You'll appear as a silhouette across the app. Your identity is revealed only after a mutual match. You can switch this off later.</p>
+              {photoUrl && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-mono uppercase tracking-luxury text-primary">
+                  <ShieldCheck className="h-3 w-3" /> Selfie Checked
+                </span>
+              )}
+
+              <div className="flex flex-wrap justify-center gap-2">
+                <button type="button" onClick={() => selfieInputRef.current?.click()} disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50">
+                  <Camera className="h-4 w-4" /> {photoUrl ? "Retake" : "Take selfie"}
+                </button>
+                <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-foreground/30 disabled:opacity-50">
+                  <Upload className="h-4 w-4" /> Upload photo
+                </button>
+                {photoUrl && (
+                  <Link to="/avatar"
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/15">
+                    <Wand2 className="h-4 w-4" /> Open Photo Studio
+                  </Link>
+                )}
               </div>
-            )}
+
+              <p className="text-center text-[11px] text-muted-foreground">
+                Edit brightness, warmth, glow, and skin-smoothing in the Photo Studio. Filters: Natural · Glow · Confident · Elegant · Radiant.
+              </p>
+            </div>
           </div>
         )}
+
 
         {/* ---------- STEP 4: Profile essentials ---------- */}
         {step === 4 && (
