@@ -424,6 +424,8 @@ function Chat() {
       <MessagePaywallModal
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
+        dailyLimit={quota.dailyLimit}
+        isPremium={quota.dailyLimit >= 15}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
 
