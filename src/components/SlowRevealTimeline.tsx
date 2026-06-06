@@ -1,13 +1,13 @@
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
 const STAGES = [
-  { day: 1, label: "Values" },
-  { day: 2, label: "Lifestyle" },
-  { day: 3, label: "Communication style" },
-  { day: 4, label: "Relationship goals" },
-  { day: 5, label: "Personality & habits" },
-  { day: 6, label: "Future vision" },
-  { day: 7, label: "Contact reveal decision" },
+  { day: 1, label: "Photo visible" },
+  { day: 2, label: "Personality insights" },
+  { day: 3, label: "Voice unlock" },
+  { day: 4, label: "Lifestyle compatibility" },
+  { day: 5, label: "Future goals" },
+  { day: 6, label: "Relationship expectations" },
+  { day: 7, label: "Phone number sharing" },
 ] as const;
 
 export function SlowRevealTimeline({ day = 1 }: { day?: number }) {
