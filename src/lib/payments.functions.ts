@@ -80,6 +80,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     environment: StripeEnv;
   }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
+    if (!PRICE_META[data.priceId]) throw new Error("This product is no longer available.");
     if (data.customerEmail && data.customerEmail.length > 254) throw new Error("Invalid email");
     data.returnUrl = validateReturnUrl(data.returnUrl);
     return data;
