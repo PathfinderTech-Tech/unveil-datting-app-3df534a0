@@ -26,13 +26,6 @@ function Manage() {
   const [sub, setSub] = useState<any>(null);
   const [tx, setTx] = useState<any[]>([]);
   const [portalBusy, setPortalBusy] = useState(false);
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState<any>(null);
-  const [sub, setSub] = useState<any>(null);
-  const [tx, setTx] = useState<any[]>([]);
-  const [renewPlan, setRenewPlan] = useState<Plan>("3");
-  const [portalBusy, setPortalBusy] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -93,7 +86,6 @@ function Manage() {
                 <h2 className="font-display text-2xl">
                   {premiumActive ? "UNVEIL Premium" : "Free Plan"}
                 </h2>
-                {profile?.verified && <VerifiedBadge size="sm" />}
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
@@ -130,63 +122,22 @@ function Manage() {
           </div>
         </div>
 
-        {/* Renew */}
+        {/* Upgrade prompt for free users */}
         {!premiumActive && (
           <div className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7">
-            <h3 className="font-display text-xl">Choose a plan</h3>
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(["1", "3", "6", "12"] as Plan[]).map((p) => {
-                const active = renewPlan === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setRenewPlan(p)}
-                    className={`rounded-2xl border p-3 text-left transition-all ${
-                      active ? "border-primary bg-gradient-hero text-primary-foreground shadow-glow" : "border-border bg-surface hover:bg-surface-2"
-                    }`}
-                  >
-                    <div className="text-[11px] opacity-80">{p} {p === "1" ? "Month" : "Months"}</div>
-                    <div className="mt-1 font-display text-xl">{PRICES[p]}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <h3 className="font-display text-xl">UNVEIL Premium</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Unlimited messaging, deeper insights, and priority discovery — $15.99 / month. Cancel anytime.
+            </p>
             <Link
               to="/checkout"
-              search={{ product: "premium", plan: renewPlan } as any}
+              search={{ product: "premium" } as any}
               className="mt-5 inline-flex rounded-full bg-gradient-hero px-5 py-2.5 text-xs font-medium text-primary-foreground shadow-glow"
             >
-              Continue
+              Upgrade · $15.99/mo
             </Link>
           </div>
         )}
-
-        {/* Verified */}
-        <div className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-xl">Verified Profile</h3>
-                {profile?.verified && <VerifiedBadge size="sm" />}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {profile?.verified
-                  ? "Your blue badge is active across the platform."
-                  : profile?.badge_paid
-                  ? "Paid — complete your identity check to unlock the badge."
-                  : "Get a blue badge across profiles, chat, search, and matches."}
-              </p>
-            </div>
-            {!profile?.verified && (
-              <Link
-                to="/verify"
-                className="rounded-full bg-gradient-hero px-5 py-2.5 text-xs font-medium text-primary-foreground shadow-glow"
-              >
-                {profile?.badge_paid ? "Continue verification" : "Get verified · $9.99"}
-              </Link>
-            )}
-          </div>
-        </div>
 
         {/* Payment history */}
         <div className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7">
