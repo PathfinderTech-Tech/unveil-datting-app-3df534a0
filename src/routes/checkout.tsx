@@ -63,7 +63,9 @@ function Checkout() {
     });
   }, [navigate]);
 
-  const priceId = priceIdFor(product ?? "premium", plan ?? "3");
+  const priceId = priceIdFor(product ?? "premium", plan ?? "1");
+  const productKey = product ?? "premium";
+  const returnQp = returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : "";
   const configured = isStripeConfigured();
 
   return (
