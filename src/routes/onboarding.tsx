@@ -108,7 +108,6 @@ type Answers = Record<string, unknown>;
 function Onboarding() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const runGenerateAvatar = useServerFn(generateAvatar);
 
   const [step, setStep] = useState(1);
   const [hydrated, setHydrated] = useState(false);
@@ -140,9 +139,9 @@ function Onboarding() {
   const [dragActive, setDragActive] = useState(false);
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>("real");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  // Avatar fields kept as constants for legacy schema fields; no UI to set them.
+  const avatarStyle = "real" as const;
+  const avatarUrl: string | null = null;
 
   // Step 4
   const [bio, setBio] = useState("");
@@ -202,12 +201,11 @@ function Onboarding() {
       if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
       const sel = prof?.profile_photo_url || prof?.photo_url;
       if (sel) setPhotoUrl(sel);
-      if (prof?.avatar_url) setAvatarUrl(prof.avatar_url);
-      if (prof?.avatar_style) setAvatarStyle(prof.avatar_style as AvatarStyleId);
+      // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
 
       const a = (onb?.answers as Answers | null) ?? null;
       if (a) {
-        if (a.appearance) setAppearance(a.appearance as AppearanceMode);
+        // appearance is always "real" now — ignored from saved answers.
         if (typeof a.agree18 === "boolean") setAgree18(a.agree18);
         if (typeof a.agreeTerms === "boolean") setAgreeTerms(a.agreeTerms);
         if (typeof a.agreePrivacy === "boolean") setAgreePrivacy(a.agreePrivacy);
@@ -221,7 +219,7 @@ function Onboarding() {
         }
         if (a.discovery && typeof a.discovery === "object") setDiscovery(a.discovery as Partial<DiscoveryProfile>);
         if (a.spark && typeof a.spark === "object") setSpark(a.spark as Record<string, string>);
-        if (a.verifyChoice === "skip" || a.verifyChoice === "verify") setVerifyChoice(a.verifyChoice);
+        // verifyChoice is auto-skipped — paid verification has been retired.
       }
 
       // Resume at first incomplete step
