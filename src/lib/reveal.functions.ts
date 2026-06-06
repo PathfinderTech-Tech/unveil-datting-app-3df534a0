@@ -2,13 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const REVEAL_STAGES = [
-  { day: 1, title: "Values", subtitle: "What grounds you both" },
-  { day: 2, title: "Lifestyle", subtitle: "How you live day-to-day" },
-  { day: 3, title: "Communication style", subtitle: "How you express and listen" },
-  { day: 4, title: "Relationship goals", subtitle: "What you're building toward" },
-  { day: 5, title: "Personality & habits", subtitle: "The texture of who you are" },
-  { day: 6, title: "Future vision", subtitle: "Where your paths could meet" },
-  { day: 7, title: "Contact reveal decision", subtitle: "Unlock direct contact sharing" },
+  { day: 1, title: "Photo visible", subtitle: "See each other from day one" },
+  { day: 2, title: "Personality insights", subtitle: "How you each show up" },
+  { day: 3, title: "Voice unlock", subtitle: "Hear each other's tone" },
+  { day: 4, title: "Lifestyle compatibility", subtitle: "How you live day-to-day" },
+  { day: 5, title: "Future goals", subtitle: "What you're building toward" },
+  { day: 6, title: "Relationship expectations", subtitle: "How you want to be loved" },
+  { day: 7, title: "Phone number sharing request", subtitle: "Unlock direct contact" },
 ] as const;
 
 async function assertMatchParticipant(
