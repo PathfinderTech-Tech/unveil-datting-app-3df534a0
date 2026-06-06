@@ -1,8 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { X, Zap, Crown } from "lucide-react";
+import { X, Zap, Crown, ShieldCheck } from "lucide-react";
 
-export function MessagePaywallModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  /** Path (including query string) the user should return to after a successful purchase. */
+  returnTo?: string;
+};
+
+export function MessagePaywallModal({ open, onClose, returnTo }: Props) {
   if (!open) return null;
+  const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-glow">
@@ -15,16 +24,35 @@ export function MessagePaywallModal({ open, onClose }: { open: boolean; onClose:
         </button>
         <div className="text-center">
           <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Daily limit reached</p>
-          <h2 className="mt-2 font-display text-2xl font-light">You've reached your daily message limit.</h2>
+          <h2 className="mt-2 font-display text-2xl font-light">Keep the conversation going.</h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            Upgrade to Premium or unlock Unlimited Messaging for the next 24 hours.
+            Pick what fits — verify for daily messages, grab a 24h pass, or go Premium.
           </p>
         </div>
 
         <div className="mt-6 space-y-3">
+          {/* Verify Identity */}
           <Link
             to="/checkout"
-            search={{ product: "message_pass" } as any}
+            search={{ product: "verified", ...(rt ? { returnTo: rt } : {}) } as any}
+            className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:bg-primary/10"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="font-medium">Verify Identity</div>
+                <div className="text-xs text-muted-foreground">Verified badge · 15 messages/day · higher trust</div>
+              </div>
+            </div>
+            <div className="font-display text-lg">$9.99</div>
+          </Link>
+
+          {/* Daily Pass */}
+          <Link
+            to="/checkout"
+            search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
             className="flex items-center justify-between rounded-2xl border border-accent/40 bg-accent/10 p-4 transition-colors hover:bg-accent/15"
           >
             <div className="flex items-center gap-3">
@@ -32,16 +60,17 @@ export function MessagePaywallModal({ open, onClose }: { open: boolean; onClose:
                 <Zap className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <div className="font-medium">Daily Message Pass</div>
+                <div className="font-medium">24-Hour Conversation Pass</div>
                 <div className="text-xs text-muted-foreground">Unlimited messaging for 24 hours</div>
               </div>
             </div>
             <div className="font-display text-lg">$1.99</div>
           </Link>
 
+          {/* Premium Monthly */}
           <Link
             to="/checkout"
-            search={{ product: "premium", plan: "1" } as any}
+            search={{ product: "premium", plan: "1", ...(rt ? { returnTo: rt } : {}) } as any}
             className="flex items-center justify-between rounded-2xl bg-gradient-hero p-4 text-primary-foreground shadow-glow"
           >
             <div className="flex items-center gap-3">
@@ -50,11 +79,15 @@ export function MessagePaywallModal({ open, onClose }: { open: boolean; onClose:
               </div>
               <div>
                 <div className="font-medium">Premium Monthly</div>
-                <div className="text-xs opacity-90">Unlimited everything · cancel anytime</div>
+                <div className="text-xs opacity-90">Verified · unlimited · insights+ · priority</div>
               </div>
             </div>
             <div className="font-display text-lg">$19.99<span className="text-xs opacity-80">/mo</span></div>
           </Link>
+
+          <p className="pt-1 text-center text-[11px] text-muted-foreground">
+            Or wait until tomorrow for free messages to reset.
+          </p>
 
           <button
             onClick={onClose}

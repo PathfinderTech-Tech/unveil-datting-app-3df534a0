@@ -7,14 +7,21 @@ import { isStripeConfigured } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, ArrowLeft } from "lucide-react";
 
-type Search = { product?: "premium" | "verified" | "message_pass"; plan?: "1" | "3" | "6" | "12" };
+type Search = {
+  product?: "premium" | "verified" | "message_pass";
+  plan?: "1" | "3" | "6" | "12";
+  returnTo?: string;
+};
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),
-  validateSearch: (s: Record<string, unknown>): Search => ({
-    product: (s.product as Search["product"]) ?? "premium",
-    plan: (s.plan as Search["plan"]) ?? "3",
-  }),
+  validateSearch: (s: Record<string, unknown>): Search => {
+    const product = (s.product as Search["product"]) ?? "premium";
+    // For one-off products we don't need a plan; default subscription plan = monthly ($19.99).
+    const plan = (s.plan as Search["plan"]) ?? "1";
+    const rt = typeof s.returnTo === "string" && s.returnTo.startsWith("/") ? s.returnTo : undefined;
+    return { product, plan, returnTo: rt };
+  },
   component: Checkout,
 });
 
@@ -38,7 +45,7 @@ function priceIdFor(product: string, plan: string): string {
 }
 
 function Checkout() {
-  const { product, plan } = useSearch({ from: "/checkout" }) as Search;
+  const { product, plan, returnTo } = useSearch({ from: "/checkout" }) as Search;
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | undefined>();
   const [email, setEmail] = useState<string | undefined>();
@@ -56,7 +63,9 @@ function Checkout() {
     });
   }, [navigate]);
 
-  const priceId = priceIdFor(product ?? "premium", plan ?? "3");
+  const priceId = priceIdFor(product ?? "premium", plan ?? "1");
+  const productKey = product ?? "premium";
+  const returnQp = returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : "";
   const configured = isStripeConfigured();
 
   return (
@@ -87,7 +96,7 @@ function Checkout() {
               priceId={priceId}
               customerEmail={email}
               userId={userId}
-              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&product=${productKey}${returnQp}`}
             />
           )}
         </div>
