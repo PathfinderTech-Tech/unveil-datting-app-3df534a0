@@ -1,6 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import {
@@ -9,11 +8,9 @@ import {
 } from "@/lib/synapse-store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { generateAvatar } from "@/lib/avatar.functions";
 import {
   Camera, ArrowRight, ArrowLeft, Check, Sparkles, Upload, Loader2, X,
-  Wand2, RefreshCw, ShieldCheck, Eye, Lock, Save, MapPin, Languages,
-  Briefcase, Heart,
+  ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,20 +39,8 @@ const INTENTS = [
   { id: "exploring", label: "Just exploring" },
 ];
 
-const APPEARANCE_MODES = [
-  { id: "real",    label: "Real Photo",            hint: "Show the actual you." },
-  { id: "avatar",  label: "Avatar First",          hint: "Generated avatar publicly, selfie stays private." },
-  { id: "private", label: "Verified but Private",  hint: "Silhouette avatar — identity revealed only on match." },
-] as const;
-type AppearanceMode = (typeof APPEARANCE_MODES)[number]["id"];
-
-const AVATAR_STYLES = [
-  { id: "anime",      label: "Anime Avatar" },
-  { id: "stylized",   label: "Stylized Avatar" },
-  { id: "realistic",  label: "Realistic AI Portrait" },
-  { id: "mystery",    label: "Mystery Avatar" },
-] as const;
-type AvatarStyleId = "real" | (typeof AVATAR_STYLES)[number]["id"];
+// Photo Studio is the only profile-photo flow. No avatar modes, no AI styles.
+type AppearanceMode = "real";
 
 const INTERESTS = [
   "Travel","Music","Books","Movies","Fitness","Yoga","Cooking","Foodie","Coffee","Wine",
@@ -105,15 +90,15 @@ const SPARK_PROMPTS = [
 ];
 
 const STEPS = [
-  { id: 1, label: "Welcome",               minutes: 1 },
-  { id: 2, label: "Identity Basics",       minutes: 2 },
-  { id: 3, label: "Public Appearance",     minutes: 2 },
-  { id: 4, label: "Profile Essentials",    minutes: 3 },
-  { id: 5, label: "Compatibility",         minutes: 3 },
-  { id: 6, label: "Personality & Spark",   minutes: 3 },
-  { id: 7, label: "Safety & Verification", minutes: 1 },
-  { id: 8, label: "Profile Preview",       minutes: 1 },
-  { id: 9, label: "Complete",              minutes: 0 },
+  { id: 1, label: "Welcome",              minutes: 1 },
+  { id: 2, label: "Identity Basics",      minutes: 2 },
+  { id: 3, label: "Profile Photo Studio", minutes: 2 },
+  { id: 4, label: "Profile Essentials",   minutes: 3 },
+  { id: 5, label: "Compatibility",        minutes: 3 },
+  { id: 6, label: "Personality & Spark",  minutes: 3 },
+  { id: 7, label: "Safety Basics",        minutes: 1 },
+  { id: 8, label: "Profile Preview",      minutes: 1 },
+  { id: 9, label: "Complete",             minutes: 0 },
 ] as const;
 
 const TOTAL = STEPS.length;
@@ -123,7 +108,6 @@ type Answers = Record<string, unknown>;
 function Onboarding() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const runGenerateAvatar = useServerFn(generateAvatar);
 
   const [step, setStep] = useState(1);
   const [hydrated, setHydrated] = useState(false);
@@ -148,16 +132,16 @@ function Onboarding() {
   const [intent, setIntent] = useState("");
   const [email, setEmail] = useState("");
 
-  // Step 3
-  const [appearance, setAppearance] = useState<AppearanceMode>("real");
+  // Photo Studio is the only flow; appearance is fixed to "real".
+  const appearance: AppearanceMode = "real";
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>("real");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  // Avatar fields kept as constants for legacy schema fields; no UI to set them.
+  const avatarStyle = "real" as const;
+  const avatarUrl: string | null = null;
 
   // Step 4
   const [bio, setBio] = useState("");
@@ -177,7 +161,8 @@ function Onboarding() {
   const [spark, setSpark] = useState<Record<string, string>>({});
 
   // Step 7
-  const [verifyChoice, setVerifyChoice] = useState<"skip" | "verify" | null>(null);
+  // Paid verification removed — auto-skip step 7.
+  const verifyChoice = "skip" as const;
 
   const allDiscoveryAnswered = DISCOVERY_QUESTIONS.every((q) => discovery[q.key]);
   const character = allDiscoveryAnswered
@@ -217,12 +202,11 @@ function Onboarding() {
       if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
       const sel = prof?.profile_photo_url || prof?.photo_url;
       if (sel) setPhotoUrl(sel);
-      if (prof?.avatar_url) setAvatarUrl(prof.avatar_url);
-      if (prof?.avatar_style) setAvatarStyle(prof.avatar_style as AvatarStyleId);
+      // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
 
       const a = (onb?.answers as Answers | null) ?? null;
       if (a) {
-        if (a.appearance) setAppearance(a.appearance as AppearanceMode);
+        // appearance is always "real" now — ignored from saved answers.
         if (typeof a.agree18 === "boolean") setAgree18(a.agree18);
         if (typeof a.agreeTerms === "boolean") setAgreeTerms(a.agreeTerms);
         if (typeof a.agreePrivacy === "boolean") setAgreePrivacy(a.agreePrivacy);
@@ -236,7 +220,7 @@ function Onboarding() {
         }
         if (a.discovery && typeof a.discovery === "object") setDiscovery(a.discovery as Partial<DiscoveryProfile>);
         if (a.spark && typeof a.spark === "object") setSpark(a.spark as Record<string, string>);
-        if (a.verifyChoice === "skip" || a.verifyChoice === "verify") setVerifyChoice(a.verifyChoice);
+        // verifyChoice is auto-skipped — paid verification has been retired.
       }
 
       // Resume at first incomplete step
@@ -251,14 +235,11 @@ function Onboarding() {
         interestedIn: prof?.interested_in ?? "",
         intent: (prof?.relationship_intent || prof?.intention) ?? "",
         email: user.email ?? "",
-        appearance: (a?.appearance as AppearanceMode) ?? "real",
         photoUrl: sel ?? null,
-        avatarUrl: prof?.avatar_url ?? null,
         bio: prof?.bio ?? "",
         interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
         compat: { ...({} as Record<CompatKey, string>), ...((a?.compat as Record<CompatKey, string>) ?? {}) },
         discovery: (a?.discovery as Partial<DiscoveryProfile>) ?? {},
-        verifyChoice: (a?.verifyChoice as "skip" | "verify" | null) ?? null,
       });
       setStep(next);
       setResumed(next > 1);
@@ -387,41 +368,22 @@ function Onboarding() {
     }
   }
 
-  async function handleGenerateAvatar() {
-    if (!photoUrl) { toast.error("Add a selfie first."); return; }
-    const style = (avatarStyle === "real" ? "stylized" : avatarStyle) as Exclude<AvatarStyleId, "real">;
-    setAvatarStyle(style);
-    setGeneratingAvatar(true);
-    try {
-      const res = await runGenerateAvatar({ data: { style, selfieUrl: photoUrl } });
-      setAvatarUrl(res.avatarUrl);
-      if (res.fallback && res.message) toast.message(res.message);
-      else toast.success("Your avatar is ready.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not generate avatar");
-    } finally {
-      setGeneratingAvatar(false);
-    }
-  }
+  // AI avatar generation removed — Photo Studio is the only profile photo flow.
 
   // ---------- Validation per step ----------
   const canNext = useMemo(() => {
     switch (step) {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
       case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
-      case 3: {
-        if (appearance === "real") return !!photoUrl;
-        if (appearance === "avatar") return !!avatarUrl;
-        return true; // private — no upload required
-      }
+      case 3: return !!photoUrl;
       case 4: return bio.trim().length >= 20 && interests.length >= 3;
       case 5: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
       case 6: return allDiscoveryAnswered;
-      case 7: return verifyChoice !== null;
+      case 7: return true;
       case 8: return true;
       default: return true;
     }
-  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, appearance, photoUrl, avatarUrl, bio, interests, compat, allDiscoveryAnswered, verifyChoice]);
+  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
 
   // ---------- Render ----------
   if (authLoading || (user && !hydrated)) {
@@ -553,122 +515,68 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 3: Public appearance ---------- */}
+        {/* ---------- STEP 3: Profile Photo Studio ---------- */}
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">How would you like to appear?</h1>
-              <p className="mt-2 text-muted-foreground">Pick a discovery mode — you can change this anytime in settings.</p>
+              <h1 className="font-display text-4xl font-bold">Profile Photo Studio</h1>
+              <p className="mt-2 text-muted-foreground">
+                Take a selfie or upload a photo. Real profile photo shows from Day 1 — no AI avatars.
+              </p>
             </div>
 
-            {/* Discovery mode binary selector (Avatar / Photo) */}
-            <div className="grid gap-3 md:grid-cols-2">
-              {[
-                { id: "avatar" as const, title: "Avatar Mode", hint: "Show a generated avatar publicly. Your real selfie stays private until a mutual reveal." },
-                { id: "photo"  as const, title: "Photo Mode",  hint: "Show your real photo on your profile from the start." },
-              ].map((m) => {
-                const derived: "avatar" | "photo" = appearance === "real" ? "photo" : "avatar";
-                const active = derived === m.id;
-                return (
-                  <button key={m.id} type="button"
-                    onClick={() => setAppearance(m.id === "photo" ? "real" : "avatar")}
-                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
-                    <div className="font-display text-base font-semibold">{m.title}</div>
-                    <div className="text-xs text-muted-foreground">{m.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => { e.preventDefault(); setDragActive(false); const f = e.dataTransfer.files?.[0]; if (f) handlePhotoFile(f); }}
+              className={`flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed p-8 transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+            >
+              <input ref={selfieInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
+              <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
 
-            <div className="grid gap-3 md:grid-cols-3">
-              {APPEARANCE_MODES.map((m) => {
-                const active = appearance === m.id;
-                return (
-                  <button key={m.id} type="button" onClick={() => setAppearance(m.id)}
-                    className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-surface hover:border-foreground/30"}`}>
-                    <div className="font-display text-sm font-medium">{m.label}</div>
-                    <div className="text-xs text-muted-foreground">{m.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Selfie upload — needed for real & avatar; private for avatar */}
-            {(appearance === "real" || appearance === "avatar") && (
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                onDragLeave={() => setDragActive(false)}
-                onDrop={(e) => { e.preventDefault(); setDragActive(false); const f = e.dataTransfer.files?.[0]; if (f) handlePhotoFile(f); }}
-                className={`flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed p-8 transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-border bg-card"}`}
-              >
-                <input ref={selfieInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
-                <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoFile(f); }} />
-
-                <div className="relative h-32 w-32 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
-                  {(appearance === "avatar" && avatarUrl) ? (
-                    <SignedImage src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
-                  ) : photoUrl ? (
-                    <SignedImage src={photoUrl} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>
-                  )}
-                  {photoUploading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
-                      <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button type="button" onClick={() => selfieInputRef.current?.click()} disabled={photoUploading}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50">
-                    <Camera className="h-4 w-4" /> {photoUrl ? "Retake" : "Take selfie"}
-                  </button>
-                  <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={photoUploading}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-foreground/30 disabled:opacity-50">
-                    <Upload className="h-4 w-4" /> Upload
-                  </button>
-                </div>
-
-                {appearance === "avatar" && (
-                  <div className="w-full">
-                    <div className="mt-2 mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Pick an avatar style</div>
-                    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                      {AVATAR_STYLES.map((s) => {
-                        const active = avatarStyle === s.id;
-                        return (
-                          <button key={s.id} type="button" onClick={() => setAvatarStyle(s.id)}
-                            className={`rounded-2xl border p-3 text-left text-xs transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-foreground/30"}`}>
-                            <div className="font-display font-medium">{s.label}</div>
-                            {active && <Check className="mt-1 h-3 w-3 text-primary" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button type="button" onClick={handleGenerateAvatar} disabled={generatingAvatar || !photoUrl}
-                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50">
-                      {generatingAvatar
-                        ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Generating…</>
-                        : avatarUrl
-                          ? <><RefreshCw className="h-3.5 w-3.5" /> Regenerate avatar</>
-                          : <><Wand2 className="h-3.5 w-3.5" /> Generate avatar</>}
-                    </button>
-                    {avatarUrl && (
-                      <p className="mt-2 text-[11px] text-muted-foreground">Selfie stays private. Your avatar is what others see.</p>
-                    )}
+              <div className="relative h-32 w-32 overflow-hidden rounded-full bg-gradient-face shadow-glow ring-2 ring-primary/30">
+                {photoUrl ? (
+                  <SignedImage src={photoUrl} alt="Selfie" className="h-full w-full object-cover" fallback={<div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>} />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center"><Camera className="h-12 w-12 text-primary-foreground/90" /></div>
+                )}
+                {photoUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
                   </div>
                 )}
               </div>
-            )}
 
-            {appearance === "private" && (
-              <div className="rounded-2xl border border-border bg-card p-5 text-sm">
-                <div className="mb-1 flex items-center gap-2 font-display text-base"><Lock className="h-4 w-4" /> Verified but Private</div>
-                <p className="text-muted-foreground">You'll appear as a silhouette across the app. Your identity is revealed only after a mutual match. You can switch this off later.</p>
+              {photoUrl && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-mono uppercase tracking-luxury text-primary">
+                  <ShieldCheck className="h-3 w-3" /> Selfie Checked
+                </span>
+              )}
+
+              <div className="flex flex-wrap justify-center gap-2">
+                <button type="button" onClick={() => selfieInputRef.current?.click()} disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50">
+                  <Camera className="h-4 w-4" /> {photoUrl ? "Retake" : "Take selfie"}
+                </button>
+                <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={photoUploading}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-foreground/30 disabled:opacity-50">
+                  <Upload className="h-4 w-4" /> Upload photo
+                </button>
+                {photoUrl && (
+                  <Link to="/avatar"
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/15">
+                    <Wand2 className="h-4 w-4" /> Open Photo Studio
+                  </Link>
+                )}
               </div>
-            )}
+
+              <p className="text-center text-[11px] text-muted-foreground">
+                Edit brightness, warmth, glow, and skin-smoothing in the Photo Studio. Filters: Natural · Glow · Confident · Elegant · Radiant.
+              </p>
+            </div>
           </div>
         )}
+
 
         {/* ---------- STEP 4: Profile essentials ---------- */}
         {step === 4 && (
@@ -824,22 +732,18 @@ function Onboarding() {
         {step === 7 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Safety & verification.</h1>
-              <p className="mt-2 text-muted-foreground">Verified profiles attract better matches and signal trust. You can verify later — beta members can skip for now.</p>
+              <h1 className="font-display text-4xl font-bold">Safety basics.</h1>
+              <p className="mt-2 text-muted-foreground">
+                Your selfie acts as your trust check. There's no paid verification — every profile starts with the same 15 daily messages.
+              </p>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <button type="button" onClick={() => setVerifyChoice("verify")}
-                className={`flex flex-col items-start gap-2 rounded-3xl border p-5 text-left transition-all ${verifyChoice === "verify" ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-card hover:border-foreground/30"}`}>
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <div className="font-display text-base font-medium">Get verified now</div>
-                <div className="text-xs text-muted-foreground">Submit a quick ID + selfie. We'll open the verification flow after onboarding.</div>
-              </button>
-              <button type="button" onClick={() => setVerifyChoice("skip")}
-                className={`flex flex-col items-start gap-2 rounded-3xl border p-5 text-left transition-all ${verifyChoice === "skip" ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-card hover:border-foreground/30"}`}>
-                <Eye className="h-6 w-6 text-muted-foreground" />
-                <div className="font-display text-base font-medium">Skip for beta</div>
-                <div className="text-xs text-muted-foreground">Available during beta. You can verify anytime from Settings.</div>
-              </button>
+            <div className="rounded-3xl border border-primary/30 bg-primary/5 p-5 text-sm">
+              <div className="mb-2 flex items-center gap-2 font-display text-base">
+                <ShieldCheck className="h-4 w-4 text-primary" /> Selfie Checked
+              </div>
+              <p className="text-muted-foreground">
+                Profiles with a real selfie display a Selfie Checked badge so other members know it's really you.
+              </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 text-sm">
               <div className="mb-1 font-display text-base">Safety basics</div>
@@ -852,6 +756,7 @@ function Onboarding() {
           </div>
         )}
 
+
         {/* ---------- STEP 8: Profile preview ---------- */}
         {step === 8 && (
           <div className="space-y-6">
@@ -862,10 +767,10 @@ function Onboarding() {
             <ProfilePreview
               name={name} age={age} city={city} country={country}
               bio={bio} interests={interests}
-              appearance={appearance}
-              avatarUrl={avatarUrl} photoUrl={photoUrl}
-              intent={intent} verified={verifyChoice === "verify"}
+              photoUrl={photoUrl}
+              intent={intent} verified={!!photoUrl}
             />
+
             <div className="text-center text-xs text-muted-foreground">
               Want to change something? Use Back to edit any previous step.
             </div>
@@ -929,20 +834,17 @@ function Onboarding() {
 function computeResumeStep(s: {
   agree18: boolean; agreeTerms: boolean; agreePrivacy: boolean; agreeCommunity: boolean;
   name: string; gender: string; country: string; interestedIn: string; intent: string; email: string;
-  appearance: AppearanceMode; photoUrl: string | null; avatarUrl: string | null;
+  photoUrl: string | null;
   bio: string; interests: string[];
   compat: Record<CompatKey, string>;
   discovery: Partial<DiscoveryProfile>;
-  verifyChoice: "skip" | "verify" | null;
 }): number {
   if (!(s.agree18 && s.agreeTerms && s.agreePrivacy && s.agreeCommunity)) return 1;
   if (!(s.name.length > 1 && s.gender && s.country && s.interestedIn && s.intent && /\S+@\S+\.\S+/.test(s.email))) return 2;
-  if (s.appearance === "real" && !s.photoUrl) return 3;
-  if (s.appearance === "avatar" && !s.avatarUrl) return 3;
+  if (!s.photoUrl) return 3;
   if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 4;
   if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 5;
   if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 6;
-  if (s.verifyChoice === null) return 7;
   return 8;
 }
 
@@ -971,15 +873,10 @@ function Agree({ v, onChange, label }: { v: boolean; onChange: (b: boolean) => v
 function ProfilePreview(props: {
   name: string; age: number; city: string; country: string;
   bio: string; interests: string[];
-  appearance: AppearanceMode;
-  avatarUrl: string | null; photoUrl: string | null;
+  photoUrl: string | null;
   intent: string; verified: boolean;
 }) {
-  const display = props.appearance === "avatar"
-    ? props.avatarUrl
-    : props.appearance === "private"
-      ? null
-      : props.photoUrl;
+  const display = props.photoUrl;
   const intentLabel = INTENTS.find((i) => i.id === props.intent)?.label ?? props.intent;
   return (
     <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-glow">
@@ -993,12 +890,7 @@ function ProfilePreview(props: {
         )}
         {props.verified && (
           <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-primary backdrop-blur">
-            <ShieldCheck className="h-3 w-3" /> Verified
-          </div>
-        )}
-        {props.appearance === "private" && (
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground backdrop-blur">
-            <Lock className="h-3 w-3" /> Private until match
+            <ShieldCheck className="h-3 w-3" /> Selfie Checked
           </div>
         )}
       </div>

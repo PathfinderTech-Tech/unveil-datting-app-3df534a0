@@ -14,7 +14,6 @@ export function SafetyReminder({ compact = false }: { compact?: boolean }) {
           {!compact && (
             <div className="mt-2 flex flex-wrap gap-3 text-xs">
               <Link to="/safety" className="text-amber-400 underline">Safety center</Link>
-              <Link to="/verify" className="text-amber-400 underline">Verify your profile</Link>
             </div>
           )}
         </div>

@@ -42,7 +42,6 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
     label: "Account",
     items: [
       { to: "/premium", label: "Membership" },
-      { to: "/verify", label: "Verification" },
       { to: "/contact-share", label: "Share & Invite" },
       { to: "/settings", label: "Settings" },
     ],

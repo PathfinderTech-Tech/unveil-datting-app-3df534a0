@@ -38,14 +38,13 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
-// Maps human-readable price IDs to "kind" + premium duration days (one-time premium only).
+// Allowed price IDs for the beta launch. Any other ID is rejected at the
+// server boundary so legacy paths (verified_badge_onetime, premium_quarterly,
+// premium_semiannual, premium_yearly) cannot be reached even via a crafted URL.
 const PRICE_META: Record<string, { kind: string; durationDays?: number; durationHours?: number }> = {
-  verified_badge_onetime: { kind: "verification_badge" },
   premium_monthly: { kind: "premium_subscription" },
-  premium_yearly: { kind: "premium_subscription" },
-  premium_quarterly: { kind: "premium_one_time", durationDays: 90 },
-  premium_semiannual: { kind: "premium_one_time", durationDays: 180 },
   message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
+  contact_reveal: { kind: "contact_reveal" },
 };
 
 const ALLOWED_RETURN_HOSTS = new Set([
@@ -81,6 +80,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     environment: StripeEnv;
   }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
+    if (!PRICE_META[data.priceId]) throw new Error("This product is no longer available.");
     if (data.customerEmail && data.customerEmail.length > 254) throw new Error("Invalid email");
     data.returnUrl = validateReturnUrl(data.returnUrl);
     return data;

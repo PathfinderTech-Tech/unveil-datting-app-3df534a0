@@ -17,7 +17,6 @@ const PRODUCT = [
   { to: "/discover", label: "Discover" },
   { to: "/matches", label: "Matches" },
   { to: "/premium", label: "Membership" },
-  { to: "/verify", label: "Get Verified" },
   { to: "/passport", label: "Passport" },
 ] as const;
 
