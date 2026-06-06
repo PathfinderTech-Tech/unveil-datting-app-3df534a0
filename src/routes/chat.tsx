@@ -3,14 +3,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX, Check, CheckCheck, Sparkles, RefreshCw } from "lucide-react";
+import {
+  MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
+  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft, ChevronDown,
+  Heart, Lock as LockIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
+import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-
+import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -30,10 +36,19 @@ export const Route = createFileRoute("/chat")({
 type Conv = { id: string; user_a: string; user_b: string; last_message_at: string | null };
 type Msg = { id: string; sender_id: string; content: string; created_at: string; delivered_at?: string | null };
 type Reaction = { message_id: string; user_id: string; emoji: string };
+type PeerProfile = {
+  id: string;
+  first_name: string | null;
+  avatar_url: string | null;
+  photo_url: string | null;
+  discovery_mode: "avatar" | "photo" | null;
+  verified: boolean | null;
+  last_seen_at: string | null;
+};
+type Compat = Awaited<ReturnType<typeof loadCompatibility>>;
 
 const QUICK_EMOJI = ["❤️", "😂", "🔥", "👍", "🥺", "🎉"];
 
-// Mirror of server-side enforce_contact_sharing regex so we can warn the user BEFORE they hit send.
 const PII_PATTERNS: RegExp[] = [
   /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i,
   /(?:\+?\d[\s().-]*){7,}\d/,
@@ -42,19 +57,34 @@ const PII_PATTERNS: RegExp[] = [
   /(^|\s)@[A-Za-z0-9._]{3,}/,
   /(wa\.me\/|t\.me\/|instagram\.com\/|fb\.com\/|facebook\.com\/|snapchat\.com\/)/i,
 ];
-function looksLikeContactShare(s: string): boolean {
-  return PII_PATTERNS.some((re) => re.test(s));
+const looksLikeContactShare = (s: string) => PII_PATTERNS.some((re) => re.test(s));
+
+function timeAgo(iso: string | null): string {
+  if (!iso) return "—";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 60_000) return "just now";
+  const m = Math.floor(ms / 60_000);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}d`;
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-// PII detection/blocking now lives server-side in the enforce_contact_sharing trigger.
-// Messages with phone/email/social handles are rejected with CONTACT_SHARING_LOCKED
-// unless the pair has cleared the trust milestones.
+function daysSince(iso: string): number {
+  const ms = Date.now() - new Date(iso).getTime();
+  return Math.max(1, Math.min(7, Math.floor(ms / 86_400_000) + 1));
+}
 
 function Chat() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { c: wantId } = Route.useSearch();
   const [convs, setConvs] = useState<Conv[]>([]);
+  const [peers, setPeers] = useState<Record<string, PeerProfile>>({});
+  const [convCompat, setConvCompat] = useState<Record<string, number>>({});
+  const [convLastMsg, setConvLastMsg] = useState<Record<string, string>>({});
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
@@ -68,48 +98,97 @@ function Chat() {
   const [ideaCategory, setIdeaCategory] = useState<IcebreakerCategory | undefined>(undefined);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
+  const [scaffoldOpen, setScaffoldOpen] = useState(false);
+  const [compatOpen, setCompatOpen] = useState(true);
+  const [revealOpen, setRevealOpen] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
-  const [chatGate, setChatGate] = useState<{ enabled: boolean; placeholder?: string }>({ enabled: true });
-  const [peerName, setPeerName] = useState<string>("them");
-  const [peerProfile, setPeerProfile] = useState<{ avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null } | null>(null);
+  const [compat, setCompat] = useState<Compat | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
-  // Messaging entitlement: DB trigger enforce_message_quota is the sole source of truth.
-  // Free=5/day, Verified=15/day, Daily Pass / Premium=unlimited. No client-side verification gate.
+
   const draftLooksLikeContact = useMemo(() => looksLikeContactShare(draft), [draft]);
   const showContactWarning = draftLooksLikeContact && !contactShareUnlocked;
 
-
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
 
+  // Load conversations + peer profiles + last messages + per-conv compatibility
   useEffect(() => {
     if (!user) return;
-    supabase.from("conversations").select("*").order("last_message_at", { ascending: false })
-      .then(({ data }) => {
-        const list = data ?? [];
-        setConvs(list);
-        if (wantId && !active) {
-          const found = list.find((c) => c.id === wantId);
-          if (found) setActive(found);
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("conversations")
+        .select("*")
+        .order("last_message_at", { ascending: false });
+      const list = (data ?? []) as Conv[];
+      if (!alive) return;
+      setConvs(list);
+      if (wantId && !active) {
+        const found = list.find((c) => c.id === wantId);
+        if (found) setActive(found);
+      }
+      const peerIds = list.map((c) => (c.user_a === user.id ? c.user_b : c.user_a));
+      const convIds = list.map((c) => c.id);
+      if (peerIds.length) {
+        const [{ data: profs }, { data: lastMsgs }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, last_seen_at")
+            .in("id", peerIds),
+          supabase
+            .from("messages")
+            .select("conversation_id, content, created_at")
+            .in("conversation_id", convIds)
+            .order("created_at", { ascending: false }),
+        ]);
+        if (!alive) return;
+        const pmap: Record<string, PeerProfile> = {};
+        for (const p of (profs ?? []) as PeerProfile[]) pmap[p.id] = p;
+        setPeers(pmap);
+        const last: Record<string, string> = {};
+        for (const m of (lastMsgs ?? []) as { conversation_id: string; content: string }[]) {
+          if (!last[m.conversation_id]) last[m.conversation_id] = m.content;
         }
-      });
-  }, [user, wantId, active]);
+        setConvLastMsg(last);
+
+        // Per-conversation compatibility (best-effort, ignore failures)
+        const compatEntries = await Promise.all(
+          list.map(async (c) => {
+            const peer = c.user_a === user.id ? c.user_b : c.user_a;
+            try {
+              const row = await loadCompatibility(peer);
+              return [c.id, row?.overall ?? 0] as const;
+            } catch { return [c.id, 0] as const; }
+          })
+        );
+        if (!alive) return;
+        const cmap: Record<string, number> = {};
+        for (const [cid, n] of compatEntries) if (n) cmap[cid] = n;
+        setConvCompat(cmap);
+      }
+    })();
+    return () => { alive = false; };
+  }, [user, wantId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const peerId = useMemo(() => {
     if (!active || !user) return null;
     return active.user_a === user.id ? active.user_b : active.user_a;
   }, [active, user]);
 
-  // Look up the mutual match for this conversation so we can run the Day 1–4 scaffold.
+  const peer = peerId ? peers[peerId] : null;
+  const peerName = peer?.first_name ?? "Match";
+
+  // Match info + compatibility for the active conversation
   useEffect(() => {
-    if (!user || !peerId) { setMatchInfo(null); return; }
+    if (!user || !peerId) { setMatchInfo(null); setCompat(null); return; }
     let alive = true;
     (async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id, created_at, mutual_interest, user_id, matched_user_id")
+        .select("id, created_at")
         .or(`and(user_id.eq.${user.id},matched_user_id.eq.${peerId}),and(user_id.eq.${peerId},matched_user_id.eq.${user.id})`)
         .eq("mutual_interest", true)
         .order("created_at", { ascending: true })
@@ -118,21 +197,18 @@ function Chat() {
       const row = data?.[0];
       setMatchInfo(row ? { id: row.id, created_at: row.created_at } : null);
 
-      const { data: prof } = await supabase.from("profiles").select("first_name, avatar_url, photo_url, discovery_mode").eq("id", peerId).maybeSingle();
+      const c = await loadCompatibility(peerId);
       if (!alive) return;
-      setPeerName(prof?.first_name ?? "them");
-      setPeerProfile(prof ? { avatar_url: prof.avatar_url, photo_url: prof.photo_url, discovery_mode: (prof.discovery_mode as "avatar" | "photo" | null) ?? null } : null);
+      setCompat(c);
 
-      // Check whether this pair has unlocked contact sharing (verified + mutual + Day 7 or premium).
       const { data: canShare } = await (supabase as any).rpc("can_share_contacts", { _a: user.id, _b: peerId });
       if (!alive) return;
       setContactShareUnlocked(!!canShare);
     })();
-
     return () => { alive = false; };
   }, [user, peerId]);
 
-  // Load messages + reactions + reads when conversation opens
+  // Load + subscribe messages for active conversation
   useEffect(() => {
     if (!active || !user) return;
     let alive = true;
@@ -141,7 +217,6 @@ function Chat() {
       if (!alive) return;
       const messages = (m ?? []) as Msg[];
       setMsgs(messages);
-
       const ids = messages.map((x) => x.id);
       if (ids.length) {
         const sb = supabase as unknown as { from: (t: string) => any };
@@ -156,8 +231,6 @@ function Chat() {
           (map[row.message_id] ??= []).push(row.user_id);
         }
         setReads(map);
-
-        // Mark peer's messages as read
         const unread = messages.filter((x) => x.sender_id !== user.id && !(map[x.id] ?? []).includes(user.id));
         if (unread.length) {
           await sb.from("message_reads").insert(unread.map((x) => ({ message_id: x.id, user_id: user.id })));
@@ -190,30 +263,26 @@ function Chat() {
     return () => { alive = false; supabase.removeChannel(ch); };
   }, [active, user]);
 
-  // Decay typing indicator
   useEffect(() => {
     if (!typingPeer) return;
     const t = setTimeout(() => setTypingPeer(false), 4000);
     return () => clearTimeout(t);
   }, [typingPeer]);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [msgs.length, typingPeer]);
+
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
-    if (!quota.unlimited && quota.remaining <= 0) {
-      setPaywallOpen(true);
-      return;
-    }
+    if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
     const content = draft.trim();
     setDraft("");
     const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: user.id, content });
     if (error) {
-      if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
-        setPaywallOpen(true);
-        await refreshQuota();
-        return;
-      }
+      if (error.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) { setPaywallOpen(true); await refreshQuota(); return; }
       if (error.message?.includes("CONTACT_SHARING_LOCKED")) {
-        setDraft(content); // restore so user can edit
+        setDraft(content);
         toast.error("Contact sharing unlocks after trust milestones have been completed.");
         return;
       }
@@ -241,11 +310,8 @@ function Chat() {
     if (!user) return;
     const sb = supabase as unknown as { from: (t: string) => any };
     const existing = reactions.find((r) => r.message_id === messageId && r.user_id === user.id && r.emoji === emoji);
-    if (existing) {
-      await sb.from("message_reactions").delete().eq("message_id", messageId).eq("user_id", user.id).eq("emoji", emoji);
-    } else {
-      await sb.from("message_reactions").insert({ message_id: messageId, user_id: user.id, emoji });
-    }
+    if (existing) await sb.from("message_reactions").delete().eq("message_id", messageId).eq("user_id", user.id).eq("emoji", emoji);
+    else await sb.from("message_reactions").insert({ message_id: messageId, user_id: user.id, emoji });
     setPickerFor(null);
   };
 
@@ -254,12 +320,12 @@ function Chat() {
     const reason = window.prompt("Report reason?");
     if (!reason) return;
     await supabase.from("reports").insert({ reporter_id: user.id, reported_user_id: peerId, reason });
-    toast.success("Report submitted. Our team will review it.");
+    toast.success("Report submitted.");
     setShowMenu(false);
   };
   const blockPeer = async () => {
     if (!peerId || !user) return;
-    if (!confirm("Block this person? You won't see each other.")) return;
+    if (!confirm("Block this person?")) return;
     await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: peerId });
     toast.success("Blocked.");
     setActive(null);
@@ -274,10 +340,6 @@ function Chat() {
     setActive(null);
     setShowMenu(false);
   };
-
-  if (loading || !user) {
-    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
-  }
 
   const fetchIcebreakers = async (category?: IcebreakerCategory) => {
     if (!peerId) return;
@@ -296,183 +358,374 @@ function Chat() {
     }
   };
 
+  if (loading || !user) {
+    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
+  }
 
+  const dayN = matchInfo ? daysSince(matchInfo.created_at) : null;
+  const overallScore = compat?.overall ?? null;
+  const band = overallScore != null ? bandLabel(overallScore) : null;
+  const metrics = compat
+    ? [
+        { label: "Values", value: compat.values_score ?? 0 },
+        { label: "Lifestyle", value: compat.lifestyle ?? 0 },
+        { label: "Communication", value: compat.communication ?? 0 },
+        { label: "Future Goals", value: compat.goals ?? 0 },
+      ]
+    : [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <UnveilNav />
       <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
-      <div className="mx-auto grid max-w-6xl gap-4 px-6 py-10 md:grid-cols-[320px_1fr]">
-        {!quota.loading && !quota.unlimited && (
-          <div className="md:col-span-2 -mb-2 rounded-2xl border border-border bg-surface/60 px-4 py-2 text-xs text-muted-foreground">
-            {quota.remaining} of {quota.dailyLimit} free messages remaining today.
-            {" "}
-            <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline">Unlock 24h pass for $1.99</Link>
-            {" · "}
-            <Link to="/premium" className="text-primary underline">Go Premium</Link>
+
+      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-4 lg:px-6 lg:py-4">
+        {/* ============ SIDEBAR / MATCH LIST ============ */}
+        <aside
+          className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[340px] shrink-0 flex-col border-r border-border bg-card/40 backdrop-blur-xl lg:rounded-3xl lg:border lg:bg-card/60`}
+          style={{ height: "calc(100vh - 64px)" }}
+        >
+          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+            <div>
+              <h1 className="font-display text-xl font-light tracking-tight">Messages</h1>
+              <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                {convs.length} {convs.length === 1 ? "match" : "matches"}
+              </p>
+            </div>
+            <Link to="/matches" className="rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow">
+              <Heart className="h-4 w-4" />
+            </Link>
           </div>
-        )}
-        {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
-          <div className="md:col-span-2 -mb-2 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent">
-            Unlimited messaging active · {formatRemainingTime(quota.messagePassUntil)} remaining on your Daily Pass.
-          </div>
-        )}
-        <aside className="rounded-3xl border border-border bg-card p-4">
-          <div className="mb-3 font-mono text-xs uppercase tracking-luxury text-muted-foreground">Open threads</div>
-          {convs.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No conversations yet. Find someone in <Link to="/matches" className="text-primary">your band</Link>.
+
+          {!quota.loading && !quota.unlimited && (
+            <div className="border-b border-border/60 px-4 py-2 text-[11px] text-muted-foreground">
+              {quota.remaining}/{quota.dailyLimit} messages today ·{" "}
+              <Link to="/checkout" search={{ product: "message_pass" } as any} className="text-accent underline">Unlock</Link>
             </div>
           )}
-          <div className="space-y-1">
-            {convs.map((c) => (
-              <button key={c.id} onClick={() => setActive(c)}
-                className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left text-sm transition-colors ${active?.id === c.id ? "bg-primary/15" : "hover:bg-surface"}`}>
-                <MessageCircle className="h-4 w-4 text-accent" />
-                <span className="truncate">Thread · {c.id.slice(0, 6)}</span>
-              </button>
-            ))}
+          {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
+            <div className="border-b border-accent/30 bg-accent/10 px-4 py-2 text-[11px] text-accent">
+              Unlimited · {formatRemainingTime(quota.messagePassUntil)} left
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto p-2">
+            {convs.length === 0 ? (
+              <div className="m-2 rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.
+              </div>
+            ) : convs.map((c) => {
+              const pid = c.user_a === user.id ? c.user_b : c.user_a;
+              const p = peers[pid];
+              const pct = convCompat[c.id];
+              const isActive = active?.id === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setActive(c)}
+                  className={`group mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-all ${
+                    isActive ? "bg-primary/15 ring-1 ring-primary/30" : "hover:bg-surface"
+                  }`}
+                >
+                  <div className="relative">
+                    <ProfileAvatar
+                      userId={pid}
+                      name={p?.first_name}
+                      discoveryMode={p?.discovery_mode}
+                      avatarUrl={p?.avatar_url}
+                      photoUrl={p?.photo_url}
+                      size={52}
+                    />
+                    {pct ? (
+                      <span className="absolute -bottom-1 -right-1 rounded-full bg-gradient-hero px-1.5 py-0.5 font-mono text-[9px] font-semibold text-primary-foreground shadow-glow">
+                        {pct}%
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1 truncate text-sm font-medium">
+                        {p?.first_name ?? "Match"}
+                        {p?.verified ? <VerifiedBadge size="xs" /> : null}
+                      </span>
+                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                        {timeAgo(c.last_message_at)}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <p className="truncate text-xs text-muted-foreground">
+                        {convLastMsg[c.id] ?? "Say hi"}
+                      </p>
+                      <span className="shrink-0 text-[10px] text-muted-foreground/80">
+                        Active {timeAgo(p?.last_seen_at ?? null)}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </aside>
 
-        <section className="flex min-h-[60vh] flex-col rounded-3xl border border-border bg-card">
+        {/* ============ CHAT PANEL ============ */}
+        <section
+          className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/40 backdrop-blur-xl lg:rounded-3xl lg:border lg:border-border lg:bg-card/60`}
+          style={{ height: "calc(100vh - 64px)" }}
+        >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
-              <h2 className="font-display text-2xl font-light">Select a thread</h2>
-              <p className="mt-2 text-sm">Conversations unfold here — slow, intentional, voice-first.</p>
+              <MessageCircle className="mx-auto mb-3 h-10 w-10 text-primary/40" />
+              <h2 className="font-display text-2xl font-light">Select a conversation</h2>
+              <p className="mt-2 text-sm">Slow, intentional, voice-first.</p>
             </div>
           ) : (
             <>
-              <div className="relative flex items-center justify-between border-b border-border p-4">
-                <div className="flex items-center gap-3">
+              {/* ============ COMPACT HEADER ============ */}
+              <header className="relative shrink-0 border-b border-border/60 bg-card/80 backdrop-blur-xl">
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <button
+                    onClick={() => setActive(null)}
+                    className="rounded-full p-1.5 hover:bg-surface lg:hidden"
+                    aria-label="Back"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
                   {peerId && (
                     <ProfileAvatar
                       userId={peerId}
                       name={peerName}
-                      discoveryMode={peerProfile?.discovery_mode}
-                      avatarUrl={peerProfile?.avatar_url}
-                      photoUrl={peerProfile?.photo_url}
-                      size={40}
+                      discoveryMode={peer?.discovery_mode}
+                      avatarUrl={peer?.avatar_url}
+                      photoUrl={peer?.photo_url}
+                      size={48}
+                      className="ring-2 ring-primary/40"
                     />
                   )}
-                  <div>
-                    <div className="text-sm font-medium leading-tight">{peerName}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Slow reveal · in progress</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-base font-semibold">{peerName}</span>
+                      {peer?.verified ? <VerifiedBadge size="xs" /> : null}
+                    </div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                      {overallScore != null && band && (
+                        <span className={`font-mono font-semibold ${band.tone}`}>
+                          {overallScore}% · {band.label}
+                        </span>
+                      )}
+                      {dayN && <span>· Day {dayN} of 7</span>}
+                      {typingPeer && <span className="italic text-primary">typing…</span>}
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setShowMenu((v) => !v)}
+                    className="rounded-full p-2 hover:bg-surface"
+                    aria-label="More"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                  {showMenu && (
+                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
+                      <button onClick={reportPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
+                      <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
+                      <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
+                    </div>
+                  )}
                 </div>
-                <button onClick={() => setShowMenu((v) => !v)} className="rounded-full p-2 hover:bg-surface">
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-                {showMenu && (
-                  <div className="absolute right-4 top-12 z-10 w-48 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
-                    <button onClick={reportPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
-                    <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
-                    <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
+
+                {/* Day progress bar */}
+                {dayN && (
+                  <div className="px-4 pb-2">
+                    <div className="h-1 overflow-hidden rounded-full bg-surface">
+                      <div
+                        className="h-full rounded-full bg-gradient-hero transition-all"
+                        style={{ width: `${(dayN / 7) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 )}
-              </div>
 
+                {/* Compatibility dashboard (collapsible) */}
+                {metrics.length > 0 && (
+                  <div className="border-t border-border/40">
+                    <button
+                      onClick={() => setCompatOpen((v) => !v)}
+                      className="flex w-full items-center justify-between px-4 py-2 text-left"
+                    >
+                      <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                        Why you match
+                      </span>
+                      <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {compatOpen && (
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 px-4 pb-3">
+                        {metrics.map((m) => (
+                          <div key={m.label}>
+                            <div className="mb-0.5 flex items-center justify-between">
+                              <span className="text-[11px] text-muted-foreground">{m.label}</span>
+                              <span className="font-mono text-[11px] font-semibold">{m.value}%</span>
+                            </div>
+                            <div className="h-1 overflow-hidden rounded-full bg-surface">
+                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {matchInfo && user && peerId && (
-                <ConversationScaffold
-                  matchId={matchInfo.id}
-                  matchCreatedAt={matchInfo.created_at}
-                  selfId={user.id}
-                  peerId={peerId}
-                  peerName={peerName}
-                  onChatGateChange={(enabled, placeholder) => setChatGate({ enabled, placeholder })}
-                />
-              )}
+                {/* Collapsible discovery cards */}
+                {matchInfo && peerId && (
+                  <div className="border-t border-border/40 px-4 py-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => setScaffoldOpen((v) => !v)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors ${
+                          scaffoldOpen ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Sparkles className="h-3 w-3" /> Discovery prompts
+                      </button>
+                      <button
+                        onClick={() => setRevealOpen((v) => !v)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors ${
+                          revealOpen ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <LockIcon className="h-3 w-3" /> Contact reveal
+                      </button>
+                      <button
+                        onClick={() => fetchIcebreakers(ideaCategory)}
+                        disabled={ideasLoading}
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      >
+                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Icebreakers
+                      </button>
+                    </div>
+                    {scaffoldOpen && (
+                      <div className="mt-2 rounded-2xl border border-border bg-surface/40 p-3">
+                        <ConversationScaffold
+                          matchId={matchInfo.id}
+                          matchCreatedAt={matchInfo.created_at}
+                          selfId={user.id}
+                          peerId={peerId}
+                          peerName={peerName}
+                          onChatGateChange={() => { /* DB trigger is source of truth */ }}
+                        />
+                      </div>
+                    )}
+                    {revealOpen && (
+                      <div className="mt-2 rounded-2xl border border-border bg-surface/40 p-3">
+                        <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </header>
 
-
-
-              <div className="flex-1 space-y-2 overflow-y-auto p-6">
-                {msgs.map((m) => {
-                  const mine = m.sender_id === user.id;
-                  const mReactions = reactions.filter((r) => r.message_id === m.id);
-                  const seenByPeer = peerId ? (reads[m.id] ?? []).includes(peerId) : false;
-                  return (
-                    <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"}`}>
-                      <div className="relative flex items-end gap-1">
-                        <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${mine ? "bg-gradient-hero text-primary-foreground" : "bg-surface"}`}>
-                          {m.content}
+              {/* ============ MESSAGES (dominant, ≥70% of column) ============ */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+                {msgs.length === 0 && (
+                  <div className="mx-auto max-w-md py-12 text-center text-sm text-muted-foreground">
+                    <Sparkles className="mx-auto mb-3 h-6 w-6 text-primary/60" />
+                    Your conversation is unfolding. Send the first thought when you're ready.
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {msgs.map((m, idx) => {
+                    const mine = m.sender_id === user.id;
+                    const mReactions = reactions.filter((r) => r.message_id === m.id);
+                    const seenByPeer = peerId ? (reads[m.id] ?? []).includes(peerId) : false;
+                    const prev = msgs[idx - 1];
+                    const grouped = prev && prev.sender_id === m.sender_id && (new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < 60_000);
+                    return (
+                      <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2"}`}>
+                        <div className="relative flex items-end gap-1">
+                          <div
+                            className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm leading-snug shadow-sm ${
+                              mine
+                                ? "bg-gradient-hero text-primary-foreground rounded-br-md"
+                                : "bg-surface text-foreground rounded-bl-md"
+                            }`}
+                          >
+                            {m.content}
+                          </div>
+                          <button
+                            onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
+                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                            aria-label="React"
+                          >
+                            <Smile className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                          {pickerFor === m.id && (
+                            <div className="absolute -top-10 right-0 z-10 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
+                              {QUICK_EMOJI.map((e) => (
+                                <button key={e} onClick={() => react(m.id, e)} className="rounded-full px-1.5 text-base hover:bg-surface">{e}</button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <button onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
-                          className="opacity-0 transition-opacity group-hover:opacity-100">
-                          <Smile className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                        {pickerFor === m.id && (
-                          <div className="absolute -top-10 right-0 z-10 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
-                            {QUICK_EMOJI.map((e) => (
-                              <button key={e} onClick={() => react(m.id, e)} className="rounded-full px-1.5 text-base hover:bg-surface">{e}</button>
+                        {mReactions.length > 0 && (
+                          <div className="mt-1 flex gap-1">
+                            {Object.entries(mReactions.reduce<Record<string, number>>((acc, r) => { acc[r.emoji] = (acc[r.emoji] ?? 0) + 1; return acc; }, {})).map(([e, n]) => (
+                              <button key={e} onClick={() => react(m.id, e)} className="rounded-full border border-border bg-card px-2 py-0.5 text-xs">
+                                {e} {n}
+                              </button>
                             ))}
                           </div>
                         )}
+                        {mine && (
+                          <div className="mt-0.5 flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                            {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
+                              : m.delivered_at ? <><CheckCheck className="h-3 w-3" /> Delivered</>
+                              : <><Check className="h-3 w-3" /> Sent</>}
+                          </div>
+                        )}
                       </div>
-                      {mReactions.length > 0 && (
-                        <div className="mt-1 flex gap-1">
-                          {Object.entries(mReactions.reduce<Record<string, number>>((acc, r) => { acc[r.emoji] = (acc[r.emoji] ?? 0) + 1; return acc; }, {})).map(([e, n]) => (
-                            <button key={e} onClick={() => react(m.id, e)} className="rounded-full border border-border bg-card px-2 py-0.5 text-xs">
-                              {e} {n}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {mine && (
-                        <div className="mt-0.5 flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                          {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
-                            : m.delivered_at ? <><CheckCheck className="h-3 w-3" /> Delivered</>
-                            : <><Check className="h-3 w-3" /> Sent</>}
-                        </div>
-                      )}
+                    );
+                  })}
+                  {typingPeer && (
+                    <div className="flex items-center gap-1 px-2">
+                      <span className="inline-flex gap-1 rounded-2xl bg-surface px-3 py-2">
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                      </span>
                     </div>
-                  );
-                })}
-                {typingPeer && (
-                  <div className="px-2 text-xs italic text-muted-foreground">typing…</div>
-                )}
-                {msgs.length === 0 && <div className="px-4 py-6 text-center text-xs italic text-muted-foreground">Your conversation is unfolding. Send the first thought when you're ready.</div>}
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
 
+              {/* ============ ICEBREAKERS DRAWER ============ */}
               {ideasOpen && (
-                <div className="border-t border-border bg-surface/50 p-3 space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="shrink-0 border-t border-border bg-surface/60 p-3 backdrop-blur-xl">
+                  <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                       <Sparkles className="h-3 w-3 text-accent" /> AI Icebreakers
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => fetchIcebreakers(ideaCategory)} disabled={ideasLoading}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-[10px] hover:bg-surface disabled:opacity-50">
-                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Generate New
-                      </button>
-                      <button onClick={() => setIdeasOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Close</button>
-                    </div>
+                    <button onClick={() => setIdeasOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Close</button>
                   </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    <button
-                      onClick={() => fetchIcebreakers(undefined)}
-                      className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
-                    >Mix</button>
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    <button onClick={() => fetchIcebreakers(undefined)}
+                      className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>Mix</button>
                     {ICE_CATEGORIES.map((c) => (
                       <button key={c.id} onClick={() => fetchIcebreakers(c.id)}
-                        className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                        className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>
                         {c.label}
                       </button>
                     ))}
                   </div>
-
                   {opener && !ideasLoading && (
-                    <div className="rounded-2xl border border-accent/40 bg-accent/10 p-3">
+                    <div className="mb-2 rounded-2xl border border-accent/40 bg-accent/10 p-3">
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">AI Suggested Opening Message</span>
+                        <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">Suggested opener</span>
                         <button onClick={() => { setDraft(opener); setIdeasOpen(false); }}
-                          className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use this</button>
+                          className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use</button>
                       </div>
                       <p className="text-xs leading-relaxed">{opener}</p>
                     </div>
                   )}
-
                   {ideasLoading && ideas.length === 0 ? (
                     <div className="py-3 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
                   ) : (
@@ -491,39 +744,45 @@ function Chat() {
               )}
 
               {showContactWarning && (
-                <div className="border-t border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-                  <div className="font-medium">Contact sharing unlocks after trust milestones have been completed.</div>
-                  <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-100/80">
-                    <li>Both members verified</li>
-                    <li>Mutual match</li>
-                    <li>7 days of connection — or either side on Premium</li>
-                  </ul>
+                <div className="shrink-0 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
+                  Contact sharing unlocks after Day 7 + both verified (or Premium).
                 </div>
               )}
 
-
-              {/* Messaging entitlement: DB trigger enforce_message_quota is the sole source of truth.
-                  Free=5/day, Verified=15/day, Daily Pass / Premium=unlimited. No client-side gate. */}
-              <form onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="flex items-center gap-2 border-t border-border p-4">
-                <button type="button" onClick={() => fetchIcebreakers(ideaCategory)} disabled={!peerId || ideasLoading}
-                  title="AI Icebreakers"
-                  className="rounded-full border border-border bg-surface p-2 hover:border-primary disabled:opacity-50">
-                  <Sparkles className="h-4 w-4 text-accent" />
-                </button>
-                <input
-                  value={draft}
-                  onChange={(e) => onDraftChange(e.target.value)}
-                  placeholder="A thought, gently…"
-                  className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary"
-                />
-                <button type="submit" className="rounded-full bg-gradient-hero px-4 py-2 text-primary-foreground shadow-glow disabled:opacity-50">
-                  <Send className="h-4 w-4" />
-                </button>
+              {/* ============ COMPOSER (fixed to bottom of panel) ============ */}
+              <form
+                onSubmit={(e) => { e.preventDefault(); send(); }}
+                className="shrink-0 border-t border-border bg-card/90 p-3 backdrop-blur-xl"
+              >
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fetchIcebreakers(ideaCategory)}
+                    disabled={!peerId || ideasLoading}
+                    title="AI Icebreakers"
+                    className="rounded-full border border-border bg-surface p-2.5 hover:border-primary disabled:opacity-50"
+                  >
+                    <Sparkles className="h-4 w-4 text-accent" />
+                  </button>
+                  <input
+                    value={draft}
+                    onChange={(e) => onDraftChange(e.target.value)}
+                    placeholder={`Message ${peerName}…`}
+                    className="flex-1 rounded-full border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!draft.trim()}
+                    className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow disabled:opacity-50"
+                    aria-label="Send"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
+                  Phone numbers, emails, and social handles are hidden until you both choose to share.
+                </p>
               </form>
-              <p className="border-t border-border px-4 py-2 text-center text-[10px] text-muted-foreground">
-                Phone numbers, emails, and social handles are auto-hidden until you both choose to share.
-              </p>
             </>
           )}
         </section>
