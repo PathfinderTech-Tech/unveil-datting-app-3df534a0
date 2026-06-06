@@ -96,7 +96,7 @@ function Checkout() {
               priceId={priceId}
               customerEmail={email}
               userId={userId}
-              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&product=${productKey}${returnQp}`}
             />
           )}
         </div>
