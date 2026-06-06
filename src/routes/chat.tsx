@@ -43,7 +43,7 @@ type PeerProfile = {
   photo_url: string | null;
   discovery_mode: "avatar" | "photo" | null;
   verified: boolean | null;
-  last_active_at: string | null;
+  last_seen_at: string | null;
 };
 type Compat = Awaited<ReturnType<typeof loadCompatibility>>;
 
@@ -136,7 +136,7 @@ function Chat() {
         const [{ data: profs }, { data: lastMsgs }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, last_active_at")
+            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, last_seen_at")
             .in("id", peerIds),
           supabase
             .from("messages")
@@ -457,7 +457,7 @@ function Chat() {
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
                       <span className="shrink-0 text-[10px] text-muted-foreground/80">
-                        Active {timeAgo(p?.last_active_at ?? null)}
+                        Active {timeAgo(p?.last_seen_at ?? null)}
                       </span>
                     </div>
                   </div>
