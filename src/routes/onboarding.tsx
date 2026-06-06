@@ -235,14 +235,11 @@ function Onboarding() {
         interestedIn: prof?.interested_in ?? "",
         intent: (prof?.relationship_intent || prof?.intention) ?? "",
         email: user.email ?? "",
-        appearance: (a?.appearance as AppearanceMode) ?? "real",
         photoUrl: sel ?? null,
-        avatarUrl: prof?.avatar_url ?? null,
         bio: prof?.bio ?? "",
         interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
         compat: { ...({} as Record<CompatKey, string>), ...((a?.compat as Record<CompatKey, string>) ?? {}) },
         discovery: (a?.discovery as Partial<DiscoveryProfile>) ?? {},
-        verifyChoice: (a?.verifyChoice as "skip" | "verify" | null) ?? null,
       });
       setStep(next);
       setResumed(next > 1);
