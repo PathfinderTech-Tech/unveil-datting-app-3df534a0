@@ -366,12 +366,80 @@ function PhotoStudioPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => { setAdj(NEUTRAL); setPresetId("original"); }}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
-                >
-                  <RefreshCw className="h-3 w-3" /> Reset
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => { setAdj(NEUTRAL); setPresetId("original"); }}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Reset
+                  </button>
+                  <button
+                    onClick={enhanceWithAI}
+                    disabled={enhancing}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60"
+                    title="Use AI to gently retouch your photo"
+                  >
+                    {enhancing
+                      ? <><Loader2 className="h-3 w-3 animate-spin" /> Enhancing…</>
+                      : <><Wand2 className="h-3 w-3" /> Enhance with AI</>}
+                  </button>
+                  {preEnhanceUrl && (
+                    <button
+                      onClick={revertEnhanced}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
+                    >
+                      <X className="h-3 w-3" /> Revert AI
+                    </button>
+                  )}
+                </div>
+
+                {(enhancing || enhancedUrl) && (
+                  <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3">
+                    <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-primary">
+                      <Wand2 className="h-3 w-3" /> AI enhancement
+                    </div>
+                    {enhancing && !enhancedUrl && (
+                      <div className="flex items-center gap-2 py-6 text-xs text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        Enhancing your photo… this can take 10–20s.
+                      </div>
+                    )}
+                    {enhancedUrl && (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="overflow-hidden rounded-xl border border-border bg-surface-2">
+                            <div className="aspect-square w-full">
+                              {previewSrc && (
+                                <img src={previewSrc} alt="Before" className="h-full w-full object-cover" />
+                              )}
+                            </div>
+                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Before</div>
+                          </div>
+                          <div className="overflow-hidden rounded-xl border border-primary shadow-glow">
+                            <div className="aspect-square w-full">
+                              <img src={enhancedUrl} alt="After" className="h-full w-full object-cover" />
+                            </div>
+                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-primary">After (AI)</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={applyEnhanced}
+                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero px-3 py-2 text-xs font-medium text-primary-foreground shadow-glow"
+                          >
+                            <Check className="h-3.5 w-3.5" /> Use enhanced
+                          </button>
+                          <button
+                            onClick={() => setEnhancedUrl(null)}
+                            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:bg-surface-2"
+                          >
+                            <X className="h-3.5 w-3.5" /> Discard
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
