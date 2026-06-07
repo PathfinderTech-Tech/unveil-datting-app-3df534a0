@@ -9,6 +9,8 @@ const corsHeaders = {
 };
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
+const FETCH_TIMEOUT_MS = 60_000; // upstream timeout
+const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -37,6 +39,25 @@ function bytesToB64(bytes: Uint8Array): string {
     s += String.fromCharCode(...bytes.subarray(i, i + chunk));
   }
   return btoa(s);
+}
+
+async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(HF_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/octet-stream",
+        Accept: "image/png",
+      },
+      body: bytes,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -68,30 +89,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const hfRes = await fetch(HF_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/octet-stream",
-        Accept: "image/png",
-      },
-      body: bytes,
-    });
+    let hfRes: Response;
+    try {
+      hfRes = await callHF(bytes, apiKey);
+    } catch (e) {
+      console.error("enhance-photo upstream error (attempt 1)", e);
+      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 503);
+    }
 
+    // Retry once after 10s on 503 (model loading)
     if (hfRes.status === 503) {
-      return json({ warming: true, message: "AI warming up, try again in 20 seconds" }, 503);
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+      try {
+        hfRes = await callHF(bytes, apiKey);
+      } catch (e) {
+        console.error("enhance-photo upstream error (retry)", e);
+        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 503);
+      }
+      if (hfRes.status === 503) {
+        return json({ warming: true, message: "AI warming up, try again in 20 seconds" }, 503);
+      }
     }
 
     if (!hfRes.ok) {
       const text = await hfRes.text().catch(() => "");
       console.error("HF error", hfRes.status, text.slice(0, 300));
       if (hfRes.status === 401 || hfRes.status === 403) {
-        return json({ error: "AI service authentication failed." }, 502);
+        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
       }
       if (hfRes.status === 429) {
-        return json({ error: "AI is busy. Please try again shortly." }, 429);
+        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 429);
       }
-      return json({ error: "AI enhancement failed. Please try again." }, 502);
+      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
     }
 
     const contentType = hfRes.headers.get("content-type") || "image/png";
@@ -100,7 +129,7 @@ Deno.serve(async (req) => {
       if (typeof j?.error === "string" && /loading/i.test(j.error)) {
         return json({ warming: true, message: "AI warming up, try again in 20 seconds" }, 503);
       }
-      return json({ error: "AI enhancement failed." }, 502);
+      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
     }
 
     const buf = new Uint8Array(await hfRes.arrayBuffer());
@@ -108,6 +137,6 @@ Deno.serve(async (req) => {
     return json({ image: `data:${contentType};base64,${outB64}` });
   } catch (e) {
     console.error("enhance-photo error", e);
-    return json({ error: "Unexpected error during enhancement." }, 500);
+    return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 500);
   }
 });
