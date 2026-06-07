@@ -4,6 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getDisplayPhotoUrl } from "@/lib/photos";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
@@ -126,7 +127,11 @@ function PhotoStudioPage() {
         .eq("id", user.id)
         .maybeSingle();
       const existing = data?.photo_url ?? data?.profile_photo_url ?? null;
-      if (existing) setSourceUrl(existing);
+      if (!existing) return;
+      // Resolve to a signed URL since profile-photos bucket is private —
+      // otherwise the <img> in the preview can't load it and the box stays empty.
+      const signed = await getDisplayPhotoUrl(existing);
+      if (signed) setSourceUrl(signed);
     })();
   }, [user]);
 
