@@ -55,13 +55,21 @@ function PhotoStudioPage() {
   const [busy, setBusy] = useState(false);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
   const [enhancing, setEnhancing] = useState(false);
+  const [enhancePhase, setEnhancePhase] = useState<"warming" | "enhancing">("warming");
   const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
   const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
 
   async function enhanceWithAI() {
     const src = sourceBlobUrl ?? sourceUrl;
     if (!src) { toast.error("Add a photo first."); return; }
+    const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
     setEnhancing(true);
+    setEnhancePhase("warming");
+    // Flip to "Enhancing your photo..." after 10s
+    const phaseTimer = setTimeout(() => setEnhancePhase("enhancing"), 10_000);
+    // Hard client-side timeout after 45s
+    const controller = new AbortController();
+    const abortTimer = setTimeout(() => controller.abort(), 45_000);
     try {
       // Convert current source to base64 (handles blob/http/signed URLs)
       const res = await fetch(src);
@@ -76,26 +84,29 @@ function PhotoStudioPage() {
 
       const { data, error } = await supabase.functions.invoke("enhance-photo", {
         body: { image: dataUrl },
+        // @ts-expect-error - supabase-js forwards signal to underlying fetch
+        signal: controller.signal,
       });
       if (error) {
-        // Edge function may return non-2xx with a JSON body (e.g. warming)
         const ctx = (error as { context?: Response }).context;
         if (ctx) {
           try {
             const j = await ctx.clone().json();
             if (j?.warming) { toast.info(j.message ?? "AI warming up, try again in 20 seconds"); return; }
-            if (j?.error) { toast.error(j.error); return; }
           } catch { /* ignore */ }
         }
-        throw new Error(error.message || "Enhancement failed");
+        toast.error(FAIL_MSG);
+        return;
       }
       if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
-      if (!data?.image) throw new Error("No enhanced image returned");
+      if (!data?.image) { toast.error(FAIL_MSG); return; }
       setEnhancedUrl(data.image);
       toast.success("AI enhancement ready — compare and apply.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Enhancement failed");
+    } catch {
+      toast.error(FAIL_MSG);
     } finally {
+      clearTimeout(phaseTimer);
+      clearTimeout(abortTimer);
       setEnhancing(false);
     }
   }
