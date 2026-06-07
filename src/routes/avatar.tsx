@@ -84,9 +84,8 @@ function PhotoStudioPage() {
 
       const { data, error } = await supabase.functions.invoke("enhance-photo", {
         body: { image: dataUrl },
-        // @ts-expect-error - supabase-js forwards signal to underlying fetch
-        signal: controller.signal,
       });
+      if (controller.signal.aborted) { toast.error(FAIL_MSG); return; }
       if (error) {
         const ctx = (error as { context?: Response }).context;
         if (ctx) {
