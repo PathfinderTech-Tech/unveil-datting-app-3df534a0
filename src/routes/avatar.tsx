@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck,
+  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck, Wand2, X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
@@ -53,6 +53,69 @@ function PhotoStudioPage() {
   const [adj, setAdj] = useState<Adjustments>(PRESETS[1].adj);
   const [busy, setBusy] = useState(false);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
+  const [enhancing, setEnhancing] = useState(false);
+  const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
+  const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
+
+  async function enhanceWithAI() {
+    const src = sourceBlobUrl ?? sourceUrl;
+    if (!src) { toast.error("Add a photo first."); return; }
+    setEnhancing(true);
+    try {
+      // Convert current source to base64 (handles blob/http/signed URLs)
+      const res = await fetch(src);
+      const blob = await res.blob();
+      if (blob.size > 8 * 1024 * 1024) throw new Error("Image too large (max 8MB)");
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result));
+        r.onerror = () => reject(new Error("Could not read image"));
+        r.readAsDataURL(blob);
+      });
+
+      const { data, error } = await supabase.functions.invoke("enhance-photo", {
+        body: { image: dataUrl },
+      });
+      if (error) {
+        // Edge function may return non-2xx with a JSON body (e.g. warming)
+        const ctx = (error as { context?: Response }).context;
+        if (ctx) {
+          try {
+            const j = await ctx.clone().json();
+            if (j?.warming) { toast.info(j.message ?? "AI warming up, try again in 20 seconds"); return; }
+            if (j?.error) { toast.error(j.error); return; }
+          } catch { /* ignore */ }
+        }
+        throw new Error(error.message || "Enhancement failed");
+      }
+      if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
+      if (!data?.image) throw new Error("No enhanced image returned");
+      setEnhancedUrl(data.image);
+      toast.success("AI enhancement ready — compare and apply.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Enhancement failed");
+    } finally {
+      setEnhancing(false);
+    }
+  }
+
+  function applyEnhanced() {
+    if (!enhancedUrl) return;
+    setPreEnhanceUrl(sourceBlobUrl ?? sourceUrl);
+    if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
+    setSourceBlobUrl(enhancedUrl); // data: URL works as <img src> and canvas source
+    setSourceUrl(enhancedUrl);
+    setEnhancedUrl(null);
+    toast.success("Using enhanced photo. Adjust filters and save.");
+  }
+
+  function revertEnhanced() {
+    if (!preEnhanceUrl) return;
+    setSourceBlobUrl(preEnhanceUrl.startsWith("data:") ? preEnhanceUrl : null);
+    setSourceUrl(preEnhanceUrl);
+    setPreEnhanceUrl(null);
+    toast.message("Reverted to original photo.");
+  }
 
   useEffect(() => {
     if (!user) return;
@@ -303,12 +366,80 @@ function PhotoStudioPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => { setAdj(NEUTRAL); setPresetId("original"); }}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
-                >
-                  <RefreshCw className="h-3 w-3" /> Reset
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => { setAdj(NEUTRAL); setPresetId("original"); }}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Reset
+                  </button>
+                  <button
+                    onClick={enhanceWithAI}
+                    disabled={enhancing}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60"
+                    title="Use AI to gently retouch your photo"
+                  >
+                    {enhancing
+                      ? <><Loader2 className="h-3 w-3 animate-spin" /> Enhancing…</>
+                      : <><Wand2 className="h-3 w-3" /> Enhance with AI</>}
+                  </button>
+                  {preEnhanceUrl && (
+                    <button
+                      onClick={revertEnhanced}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
+                    >
+                      <X className="h-3 w-3" /> Revert AI
+                    </button>
+                  )}
+                </div>
+
+                {(enhancing || enhancedUrl) && (
+                  <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3">
+                    <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-primary">
+                      <Wand2 className="h-3 w-3" /> AI enhancement
+                    </div>
+                    {enhancing && !enhancedUrl && (
+                      <div className="flex items-center gap-2 py-6 text-xs text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        Enhancing your photo… this can take 10–20s.
+                      </div>
+                    )}
+                    {enhancedUrl && (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="overflow-hidden rounded-xl border border-border bg-surface-2">
+                            <div className="aspect-square w-full">
+                              {previewSrc && (
+                                <img src={previewSrc} alt="Before" className="h-full w-full object-cover" />
+                              )}
+                            </div>
+                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Before</div>
+                          </div>
+                          <div className="overflow-hidden rounded-xl border border-primary shadow-glow">
+                            <div className="aspect-square w-full">
+                              <img src={enhancedUrl} alt="After" className="h-full w-full object-cover" />
+                            </div>
+                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-primary">After (AI)</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={applyEnhanced}
+                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero px-3 py-2 text-xs font-medium text-primary-foreground shadow-glow"
+                          >
+                            <Check className="h-3.5 w-3.5" /> Use enhanced
+                          </button>
+                          <button
+                            onClick={() => setEnhancedUrl(null)}
+                            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:bg-surface-2"
+                          >
+                            <X className="h-3.5 w-3.5" /> Discard
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
