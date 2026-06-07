@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck,
+  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck, Wand2, X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
@@ -53,6 +53,69 @@ function PhotoStudioPage() {
   const [adj, setAdj] = useState<Adjustments>(PRESETS[1].adj);
   const [busy, setBusy] = useState(false);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
+  const [enhancing, setEnhancing] = useState(false);
+  const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
+  const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
+
+  async function enhanceWithAI() {
+    const src = sourceBlobUrl ?? sourceUrl;
+    if (!src) { toast.error("Add a photo first."); return; }
+    setEnhancing(true);
+    try {
+      // Convert current source to base64 (handles blob/http/signed URLs)
+      const res = await fetch(src);
+      const blob = await res.blob();
+      if (blob.size > 8 * 1024 * 1024) throw new Error("Image too large (max 8MB)");
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result));
+        r.onerror = () => reject(new Error("Could not read image"));
+        r.readAsDataURL(blob);
+      });
+
+      const { data, error } = await supabase.functions.invoke("enhance-photo", {
+        body: { image: dataUrl },
+      });
+      if (error) {
+        // Edge function may return non-2xx with a JSON body (e.g. warming)
+        const ctx = (error as { context?: Response }).context;
+        if (ctx) {
+          try {
+            const j = await ctx.clone().json();
+            if (j?.warming) { toast.info(j.message ?? "AI warming up, try again in 20 seconds"); return; }
+            if (j?.error) { toast.error(j.error); return; }
+          } catch { /* ignore */ }
+        }
+        throw new Error(error.message || "Enhancement failed");
+      }
+      if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
+      if (!data?.image) throw new Error("No enhanced image returned");
+      setEnhancedUrl(data.image);
+      toast.success("AI enhancement ready — compare and apply.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Enhancement failed");
+    } finally {
+      setEnhancing(false);
+    }
+  }
+
+  function applyEnhanced() {
+    if (!enhancedUrl) return;
+    setPreEnhanceUrl(sourceBlobUrl ?? sourceUrl);
+    if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
+    setSourceBlobUrl(enhancedUrl); // data: URL works as <img src> and canvas source
+    setSourceUrl(enhancedUrl);
+    setEnhancedUrl(null);
+    toast.success("Using enhanced photo. Adjust filters and save.");
+  }
+
+  function revertEnhanced() {
+    if (!preEnhanceUrl) return;
+    setSourceBlobUrl(preEnhanceUrl.startsWith("data:") ? preEnhanceUrl : null);
+    setSourceUrl(preEnhanceUrl);
+    setPreEnhanceUrl(null);
+    toast.message("Reverted to original photo.");
+  }
 
   useEffect(() => {
     if (!user) return;
