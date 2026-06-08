@@ -92,7 +92,8 @@ Deno.serve(async (req) => {
   let payload: { image?: string } = {};
   try {
     payload = await req.json();
-  } catch {
+  } catch (e) {
+    logStepError("parse JSON body", e);
     return json({ error: "Invalid JSON body" }, 400);
   }
   if (!payload.image || typeof payload.image !== "string") {
@@ -130,6 +131,7 @@ Deno.serve(async (req) => {
       hfRes = await callHF(bytes, apiKey);
     } catch (e) {
       console.error("enhance-photo upstream error (attempt 1)", e);
+      logStepError("3. Calling Hugging Face model", e);
       if (e instanceof Error && e.message === "Model timeout after 30s") {
         return json({ message: "Model timeout after 30s" }, 408);
       }
@@ -150,6 +152,7 @@ Deno.serve(async (req) => {
         hfRes = await callHF(bytes, apiKey);
       } catch (e) {
         console.error("enhance-photo upstream error (retry)", e);
+        logStepError("3. Calling Hugging Face model retry", e);
         if (e instanceof Error && e.message === "Model timeout after 30s") {
           return json({ message: "Model timeout after 30s" }, 408);
         }
