@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
-const HF_FALLBACK_URL = "https://router.huggingface.co/hf-inference/models/Hyratek/GFPGANv1.4-QAIC";
+const HF_SPACE_ROOT = "https://mayanktamakuwala-image-upscaler-and-restoring-gf-5c51069.hf.space";
 const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
@@ -59,16 +59,101 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
     new Promise<Response>((_, reject) =>
       setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
     ),
-  ]).catch(async (error) => {
-    console.error("Primary Hugging Face endpoint failed; trying fallback router", error);
-    console.log("3. Calling Hugging Face fallback model...", HF_FALLBACK_URL);
-    return await Promise.race([
-      fetch(HF_FALLBACK_URL, { method: "POST", headers, body: bytes }),
-      new Promise<Response>((_, reject) =>
-        setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
-      ),
-    ]);
   });
+
+  return primary.catch(async (error) => {
+    console.error("Primary Hugging Face endpoint failed; trying live GFPGAN Space fallback", error);
+    return callGradioGFPGAN(bytes);
+  }).then(async (res) => {
+    const unsupported = res.status === 400 && /not supported/i.test(res.headers.get("x-error-message") ?? "");
+    if (unsupported) {
+      console.log("3a. Primary model unsupported by current provider; trying live GFPGAN Space fallback");
+      return callGradioGFPGAN(bytes);
+    }
+    return res;
+  });
+}
+
+function randomSessionHash() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(12)), (n) => (n % 36).toString(36)).join("");
+}
+
+async function callGradioGFPGAN(bytes: Uint8Array): Promise<Response> {
+  console.log("3b. Uploading image to live GFPGAN Space fallback...");
+  const form = new FormData();
+  form.append("files", new Blob([bytes], { type: "image/png" }), "photo.png");
+  const uploadRes = await fetch(`${HF_SPACE_ROOT}/upload`, { method: "POST", body: form });
+  console.log("3c. GFPGAN Space upload status:", uploadRes.status);
+  if (!uploadRes.ok) throw new Error(`GFPGAN Space upload failed (${uploadRes.status})`);
+  const uploaded = await uploadRes.json();
+  const path = Array.isArray(uploaded) ? uploaded[0] : null;
+  if (typeof path !== "string" || !path) throw new Error("GFPGAN Space did not return an uploaded file path");
+
+  const sessionHash = randomSessionHash();
+  const joinPayload = {
+    data: [
+      {
+        path,
+        url: `${HF_SPACE_ROOT}/file=${path}`,
+        orig_name: "photo.png",
+        mime_type: "image/png",
+        is_stream: false,
+        meta: { _type: "gradio.FileData" },
+      },
+      "GFPGANv1.4",
+      2,
+    ],
+    event_data: null,
+    fn_index: 0,
+    trigger_id: 12,
+    session_hash: sessionHash,
+  };
+  const joinRes = await fetch(`${HF_SPACE_ROOT}/queue/join`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(joinPayload),
+  });
+  console.log("3d. GFPGAN Space queue join status:", joinRes.status);
+  if (!joinRes.ok) throw new Error(`GFPGAN Space queue join failed (${joinRes.status})`);
+
+  const streamController = new AbortController();
+  const streamTimer = setTimeout(() => streamController.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const streamRes = await fetch(`${HF_SPACE_ROOT}/queue/data?session_hash=${sessionHash}`, {
+      headers: { Accept: "text/event-stream" },
+      signal: streamController.signal,
+    });
+    console.log("3e. GFPGAN Space stream status:", streamRes.status);
+    if (!streamRes.ok || !streamRes.body) throw new Error(`GFPGAN Space stream failed (${streamRes.status})`);
+    const reader = streamRes.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const event = JSON.parse(line.slice(6));
+        console.log("3f. GFPGAN Space event:", event.msg);
+        if (event.msg !== "process_completed") continue;
+        if (!event.success) throw new Error(event.output?.error || "GFPGAN Space processing failed");
+        const imageUrl = event.output?.data?.[0]?.url;
+        if (typeof imageUrl !== "string") throw new Error("GFPGAN Space did not return an enhanced image URL");
+        console.log("3g. Downloading GFPGAN Space enhanced image...");
+        const imageRes = await fetch(imageUrl);
+        console.log("3h. GFPGAN Space enhanced image status:", imageRes.status);
+        if (!imageRes.ok) throw new Error(`GFPGAN Space image download failed (${imageRes.status})`);
+        const contentType = imageRes.headers.get("content-type") || "image/webp";
+        return new Response(await imageRes.arrayBuffer(), { status: 200, headers: { "content-type": contentType } });
+      }
+    }
+  } finally {
+    clearTimeout(streamTimer);
+  }
+  throw new Error("GFPGAN Space stream ended without an enhanced image");
 }
 
 async function fetchImageBytes(imageUrl: string): Promise<Uint8Array> {
