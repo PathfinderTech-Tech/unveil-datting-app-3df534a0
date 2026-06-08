@@ -246,8 +246,8 @@ Deno.serve(async (req) => {
     } catch (e) {
       console.error("enhance-photo upstream error (attempt 1)", e);
       logStepError("3. Calling Hugging Face model", e);
-      if (e instanceof Error && e.message === "Model timeout after 30s") {
-        return json({ message: "Model timeout after 30s" }, 408);
+      if (e instanceof Error && /timeout|aborted/i.test(e.message)) {
+        return json({ error: "AI enhancement timed out" }, 408);
       }
       return json({ error: FAIL_MSG }, 503);
     }
@@ -267,8 +267,8 @@ Deno.serve(async (req) => {
       } catch (e) {
         console.error("enhance-photo upstream error (retry)", e);
         logStepError("3. Calling Hugging Face model retry", e);
-        if (e instanceof Error && e.message === "Model timeout after 30s") {
-          return json({ message: "Model timeout after 30s" }, 408);
+        if (e instanceof Error && /timeout|aborted/i.test(e.message)) {
+          return json({ error: "AI enhancement timed out" }, 408);
         }
         return json({ error: FAIL_MSG }, 503);
       }
