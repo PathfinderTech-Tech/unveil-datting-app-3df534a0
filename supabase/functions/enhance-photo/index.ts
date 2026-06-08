@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
-const HF_FALLBACK_URL = "https://router.huggingface.co/hf-inference/models/tencentarc/gfpgan";
+const HF_FALLBACK_URL = "https://router.huggingface.co/hf-inference/models/Hyratek/GFPGANv1.4-QAIC";
 const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
