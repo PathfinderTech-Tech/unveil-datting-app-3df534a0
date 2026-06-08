@@ -60,20 +60,44 @@ function PhotoStudioPage() {
   const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
 
   async function enhanceWithAI() {
+    if (!user) { toast.error("Please sign in."); return; }
     const src = sourceBlobUrl ?? sourceUrl;
     if (!src) { toast.error("Add a photo first."); return; }
-    const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
+    const originalUrl = src;
     setEnhancing(true);
     setEnhancePhase("warming");
+    setEnhancedUrl(null);
+    toast.message("Enhancing started.");
+    console.log("[AI Enhance] 1. Button clicked", {
+      hasSourceUrl: Boolean(sourceUrl),
+      hasLocalPreview: Boolean(sourceBlobUrl),
+      presetId,
+    });
     // Flip to "Enhancing your photo..." after 10s
     const phaseTimer = setTimeout(() => setEnhancePhase("enhancing"), 10_000);
-    // Hard client-side timeout after 35s
+    // Hard client-side timeout so the button never stays stuck.
     const controller = new AbortController();
-    const abortTimer = setTimeout(() => controller.abort(), 35_000);
+    const abortTimer = setTimeout(() => controller.abort(), 65_000);
     try {
-      // Convert current source to base64 (handles blob/http/signed URLs)
-      const res = await fetch(src, { signal: controller.signal });
+      const imageUrl = sourceUrl ? await getDisplayPhotoUrl(sourceUrl) : null;
+      console.log("[AI Enhance] 2. Uploaded image URL resolved", {
+        imageUrl,
+        sourceUrl,
+      });
+
+      // Convert current source to base64 (handles blob/http/signed URLs) and
+      // pass both the signed URL and base64 fallback to the edge function.
+      const fetchSource = sourceBlobUrl ?? imageUrl ?? sourceUrl;
+      if (!fetchSource) throw new Error("No image source available for enhancement");
+      const res = await fetch(fetchSource, { signal: controller.signal, cache: "no-store" });
+      console.log("[AI Enhance] 3. Source image fetch", {
+        status: res.status,
+        ok: res.ok,
+        contentType: res.headers.get("content-type"),
+      });
+      if (!res.ok) throw new Error(`Could not load uploaded image (${res.status})`);
       const blob = await res.blob();
+      console.log("[AI Enhance] 4. Source image blob ready", { size: blob.size, type: blob.type });
       if (blob.size > 8 * 1024 * 1024) throw new Error("Image too large (max 8MB)");
       const dataUrl: string = await new Promise((resolve, reject) => {
         const r = new FileReader();
@@ -83,32 +107,54 @@ function PhotoStudioPage() {
       });
 
       const edgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enhance-photo`;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const bearer = sessionData.session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      console.log("[AI Enhance] 5. Calling enhance-photo Edge Function", {
+        edgeUrl,
+        imageUrl,
+        base64Size: dataUrl.length,
+        hasUserToken: Boolean(sessionData.session?.access_token),
+      });
       const response = await fetch(edgeUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${bearer}`,
         },
-        body: JSON.stringify({ image: dataUrl }),
+        body: JSON.stringify({ imageUrl, image: dataUrl }),
         signal: controller.signal,
       });
-      console.log("Edge function status:", response.status);
+      console.log("[AI Enhance] 6. Edge function status:", response.status);
       const responseText = await response.clone().text();
-      console.log("Edge function response:", responseText);
+      console.log("[AI Enhance] 7. Edge function response:", responseText);
       const data = responseText ? JSON.parse(responseText) : null;
-      if (response.status !== 200) {
-        if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
-        toast.error(FAIL_MSG);
-        return;
-      }
-      if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
-      if (!data?.image) { toast.error(FAIL_MSG); return; }
-      setEnhancedUrl(data.image);
-      toast.success("AI enhancement ready — compare and apply.");
+      if (!response.ok) throw new Error(data?.error || data?.message || `Edge function returned ${response.status}`);
+      if (!data?.image || typeof data.image !== "string") throw new Error("Edge function did not return an enhanced image");
+      if (!data.image.startsWith("data:image/")) throw new Error("Edge function returned an invalid image format");
+      console.log("[AI Enhance] 8. Valid enhanced image received", { size: data.image.length });
+
+      const enhancedBlob = dataUrlToBlob(data.image);
+      const ext = enhancedBlob.type.includes("png") ? "png" : "jpg";
+      const path = `${user.id}/enhanced-${Date.now()}.${ext}`;
+      console.log("[AI Enhance] 9. Saving enhanced image to storage", { path, size: enhancedBlob.size, type: enhancedBlob.type });
+      const { error: uploadError } = await supabase.storage
+        .from("profile-photos")
+        .upload(path, enhancedBlob, { upsert: true, contentType: enhancedBlob.type || "image/png", cacheControl: "3600" });
+      if (uploadError) throw uploadError;
+
+      const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
+      const displayUrl = await getDisplayPhotoUrl(pub.publicUrl);
+      setPreEnhanceUrl(originalUrl);
+      setSourceUrl(pub.publicUrl);
+      setSourceBlobUrl(displayUrl ?? data.image);
+      setEnhancedUrl(displayUrl ?? data.image);
+      console.log("[AI Enhance] 10. Frontend replaced old image with enhanced image", { path, publicUrl: pub.publicUrl });
+      toast.success("Enhancement successful.");
     } catch (e) {
-      console.error("AI enhancement request failed", e);
-      toast.error(FAIL_MSG);
+      const reason = enhancementErrorReason(e);
+      console.error("[AI Enhance] Enhancement failed with reason:", reason, e);
+      toast.error(`Enhancement failed: ${reason}`);
     } finally {
       clearTimeout(phaseTimer);
       clearTimeout(abortTimer);
@@ -401,7 +447,7 @@ function PhotoStudioPage() {
                     title="Use AI to gently retouch your photo"
                   >
                     {enhancing
-                      ? <><Loader2 className="h-3 w-3 animate-spin" /> Enhancing…</>
+                      ? <><Loader2 className="h-3 w-3 animate-spin" /> {enhancePhase === "warming" ? "Warming up AI…" : "Enhancing your photo…"}</>
                       : <><Wand2 className="h-3 w-3" /> Enhance with AI</>}
                   </button>
                   {preEnhanceUrl && (
@@ -430,8 +476,8 @@ function PhotoStudioPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <div className="overflow-hidden rounded-xl border border-border bg-surface-2">
                             <div className="aspect-square w-full">
-                              {previewSrc && (
-                                <img src={previewSrc} alt="Before" className="h-full w-full object-cover" />
+                                {(preEnhanceUrl ?? previewSrc) && (
+                                  <img src={preEnhanceUrl ?? previewSrc ?? ""} alt="Before" className="h-full w-full object-cover" />
                               )}
                             </div>
                             <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Before</div>
