@@ -57,11 +57,11 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
       body: bytes,
     }),
     new Promise<Response>((_, reject) =>
-      setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
+      setTimeout(() => reject(new Error("Model timeout after 60s")), FETCH_TIMEOUT_MS),
     ),
   });
 
-  return primary.catch(async (error) => {
+  return await primary.catch(async (error) => {
     console.error("Primary Hugging Face endpoint failed; trying live GFPGAN Space fallback", error);
     return callGradioGFPGAN(bytes);
   }).then(async (res) => {
