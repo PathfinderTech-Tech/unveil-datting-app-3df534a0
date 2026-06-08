@@ -18,7 +18,7 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
-  ]);
+  });
 }
 
 function stripDataUrl(b64: string): { mime: string; data: string } {
@@ -59,7 +59,7 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
     new Promise<Response>((_, reject) =>
       setTimeout(() => reject(new Error("Model timeout after 60s")), FETCH_TIMEOUT_MS),
     ),
-  });
+  ]);
 
   return await primary.catch(async (error) => {
     console.error("Primary Hugging Face endpoint failed; trying live GFPGAN Space fallback", error);
