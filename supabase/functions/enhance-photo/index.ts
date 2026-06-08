@@ -110,51 +110,53 @@ Deno.serve(async (req) => {
   let apiKey: string | undefined;
   try {
     apiKey = Deno.env.get("HUGGINGFACE_API_KEY");
+    console.log("2. Hugging Face API key loaded:", Boolean(apiKey));
     if (!apiKey) return json({ error: "Server is not configured for AI enhancement." }, 500);
   } catch (e) {
     logStepError("read HUGGINGFACE_API_KEY", e);
     return json({ error: FAIL_MSG }, 500);
   }
 
-  let payload: { image?: string } = {};
+  let payload: { image?: string; imageUrl?: string } = {};
   try {
     payload = await req.json();
   } catch (e) {
     logStepError("parse JSON body", e);
     return json({ error: "Invalid JSON body" }, 400);
   }
-  if (!payload.image || typeof payload.image !== "string") {
-    return json({ error: "Missing 'image' (base64 string)" }, 400);
+  if ((!payload.image || typeof payload.image !== "string") && (!payload.imageUrl || typeof payload.imageUrl !== "string")) {
+    return json({ error: "Missing 'imageUrl' or 'image'" }, 400);
   }
-  const imageBase64 = payload.image;
+  const imageBase64 = payload.image ?? "";
   try {
-    console.log("2. Image base64 received, size:", imageBase64.length);
+    console.log("2. Image payload received", {
+      imageUrl: payload.imageUrl ?? null,
+      base64Size: imageBase64.length,
+    });
   } catch (e) {
-    logStepError("2. Image base64 received", e);
+    logStepError("2. Image payload received", e);
   }
 
-  let data: string;
-  try {
-    ({ data } = stripDataUrl(imageBase64));
-  } catch (e) {
-    logStepError("strip data URL", e);
-    return json({ error: "Invalid base64 image" }, 400);
-  }
   let bytes: Uint8Array;
   try {
-    bytes = b64ToBytes(data);
+    if (payload.imageUrl) {
+      bytes = await fetchImageBytes(payload.imageUrl);
+    } else {
+      const { data } = stripDataUrl(imageBase64);
+      bytes = b64ToBytes(data);
+    }
   } catch (e) {
-    logStepError("base64 decode", e);
-    return json({ error: "Invalid base64 image" }, 400);
+    logStepError("read source image", e);
+    return json({ error: e instanceof Error ? e.message : "Invalid source image" }, 400);
   }
   if (bytes.length > 8 * 1024 * 1024) {
     return json({ error: "Image too large (max 8MB)" }, 413);
   }
+  console.log("2d. Image bytes ready for Hugging Face, size:", bytes.byteLength);
 
   try {
     let hfRes: Response;
     try {
-      console.log("3. Calling Hugging Face model...");
       hfRes = await callHF(bytes, apiKey);
     } catch (e) {
       console.error("enhance-photo upstream error (attempt 1)", e);
@@ -173,9 +175,9 @@ Deno.serve(async (req) => {
 
     // Retry once after 10s on 503 (model loading)
     if (hfRes.status === 503) {
+      console.log("5a. HF returned 503; retrying once after 10 seconds");
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
       try {
-        console.log("3. Calling Hugging Face model...");
         hfRes = await callHF(bytes, apiKey);
       } catch (e) {
         console.error("enhance-photo upstream error (retry)", e);
