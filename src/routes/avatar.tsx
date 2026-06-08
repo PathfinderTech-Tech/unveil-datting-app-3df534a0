@@ -580,6 +580,24 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [meta, encoded] = dataUrl.split(",");
+  if (!meta || !encoded) throw new Error("Invalid enhanced image data");
+  const mime = meta.match(/^data:([^;]+);base64$/)?.[1] ?? "image/png";
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+function enhancementErrorReason(error: unknown): string {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return "the request timed out";
+  }
+  if (error instanceof Error) return error.message;
+  return String(error || "AI Enhancement unavailable right now — try again in a moment.");
+}
+
 function Slider({ label, value, min, max, step, onChange }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
 }) {
