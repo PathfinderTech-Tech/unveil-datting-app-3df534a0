@@ -1,5 +1,5 @@
 // Enhance a user-uploaded photo via Hugging Face GFPGAN.
-// Accepts { image: "<base64>" } (optionally a data URL) and returns
+// Accepts { imageUrl: "<signed url>", image: "<base64 fallback>" } and returns
 // { image: "<base64 jpeg/png>" } or a friendly warming-up message.
 
 const corsHeaders = {
@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
+const HF_FALLBACK_URL = "https://router.huggingface.co/hf-inference/models/tencentarc/gfpgan";
 const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
@@ -43,20 +44,46 @@ function bytesToB64(bytes: Uint8Array): string {
 }
 
 async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/octet-stream",
+    Accept: "image/png",
+  };
+  console.log("3. Calling Hugging Face model...", HF_URL);
   return await Promise.race([
     fetch(HF_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/octet-stream",
-        Accept: "image/png",
-      },
+      headers,
       body: bytes,
     }),
     new Promise<Response>((_, reject) =>
       setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
     ),
+  ]).catch(async (error) => {
+    console.error("Primary Hugging Face endpoint failed; trying fallback router", error);
+    console.log("3. Calling Hugging Face fallback model...", HF_FALLBACK_URL);
+    return await Promise.race([
+      fetch(HF_FALLBACK_URL, { method: "POST", headers, body: bytes }),
+      new Promise<Response>((_, reject) =>
+        setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
+      ),
+    ]);
+  });
+}
+
+async function fetchImageBytes(imageUrl: string): Promise<Uint8Array> {
+  console.log("2a. Fetching uploaded image URL");
+  const res = await Promise.race([
+    fetch(imageUrl, { headers: { Accept: "image/*" } }),
+    new Promise<Response>((_, reject) =>
+      setTimeout(() => reject(new Error("Image URL fetch timeout")), 15_000),
+    ),
   ]);
+  console.log("2b. Uploaded image URL fetch status:", res.status);
+  if (!res.ok) throw new Error(`Could not fetch uploaded image URL (${res.status})`);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  console.log("2c. Uploaded image bytes received:", bytes.byteLength);
+  return bytes;
 }
 
 function logStepError(step: string, error: unknown) {
