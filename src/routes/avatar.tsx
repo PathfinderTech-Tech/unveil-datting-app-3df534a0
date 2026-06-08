@@ -97,7 +97,7 @@ function PhotoStudioPage() {
       const responseText = await response.clone().text();
       console.log("Edge function response:", responseText);
       const data = responseText ? JSON.parse(responseText) : null;
-      if (!response.ok) {
+      if (response.status !== 200) {
         if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
         toast.error(FAIL_MSG);
         return;
