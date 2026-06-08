@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
-const FETCH_TIMEOUT_MS = 60_000; // upstream timeout
+const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 
 function json(body: unknown, status = 200) {
@@ -42,10 +42,8 @@ function bytesToB64(bytes: Uint8Array): string {
 }
 
 async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    return await fetch(HF_URL, {
+  return await Promise.race([
+    fetch(HF_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -53,11 +51,11 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
         Accept: "image/png",
       },
       body: bytes,
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(t);
-  }
+    }),
+    new Promise<Response>((_, reject) =>
+      setTimeout(() => reject(new Error("Model timeout after 30s")), FETCH_TIMEOUT_MS),
+    ),
+  ]);
 }
 
 Deno.serve(async (req) => {
