@@ -67,9 +67,9 @@ function PhotoStudioPage() {
     setEnhancePhase("warming");
     // Flip to "Enhancing your photo..." after 10s
     const phaseTimer = setTimeout(() => setEnhancePhase("enhancing"), 10_000);
-    // Hard client-side timeout after 45s
+    // Hard client-side timeout after 35s
     const controller = new AbortController();
-    const abortTimer = setTimeout(() => controller.abort(), 45_000);
+    const abortTimer = setTimeout(() => controller.abort(), 35_000);
     try {
       // Convert current source to base64 (handles blob/http/signed URLs)
       const res = await fetch(src);
@@ -82,18 +82,23 @@ function PhotoStudioPage() {
         r.readAsDataURL(blob);
       });
 
-      const { data, error } = await supabase.functions.invoke("enhance-photo", {
-        body: { image: dataUrl },
+      const edgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enhance-photo`;
+      const response = await fetch(edgeUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ image: dataUrl }),
+        signal: controller.signal,
       });
-      if (controller.signal.aborted) { toast.error(FAIL_MSG); return; }
-      if (error) {
-        const ctx = (error as { context?: Response }).context;
-        if (ctx) {
-          try {
-            const j = await ctx.clone().json();
-            if (j?.warming) { toast.info(j.message ?? "AI warming up, try again in 20 seconds"); return; }
-          } catch { /* ignore */ }
-        }
+      console.log("Edge function status:", response.status);
+      const responseText = await response.clone().text();
+      console.log("Edge function response:", responseText);
+      const data = responseText ? JSON.parse(responseText) : null;
+      if (!response.ok) {
+        if (data?.warming) { toast.info(data.message ?? "AI warming up, try again in 20 seconds"); return; }
         toast.error(FAIL_MSG);
         return;
       }
@@ -101,7 +106,8 @@ function PhotoStudioPage() {
       if (!data?.image) { toast.error(FAIL_MSG); return; }
       setEnhancedUrl(data.image);
       toast.success("AI enhancement ready — compare and apply.");
-    } catch {
+    } catch (e) {
+      console.error("AI enhancement request failed", e);
       toast.error(FAIL_MSG);
     } finally {
       clearTimeout(phaseTimer);
