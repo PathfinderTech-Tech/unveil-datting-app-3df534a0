@@ -50,7 +50,7 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
     Accept: "image/png",
   };
   console.log("3. Calling Hugging Face model...", HF_URL);
-  return await Promise.race([
+  const primary = Promise.race([
     fetch(HF_URL, {
       method: "POST",
       headers,
