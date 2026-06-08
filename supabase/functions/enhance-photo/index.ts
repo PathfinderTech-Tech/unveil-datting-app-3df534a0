@@ -18,7 +18,7 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  ]);
 }
 
 function stripDataUrl(b64: string): { mime: string; data: string } {
