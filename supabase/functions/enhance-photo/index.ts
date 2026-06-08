@@ -10,7 +10,7 @@ const corsHeaders = {
 
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
 const HF_SPACE_ROOT = "https://mayanktamakuwala-image-upscaler-and-restoring-gf-5c51069.hf.space";
-const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
+const FETCH_TIMEOUT_MS = 60_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
 const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
 
