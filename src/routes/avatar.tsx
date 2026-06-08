@@ -72,7 +72,7 @@ function PhotoStudioPage() {
     const abortTimer = setTimeout(() => controller.abort(), 35_000);
     try {
       // Convert current source to base64 (handles blob/http/signed URLs)
-      const res = await fetch(src);
+      const res = await fetch(src, { signal: controller.signal });
       const blob = await res.blob();
       if (blob.size > 8 * 1024 * 1024) throw new Error("Image too large (max 8MB)");
       const dataUrl: string = await new Promise((resolve, reject) => {
