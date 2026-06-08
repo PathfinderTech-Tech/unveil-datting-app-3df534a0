@@ -11,6 +11,7 @@ const corsHeaders = {
 const HF_URL = "https://api-inference.huggingface.co/models/tencentarc/gfpgan";
 const FETCH_TIMEOUT_MS = 30_000; // hard upstream timeout
 const RETRY_DELAY_MS = 10_000;   // wait after a 503 before retrying once
+const FAIL_MSG = "AI Enhancement unavailable right now — try again in a moment.";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -58,12 +59,35 @@ async function callHF(bytes: Uint8Array, apiKey: string): Promise<Response> {
   ]);
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+function logStepError(step: string, error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  const stack = error instanceof Error ? error.stack : undefined;
+  console.error(`${step} failed`, { message, stack });
+}
 
-  const apiKey = Deno.env.get("HUGGINGFACE_API_KEY");
-  if (!apiKey) return json({ error: "Server is not configured for AI enhancement." }, 500);
+Deno.serve(async (req) => {
+  try {
+    console.log("1. Request received");
+  } catch (e) {
+    logStepError("1. Request received", e);
+  }
+
+  try {
+    if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+    if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  } catch (e) {
+    logStepError("request method check", e);
+    return json({ error: FAIL_MSG }, 500);
+  }
+
+  let apiKey: string | undefined;
+  try {
+    apiKey = Deno.env.get("HUGGINGFACE_API_KEY");
+    if (!apiKey) return json({ error: "Server is not configured for AI enhancement." }, 500);
+  } catch (e) {
+    logStepError("read HUGGINGFACE_API_KEY", e);
+    return json({ error: FAIL_MSG }, 500);
+  }
 
   let payload: { image?: string } = {};
   try {
@@ -74,12 +98,25 @@ Deno.serve(async (req) => {
   if (!payload.image || typeof payload.image !== "string") {
     return json({ error: "Missing 'image' (base64 string)" }, 400);
   }
+  const imageBase64 = payload.image;
+  try {
+    console.log("2. Image base64 received, size:", imageBase64.length);
+  } catch (e) {
+    logStepError("2. Image base64 received", e);
+  }
 
-  const { data } = stripDataUrl(payload.image);
+  let data: string;
+  try {
+    ({ data } = stripDataUrl(imageBase64));
+  } catch (e) {
+    logStepError("strip data URL", e);
+    return json({ error: "Invalid base64 image" }, 400);
+  }
   let bytes: Uint8Array;
   try {
     bytes = b64ToBytes(data);
-  } catch {
+  } catch (e) {
+    logStepError("base64 decode", e);
     return json({ error: "Invalid base64 image" }, 400);
   }
   if (bytes.length > 8 * 1024 * 1024) {
@@ -89,20 +126,40 @@ Deno.serve(async (req) => {
   try {
     let hfRes: Response;
     try {
+      console.log("3. Calling Hugging Face model...");
       hfRes = await callHF(bytes, apiKey);
     } catch (e) {
       console.error("enhance-photo upstream error (attempt 1)", e);
-      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 503);
+      if (e instanceof Error && e.message === "Model timeout after 30s") {
+        return json({ message: "Model timeout after 30s" }, 408);
+      }
+      return json({ error: FAIL_MSG }, 503);
+    }
+    try {
+      console.log("4. HF response status:", hfRes.status);
+      console.log("5. HF response headers:", Object.fromEntries(hfRes.headers));
+    } catch (e) {
+      logStepError("HF response logging", e);
     }
 
     // Retry once after 10s on 503 (model loading)
     if (hfRes.status === 503) {
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
       try {
+        console.log("3. Calling Hugging Face model...");
         hfRes = await callHF(bytes, apiKey);
       } catch (e) {
         console.error("enhance-photo upstream error (retry)", e);
-        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 503);
+        if (e instanceof Error && e.message === "Model timeout after 30s") {
+          return json({ message: "Model timeout after 30s" }, 408);
+        }
+        return json({ error: FAIL_MSG }, 503);
+      }
+      try {
+        console.log("4. HF response status:", hfRes.status);
+        console.log("5. HF response headers:", Object.fromEntries(hfRes.headers));
+      } catch (e) {
+        logStepError("HF retry response logging", e);
       }
       if (hfRes.status === 503) {
         return json({ warming: true, message: "AI warming up, try again in 20 seconds" }, 503);
@@ -113,12 +170,12 @@ Deno.serve(async (req) => {
       const text = await hfRes.text().catch(() => "");
       console.error("HF error", hfRes.status, text.slice(0, 300));
       if (hfRes.status === 401 || hfRes.status === 403) {
-        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
+        return json({ error: FAIL_MSG }, 502);
       }
       if (hfRes.status === 429) {
-        return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 429);
+        return json({ error: FAIL_MSG }, 429);
       }
-      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
+      return json({ error: FAIL_MSG }, 502);
     }
 
     const contentType = hfRes.headers.get("content-type") || "image/png";
@@ -127,14 +184,34 @@ Deno.serve(async (req) => {
       if (typeof j?.error === "string" && /loading/i.test(j.error)) {
         return json({ warming: true, message: "AI warming up, try again in 20 seconds" }, 503);
       }
-      return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 502);
+      return json({ error: FAIL_MSG }, 502);
     }
 
-    const buf = new Uint8Array(await hfRes.arrayBuffer());
-    const outB64 = bytesToB64(buf);
+    let enhancedBuffer: Uint8Array;
+    try {
+      enhancedBuffer = new Uint8Array(await hfRes.arrayBuffer());
+      console.log("6. Image buffer size:", enhancedBuffer.byteLength);
+    } catch (e) {
+      logStepError("6. Image buffer size", e);
+      return json({ error: FAIL_MSG }, 502);
+    }
+    let outB64: string;
+    try {
+      outB64 = bytesToB64(enhancedBuffer);
+      console.log("7. Base64 conversion complete");
+    } catch (e) {
+      logStepError("7. Base64 conversion", e);
+      return json({ error: FAIL_MSG }, 500);
+    }
+    try {
+      console.log("8. Returning success response");
+    } catch (e) {
+      logStepError("8. Returning success response", e);
+    }
     return json({ image: `data:${contentType};base64,${outB64}` });
   } catch (e) {
     console.error("enhance-photo error", e);
-    return json({ error: "AI Enhancement unavailable right now — try again in a moment." }, 500);
+    logStepError("enhance-photo outer handler", e);
+    return json({ error: FAIL_MSG }, 500);
   }
 });
