@@ -164,12 +164,24 @@ function PhotoStudioPage() {
 
   function applyEnhanced() {
     if (!enhancedUrl) return;
-    setPreEnhanceUrl(sourceBlobUrl ?? sourceUrl);
-    if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
-    setSourceBlobUrl(enhancedUrl); // data: URL works as <img src> and canvas source
-    setSourceUrl(enhancedUrl);
+    if ((sourceBlobUrl ?? sourceUrl) !== enhancedUrl) {
+      setPreEnhanceUrl(sourceBlobUrl ?? sourceUrl);
+      if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
+      setSourceBlobUrl(enhancedUrl);
+      setSourceUrl(enhancedUrl);
+    }
     setEnhancedUrl(null);
     toast.success("Using enhanced photo. Adjust filters and save.");
+  }
+
+  function discardEnhanced() {
+    if (preEnhanceUrl && enhancedUrl && (sourceBlobUrl ?? sourceUrl) === enhancedUrl) {
+      setSourceBlobUrl(preEnhanceUrl.startsWith("data:") ? preEnhanceUrl : null);
+      setSourceUrl(preEnhanceUrl);
+      setPreEnhanceUrl(null);
+    }
+    setEnhancedUrl(null);
+    toast.message("AI enhancement discarded.");
   }
 
   function revertEnhanced() {
@@ -497,7 +509,7 @@ function PhotoStudioPage() {
                             <Check className="h-3.5 w-3.5" /> Use enhanced
                           </button>
                           <button
-                            onClick={() => setEnhancedUrl(null)}
+                            onClick={discardEnhanced}
                             className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:bg-surface-2"
                           >
                             <X className="h-3.5 w-3.5" /> Discard
