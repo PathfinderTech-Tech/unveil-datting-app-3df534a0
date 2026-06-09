@@ -370,6 +370,7 @@ function Matches() {
                         photoUrl={peerMeta[m.userId]?.photo_url}
                         size={56}
                         className="border-2 border-primary/35 shadow-glow"
+                        veiled
                       />
                     </div>
                     <div className="text-right">
