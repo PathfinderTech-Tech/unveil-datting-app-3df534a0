@@ -5,6 +5,7 @@ import { SignedImage } from "@/components/SignedImage";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getDisplayPhotoUrl } from "@/lib/photos";
+import { markSelfieVerified } from "@/lib/verification.functions";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
@@ -291,7 +292,23 @@ function PhotoStudioPage() {
         .eq("id", user.id);
       setSavedUrl(url);
       setStep(2);
-      toast.success("Profile photo saved.");
+      // Mark the user verified — the selfie is the authenticity check.
+      try {
+        await markSelfieVerified();
+        toast.success("Profile photo saved. You're verified ✓");
+      } catch (err) {
+        console.warn("[unveil] markSelfieVerified failed", err);
+        toast.success("Profile photo saved.");
+      }
+      // If we were sent here from a chat that required verification,
+      // return the user back to that exact conversation.
+      try {
+        const ret = sessionStorage.getItem("unveil:verify_return");
+        if (ret) {
+          sessionStorage.removeItem("unveil:verify_return");
+          setTimeout(() => { window.location.href = ret; }, 600);
+        }
+      } catch { /* ignore */ }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally { setBusy(false); }
