@@ -1,5 +1,6 @@
 // Mutual-match + share + date-plan wiring against real Supabase tables.
 import { supabase } from "@/integrations/supabase/client";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 export type Partner = {
   userId: string;
@@ -28,17 +29,19 @@ export async function loadMutualPartners(): Promise<Partner[]> {
   const ids = rows.map((r) => r.matched_user_id);
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, first_name, city, country, photo_url")
+    .select("id, first_name, city, country, photo_url, profile_photo_url")
     .in("id", ids);
   const map = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const media = new Map((await getPrimaryProfileMedia({ data: { userIds: ids } })).map((p) => [p.id, p]));
   return rows.map((r) => {
     const p = map.get(r.matched_user_id);
+    const m = media.get(r.matched_user_id);
     return {
       userId: r.matched_user_id,
-      name: p?.first_name || "Someone",
+      name: m?.firstName || p?.first_name?.trim() || "Someone",
       city: p?.city ?? null,
       country: p?.country ?? null,
-      avatar: p?.photo_url ?? null,
+      avatar: m?.photoUrl ?? p?.profile_photo_url ?? p?.photo_url ?? null,
       matchId: r.id,
       shareUserConsent: !!r.share_user_consent,
       shareMatchedConsent: !!r.share_matched_consent,

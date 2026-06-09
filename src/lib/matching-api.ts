@@ -5,6 +5,7 @@ import {
   computeComposite, deriveArchetype, type CharacterDNA, type SynapseProfile,
   type Profession,
 } from "@/lib/synapse-store";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 type DiscoverRow = {
   id: string;
@@ -178,17 +179,12 @@ export async function loadRealMatches(filters: DiscoverFilters | number = 40): P
   // public photo_url which may hold a generated initial-style avatar.
   const ids = rows.map((r) => r.id).filter(Boolean);
   if (ids.length) {
-    const { data: pp } = await supabase
-      .from("profiles")
-      .select("id, profile_photo_url")
-      .in("id", ids);
-    const map = new Map<string, string | null>();
-    for (const row of (pp ?? []) as Array<{ id: string; profile_photo_url: string | null }>) {
-      map.set(row.id, row.profile_photo_url);
-    }
+    const media = await getPrimaryProfileMedia({ data: { userIds: ids } });
+    const map = new Map(media.map((row) => [row.id, row]));
     for (const r of rows) {
       const real = map.get(r.id);
-      if (real) r.photo_url = real;
+      if (real?.photoUrl) r.photo_url = real.photoUrl;
+      if (real?.firstName) r.first_name = real.firstName;
     }
   }
   return rows.map((r) => toSynapse(r, me));

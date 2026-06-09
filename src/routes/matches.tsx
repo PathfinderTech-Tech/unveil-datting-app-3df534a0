@@ -25,6 +25,7 @@ import { loadHiddenMatches, logHiddenMatchView, type HiddenMatch } from "@/lib/h
 import { useServerFn } from "@tanstack/react-start";
 import { trackEvent } from "@/lib/analytics";
 import { ThoughtModal } from "@/components/ThoughtModal";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
@@ -139,16 +140,13 @@ function Matches() {
     const ids = visible.map((m) => m.userId).filter((id) => !(id in peerMeta));
     if (ids.length === 0) return;
     let alive = true;
-    supabase
-      .from("profiles")
-      .select("id, avatar_url, photo_url, profile_photo_url, discovery_mode")
-      .in("id", ids)
-      .then(({ data }) => {
+    getPrimaryProfileMedia({ data: { userIds: ids } })
+      .then((data) => {
         if (!alive || !data) return;
         setPeerMeta((prev) => {
           const next = { ...prev };
-          for (const row of data as Array<{ id: string; avatar_url: string | null; photo_url: string | null; profile_photo_url: string | null; discovery_mode: "avatar" | "photo" | null }>) {
-            next[row.id] = { avatar_url: row.avatar_url, photo_url: row.profile_photo_url ?? row.photo_url, discovery_mode: row.discovery_mode };
+          for (const row of data) {
+            next[row.id] = { avatar_url: row.avatarUrl, photo_url: row.photoUrl, discovery_mode: row.hasUploadedPhoto ? "photo" : row.discoveryMode };
           }
           return next;
         });

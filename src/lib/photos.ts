@@ -30,6 +30,10 @@ export async function getDisplayPhotoUrl(
   expiresInSec = 3600,
 ): Promise<string | null> {
   if (!input) return null;
+  // Server-resolved private photos may already be signed. Do not try to
+  // re-sign them in the browser, because pre-conversation veiled photos are
+  // intentionally delivered via a safe, short-lived URL.
+  if (input.includes("/storage/v1/object/sign/profile-photos/") && input.includes("token=")) return input;
   const path = extractPhotoPath(input);
   if (!path) return input; // data: or external — pass through.
 

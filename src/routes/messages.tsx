@@ -4,6 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Search } from "lucide-react";
@@ -79,10 +80,11 @@ function MessagesPage() {
       const peerIds = Array.from(new Set([...convPeerIds, ...thoughtPeerIds]));
       const convIds = (convs ?? []).map((c: any) => c.id);
 
-      const [{ data: profs }, { data: msgs }, { data: reads }] = await Promise.all([
+      const [{ data: profs }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
           ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode").in("id", peerIds)
           : Promise.resolve({ data: [] as any[] } as any),
+        peerIds.length ? getPrimaryProfileMedia({ data: { userIds: peerIds } }) : Promise.resolve([]),
         convIds.length
           ? supabase
               .from("messages")
@@ -105,6 +107,7 @@ function MessagesPage() {
 
       const profMap = new Map<string, any>();
       for (const p of (profs ?? []) as any[]) profMap.set(p.id, p);
+      const mediaMap = new Map(mediaRows.map((m) => [m.id, m]));
 
       const previewFor = (m: any): string => {
         if (!m) return "Say hi";
@@ -115,6 +118,7 @@ function MessagesPage() {
       const convRows: Row[] = (convs ?? []).map((c: any) => {
         const peerId = c.user_a === user!.id ? c.user_b : c.user_a;
         const peer = profMap.get(peerId);
+        const media = mediaMap.get(peerId);
         const last = lastByConv.get(c.id);
         return {
           id: c.id,
@@ -122,10 +126,10 @@ function MessagesPage() {
           user_b: c.user_b,
           last_message_at: c.last_message_at ?? last?.created_at ?? null,
           peer_id: peerId,
-          peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.profile_photo_url ?? peer?.photo_url ?? null,
-          peer_avatar: peer?.avatar_url ?? null,
-          peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
+          peer_name: media?.firstName ?? peer?.first_name?.trim() ?? null,
+          peer_photo: media?.photoUrl ?? peer?.profile_photo_url ?? peer?.photo_url ?? null,
+          peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
+          peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
           last_text: previewFor(last),
           unread: unreadByConv.get(c.id) ?? 0,
         };
@@ -140,6 +144,7 @@ function MessagesPage() {
         if (peersWithConv.has(peerId) || seenPeers.has(peerId)) continue;
         seenPeers.add(peerId);
         const peer = profMap.get(peerId);
+        const media = mediaMap.get(peerId);
         const incoming = t.recipient_id === user!.id;
         thoughtRows.push({
           id: `thought:${peerId}`,
@@ -147,10 +152,10 @@ function MessagesPage() {
           user_b: peerId,
           last_message_at: t.created_at,
           peer_id: peerId,
-          peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.profile_photo_url ?? peer?.photo_url ?? null,
-          peer_avatar: peer?.avatar_url ?? null,
-          peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
+          peer_name: media?.firstName ?? peer?.first_name?.trim() ?? null,
+          peer_photo: media?.photoUrl ?? peer?.profile_photo_url ?? peer?.photo_url ?? null,
+          peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
+          peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
           last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,
           unread: incoming && !t.read_at ? 1 : 0,
         });

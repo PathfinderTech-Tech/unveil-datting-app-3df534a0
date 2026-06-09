@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { loadPrimaryProfileMedia } from "@/lib/profile-media.server";
 
 export type HiddenMatch = {
   id: string;
@@ -58,28 +59,23 @@ export const loadHiddenMatches = createServerFn({ method: "POST" })
     // Overlay the real selfie (private bucket) over the public photo_url
     // which may be a generated initial-style avatar.
     const ids = all.map((r) => r.id).filter(Boolean);
-    const realPhotos = new Map<string, string | null>();
+    const mediaById = new Map<string, Awaited<ReturnType<typeof loadPrimaryProfileMedia>>[number]>();
     if (ids.length) {
-      const { data: pp } = await supabase
-        .from("profiles")
-        .select("id, profile_photo_url")
-        .in("id", ids);
-      for (const row of (pp ?? []) as Array<{ id: string; profile_photo_url: string | null }>) {
-        realPhotos.set(row.id, row.profile_photo_url);
-      }
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      for (const media of await loadPrimaryProfileMedia(supabaseAdmin, userId, ids)) mediaById.set(media.id, media);
     }
     const matches: HiddenMatch[] = all.map((r, idx) => {
       const lock = !premium && idx >= FREE_VISIBLE;
-      const realPhoto = realPhotos.get(r.id) ?? null;
+      const media = mediaById.get(r.id);
       return {
         id: r.id,
-        firstName: lock ? null : r.first_name,
+        firstName: lock ? null : (media?.firstName ?? r.first_name),
         age: lock ? null : r.age,
         city: lock ? null : r.city,
         country: lock ? null : r.country,
         archetype: lock ? null : r.archetype,
         bio: lock ? null : r.bio,
-        photoUrl: lock ? null : (realPhoto ?? r.photo_url),
+        photoUrl: lock ? null : (media?.photoUrl ?? r.photo_url),
         similarityScore: r.similarity_score ?? 0,
         complementaryScore: r.complementary_score ?? 0,
         sharedValues: lock ? [] : (r.shared_values ?? []),
