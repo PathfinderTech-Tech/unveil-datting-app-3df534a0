@@ -506,6 +506,7 @@ function Chat() {
                         avatarUrl={p?.avatar_url}
                         photoUrl={p?.photo_url}
                         size={56}
+                        veiled={!convLastMsg[c.id]}
                       />
                     </div>
                     {pct ? (
