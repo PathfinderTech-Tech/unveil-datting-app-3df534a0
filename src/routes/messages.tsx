@@ -236,11 +236,15 @@ function MessagesPage() {
           </div>
         ) : (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
-            {filtered.map((r) => (
+            {filtered.map((r) => {
+              const isThought = r.id.startsWith("thought:");
+              const linkProps = isThought
+                ? ({ to: "/p/$userId", params: { userId: r.peer_id } } as const)
+                : ({ to: "/chat", search: { c: r.id } } as const);
+              return (
               <li key={r.id}>
                 <Link
-                  to="/chat"
-                  search={{ c: r.id }}
+                  {...(linkProps as any)}
                   className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
@@ -273,7 +277,8 @@ function MessagesPage() {
                   </div>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>
