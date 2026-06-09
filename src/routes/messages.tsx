@@ -190,6 +190,7 @@ function MessagesPage() {
     const hay = `${r.peer_name ?? ""} ${r.last_text ?? ""}`.toLowerCase();
     return hay.includes(q.toLowerCase());
   });
+  const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
 
   if (checking || loading) {
     return (
