@@ -24,7 +24,7 @@ export function SelfieVerifyModal({ open, onClose, returnTo }: Props) {
     if (returnTo) {
       try { sessionStorage.setItem("unveil:verify_return", returnTo); } catch { /* ignore */ }
     }
-    navigate({ to: "/avatar", search: { verify: 1 } as never });
+    navigate({ to: "/avatar" });
   };
 
   return (
