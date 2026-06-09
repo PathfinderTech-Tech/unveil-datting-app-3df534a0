@@ -162,6 +162,8 @@ function MessagesPage() {
       }
 
       const all = [...convRows, ...thoughtRows].sort((a, b) => {
+        // Unread conversations always float to the top.
+        if ((a.unread > 0) !== (b.unread > 0)) return a.unread > 0 ? -1 : 1;
         const ta = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
         const tb = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
         return tb - ta;
@@ -188,6 +190,7 @@ function MessagesPage() {
     const hay = `${r.peer_name ?? ""} ${r.last_text ?? ""}`.toLowerCase();
     return hay.includes(q.toLowerCase());
   });
+  const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
 
   if (checking || loading) {
     return (
@@ -213,6 +216,17 @@ function MessagesPage() {
         {/* Verification is NOT required to message. Free users get 5/day, verified get 15/day,
             Daily Pass / Premium are unlimited. DB trigger enforces quota. */}
 
+
+        {totalUnread > 0 && (
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm">
+            <span className="font-medium text-foreground">
+              You have {totalUnread} unread {totalUnread === 1 ? "message" : "messages"}
+            </span>
+            <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+              {totalUnread}
+            </span>
+          </div>
+        )}
 
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -254,7 +268,11 @@ function MessagesPage() {
               <li key={r.id}>
                 <Link
                   {...(linkProps as any)}
-                  className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
+                  className={`flex items-center gap-3 p-4 transition-colors ${
+                    r.unread > 0
+                      ? "bg-primary/10 border-l-2 border-primary hover:bg-primary/15"
+                      : "hover:bg-surface"
+                  }`}
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                     <ProfileAvatar
@@ -274,9 +292,18 @@ function MessagesPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium">{r.peer_name ?? "Match"}</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className={`truncate ${r.unread > 0 ? "font-semibold" : "font-medium"}`}>
+                          {r.peer_name ?? "Match"}
+                        </span>
+                        {r.unread > 0 && (
+                          <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                            New
+                          </span>
+                        )}
+                      </span>
                       {r.last_message_at && (
-                        <span className="shrink-0 text-xs text-muted-foreground">
+                        <span className={`shrink-0 text-xs ${r.unread > 0 ? "font-medium text-primary" : "text-muted-foreground"}`}>
                           {formatTime(r.last_message_at)}
                         </span>
                       )}

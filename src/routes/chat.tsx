@@ -143,9 +143,9 @@ function Chat() {
       const list = (data ?? []) as Conv[];
       if (!alive) return;
       setConvs(list);
-      if (wantId && !active) {
+      if (wantId) {
         const found = list.find((c) => c.id === wantId);
-        if (found) setActive(found);
+        if (found) setActive((prev) => (prev?.id === found.id ? prev : found));
       }
       const peerIds = list.map((c) => (c.user_a === user.id ? c.user_b : c.user_a));
       const convIds = list.map((c) => c.id);
@@ -202,6 +202,13 @@ function Chat() {
     })();
     return () => { alive = false; };
   }, [user, wantId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep `active` in sync with `?c=` and the loaded conversation list.
+  useEffect(() => {
+    if (!wantId) return;
+    const found = convs.find((c) => c.id === wantId);
+    if (found && active?.id !== found.id) setActive(found);
+  }, [wantId, convs, active?.id]);
 
   const peerId = useMemo(() => {
     if (!active || !user) return null;
