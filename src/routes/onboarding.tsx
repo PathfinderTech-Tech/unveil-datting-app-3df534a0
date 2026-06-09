@@ -13,6 +13,8 @@ import {
   ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import "@/styles/unveil-onboarding.css";
+
 
 
 export const Route = createFileRoute("/onboarding")({
