@@ -16,7 +16,7 @@ import { ThemeTokenSwitcher } from "@/components/ThemeTokenSwitcher";
 import { CooldownGuard } from "@/components/CooldownGuard";
 import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
-import watermarkAsset from "@/assets/unveil-watermark.png.asset.json";
+
 
 function NotFoundComponent() {
   return (
