@@ -56,10 +56,10 @@ export function resolveProfileImage(
   },
 ): string {
   const { discoveryMode, avatarUrl, photoUrl, seed, label } = opts;
-  if (discoveryMode === "avatar") {
-    if (avatarUrl) return avatarUrl;
-  } else if (discoveryMode === "photo") {
-    if (photoUrl) return photoUrl;
-  }
-  return avatarUrl || photoUrl || getAvatarFallback(seed ?? label ?? "unveil", label);
+  // Always prefer the real photo so we can render it behind a veil rather than
+  // showing initials or generated gradient circles. Avatar/discovery mode is
+  // only honoured as a last resort when no photo exists.
+  if (photoUrl) return photoUrl;
+  if (discoveryMode === "avatar" && avatarUrl) return avatarUrl;
+  return photoUrl || avatarUrl || getAvatarFallback(seed ?? label ?? "unveil", label);
 }
