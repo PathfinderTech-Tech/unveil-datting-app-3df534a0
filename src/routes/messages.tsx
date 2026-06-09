@@ -268,7 +268,11 @@ function MessagesPage() {
               <li key={r.id}>
                 <Link
                   {...(linkProps as any)}
-                  className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
+                  className={`flex items-center gap-3 p-4 transition-colors ${
+                    r.unread > 0
+                      ? "bg-primary/10 border-l-2 border-primary hover:bg-primary/15"
+                      : "hover:bg-surface"
+                  }`}
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                     <ProfileAvatar
@@ -288,9 +292,18 @@ function MessagesPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium">{r.peer_name ?? "Match"}</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className={`truncate ${r.unread > 0 ? "font-semibold" : "font-medium"}`}>
+                          {r.peer_name ?? "Match"}
+                        </span>
+                        {r.unread > 0 && (
+                          <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                            New
+                          </span>
+                        )}
+                      </span>
                       {r.last_message_at && (
-                        <span className="shrink-0 text-xs text-muted-foreground">
+                        <span className={`shrink-0 text-xs ${r.unread > 0 ? "font-medium text-primary" : "text-muted-foreground"}`}>
                           {formatTime(r.last_message_at)}
                         </span>
                       )}
