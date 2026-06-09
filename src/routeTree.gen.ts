@@ -25,7 +25,6 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PlayfulRouteImport } from './routes/playful'
-import { Route as PlayRouteImport } from './routes/play'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -44,10 +43,11 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
-import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayIndexRouteImport } from './routes/play.index'
+import { Route as ChallengesIndexRouteImport } from './routes/challenges.index'
 import { Route as PlayThisOrThatRouteImport } from './routes/play.this-or-that'
 import { Route as PlayStoryRouteImport } from './routes/play.story'
 import { Route as PlayQuizRouteImport } from './routes/play.quiz'
@@ -141,11 +141,6 @@ const PlayfulRoute = PlayfulRouteImport.update({
   path: '/playful',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlayRoute = PlayRouteImport.update({
-  id: '/play',
-  path: '/play',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PassportRoute = PassportRouteImport.update({
   id: '/passport',
   path: '/passport',
@@ -236,11 +231,6 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChallengesRoute = ChallengesRouteImport.update({
-  id: '/challenges',
-  path: '/challenges',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AvatarRoute = AvatarRouteImport.update({
   id: '/avatar',
   path: '/avatar',
@@ -254,6 +244,16 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayIndexRoute = PlayIndexRouteImport.update({
+  id: '/play/',
+  path: '/play/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChallengesIndexRoute = ChallengesIndexRouteImport.update({
+  id: '/challenges/',
+  path: '/challenges/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayThisOrThatRoute = PlayThisOrThatRouteImport.update({
@@ -324,7 +324,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -343,7 +342,6 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
-  '/play': typeof PlayRouteWithChildren
   '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -370,6 +368,8 @@ export interface FileRoutesByFullPath {
   '/play/quiz': typeof PlayQuizRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
+  '/challenges/': typeof ChallengesIndexRoute
+  '/play/': typeof PlayIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -377,7 +377,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -396,7 +395,6 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
-  '/play': typeof PlayRouteWithChildren
   '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -423,6 +421,8 @@ export interface FileRoutesByTo {
   '/play/quiz': typeof PlayQuizRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
+  '/challenges': typeof ChallengesIndexRoute
+  '/play': typeof PlayIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -431,7 +431,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -450,7 +449,6 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
-  '/play': typeof PlayRouteWithChildren
   '/playful': typeof PlayfulRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -477,6 +475,8 @@ export interface FileRoutesById {
   '/play/quiz': typeof PlayQuizRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
+  '/challenges/': typeof ChallengesIndexRoute
+  '/play/': typeof PlayIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -486,7 +486,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/avatar'
-    | '/challenges'
     | '/chat'
     | '/checkout'
     | '/community-guidelines'
@@ -505,7 +504,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/onboarding'
     | '/passport'
-    | '/play'
     | '/playful'
     | '/premium'
     | '/privacy'
@@ -532,6 +530,8 @@ export interface FileRouteTypes {
     | '/play/quiz'
     | '/play/story'
     | '/play/this-or-that'
+    | '/challenges/'
+    | '/play/'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
@@ -539,7 +539,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/avatar'
-    | '/challenges'
     | '/chat'
     | '/checkout'
     | '/community-guidelines'
@@ -558,7 +557,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/onboarding'
     | '/passport'
-    | '/play'
     | '/playful'
     | '/premium'
     | '/privacy'
@@ -585,6 +583,8 @@ export interface FileRouteTypes {
     | '/play/quiz'
     | '/play/story'
     | '/play/this-or-that'
+    | '/challenges'
+    | '/play'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   id:
@@ -592,7 +592,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/avatar'
-    | '/challenges'
     | '/chat'
     | '/checkout'
     | '/community-guidelines'
@@ -611,7 +610,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/onboarding'
     | '/passport'
-    | '/play'
     | '/playful'
     | '/premium'
     | '/privacy'
@@ -638,6 +636,8 @@ export interface FileRouteTypes {
     | '/play/quiz'
     | '/play/story'
     | '/play/this-or-that'
+    | '/challenges/'
+    | '/play/'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
@@ -646,7 +646,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AvatarRoute: typeof AvatarRoute
-  ChallengesRoute: typeof ChallengesRouteWithChildren
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
@@ -665,7 +664,6 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
-  PlayRoute: typeof PlayRouteWithChildren
   PlayfulRoute: typeof PlayfulRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -684,6 +682,8 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
+  ChallengesIndexRoute: typeof ChallengesIndexRoute
+  PlayIndexRoute: typeof PlayIndexRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -800,13 +800,6 @@ declare module '@tanstack/react-router' {
       path: '/playful'
       fullPath: '/playful'
       preLoaderRoute: typeof PlayfulRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/play': {
-      id: '/play'
-      path: '/play'
-      fullPath: '/play'
-      preLoaderRoute: typeof PlayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/passport': {
@@ -935,13 +928,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/challenges': {
-      id: '/challenges'
-      path: '/challenges'
-      fullPath: '/challenges'
-      preLoaderRoute: typeof ChallengesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/avatar': {
       id: '/avatar'
       path: '/avatar'
@@ -961,6 +947,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play/': {
+      id: '/play/'
+      path: '/play'
+      fullPath: '/play/'
+      preLoaderRoute: typeof PlayIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/challenges/': {
+      id: '/challenges/'
+      path: '/challenges'
+      fullPath: '/challenges/'
+      preLoaderRoute: typeof ChallengesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play/this-or-that': {
@@ -1060,18 +1060,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface ChallengesRouteChildren {
-  ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
-}
-
-const ChallengesRouteChildren: ChallengesRouteChildren = {
-  ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
-}
-
-const ChallengesRouteWithChildren = ChallengesRoute._addFileChildren(
-  ChallengesRouteChildren,
-)
-
 interface CheckoutRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
 }
@@ -1084,29 +1072,10 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
   CheckoutRouteChildren,
 )
 
-interface PlayRouteChildren {
-  PlayEscapeRoute: typeof PlayEscapeRoute
-  PlayPredictRoute: typeof PlayPredictRoute
-  PlayQuizRoute: typeof PlayQuizRoute
-  PlayStoryRoute: typeof PlayStoryRoute
-  PlayThisOrThatRoute: typeof PlayThisOrThatRoute
-}
-
-const PlayRouteChildren: PlayRouteChildren = {
-  PlayEscapeRoute: PlayEscapeRoute,
-  PlayPredictRoute: PlayPredictRoute,
-  PlayQuizRoute: PlayQuizRoute,
-  PlayStoryRoute: PlayStoryRoute,
-  PlayThisOrThatRoute: PlayThisOrThatRoute,
-}
-
-const PlayRouteWithChildren = PlayRoute._addFileChildren(PlayRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AvatarRoute: AvatarRoute,
-  ChallengesRoute: ChallengesRouteWithChildren,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
@@ -1125,7 +1094,6 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
-  PlayRoute: PlayRouteWithChildren,
   PlayfulRoute: PlayfulRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
@@ -1144,6 +1112,8 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
+  ChallengesIndexRoute: ChallengesIndexRoute,
+  PlayIndexRoute: PlayIndexRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
