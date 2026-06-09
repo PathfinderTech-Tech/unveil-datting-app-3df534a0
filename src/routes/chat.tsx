@@ -579,6 +579,7 @@ function Chat() {
                             avatarUrl={peer?.avatar_url}
                             photoUrl={peer?.photo_url}
                             size={56}
+                            veiled={msgs.length === 0}
                           />
                         </div>
                       </div>
