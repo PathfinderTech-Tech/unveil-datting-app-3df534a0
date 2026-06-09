@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch, Link } from "@tanstack/react-router";
+import { createFileRoute, useRouterState, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, MessageCircle, Heart, Calendar, Lock, Users } from "lucide-react";
@@ -37,7 +37,7 @@ const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
   const { checking } = useRequireOnboarding();
-  const search = useSearch({ strict: false }) as SearchParams;
+  const search = useRouterState({ select: (state) => state.location.search }) as SearchParams;
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
 
   const [active, setActive] = useState<string | null>(search.cat ?? null);
