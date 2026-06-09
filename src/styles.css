@@ -1,7 +1,11 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "./styles/unveil-global.css";
+/* unveil-global.css disabled: its broad [class*="…"] !important selectors
+   hijacked shadcn buttons/cards/dialogs and broke Daily Personality, Match
+   Games, Complete the Picture, and button contrast. The token-based design
+   in this file already provides the luxury indigo/purple/gold styling. */
+/* @import "./styles/unveil-global.css"; */
 
 @custom-variant dark (&:is(.dark *));
 
