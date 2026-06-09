@@ -749,3 +749,22 @@ a.border-primary {
   color: transparent !important;
 }
 
+
+@keyframes unveil-heartbeat {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(1.045); }
+  20% { transform: scale(1); }
+  30% { transform: scale(1.025); }
+  40% { transform: scale(1); }
+}
+.animate-heartbeat {
+  animation: unveil-heartbeat 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes unveil-pulse-slow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 0%, transparent); }
+}
+.animate-pulse-slow {
+  animation: unveil-pulse-slow 2.4s ease-in-out infinite;
+}
