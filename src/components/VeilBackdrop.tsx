@@ -1,44 +1,16 @@
-import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
+// Old background watermark removed per request — VeilBackdrop is now a no-op.
+// Kept as exports so existing imports continue to compile.
+import logoAsset from "@/assets/unveil-logo.png.asset.json";
 
-type Variant = "corner" | "center" | "edge";
-
-/**
- * Subtle UNVEIL veil watermark for cards, hero sections, loaders.
- * Decorative only — never blocks content (pointer-events: none, low opacity).
- */
-export function VeilBackdrop({
-  variant = "corner",
-  opacity = 0.07,
-  className = "",
-}: {
-  variant?: Variant;
+export function VeilBackdrop(_: {
+  variant?: "corner" | "center" | "edge";
   opacity?: number;
   className?: string;
 }) {
-  const position =
-    variant === "center"
-      ? "center center"
-      : variant === "edge"
-      ? "center right -15%"
-      : "bottom -15% right -15%";
-  const size = variant === "center" ? "60%" : "50%";
-  return (
-    <div
-      aria-hidden
-      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
-      style={{
-        backgroundImage: `url(${logoAsset.url})`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: position,
-        backgroundSize: `${size} auto`,
-        opacity,
-        mixBlendMode: "screen",
-      }}
-    />
-  );
+  return null;
 }
 
-/** Compact inline veil mark — for loaders, badges, inline accents. */
+/** Compact inline veil mark — floating master logo (no black background). */
 export function VeilPulse({ size = 64 }: { size?: number }) {
   return (
     <div
@@ -53,7 +25,9 @@ export function VeilPulse({ size = 64 }: { size?: number }) {
         style={{
           width: size * 0.8,
           height: size * 0.8,
-          filter: "drop-shadow(0 0 16px color-mix(in oklch, var(--logo-magenta) 62%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 38%, transparent))",
+          mixBlendMode: "screen",
+          filter:
+            "drop-shadow(0 0 16px color-mix(in oklch, var(--logo-magenta) 62%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 38%, transparent))",
         }}
       />
     </div>

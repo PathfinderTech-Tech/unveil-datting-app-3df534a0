@@ -50,33 +50,53 @@ function MessagesPage() {
     let alive = true;
 
     async function load() {
-      const { data: convs } = await supabase
-        .from("conversations")
-        .select("id, user_a, user_b, last_message_at")
-        .order("last_message_at", { ascending: false });
+      const [{ data: convs }, { data: thoughtsSent }, { data: thoughtsRecv }] = await Promise.all([
+        supabase
+          .from("conversations")
+          .select("id, user_a, user_b, last_message_at")
+          .order("last_message_at", { ascending: false, nullsFirst: false }),
+        (supabase as any)
+          .from("thoughts")
+          .select("id, sender_id, recipient_id, content, created_at, read_at, delivered_as_message_id")
+          .eq("sender_id", user!.id)
+          .is("delivered_as_message_id", null)
+          .order("created_at", { ascending: false })
+          .limit(50),
+        (supabase as any)
+          .from("thoughts")
+          .select("id, sender_id, recipient_id, content, created_at, read_at, delivered_as_message_id")
+          .eq("recipient_id", user!.id)
+          .is("delivered_as_message_id", null)
+          .order("created_at", { ascending: false })
+          .limit(50),
+      ]);
 
-      if (!alive || !convs?.length) {
-        setRows([]);
-        return;
-      }
-
-      const peerIds = convs.map((c: any) => (c.user_a === user!.id ? c.user_b : c.user_a));
-      const convIds = convs.map((c: any) => c.id);
+      const convPeerIds = (convs ?? []).map((c: any) => (c.user_a === user!.id ? c.user_b : c.user_a));
+      const thoughtPeerIds = [
+        ...((thoughtsSent ?? []) as any[]).map((t) => t.recipient_id),
+        ...((thoughtsRecv ?? []) as any[]).map((t) => t.sender_id),
+      ];
+      const peerIds = Array.from(new Set([...convPeerIds, ...thoughtPeerIds]));
+      const convIds = (convs ?? []).map((c: any) => c.id);
 
       const [{ data: profs }, { data: msgs }, { data: reads }] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, photo_url, avatar_url, discovery_mode").in("id", peerIds),
-        supabase
-          .from("messages")
-          .select("id, conversation_id, content, sender_id, created_at")
-          .in("conversation_id", convIds)
-          .order("created_at", { ascending: false }),
+        peerIds.length
+          ? supabase.from("profiles").select("id, first_name, photo_url, avatar_url, discovery_mode").in("id", peerIds)
+          : Promise.resolve({ data: [] as any[] } as any),
+        convIds.length
+          ? supabase
+              .from("messages")
+              .select("id, conversation_id, content, sender_id, created_at, message_type")
+              .in("conversation_id", convIds)
+              .order("created_at", { ascending: false })
+          : Promise.resolve({ data: [] as any[] } as any),
         supabase.from("message_reads").select("message_id").eq("user_id", user!.id),
       ]);
 
       const readSet = new Set((reads ?? []).map((r: any) => r.message_id));
       const lastByConv = new Map<string, any>();
       const unreadByConv = new Map<string, number>();
-      for (const m of msgs ?? []) {
+      for (const m of (msgs ?? []) as any[]) {
         if (!lastByConv.has(m.conversation_id)) lastByConv.set(m.conversation_id, m);
         if (m.sender_id !== user!.id && !readSet.has(m.id)) {
           unreadByConv.set(m.conversation_id, (unreadByConv.get(m.conversation_id) ?? 0) + 1);
@@ -84,9 +104,15 @@ function MessagesPage() {
       }
 
       const profMap = new Map<string, any>();
-      for (const p of profs ?? []) profMap.set(p.id, p);
+      for (const p of (profs ?? []) as any[]) profMap.set(p.id, p);
 
-      const built: Row[] = convs.map((c: any) => {
+      const previewFor = (m: any): string => {
+        if (!m) return "Say hi";
+        if (m.message_type === "voice") return "🎙️ Voice message";
+        return m.content ?? "Say hi";
+      };
+
+      const convRows: Row[] = (convs ?? []).map((c: any) => {
         const peerId = c.user_a === user!.id ? c.user_b : c.user_a;
         const peer = profMap.get(peerId);
         const last = lastByConv.get(c.id);
@@ -94,17 +120,48 @@ function MessagesPage() {
           id: c.id,
           user_a: c.user_a,
           user_b: c.user_b,
-          last_message_at: c.last_message_at,
+          last_message_at: c.last_message_at ?? last?.created_at ?? null,
           peer_id: peerId,
           peer_name: peer?.first_name ?? null,
           peer_photo: peer?.photo_url ?? null,
           peer_avatar: peer?.avatar_url ?? null,
           peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
-          last_text: last?.content ?? null,
+          last_text: previewFor(last),
           unread: unreadByConv.get(c.id) ?? 0,
         };
       });
-      if (alive) setRows(built);
+
+      // Pseudo-rows for thoughts (pre-mutual interest pings) so sender + recipient both see activity.
+      const peersWithConv = new Set(convRows.map((r) => r.peer_id));
+      const thoughtRows: Row[] = [];
+      const seenPeers = new Set<string>();
+      for (const t of [...(thoughtsRecv ?? []), ...(thoughtsSent ?? [])] as any[]) {
+        const peerId = t.sender_id === user!.id ? t.recipient_id : t.sender_id;
+        if (peersWithConv.has(peerId) || seenPeers.has(peerId)) continue;
+        seenPeers.add(peerId);
+        const peer = profMap.get(peerId);
+        const incoming = t.recipient_id === user!.id;
+        thoughtRows.push({
+          id: `thought:${peerId}`,
+          user_a: user!.id,
+          user_b: peerId,
+          last_message_at: t.created_at,
+          peer_id: peerId,
+          peer_name: peer?.first_name ?? null,
+          peer_photo: peer?.photo_url ?? null,
+          peer_avatar: peer?.avatar_url ?? null,
+          peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
+          last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,
+          unread: incoming && !t.read_at ? 1 : 0,
+        });
+      }
+
+      const all = [...convRows, ...thoughtRows].sort((a, b) => {
+        const ta = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+        const tb = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+        return tb - ta;
+      });
+      if (alive) setRows(all);
     }
 
     load();
@@ -113,6 +170,7 @@ function MessagesPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "message_reads" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "thoughts" }, load)
       .subscribe();
     return () => {
       alive = false;
@@ -179,11 +237,15 @@ function MessagesPage() {
           </div>
         ) : (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
-            {filtered.map((r) => (
+            {filtered.map((r) => {
+              const isThought = r.id.startsWith("thought:");
+              const linkProps = isThought
+                ? ({ to: "/p/$userId", params: { userId: r.peer_id } } as const)
+                : ({ to: "/chat", search: { c: r.id } } as const);
+              return (
               <li key={r.id}>
                 <Link
-                  to="/chat"
-                  search={{ c: r.id }}
+                  {...(linkProps as any)}
                   className="flex items-center gap-3 p-4 transition-colors hover:bg-surface"
                 >
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
@@ -216,7 +278,8 @@ function MessagesPage() {
                   </div>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>

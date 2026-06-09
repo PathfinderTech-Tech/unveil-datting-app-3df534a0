@@ -9,7 +9,11 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
       width={size}
       height={size}
       className={`object-contain ${className}`}
-      style={{ filter: "drop-shadow(0 0 14px color-mix(in oklch, var(--logo-magenta) 50%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 34%, transparent))" }}
+      style={{
+        mixBlendMode: "screen",
+        filter:
+          "drop-shadow(0 0 14px color-mix(in oklch, var(--logo-magenta) 50%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 34%, transparent))",
+      }}
     />
   );
 }
