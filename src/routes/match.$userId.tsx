@@ -217,7 +217,13 @@ function MatchExperience() {
   return (
     <div className="min-h-screen bg-background">
       <UnveilNav />
-      <MessagePaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
+      <MessagePaywallModal
+        open={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        dailyLimit={quota.dailyLimit}
+        isPremium={quota.dailyLimit >= 35}
+        returnTo={`/match/${userId}`}
+      />
 
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6">
         <Link to="/matches" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
@@ -363,7 +369,7 @@ function MatchExperience() {
               {!quota.loading && !quota.unlimited && (
                 <div className="mb-1.5 px-1 text-[10px] text-muted-foreground">
                   {quota.remaining} of {quota.dailyLimit} interactions remaining ·{" "}
-                  <Link to="/checkout" search={{ product: "message_pass" } as never} className="text-accent underline">Daily Pass $1.99</Link>
+                  <Link to="/checkout" search={{ product: "message_pass", returnTo: `/match/${userId}` } as never} className="text-accent underline">Daily Pass $1.99</Link>
                 </div>
               )}
               <form

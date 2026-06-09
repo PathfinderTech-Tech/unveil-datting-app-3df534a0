@@ -53,6 +53,13 @@ function Checkout() {
       toast.error("This product is no longer available.");
       navigate({ to: returnTo?.startsWith("/chat") ? "/chat" : "/messages" });
     }
+    // Persist the return destination so we can recover it on /checkout/return
+    // even if Stripe drops the search param (some redirect paths strip it).
+    try {
+      if (returnTo && returnTo.startsWith("/")) {
+        localStorage.setItem("unveil:checkoutReturn", returnTo);
+      }
+    } catch { /* ignore quota / privacy errors */ }
   }, [navigate, returnTo]);
 
   useEffect(() => {

@@ -28,14 +28,25 @@ function CheckoutReturn() {
   const { session_id, product, returnTo } = Route.useSearch() as { session_id?: string; product?: ProductKey; returnTo?: string };
   const navigate = useNavigate();
 
+  // Recover returnTo from localStorage if Stripe dropped the search param.
+  let effectiveReturnTo: string | undefined = returnTo;
+  if (!effectiveReturnTo) {
+    try {
+      const saved = localStorage.getItem("unveil:checkoutReturn");
+      if (saved && saved.startsWith("/")) effectiveReturnTo = saved;
+    } catch { /* ignore */ }
+  }
+
   useEffect(() => {
     if (!session_id) return;
     if (product) toast.success(SUCCESS_BANNER[product]);
-    if (returnTo) {
-      const t = setTimeout(() => { window.location.replace(returnTo); }, 800);
+    // Always clear the saved checkout-return state once the payment completes.
+    try { localStorage.removeItem("unveil:checkoutReturn"); } catch { /* ignore */ }
+    if (effectiveReturnTo) {
+      const t = setTimeout(() => { window.location.replace(effectiveReturnTo!); }, 800);
       return () => clearTimeout(t);
     }
-  }, [session_id, product, returnTo, navigate]);
+  }, [session_id, product, effectiveReturnTo, navigate]);
 
   return (
     <div className="min-h-screen">
@@ -48,7 +59,7 @@ function CheckoutReturn() {
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
           {session_id ? (product ? SUCCESS_BANNER[product] : "Your purchase is confirmed.") : "Welcome to UNVEIL."}
         </p>
-        {returnTo ? (
+        {effectiveReturnTo ? (
           <p className="mt-4 text-xs text-muted-foreground">Returning you to your conversation…</p>
         ) : (
           <div className="mt-8 flex flex-wrap justify-center gap-3">
