@@ -417,9 +417,10 @@ function Onboarding() {
   const minsLeft = STEPS.slice(step - 1).reduce((sum, s) => sum + s.minutes, 0);
 
   return (
-    <div className="min-h-screen">
+    <div className="unveil-onboarding min-h-screen">
       <UnveilNav />
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="relative z-[1] mx-auto max-w-2xl px-6 py-12">
+
 
         {/* Welcome-back banner */}
         {resumed && step > 1 && (
