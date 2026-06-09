@@ -455,7 +455,7 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Welcome to UNVEIL.</h1>
+              <h1 className="font-display text-4xl font-bold">Welcome to <span className="uo-accent">UNVEIL</span>.</h1>
               <p className="mt-2 text-muted-foreground">A few guided steps to set up a profile you'll actually be proud of. Your progress is saved as you go.</p>
             </div>
             <div className="space-y-3 rounded-3xl border border-border bg-card p-6">
