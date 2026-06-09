@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { X, Zap, Crown } from "lucide-react";
+import { X, Zap, Crown, Infinity as InfinityIcon } from "lucide-react";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Limit the user just hit (5 free / 15 premium). */
+  /** Limit the user just hit (15 free / 30 monthly premium). */
   dailyLimit?: number;
-  /** Is this user already premium? Hides the upgrade CTA. */
+  /** True when the user is already on the Monthly Premium plan. Hides the monthly CTA. */
   isPremium?: boolean;
   /** Path (including query string) the user should return to after a successful purchase. */
   returnTo?: string;
@@ -15,7 +15,7 @@ type Props = {
 export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, returnTo }: Props) {
   if (!open) return null;
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
-  const limit = dailyLimit ?? (isPremium ? 15 : 5);
+  const limit = dailyLimit ?? (isPremium ? 30 : 15);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur">
@@ -29,15 +29,14 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
         </button>
         <div className="text-center">
           <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Daily limit reached</p>
-          <h2 className="mt-2 font-display text-2xl font-light">You've used today's {limit} messages.</h2>
+          <h2 className="mt-2 font-display text-2xl font-light">You've used today's {limit} interactions.</h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            {isPremium
-              ? "Get unlimited messaging for the next 24 hours, or wait until tomorrow."
-              : "Get unlimited messaging for 24 hours, upgrade to Premium, or wait until tomorrow."}
+            Text messages and voice notes share the same daily allowance.
           </p>
         </div>
 
         <div className="mt-6 space-y-3">
+          {/* Daily Pass — always offered */}
           <Link
             to="/checkout"
             search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
@@ -48,30 +47,48 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
                 <Zap className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <div className="font-medium">24-Hour Pass</div>
-                <div className="text-xs text-muted-foreground">Unlimited messaging for 24 hours</div>
+                <div className="font-medium">UNVEIL Daily Pass</div>
+                <div className="text-xs text-muted-foreground">Unlimited messages &amp; voice notes for 24 hours</div>
               </div>
             </div>
             <div className="font-display text-lg">$1.99</div>
           </Link>
 
+          {/* Monthly Premium — hidden for monthly users (they already have it) */}
           {!isPremium && (
             <Link
-              to="/premium"
-              className="flex items-center justify-between rounded-2xl bg-gradient-hero p-4 text-primary-foreground shadow-glow"
+              to="/checkout"
+              search={{ product: "premium", ...(rt ? { returnTo: rt } : {}) } as any}
+              className="flex items-center justify-between rounded-2xl border border-border bg-surface/60 p-4 transition-colors hover:bg-surface"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/20">
-                  <Crown className="h-5 w-5" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+                  <Crown className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="font-medium">Upgrade to Premium</div>
-                  <div className="text-xs opacity-90">15 messages/day · instant contact sharing · priority</div>
+                  <div className="font-medium">1-Month Premium</div>
+                  <div className="text-xs text-muted-foreground">30 interactions per day</div>
                 </div>
               </div>
-              <div className="font-display text-lg">$15.99<span className="text-xs opacity-80">/mo</span></div>
             </Link>
           )}
+
+          {/* 3-Month Premium — always offered (true unlimited) */}
+          <Link
+            to="/checkout"
+            search={{ product: "premium_quarterly", ...(rt ? { returnTo: rt } : {}) } as any}
+            className="flex items-center justify-between rounded-2xl bg-gradient-hero p-4 text-primary-foreground shadow-glow"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/20">
+                <InfinityIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-medium">3-Month Premium</div>
+                <div className="text-xs opacity-90">Unlimited messages &amp; voice notes</div>
+              </div>
+            </div>
+          </Link>
 
           <button
             onClick={onClose}

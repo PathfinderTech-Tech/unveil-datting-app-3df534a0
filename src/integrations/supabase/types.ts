@@ -1925,6 +1925,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_effective_message_limit: { Args: { _uid: string }; Returns: number }
       get_message_quota: {
         Args: { _uid?: string }
         Returns: {
