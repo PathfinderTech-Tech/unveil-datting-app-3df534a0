@@ -10,6 +10,7 @@ import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match — UNVEIL" }] }),
@@ -109,12 +110,21 @@ function MatchExperience() {
       setMeId(uid);
       if (uid && uid === userId) { navigate({ to: "/profile", replace: true }); return; }
 
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode")
-        .eq("id", userId).maybeSingle();
+      const [{ data: p }, mediaRows] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode")
+          .eq("id", userId).maybeSingle(),
+        getPrimaryProfileMedia({ data: { userIds: [userId] } }),
+      ]);
       const prow = p as (Profile & { profile_photo_url?: string | null }) | null;
-      if (prow) prow.photo_url = prow.profile_photo_url ?? prow.photo_url ?? null;
+      const media = mediaRows[0];
+      if (prow) {
+        prow.first_name = media?.firstName ?? prow.first_name?.trim() ?? null;
+        prow.photo_url = media?.photoUrl ?? prow.profile_photo_url ?? prow.photo_url ?? null;
+        prow.avatar_url = media?.avatarUrl ?? prow.avatar_url ?? null;
+        prow.discovery_mode = media?.hasUploadedPhoto ? "photo" : prow.discovery_mode;
+      }
       setProfile(prow);
       setCompat(await loadCompatibility(userId));
 
