@@ -81,7 +81,7 @@ function MessagesPage() {
 
       const [{ data: profs }, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
-          ? supabase.from("profiles").select("id, first_name, photo_url, avatar_url, discovery_mode").in("id", peerIds)
+          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode").in("id", peerIds)
           : Promise.resolve({ data: [] as any[] } as any),
         convIds.length
           ? supabase
@@ -123,7 +123,7 @@ function MessagesPage() {
           last_message_at: c.last_message_at ?? last?.created_at ?? null,
           peer_id: peerId,
           peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.photo_url ?? null,
+          peer_photo: peer?.profile_photo_url ?? peer?.photo_url ?? null,
           peer_avatar: peer?.avatar_url ?? null,
           peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
           last_text: previewFor(last),
@@ -148,7 +148,7 @@ function MessagesPage() {
           last_message_at: t.created_at,
           peer_id: peerId,
           peer_name: peer?.first_name ?? null,
-          peer_photo: peer?.photo_url ?? null,
+          peer_photo: peer?.profile_photo_url ?? peer?.photo_url ?? null,
           peer_avatar: peer?.avatar_url ?? null,
           peer_discovery_mode: (peer?.discovery_mode as "avatar" | "photo" | null) ?? null,
           last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,

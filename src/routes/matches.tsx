@@ -141,14 +141,14 @@ function Matches() {
     let alive = true;
     supabase
       .from("profiles")
-      .select("id, avatar_url, photo_url, discovery_mode")
+      .select("id, avatar_url, photo_url, profile_photo_url, discovery_mode")
       .in("id", ids)
       .then(({ data }) => {
         if (!alive || !data) return;
         setPeerMeta((prev) => {
           const next = { ...prev };
-          for (const row of data as Array<{ id: string } & PeerMeta>) {
-            next[row.id] = { avatar_url: row.avatar_url, photo_url: row.photo_url, discovery_mode: row.discovery_mode };
+          for (const row of data as Array<{ id: string; avatar_url: string | null; photo_url: string | null; profile_photo_url: string | null; discovery_mode: "avatar" | "photo" | null }>) {
+            next[row.id] = { avatar_url: row.avatar_url, photo_url: row.profile_photo_url ?? row.photo_url, discovery_mode: row.discovery_mode };
           }
           return next;
         });

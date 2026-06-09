@@ -44,11 +44,15 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
     let alive = true;
     supabase
       .from("profiles")
-      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, discovery_mode, communication_style")
+      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, profile_photo_url, discovery_mode, communication_style")
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
-        if (alive) setP((data as PassportProfile) ?? null);
+        if (alive) {
+          const row = data as (PassportProfile & { profile_photo_url?: string | null }) | null;
+          if (row) row.photo_url = row.profile_photo_url ?? row.photo_url ?? null;
+          setP(row);
+        }
       });
     supabase
       .from("personality_blueprint")

@@ -173,7 +173,25 @@ export async function loadRealMatches(filters: DiscoverFilters | number = 40): P
     console.warn("[unveil] discover_profiles failed", error);
     return [];
   }
-  return (data ?? []).map((r) => toSynapse(r as DiscoverRow, me));
+  const rows = (data ?? []) as DiscoverRow[];
+  // Prefer the real selfie (profile_photo_url, private bucket) over the
+  // public photo_url which may hold a generated initial-style avatar.
+  const ids = rows.map((r) => r.id).filter(Boolean);
+  if (ids.length) {
+    const { data: pp } = await supabase
+      .from("profiles")
+      .select("id, profile_photo_url")
+      .in("id", ids);
+    const map = new Map<string, string | null>();
+    for (const row of (pp ?? []) as Array<{ id: string; profile_photo_url: string | null }>) {
+      map.set(row.id, row.profile_photo_url);
+    }
+    for (const r of rows) {
+      const real = map.get(r.id);
+      if (real) r.photo_url = real;
+    }
+  }
+  return rows.map((r) => toSynapse(r, me));
 }
 
 export function distanceLabel(km: number | null): string | null {

@@ -111,9 +111,11 @@ function MatchExperience() {
 
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, discovery_mode")
+        .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode")
         .eq("id", userId).maybeSingle();
-      setProfile(p as Profile | null);
+      const prow = p as (Profile & { profile_photo_url?: string | null }) | null;
+      if (prow) prow.photo_url = prow.profile_photo_url ?? prow.photo_url ?? null;
+      setProfile(prow);
       setCompat(await loadCompatibility(userId));
 
       if (uid) {

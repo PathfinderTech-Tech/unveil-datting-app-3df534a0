@@ -152,7 +152,7 @@ function Chat() {
         const [{ data: profs }, { data: lastMsgs }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("id, first_name, avatar_url, photo_url, discovery_mode, verified, updated_at")
+            .select("id, first_name, avatar_url, photo_url, profile_photo_url, discovery_mode, verified, updated_at")
             .in("id", peerIds),
           supabase
             .from("messages")
@@ -162,12 +162,12 @@ function Chat() {
         ]);
         if (!alive) return;
         const pmap: Record<string, PeerProfile> = {};
-        for (const p of (profs ?? []) as PeerRow[]) {
+        for (const p of (profs ?? []) as (PeerRow & { profile_photo_url: string | null })[]) {
           pmap[p.id] = {
             id: p.id,
             first_name: p.first_name,
             avatar_url: p.avatar_url,
-            photo_url: p.photo_url,
+            photo_url: p.profile_photo_url ?? p.photo_url,
             discovery_mode: (p.discovery_mode as "avatar" | "photo" | null) ?? null,
             verified: p.verified,
             last_seen_at: p.updated_at,
