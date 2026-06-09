@@ -947,14 +947,25 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
-                  <VoiceMessageRecorder
-                    conversationId={active.id}
-                    senderId={user.id}
-                    maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                    onSent={() => refreshQuota()}
-                    onQuotaExhausted={() => setPaywallOpen(true)}
-                    disabled={!quota.unlimited && quota.remaining <= 0}
-                  />
+                  {verified ? (
+                    <VoiceMessageRecorder
+                      conversationId={active.id}
+                      senderId={user.id}
+                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                      onSent={() => refreshQuota()}
+                      onQuotaExhausted={() => setPaywallOpen(true)}
+                      disabled={!quota.unlimited && quota.remaining <= 0}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setVerifyOpen(true)}
+                      aria-label="Verify to send voice"
+                      className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                    >
+                      <LockIcon className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
