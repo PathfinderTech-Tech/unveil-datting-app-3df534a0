@@ -105,10 +105,10 @@ function CompletePicture() {
       try {
         await supabase.from("game_results").insert({
           user_id: uid,
-          game_id: "complete_picture",
-          score,
-          total_questions: total,
+          total_score: score,
           emotional_score: accuracy,
+          archetype: "complete_picture",
+          attempts: [{ game: "complete_picture", total, score, accuracy }],
         } as never);
         if (accuracy >= 80) awardBadge("complete-picture-ace");
       } catch (e) {
