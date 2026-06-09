@@ -495,6 +495,7 @@ function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { matc
               avatarUrl={peerMeta?.avatar_url}
               photoUrl={peerMeta?.photo_url}
               size={72}
+              veiled
             />
 
             <div className="flex-1">
