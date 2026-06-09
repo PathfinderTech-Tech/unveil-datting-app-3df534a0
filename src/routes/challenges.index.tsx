@@ -37,7 +37,7 @@ const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
   const { checking } = useRequireOnboarding();
-  const search = useSearch({ from: "/challenges/" }) as SearchParams;
+  const search = useSearch({ strict: false }) as SearchParams;
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
 
   const [active, setActive] = useState<string | null>(search.cat ?? null);
