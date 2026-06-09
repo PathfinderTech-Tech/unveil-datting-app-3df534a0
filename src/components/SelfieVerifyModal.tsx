@@ -7,31 +7,48 @@ import { markSelfieVerified } from "@/lib/verification.functions";
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Where to return after verification succeeds (defaults to current URL). */
   returnTo?: string;
   onVerified?: () => void;
 };
 
-/**
- * Live selfie verification gate. Opens the device's front-facing camera
- * directly (synchronous getUserMedia inside the user gesture), captures a
- * single frame, uploads it privately to the user's profile-photos folder
- * under /selfies/, marks the profile as verified, then returns the user
- * to where they came from. The selfie is NEVER set as the public profile
- * photo here — that's an opt-in action in Profile settings.
- */
+type Phase = "intro" | "live" | "review" | "saving" | "done";
+
 export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [phase, setPhase] = useState<"intro" | "live" | "review" | "saving" | "done">("intro");
+  const [phase, setPhase] = useState<Phase>("intro");
   const [error, setError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<string | null>(null);
+  const [canCapture, setCanCapture] = useState(false);
 
-  // Cleanup camera on unmount / close.
   useEffect(() => {
-    if (!open) stopCamera();
+    if (!open) {
+      stopCamera();
+      setPhase("intro");
+      setSnapshot(null);
+      setError(null);
+      setCanCapture(false);
+    }
     return () => stopCamera();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Attach stream to video element whenever both are ready.
+  useEffect(() => {
+    if (phase !== "live") return;
+    const v = videoRef.current;
+    const s = streamRef.current;
+    if (!v || !s) return;
+    try {
+      if (v.srcObject !== s) v.srcObject = s;
+      v.setAttribute("playsinline", "true");
+      v.setAttribute("webkit-playsinline", "true");
+      v.muted = true;
+      v.autoplay = true;
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } catch {}
+  }, [phase]);
 
   function stopCamera() {
     const s = streamRef.current;
@@ -39,30 +56,27 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
       s.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
-    if (videoRef.current) videoRef.current.srcObject = null;
+    if (videoRef.current) {
+      try { videoRef.current.pause(); } catch {}
+      videoRef.current.srcObject = null;
+    }
+    setCanCapture(false);
   }
 
   async function startCamera() {
     setError(null);
+    setCanCapture(false);
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("Camera not available on this device or browser.");
       return;
     }
     try {
-      // Synchronous-ish call inside the click handler — required by Safari/iOS.
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
         audio: false,
       });
       streamRef.current = stream;
       setPhase("live");
-      // Wait one tick so the <video> element is mounted.
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play().catch(() => {});
-        }
-      }, 0);
     } catch (e: any) {
       const name = e?.name ?? "";
       if (name === "NotAllowedError" || name === "SecurityError") {
@@ -88,7 +102,6 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
     canvas.height = 720;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    // Mirror so the snapshot matches what the user sees in the preview.
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(v, sx, sy, size, size, 0, 0, canvas.width, canvas.height);
@@ -105,7 +118,6 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Please sign in.");
       const blob = await (await fetch(snapshot)).blob();
-      // Private path inside the user's folder — not exposed publicly.
       const path = `${user.id}/selfies/verify-${Date.now()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("profile-photos")
@@ -115,7 +127,6 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
       setPhase("done");
       toast.success("Thank you for helping keep the Unveil community safe.");
       onVerified?.();
-      // Return the user to where they came from.
       setTimeout(() => {
         onClose();
         const dest = returnTo ?? (typeof window !== "undefined" ? window.location.pathname + window.location.search : null);
@@ -182,24 +193,40 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
 
         {phase === "live" && (
           <div className="flex flex-col">
-            <div className="relative aspect-square w-full bg-black">
+            <div className="relative aspect-square w-full overflow-hidden bg-black">
               <video
                 ref={videoRef}
                 playsInline
-                muted
                 autoPlay
-                className="h-full w-full object-cover"
+                muted
+                disablePictureInPicture
+                onLoadedMetadata={() => setCanCapture(true)}
+                onCanPlay={() => setCanCapture(true)}
+                onError={() => setError("Camera preview failed to load. Please retry.")}
+                className="absolute inset-0 h-full w-full object-cover"
                 style={{ transform: "scaleX(-1)" }}
               />
               <div className="pointer-events-none absolute inset-6 rounded-full border-2 border-white/40" />
+              {!canCapture && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                  <Loader2 className="h-6 w-6 animate-spin text-white/80" />
+                </div>
+              )}
             </div>
             <div className="grid gap-2 p-5">
-              <p className="text-center text-xs text-muted-foreground">
-                Center your face in the circle, then tap Capture.
-              </p>
+              {error ? (
+                <p className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-center text-xs text-destructive">
+                  {error}
+                </p>
+              ) : (
+                <p className="text-center text-xs text-muted-foreground">
+                  Center your face in the circle, then tap Capture.
+                </p>
+              )}
               <button
                 onClick={capture}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow"
+                disabled={!canCapture}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50"
               >
                 <Camera className="h-4 w-4" /> Capture
               </button>
