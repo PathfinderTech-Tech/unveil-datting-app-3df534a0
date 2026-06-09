@@ -359,7 +359,7 @@ function MatchExperience() {
             <div className="border-t border-border bg-card/80 p-2.5 backdrop-blur">
               {!quota.loading && !quota.unlimited && (
                 <div className="mb-1.5 px-1 text-[10px] text-muted-foreground">
-                  {quota.remaining} of {quota.dailyLimit} free messages remaining ·{" "}
+                  {quota.remaining} of {quota.dailyLimit} interactions remaining ·{" "}
                   <Link to="/checkout" search={{ product: "message_pass" } as never} className="text-accent underline">Daily Pass $1.99</Link>
                 </div>
               )}
