@@ -16,6 +16,8 @@ import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
+import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
@@ -34,7 +36,17 @@ export const Route = createFileRoute("/chat")({
 });
 
 type Conv = { id: string; user_a: string; user_b: string; last_message_at: string | null };
-type Msg = { id: string; sender_id: string; content: string; created_at: string; delivered_at?: string | null };
+type Msg = {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  delivered_at?: string | null;
+  message_type?: string | null;
+  media_url?: string | null;
+  media_type?: string | null;
+  duration_seconds?: number | null;
+};
 type Reaction = { message_id: string; user_id: string; emoji: string };
 type PeerProfile = {
   id: string;
@@ -425,7 +437,7 @@ function Chat() {
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
         dailyLimit={quota.dailyLimit}
-        isPremium={quota.dailyLimit >= 15}
+        isPremium={quota.dailyLimit >= 30}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
 
@@ -771,16 +783,26 @@ function Chat() {
                     return (
                       <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2.5"}`}>
                         <div className="relative flex items-end gap-1.5">
-                          <div
-                            title={ts}
-                            className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
-                              mine
-                                ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
-                                : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
-                            }`}
-                          >
-                            {m.content}
-                          </div>
+                          {m.message_type === "voice" && m.media_url ? (
+                            <div className="max-w-[78%]">
+                              <VoiceMessageBubble
+                                mediaPath={m.media_url}
+                                duration={m.duration_seconds ?? null}
+                                mine={mine}
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              title={ts}
+                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
+                                mine
+                                  ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
+                                  : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
+                              }`}
+                            >
+                              {m.content}
+                            </div>
+                          )}
                           <button
                             onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
                             className="opacity-0 transition-opacity group-hover:opacity-100"
@@ -897,6 +919,14 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
+                  <VoiceMessageRecorder
+                    conversationId={active.id}
+                    senderId={user.id}
+                    maxSeconds={quota.dailyLimit >= 30 ? 120 : 60}
+                    onSent={() => refreshQuota()}
+                    onQuotaExhausted={() => setPaywallOpen(true)}
+                    disabled={!quota.unlimited && quota.remaining <= 0}
+                  />
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
