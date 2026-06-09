@@ -334,7 +334,7 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
-    if (!verified) { setVerifyOpen(true); return; }
+    if (mustVerify) { setVerifyOpen(true); return; }
     if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
     const content = draft.trim();
     setDraft("");
