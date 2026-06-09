@@ -239,8 +239,11 @@ function MessagesPage() {
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
             {filtered.map((r) => {
               const isThought = r.id.startsWith("thought:");
+              // Always route to the chat thread. Real conversations open via ?c=<id>.
+              // Thought (pre-mutual) rows open the chat list so the user can reply there
+              // — never redirect to a profile/passport page from the inbox.
               const linkProps = isThought
-                ? ({ to: "/p/$userId", params: { userId: r.peer_id } } as const)
+                ? ({ to: "/chat" } as const)
                 : ({ to: "/chat", search: { c: r.id } } as const);
               return (
               <li key={r.id}>
