@@ -353,6 +353,13 @@ function Chat() {
     const sb = supabase as unknown as { from: (t: string) => any };
     await sb.from("typing_indicators").delete().eq("conversation_id", active.id).eq("user_id", user.id);
     refreshQuota();
+    if (!verified) {
+      setSentCount((n) => {
+        const next = n + 1;
+        if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+        return next;
+      });
+    }
   };
 
   const onDraftChange = (v: string) => {
