@@ -13,6 +13,8 @@ import {
   ShieldCheck, Save, MapPin, Languages, Briefcase, Heart, Wand2, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import "@/styles/unveil-onboarding.css";
+
 
 
 export const Route = createFileRoute("/onboarding")({
@@ -415,9 +417,10 @@ function Onboarding() {
   const minsLeft = STEPS.slice(step - 1).reduce((sum, s) => sum + s.minutes, 0);
 
   return (
-    <div className="min-h-screen">
+    <div className="unveil-onboarding min-h-screen">
       <UnveilNav />
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="relative z-[1] mx-auto max-w-2xl px-6 py-12">
+
 
         {/* Welcome-back banner */}
         {resumed && step > 1 && (
@@ -452,7 +455,7 @@ function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Welcome to UNVEIL.</h1>
+              <h1 className="font-display text-4xl font-bold">Welcome to <span className="uo-accent">UNVEIL</span>.</h1>
               <p className="mt-2 text-muted-foreground">A few guided steps to set up a profile you'll actually be proud of. Your progress is saved as you go.</p>
             </div>
             <div className="space-y-3 rounded-3xl border border-border bg-card p-6">
@@ -468,7 +471,7 @@ function Onboarding() {
         {step === 2 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Tell us who you are.</h1>
+              <h1 className="font-display text-4xl font-bold">Tell us <span className="uo-accent">who you are</span>.</h1>
               <p className="mt-2 text-muted-foreground">The basics for your profile. Phone number is never required.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -519,7 +522,7 @@ function Onboarding() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Profile Photo Studio</h1>
+              <h1 className="font-display text-4xl font-bold">Profile <span className="uo-accent">Photo Studio</span></h1>
               <p className="mt-2 text-muted-foreground">
                 Take a selfie or upload a photo. Real profile photo shows from Day 1 — no AI avatars.
               </p>
@@ -582,7 +585,7 @@ function Onboarding() {
         {step === 4 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Make your profile yours.</h1>
+              <h1 className="font-display text-4xl font-bold">Make your profile <span className="uo-accent">yours</span>.</h1>
               <p className="mt-2 text-muted-foreground">Bio and interests are required. The rest is optional but helps your matches.</p>
             </div>
             <Field label={`Short bio * (${bio.length}/240)`}>
@@ -650,7 +653,7 @@ function Onboarding() {
         {step === 5 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">What matters in a match?</h1>
+              <h1 className="font-display text-4xl font-bold">What matters in a <span className="uo-accent">match</span>?</h1>
               <p className="mt-2 text-muted-foreground">These shape compatibility scoring. There are no right answers.</p>
             </div>
             <div className="space-y-4">
@@ -691,7 +694,7 @@ function Onboarding() {
         {step === 6 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Personality & Spark.</h1>
+              <h1 className="font-display text-4xl font-bold">Personality & <span className="uo-accent">Spark</span>.</h1>
               <p className="mt-2 text-muted-foreground">Six quick this-or-thats, plus a couple of free-form prompts.</p>
             </div>
             <div className="space-y-4">
@@ -732,7 +735,7 @@ function Onboarding() {
         {step === 7 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Safety basics.</h1>
+              <h1 className="font-display text-4xl font-bold">Safety <span className="uo-accent">basics</span>.</h1>
               <p className="mt-2 text-muted-foreground">
                 Your selfie acts as your trust check. There's no paid verification — every profile starts with the same 15 daily messages.
               </p>
@@ -761,7 +764,7 @@ function Onboarding() {
         {step === 8 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">How your profile looks.</h1>
+              <h1 className="font-display text-4xl font-bold">How your <span className="uo-accent">profile</span> looks.</h1>
               <p className="mt-2 text-muted-foreground">This is exactly what others will see in Discover and Matches.</p>
             </div>
             <ProfilePreview
@@ -780,14 +783,33 @@ function Onboarding() {
         {/* ---------- STEP 9: Completion ---------- */}
         {step === 9 && (
           <div className="space-y-6 text-center">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-hero shadow-glow">
-              <Check className="h-10 w-10 text-primary-foreground" />
+            <div className="uo-complete-stage">
+              <div className="uo-logo-spin" aria-hidden />
+              <div className="uo-ring r1" aria-hidden />
+              <div className="uo-ring r2" aria-hidden />
+              <div className="uo-ring r3" aria-hidden />
+              <div className="uo-ring r4" aria-hidden />
+              <div className="uo-heart">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <defs>
+                    <linearGradient id="uo-heart-grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%"  stopColor="#7B3FC4" />
+                      <stop offset="38%" stopColor="#D955A0" />
+                      <stop offset="70%" stopColor="#F0A020" />
+                      <stop offset="100%" stopColor="#1B6FE8" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M12 21s-7-4.35-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.65 12 21 12 21Z"
+                    stroke="url(#uo-heart-grad)" strokeWidth="1.8" strokeLinejoin="round" />
+                </svg>
+              </div>
             </div>
             <div>
               <div className="font-mono text-[11px] uppercase tracking-luxury text-primary">100% Complete · Profile Setup Complete</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Your UNVEIL profile is ready.</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">{name ? `Welcome, ${name}.` : "Your UNVEIL profile is "}<span className="uo-accent">{name ? "" : "ready"}</span></h1>
               <p className="mt-2 text-muted-foreground">Features now unlocked:</p>
             </div>
+
             <ul className="mx-auto max-w-sm space-y-2 text-left text-sm">
               <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Discover compatible matches</li>
               <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Hidden / opposite-match insights</li>
