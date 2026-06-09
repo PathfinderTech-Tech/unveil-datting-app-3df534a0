@@ -162,6 +162,8 @@ function MessagesPage() {
       }
 
       const all = [...convRows, ...thoughtRows].sort((a, b) => {
+        // Unread conversations always float to the top.
+        if ((a.unread > 0) !== (b.unread > 0)) return a.unread > 0 ? -1 : 1;
         const ta = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
         const tb = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
         return tb - ta;
