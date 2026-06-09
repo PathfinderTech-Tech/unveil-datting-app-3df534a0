@@ -217,6 +217,17 @@ function MessagesPage() {
             Daily Pass / Premium are unlimited. DB trigger enforces quota. */}
 
 
+        {totalUnread > 0 && (
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm">
+            <span className="font-medium text-foreground">
+              You have {totalUnread} unread {totalUnread === 1 ? "message" : "messages"}
+            </span>
+            <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+              {totalUnread}
+            </span>
+          </div>
+        )}
+
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <input
