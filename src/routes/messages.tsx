@@ -170,6 +170,7 @@ function MessagesPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "message_reads" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "thoughts" }, load)
       .subscribe();
     return () => {
       alive = false;
