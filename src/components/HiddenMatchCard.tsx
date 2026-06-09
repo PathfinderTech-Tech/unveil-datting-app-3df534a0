@@ -61,7 +61,7 @@ export function HiddenMatchCard({
       <button onClick={onView} className="text-left">
         <div className="flex items-start justify-between">
           <div className="relative">
-            <ProfileAvatar userId={match.id} name={match.firstName ?? "Hidden"} photoUrl={match.photoUrl} size={56} />
+            <ProfileAvatar userId={match.id} name={match.firstName ?? "Hidden"} photoUrl={match.photoUrl} size={56} veiled />
             <div className="absolute -bottom-1 -right-1 rounded-full bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase text-accent-foreground">
               Hidden
             </div>
