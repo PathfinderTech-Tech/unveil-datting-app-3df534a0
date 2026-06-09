@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { ArrowLeft, Clock, Check, X, Trophy, Sparkles, RotateCcw, Puzzle } from "lucide-react";
+import { ArrowLeft, Clock, Check, X, Trophy, Sparkles, RotateCcw } from "lucide-react";
 import { useUserId, awardBadge } from "@/lib/games-api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
