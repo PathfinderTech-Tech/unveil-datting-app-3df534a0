@@ -653,7 +653,7 @@ function Onboarding() {
         {step === 5 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">What matters in a match?</h1>
+              <h1 className="font-display text-4xl font-bold">What matters in a <span className="uo-accent">match</span>?</h1>
               <p className="mt-2 text-muted-foreground">These shape compatibility scoring. There are no right answers.</p>
             </div>
             <div className="space-y-4">
