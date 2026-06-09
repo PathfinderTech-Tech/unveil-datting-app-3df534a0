@@ -525,3 +525,227 @@ h1, h2, h3, h4 {
   background-size: 200% 100%;
   animation: goldSweep 2.6s linear infinite;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   UNVEIL — GLOBAL ONBOARDING THEME (promoted from /onboarding)
+   The onboarding screen is the visual gold standard. These rules
+   propagate its tokens app-wide. NO markup, layout, routing, or
+   behavior changes — only colors, gradients, type, shadows, borders.
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --uog-black:    #000000;
+  --uog-bg:       #09070d;
+  --uog-card:     #120f1a;
+  --uog-card-2:   #181222;
+  --uog-border:   #2a1f3d;
+  --uog-border-h: #3d2d58;
+  --uog-purple:   #7B3FC4;
+  --uog-magenta:  #D955A0;
+  --uog-magenta-l:#F070B0;
+  --uog-gold:     #F0A020;
+  --uog-blue:     #1B6FE8;
+  --uog-text:     #ffffff;
+  --uog-text-dim: rgba(255,255,255,0.62);
+  --uog-text-mut: rgba(255,255,255,0.48);
+  --uog-grad:     linear-gradient(135deg,#7B3FC4 0%,#D955A0 38%,#F0A020 70%,#1B6FE8 100%);
+}
+
+/* Global ambient glow — applied to body so every page inherits it.
+   The /onboarding scoped halos still win on that route (z-index -1 either way). */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.45;
+}
+body::before {
+  top: -10%; left: -10%;
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(123,63,196,0.32), transparent 70%);
+}
+body::after {
+  bottom: -15%; right: -10%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(27,111,232,0.26), transparent 70%);
+}
+
+/* Typography — preserve onboarding hierarchy globally.
+   Scope is the document but we do NOT touch the .unveil-onboarding subtree. */
+body:not(.unveil-onboarding) {
+  font-family: 'Raleway', 'Inter', system-ui, sans-serif;
+}
+body:not(.unveil-onboarding) h1,
+body:not(.unveil-onboarding) h2,
+body:not(.unveil-onboarding) h3,
+body:not(.unveil-onboarding) h4,
+body:not(.unveil-onboarding) .font-display {
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+/* Gradient text classes retain their original cascade (background-clip:text).
+   We only update the underlying --gradient-hero variable so they paint with
+   the onboarding stops automatically. */
+
+
+/* ─── Cards ─── 20px radius + 1px top gradient hairline + glass blur. */
+.bg-card,
+.bg-surface\/40,
+.bg-surface\/60,
+.bg-surface {
+  background-color: var(--uog-card) !important;
+}
+.rounded-2xl.bg-card,
+.rounded-3xl.bg-card,
+.rounded-2xl.bg-surface,
+.rounded-3xl.bg-surface,
+.rounded-2xl.border.bg-surface\/40,
+.rounded-2xl.bg-surface\/40,
+.rounded-2xl.bg-surface\/60 {
+  position: relative;
+  border-radius: 20px !important;
+  border-color: var(--uog-border) !important;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+.rounded-2xl.bg-card::before,
+.rounded-3xl.bg-card::before,
+.rounded-2xl.bg-surface::before,
+.rounded-3xl.bg-surface::before,
+.rounded-2xl.bg-surface\/40::before,
+.rounded-2xl.bg-surface\/60::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--uog-grad);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Borders ─── unify the border token everywhere. */
+.border-border { border-color: var(--uog-border) !important; }
+
+/* ─── Inputs ─── match onboarding form fields. */
+body:not(.unveil-onboarding) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+body:not(.unveil-onboarding) select,
+body:not(.unveil-onboarding) textarea {
+  background-color: var(--uog-card-2) !important;
+  border: 1px solid var(--uog-border) !important;
+  color: var(--uog-text) !important;
+  border-radius: 12px;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+body:not(.unveil-onboarding) input:focus,
+body:not(.unveil-onboarding) select:focus,
+body:not(.unveil-onboarding) textarea:focus {
+  border-color: var(--uog-magenta) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(217,85,160,0.18) !important;
+}
+body:not(.unveil-onboarding) select option {
+  background: var(--uog-card);
+  color: var(--uog-text);
+}
+
+/* ─── Buttons: primary gradient ─── DARK text, uppercase, magenta glow.
+   This overrides the previous white-on-gradient treatment. */
+.bg-gradient-hero,
+.btn-gradient-primary,
+.u-btn-primary {
+  background: var(--uog-grad) !important;
+  color: #0a0612 !important;
+  font-family: 'Raleway', 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border: none !important;
+  box-shadow: 0 6px 22px rgba(217,85,160,0.28);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+.bg-gradient-hero:not(:disabled):hover,
+.btn-gradient-primary:not(:disabled):hover,
+.u-btn-primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(217,85,160,0.45), 0 0 24px rgba(240,160,32,0.25);
+  filter: brightness(1.05);
+}
+/* Force dark foreground anywhere the gradient is the background — covers
+   nested spans/icons that previously used text-primary-foreground (ivory). */
+.bg-gradient-hero,
+.bg-gradient-hero *,
+.btn-gradient-primary,
+.btn-gradient-primary *,
+.u-btn-primary,
+.u-btn-primary * { color: #0a0612 !important; }
+.text-primary-foreground { color: #0a0612 !important; }
+
+/* Secondary / outlined buttons — keep ivory text on dark surface. */
+button.rounded-full.border-primary\/35,
+a.rounded-full.border-primary\/35,
+button.border.border-border,
+a.border.border-border {
+  color: var(--uog-text) !important;
+  border-color: var(--uog-border) !important;
+  background-color: rgba(255,255,255,0.02);
+  transition: all 0.22s ease;
+}
+button.border.border-border:hover,
+a.border.border-border:hover {
+  border-color: var(--uog-magenta) !important;
+  background-color: rgba(217,85,160,0.06);
+}
+
+/* Selected option / chip cards (intent, compat, interests, etc.). */
+button.border-primary,
+a.border-primary {
+  border-color: var(--uog-magenta) !important;
+  background: linear-gradient(135deg, rgba(123,63,196,0.18), rgba(217,85,160,0.18), rgba(240,160,32,0.12)) !important;
+  color: var(--uog-text) !important;
+}
+
+/* Active nav links — magenta accent. */
+[data-status="active"] {
+  color: var(--uog-magenta-l) !important;
+}
+
+/* Muted text token alignment. */
+.text-muted-foreground { color: var(--uog-text-mut) !important; }
+
+/* Override the legacy --gradient-hero so existing .bg-gradient-hero / .text-gradient-hero
+   pick up the onboarding stops without changing any cascade rules. */
+:root {
+  --gradient-hero: linear-gradient(135deg,#7B3FC4 0%,#D955A0 38%,#F0A020 70%,#1B6FE8 100%);
+  --gradient-logo: linear-gradient(135deg,#7B3FC4 0%,#D955A0 38%,#F0A020 70%,#1B6FE8 100%);
+}
+
+/* Force background-clip:text for gradient text classes outside @layer utilities,
+   so the rule wins over any later inheritance / cascade reset. */
+.text-gradient-hero {
+  background-image: var(--uog-grad) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+.text-gradient-aura {
+  background-image: var(--gradient-aura) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+.u-text-gradient,
+.uo-accent {
+  background-image: var(--uog-grad) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
