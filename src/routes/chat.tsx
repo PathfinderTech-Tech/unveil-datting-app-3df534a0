@@ -143,9 +143,9 @@ function Chat() {
       const list = (data ?? []) as Conv[];
       if (!alive) return;
       setConvs(list);
-      if (wantId && !active) {
+      if (wantId) {
         const found = list.find((c) => c.id === wantId);
-        if (found) setActive(found);
+        if (found) setActive((prev) => (prev?.id === found.id ? prev : found));
       }
       const peerIds = list.map((c) => (c.user_a === user.id ? c.user_b : c.user_a));
       const convIds = list.map((c) => c.id);
