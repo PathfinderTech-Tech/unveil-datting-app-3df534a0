@@ -783,14 +783,33 @@ function Onboarding() {
         {/* ---------- STEP 9: Completion ---------- */}
         {step === 9 && (
           <div className="space-y-6 text-center">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-hero shadow-glow">
-              <Check className="h-10 w-10 text-primary-foreground" />
+            <div className="uo-complete-stage">
+              <div className="uo-logo-spin" aria-hidden />
+              <div className="uo-ring r1" aria-hidden />
+              <div className="uo-ring r2" aria-hidden />
+              <div className="uo-ring r3" aria-hidden />
+              <div className="uo-ring r4" aria-hidden />
+              <div className="uo-heart">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <defs>
+                    <linearGradient id="uo-heart-grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%"  stopColor="#7B3FC4" />
+                      <stop offset="38%" stopColor="#D955A0" />
+                      <stop offset="70%" stopColor="#F0A020" />
+                      <stop offset="100%" stopColor="#1B6FE8" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M12 21s-7-4.35-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.65 12 21 12 21Z"
+                    stroke="url(#uo-heart-grad)" strokeWidth="1.8" strokeLinejoin="round" />
+                </svg>
+              </div>
             </div>
             <div>
               <div className="font-mono text-[11px] uppercase tracking-luxury text-primary">100% Complete · Profile Setup Complete</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Your UNVEIL profile is ready.</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">{name ? `Welcome, ${name}.` : "Your UNVEIL profile is "}<span className="uo-accent">{name ? "" : "ready"}</span></h1>
               <p className="mt-2 text-muted-foreground">Features now unlocked:</p>
             </div>
+
             <ul className="mx-auto max-w-sm space-y-2 text-left text-sm">
               <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Discover compatible matches</li>
               <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Hidden / opposite-match insights</li>
