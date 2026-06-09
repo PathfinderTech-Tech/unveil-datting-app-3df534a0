@@ -16,7 +16,7 @@ import { ThemeTokenSwitcher } from "@/components/ThemeTokenSwitcher";
 import { CooldownGuard } from "@/components/CooldownGuard";
 import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
-import watermarkAsset from "@/assets/unveil-watermark.png.asset.json";
+
 
 function NotFoundComponent() {
   return (
@@ -152,21 +152,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <CooldownGuard />
       <RevealNotifier />
-      {/* Global fading watermark behind all content */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{
-          backgroundImage: `radial-gradient(ellipse at center, color-mix(in oklch, var(--background) 0%, transparent) 0%, color-mix(in oklch, var(--background) 75%, transparent) 50%, color-mix(in oklch, var(--background) 96%, transparent) 100%), url(${watermarkAsset.url})`,
-          backgroundSize: "cover, min(60vmin, 640px) min(60vmin, 640px)",
-          backgroundPosition: "center, center",
-          backgroundRepeat: "no-repeat, no-repeat",
-          opacity: 0.03,
-          mixBlendMode: "screen",
-          filter: "blur(2.5px)",
-          animation: "unveil-watermark-pulse 16s ease-in-out infinite",
-        }}
-      />
+      {/* Background watermark removed per design request */}
       <div className="relative z-10 flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">
           <Outlet />

@@ -4,7 +4,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import type { HiddenMatch } from "@/lib/hidden-matches.functions";
 
 const TAGLINES = [
-  "Your perfect match may not be your type.",
+  "Great relationships are often found beyond our assumptions.",
   "Discover the connections you would normally overlook.",
   "Compatibility beyond attraction.",
   "Where contrast becomes chemistry.",

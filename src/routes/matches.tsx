@@ -395,7 +395,7 @@ function Matches() {
           <button
             onClick={() => setMode("hidden")}
             className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode === "hidden" ? "bg-gradient-aura text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
-          >Hidden Matches™</button>
+          >Unexpected Matches</button>
         </div>
 
         {mode === "hidden" ? (
@@ -785,7 +785,7 @@ function CompareBar({ label, you, them }: { label: string; you: number; them: nu
 }
 
 const HIDDEN_TAGLINES = [
-  "Your perfect match may not be your type.",
+  "Great relationships are often found beyond our assumptions.",
   "Discover the connections you would normally overlook.",
   "Compatibility beyond attraction.",
 ];
@@ -808,7 +808,7 @@ function HiddenMatchesView() {
         setTotal(r.total);
         setPremium(r.premium);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Couldn't load Hidden Matches");
+        toast.error(e instanceof Error ? e.message : "Couldn't load Unexpected Matches");
       } finally {
         setLoading(false);
       }
@@ -840,20 +840,23 @@ function HiddenMatchesView() {
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-accent/30 bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-6">
-        <p className="font-mono text-[10px] uppercase tracking-luxury text-accent">Hidden Matches™</p>
+        <p className="font-mono text-[10px] uppercase tracking-luxury text-accent">Unexpected Matches</p>
         <h1 className="mt-2 font-display text-3xl font-light md:text-4xl">
-          {loading ? "Reading your blueprint…" : `You have ${total} Hidden ${total === 1 ? "Match" : "Matches"}`}
+          {loading ? "Reading your blueprint…" : `You have ${total} Unexpected ${total === 1 ? "Match" : "Matches"}`}
         </h1>
-        <p className="mt-1 text-sm text-foreground/80 italic">"{tagline}"</p>
+        <p className="mt-1 text-sm text-foreground/80">
+          Discover people outside your usual preferences. Sometimes the best connection comes from someone unexpected.
+        </p>
+        <p className="mt-2 text-sm text-foreground/80 italic">"{tagline}"</p>
         {strongest && (
           <p className="mt-3 text-sm text-muted-foreground">
             <Sparkles className="mr-1 inline h-3.5 w-3.5 text-accent" />
-            One Hidden Match has a {strongest.complementaryScore}% Complementary Score.
+            One Unexpected Match has a {strongest.complementaryScore}% Complementary Score.
           </p>
         )}
         {!premium && (
           <p className="mt-3 text-xs text-muted-foreground">
-            Free preview shows 3 Hidden Matches. <Link to="/premium" className="text-accent underline">Unlock unlimited</Link>.
+            Free preview shows 3 Unexpected Matches. <Link to="/premium" className="text-accent underline">Unlock unlimited</Link>.
           </p>
         )}
       </div>
@@ -862,7 +865,7 @@ function HiddenMatchesView() {
         <p className="text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
-          No Hidden Matches yet. As more profiles complete onboarding and you refine your blueprint, they'll appear here.
+          No Unexpected Matches yet. As more profiles complete onboarding and you refine your blueprint, they'll appear here.
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

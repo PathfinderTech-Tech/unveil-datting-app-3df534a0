@@ -45,7 +45,7 @@ export function WhyWeMatchSheet({
         </button>
 
         <div className="bg-gradient-to-br from-primary/20 via-accent/15 to-transparent p-6">
-          <p className="font-mono text-[10px] uppercase tracking-luxury text-accent">Hidden Matches™ · Why we match</p>
+          <p className="font-mono text-[10px] uppercase tracking-luxury text-accent">Unexpected Matches · Why we match</p>
           <h2 className="mt-1 font-display text-2xl">{peerName ? `You & ${peerName}` : "Why this could work"}</h2>
         </div>
 
