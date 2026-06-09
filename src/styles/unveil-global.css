@@ -1,0 +1,1377 @@
+/* ============================================================
+   UNVEIL GLOBAL DESIGN SYSTEM
+   Version 2.0 — Four-colour brand system
+   
+   Drop this file into: src/styles/unveil-global.css
+   Import in: src/main.tsx or src/index.css → @import './unveil-global.css';
+   
+   ⚠️  VISUAL LAYER ONLY — zero logic changes
+   ⚠️  Do NOT remove existing Tailwind or component CSS
+   ⚠️  This file adds / overrides visual properties only
+   
+   BRAND PALETTE (from UNVEIL Master Logo):
+   Purple  #7B3FC4  ← left arc
+   Magenta #D955A0  ← top arc
+   Gold    #F0A020  ← right arc bottom
+   Blue    #1B6FE8  ← royal blue (king blue), added after gold
+   
+   GRADIENT SIGNATURE:
+   Purple → Magenta → Gold → Royal Blue
+   ============================================================ */
+
+/* ─────────────────────────────────────────
+   1. GOOGLE FONTS
+   ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Raleway:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
+/* ─────────────────────────────────────────
+   2. DESIGN TOKENS
+   ───────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --uv-bg:           #000000;
+  --uv-surface:      #09070d;
+  --uv-surface-2:    #0d0a14;
+  --uv-card:         #120f1a;
+  --uv-card-2:       #181222;
+  --uv-card-3:       #1e1730;
+
+  /* Borders */
+  --uv-border:       #2a1f3d;
+  --uv-border-h:     #3d2d58;
+  --uv-border-focus: rgba(217, 85, 160, 0.45);
+
+  /* Brand colours */
+  --uv-purple:       #7B3FC4;
+  --uv-purple-d:     #5B2D9E;
+  --uv-purple-l:     #9B5AD4;
+  --uv-magenta:      #D955A0;
+  --uv-magenta-l:    #F070B0;
+  --uv-gold:         #F0A020;
+  --uv-gold-l:       #F5C842;
+  --uv-gold-d:       #D4820A;
+  --uv-blue:         #1B6FE8;
+  --uv-blue-d:       #1558C0;
+  --uv-blue-l:       #4D94FF;
+
+  /* THE SIGNATURE GRADIENT — Purple → Magenta → Gold → Royal Blue */
+  --uv-grad:         linear-gradient(135deg, #7B3FC4 0%, #D955A0 38%, #F0A020 70%, #1B6FE8 100%);
+  --uv-grad-h:       linear-gradient(135deg, #8B4FD4 0%, #E965B0 38%, #F5B030 70%, #3B7FF8 100%);
+  --uv-grad-v:       linear-gradient(180deg, #7B3FC4 0%, #D955A0 38%, #F0A020 70%, #1B6FE8 100%);
+  --uv-grad-90:      linear-gradient(90deg,  #7B3FC4 0%, #D955A0 38%, #F0A020 70%, #1B6FE8 100%);
+  --uv-grad-r:       linear-gradient(135deg, #1B6FE8 0%, #F0A020 33%, #D955A0 66%, #7B3FC4 100%);
+
+  /* Ambient glows */
+  --uv-glow-purple:  rgba(123, 63,  196, 0.18);
+  --uv-glow-magenta: rgba(217, 85,  160, 0.15);
+  --uv-glow-gold:    rgba(240, 160,  32, 0.12);
+  --uv-glow-blue:    rgba(27,  111, 232, 0.18);
+  --uv-glow-mix:     rgba(160,  80,  180, 0.10);
+
+  /* Text */
+  --uv-text:         #ffffff;
+  --uv-text-dim:     rgba(255, 255, 255, 0.62);
+  --uv-text-mute:    rgba(255, 255, 255, 0.35);
+  --uv-muted:        rgba(255, 255, 255, 0.45);
+  --uv-ghost:        rgba(255, 255, 255, 0.22);
+
+  /* Typography */
+  --uv-font-display: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  --uv-font-ui:      'Raleway', 'Inter', system-ui, sans-serif;
+  --uv-font-mono:    'DM Mono', 'Fira Mono', monospace;
+
+  /* Type scale */
+  --uv-text-xs:      11px;
+  --uv-text-sm:      13px;
+  --uv-text-base:    15px;
+  --uv-text-md:      17px;
+  --uv-text-lg:      20px;
+  --uv-text-xl:      26px;
+  --uv-text-2xl:     34px;
+  --uv-text-3xl:     46px;
+  --uv-text-4xl:     60px;
+
+  /* Letter spacing */
+  --uv-track-tight:  -0.02em;
+  --uv-track-normal:  0;
+  --uv-track-wide:    0.05em;
+  --uv-track-wider:   0.12em;
+  --uv-track-mono:    0.18em;
+
+  /* Line heights */
+  --uv-lead-tight:   1.08;
+  --uv-lead-snug:    1.3;
+  --uv-lead-normal:  1.6;
+  --uv-lead-loose:   1.78;
+
+  /* Radii */
+  --uv-r-xs:   6px;
+  --uv-r-sm:   9px;
+  --uv-r-md:   12px;
+  --uv-r-lg:   18px;
+  --uv-r-xl:   24px;
+  --uv-r-2xl:  32px;
+  --uv-r-full: 9999px;
+
+  /* Spacing */
+  --uv-s-1:  4px;   --uv-s-2:  8px;   --uv-s-3:  12px;
+  --uv-s-4:  16px;  --uv-s-5:  20px;  --uv-s-6:  24px;
+  --uv-s-8:  32px;  --uv-s-10: 40px;  --uv-s-12: 48px;
+  --uv-s-16: 64px;  --uv-s-20: 80px;  --uv-s-24: 96px;
+
+  /* Shadows */
+  --uv-shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
+  --uv-shadow-md:  0 8px 24px rgba(0,0,0,0.5);
+  --uv-shadow-lg:  0 16px 48px rgba(0,0,0,0.6);
+  --uv-shadow-glow-purple: 0 0 24px rgba(123,63,196,0.35);
+  --uv-shadow-glow-magenta: 0 0 24px rgba(217,85,160,0.3);
+  --uv-shadow-glow-blue:   0 0 24px rgba(27,111,232,0.35);
+
+  /* Transitions */
+  --uv-ease:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --uv-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --uv-dur-fast: 0.18s;
+  --uv-dur-mid:  0.28s;
+  --uv-dur-slow: 0.45s;
+}
+
+/* ─────────────────────────────────────────
+   3. BASE / RESET
+   ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--uv-bg) !important;
+  color: var(--uv-text) !important;
+  font-family: var(--uv-font-ui) !important;
+  font-size: var(--uv-text-base);
+  line-height: var(--uv-lead-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Ambient background glow — fixed, non-interactive */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; right: -150px;
+  width: 700px; height: 600px;
+  background: radial-gradient(circle, rgba(123,63,196,0.07) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -150px; left: -100px;
+  width: 550px; height: 500px;
+  background: radial-gradient(circle, rgba(27,111,232,0.05) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* All page content above ambient */
+#root, [id="root"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─────────────────────────────────────────
+   4. TYPOGRAPHY
+   ───────────────────────────────────────── */
+h1, .text-4xl, .text-5xl, .text-6xl {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 300 !important;
+  line-height: var(--uv-lead-tight) !important;
+  letter-spacing: var(--uv-track-tight) !important;
+  color: var(--uv-text) !important;
+}
+
+h2, .text-3xl {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 400 !important;
+  line-height: var(--uv-lead-snug) !important;
+  color: var(--uv-text) !important;
+}
+
+h3, h4, .text-2xl, .text-xl {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 400 !important;
+  color: var(--uv-text) !important;
+}
+
+h5, h6, p, span, div, li {
+  font-family: var(--uv-font-ui);
+}
+
+/* Italic headings get gradient — the signature moment */
+h1 em, h2 em, h3 em,
+.heading-gradient,
+[class*="gradient-text"] {
+  font-style: italic;
+  background: var(--uv-grad) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Muted / secondary text */
+.text-muted-foreground,
+[class*="text-muted"],
+[class*="text-gray"],
+[class*="text-slate"] {
+  color: var(--uv-muted) !important;
+}
+
+/* ─────────────────────────────────────────
+   5. SCROLLBAR
+   ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--uv-surface); }
+::-webkit-scrollbar-thumb {
+  background: var(--uv-border-h);
+  border-radius: var(--uv-r-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--uv-purple); }
+
+/* ─────────────────────────────────────────
+   6. BACKGROUNDS & SURFACES
+   ───────────────────────────────────────── */
+/* Page / screen backgrounds */
+[class*="bg-background"],
+[class*="bg-black"],
+main, .main, [role="main"] {
+  background-color: var(--uv-bg) !important;
+}
+
+/* Elevated surfaces */
+[class*="bg-card"],
+[class*="bg-popover"],
+[class*="bg-muted"] {
+  background-color: var(--uv-card) !important;
+}
+
+/* ─────────────────────────────────────────
+   7. CARDS — Glassmorphism system
+   ───────────────────────────────────────── */
+.card,
+[class*="Card"],
+[class*="-card"],
+[class*="card-"],
+[data-radix-popper-content-wrapper] > div,
+[class*="rounded-lg"]:not(button):not(input):not(textarea) {
+  background: var(--uv-card) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-lg) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  position: relative !important;
+  transition: transform var(--uv-dur-mid) var(--uv-ease),
+              box-shadow var(--uv-dur-mid) var(--uv-ease),
+              border-color var(--uv-dur-mid) var(--uv-ease) !important;
+}
+
+/* Gradient top-border on every card */
+.card::before,
+[class*="Card"]::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0 !important;
+  height: 1px !important;
+  background: var(--uv-grad-90) !important;
+  border-radius: var(--uv-r-lg) var(--uv-r-lg) 0 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* Card hover lift */
+.card:hover,
+[class*="Card"]:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5) !important;
+  border-color: var(--uv-border-h) !important;
+}
+
+/* ─────────────────────────────────────────
+   8. BUTTONS
+   ───────────────────────────────────────── */
+
+/* PRIMARY — The gradient button */
+button[class*="bg-primary"],
+[class*="btn-primary"],
+[data-variant="primary"],
+button.bg-purple-600,
+button.bg-indigo-600,
+button[class*="primary"] {
+  background: var(--uv-grad) !important;
+  background-size: 200% auto !important;
+  color: #000000 !important;
+  font-family: var(--uv-font-ui) !important;
+  font-weight: 700 !important;
+  font-size: var(--uv-text-sm) !important;
+  letter-spacing: var(--uv-track-wider) !important;
+  text-transform: uppercase !important;
+  border: none !important;
+  border-radius: var(--uv-r-md) !important;
+  padding: 15px 28px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform var(--uv-dur-fast) var(--uv-ease),
+              box-shadow var(--uv-dur-fast) var(--uv-ease) !important;
+}
+button[class*="bg-primary"]:hover,
+button[class*="primary"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 36px rgba(180, 80, 180, 0.32) !important;
+  filter: brightness(1.08) !important;
+}
+button[class*="bg-primary"]:active,
+button[class*="primary"]:active {
+  transform: translateY(0) !important;
+}
+
+/* Shimmer overlay on primary buttons */
+button[class*="bg-primary"]::after,
+button[class*="primary"]::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(255,255,255,0) !important;
+  transition: background var(--uv-dur-fast) !important;
+  pointer-events: none !important;
+}
+button[class*="bg-primary"]:hover::after,
+button[class*="primary"]:hover::after {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+/* SECONDARY / OUTLINE buttons */
+button[class*="outline"],
+button[class*="ghost"],
+button[class*="secondary"],
+[data-variant="outline"],
+[data-variant="ghost"] {
+  background: transparent !important;
+  color: var(--uv-text-dim) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-md) !important;
+  font-family: var(--uv-font-ui) !important;
+  font-size: var(--uv-text-sm) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--uv-track-wide) !important;
+  padding: 14px 28px !important;
+  cursor: pointer !important;
+  transition: border-color var(--uv-dur-fast),
+              color var(--uv-dur-fast),
+              transform var(--uv-dur-fast) !important;
+}
+button[class*="outline"]:hover,
+button[class*="ghost"]:hover,
+button[class*="secondary"]:hover {
+  border-color: var(--uv-border-h) !important;
+  color: var(--uv-text) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* DESTRUCTIVE button */
+button[class*="destructive"] {
+  background: rgba(220, 60, 60, 0.15) !important;
+  border: 1px solid rgba(220, 60, 60, 0.35) !important;
+  color: #ff6b6b !important;
+  border-radius: var(--uv-r-md) !important;
+}
+
+/* Icon buttons / small round buttons */
+button[class*="icon"],
+[class*="icon-btn"] {
+  border-radius: var(--uv-r-full) !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--uv-border) !important;
+  color: var(--uv-muted) !important;
+  transition: all var(--uv-dur-fast) !important;
+}
+button[class*="icon"]:hover,
+[class*="icon-btn"]:hover {
+  background: rgba(217,85,160,0.12) !important;
+  border-color: rgba(217,85,160,0.4) !important;
+  color: var(--uv-text) !important;
+}
+
+/* ─────────────────────────────────────────
+   9. FORM ELEMENTS
+   ───────────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-md) !important;
+  color: var(--uv-text) !important;
+  font-family: var(--uv-font-ui) !important;
+  font-size: var(--uv-text-base) !important;
+  padding: 13px 17px !important;
+  outline: none !important;
+  width: 100% !important;
+  transition: border-color var(--uv-dur-fast),
+              background var(--uv-dur-fast),
+              box-shadow var(--uv-dur-fast) !important;
+  -webkit-appearance: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--uv-ghost) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--uv-border-focus) !important;
+  background: rgba(255,255,255,0.06) !important;
+  box-shadow: 0 0 0 3px rgba(217,85,160,0.1) !important;
+}
+
+/* Input labels */
+label,
+[class*="label"],
+[class*="Label"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: var(--uv-text-xs) !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+  color: var(--uv-muted) !important;
+  display: block !important;
+  margin-bottom: 7px !important;
+}
+
+/* Select dropdown */
+select option {
+  background: var(--uv-card) !important;
+  color: var(--uv-text) !important;
+}
+
+/* Checkbox & Radio custom */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: var(--uv-magenta) !important;
+  cursor: pointer !important;
+}
+
+/* Range slider */
+input[type="range"] {
+  accent-color: var(--uv-magenta) !important;
+}
+
+/* ─────────────────────────────────────────
+   10. NAVIGATION
+   ───────────────────────────────────────── */
+
+/* Top nav bar */
+nav,
+header,
+[class*="navbar"],
+[class*="header"],
+[class*="nav-bar"] {
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border-bottom: 1px solid var(--uv-border) !important;
+}
+
+/* Nav links */
+nav a,
+header a,
+[class*="nav-link"] {
+  color: var(--uv-muted) !important;
+  font-family: var(--uv-font-ui) !important;
+  font-size: var(--uv-text-sm) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--uv-track-wide) !important;
+  text-decoration: none !important;
+  transition: color var(--uv-dur-fast) !important;
+}
+nav a:hover,
+header a:hover {
+  color: var(--uv-text) !important;
+}
+
+/* Active nav item — gradient text */
+nav a[aria-current="page"],
+nav a.active,
+nav [data-active="true"],
+[class*="nav-active"] {
+  background: var(--uv-grad) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 600 !important;
+}
+
+/* Bottom mobile nav */
+[class*="bottom-nav"],
+[class*="tab-bar"],
+[class*="mobile-nav"] {
+  background: rgba(9, 7, 13, 0.95) !important;
+  border-top: 1px solid var(--uv-border) !important;
+  backdrop-filter: blur(28px) !important;
+}
+
+/* Active mobile nav icon glow */
+[class*="bottom-nav"] [data-active="true"] svg,
+[class*="tab-bar"] .active svg {
+  filter: drop-shadow(0 0 6px rgba(217,85,160,0.7)) !important;
+}
+
+/* ─────────────────────────────────────────
+   11. BADGES & TAGS
+   ───────────────────────────────────────── */
+[class*="badge"],
+[class*="Badge"],
+[class*="tag"],
+[class*="chip"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+  padding: 4px 12px !important;
+  border-radius: var(--uv-r-full) !important;
+  border: 1px solid var(--uv-border-h) !important;
+  background: rgba(123,63,196,0.1) !important;
+  color: var(--uv-text-dim) !important;
+}
+
+/* Premium badge */
+[class*="premium"],
+[class*="gold-badge"],
+[class*="vip"] {
+  background: linear-gradient(135deg, rgba(123,63,196,0.2), rgba(240,160,32,0.18)) !important;
+  border-color: rgba(240,160,32,0.45) !important;
+  color: var(--uv-gold-l) !important;
+}
+
+/* Stage badges (Curiosity / Warmth / Presence) */
+[class*="stage"],
+[class*="Stage"] {
+  background: linear-gradient(135deg, rgba(27,111,232,0.15), rgba(123,63,196,0.15)) !important;
+  border-color: rgba(27,111,232,0.35) !important;
+  color: var(--uv-blue-l) !important;
+}
+
+/* ─────────────────────────────────────────
+   12. AVATAR / PROFILE RINGS
+   ───────────────────────────────────────── */
+
+/* 
+   The 4-ring system — reflects the UNVEIL master logo inner rings
+   Gold (outer) · Purple (mid) · Gold (inner) · Royal Blue (innermost)
+   Apply these classes to avatar wrapper elements
+*/
+
+/* Avatar container */
+[class*="avatar"],
+[class*="Avatar"] {
+  position: relative !important;
+}
+
+/* Ring 1 — Outer Gold */
+.uv-ring-gold-outer,
+[class*="avatar-ring-outer"] {
+  border: 1.5px solid rgba(240,160,32,0.85) !important;
+  box-shadow:
+    0 0 8px rgba(240,160,32,0.55),
+    0 0 18px rgba(240,160,32,0.28),
+    inset 0 0 8px rgba(240,160,32,0.1) !important;
+  animation: uv-ring-breathe 2.4s ease-in-out infinite !important;
+}
+
+/* Ring 2 — Mid Purple */
+.uv-ring-purple-mid,
+[class*="avatar-ring-mid"] {
+  border: 1.5px solid rgba(123,63,196,0.92) !important;
+  box-shadow:
+    0 0 10px rgba(123,63,196,0.68),
+    0 0 22px rgba(123,63,196,0.38),
+    0 0 42px rgba(123,63,196,0.16),
+    inset 0 0 8px rgba(123,63,196,0.2) !important;
+  animation: uv-ring-breathe 2.4s ease-in-out infinite 0.3s !important;
+}
+
+/* Ring 3 — Inner Gold */
+.uv-ring-gold-inner,
+[class*="avatar-ring-inner"] {
+  border: 1px solid rgba(240,160,32,0.62) !important;
+  box-shadow:
+    0 0 6px rgba(240,160,32,0.42),
+    0 0 14px rgba(240,160,32,0.22),
+    inset 0 0 6px rgba(123,63,196,0.15) !important;
+  animation: uv-ring-breathe 2.4s ease-in-out infinite 0.5s !important;
+}
+
+/* Ring 4 — Innermost Royal Blue */
+.uv-ring-blue,
+[class*="avatar-ring-blue"] {
+  border: 1.5px solid rgba(27,111,232,0.92) !important;
+  box-shadow:
+    0 0 10px rgba(27,111,232,0.72),
+    0 0 24px rgba(27,111,232,0.42),
+    0 0 44px rgba(27,111,232,0.18),
+    inset 0 0 10px rgba(27,111,232,0.15) !important;
+  animation: uv-ring-breathe 2.4s ease-in-out infinite 0.7s !important;
+}
+
+/* ─────────────────────────────────────────
+   13. PROGRESS & STEP TRACKERS
+   ───────────────────────────────────────── */
+
+/* Progress bars */
+[class*="progress"],
+[class*="Progress"] {
+  background: var(--uv-border) !important;
+  border-radius: var(--uv-r-full) !important;
+  overflow: hidden !important;
+}
+[class*="progress-bar"],
+[class*="progress-fill"],
+[class*="Progress"] > div {
+  background: var(--uv-grad-90) !important;
+  border-radius: var(--uv-r-full) !important;
+  transition: width 0.4s var(--uv-ease-out) !important;
+}
+
+/* Step indicators */
+[class*="step"],
+[class*="Step"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: var(--uv-text-xs) !important;
+  letter-spacing: var(--uv-track-mono) !important;
+}
+
+/* ─────────────────────────────────────────
+   14. MODALS / DIALOGS / SHEETS
+   ───────────────────────────────────────── */
+
+[role="dialog"],
+[class*="dialog"],
+[class*="Dialog"],
+[class*="modal"],
+[class*="Modal"],
+[class*="sheet"],
+[class*="Sheet"],
+[class*="drawer"],
+[class*="Drawer"] {
+  background: var(--uv-surface-2) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-xl) !important;
+  backdrop-filter: blur(32px) !important;
+  -webkit-backdrop-filter: blur(32px) !important;
+}
+
+/* Bottom sheet — rounded top only */
+[class*="sheet"],
+[class*="drawer"] {
+  border-radius: var(--uv-r-xl) var(--uv-r-xl) 0 0 !important;
+}
+
+/* Modal gradient top border */
+[role="dialog"]::before,
+[class*="dialog"]::before,
+[class*="modal"]::before,
+[class*="sheet"]::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0 !important;
+  height: 1px !important;
+  background: var(--uv-grad-90) !important;
+  border-radius: inherit !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Overlay backdrop */
+[class*="overlay"],
+[class*="Overlay"],
+[data-radix-portal] > [class*="backdrop"] {
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ─────────────────────────────────────────
+   15. DROPDOWNS / POPOVERS / MENUS
+   ───────────────────────────────────────── */
+
+[class*="dropdown"],
+[class*="Dropdown"],
+[class*="popover"],
+[class*="Popover"],
+[class*="menu"],
+[class*="Menu"],
+[class*="select-content"],
+[class*="SelectContent"] {
+  background: var(--uv-card-2) !important;
+  border: 1px solid var(--uv-border-h) !important;
+  border-radius: var(--uv-r-md) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* Dropdown item */
+[class*="dropdown-item"],
+[class*="menu-item"],
+[class*="select-item"],
+[class*="SelectItem"] {
+  color: var(--uv-text-dim) !important;
+  border-radius: var(--uv-r-sm) !important;
+  transition: background var(--uv-dur-fast),
+              color var(--uv-dur-fast) !important;
+}
+[class*="dropdown-item"]:hover,
+[class*="menu-item"]:hover,
+[class*="select-item"]:hover {
+  background: rgba(217,85,160,0.1) !important;
+  color: var(--uv-text) !important;
+}
+
+/* ─────────────────────────────────────────
+   16. TOASTS / NOTIFICATIONS / ALERTS
+   ───────────────────────────────────────── */
+
+[class*="toast"],
+[class*="Toast"],
+[class*="Toaster"],
+[class*="alert"],
+[class*="Alert"],
+[class*="snackbar"] {
+  background: var(--uv-card-2) !important;
+  border: 1px solid var(--uv-border-h) !important;
+  border-radius: var(--uv-r-md) !important;
+  color: var(--uv-text) !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
+}
+
+/* Success toast */
+[data-type="success"],
+[class*="toast-success"] {
+  border-left: 3px solid var(--uv-gold) !important;
+}
+
+/* Error toast */
+[data-type="error"],
+[class*="toast-error"] {
+  border-left: 3px solid #ef4444 !important;
+}
+
+/* Info toast */
+[data-type="info"],
+[class*="toast-info"] {
+  border-left: 3px solid var(--uv-blue) !important;
+}
+
+/* ─────────────────────────────────────────
+   17. TABS
+   ───────────────────────────────────────── */
+
+[class*="tabs"],
+[class*="Tabs"] {
+  border-bottom: 1px solid var(--uv-border) !important;
+}
+
+[class*="tab-trigger"],
+[class*="TabsTrigger"],
+[role="tab"] {
+  font-family: var(--uv-font-ui) !important;
+  font-size: var(--uv-text-sm) !important;
+  font-weight: 500 !important;
+  color: var(--uv-muted) !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  cursor: pointer !important;
+  transition: color var(--uv-dur-fast) !important;
+  position: relative !important;
+}
+
+[class*="tab-trigger"][data-state="active"],
+[class*="TabsTrigger"][data-state="active"],
+[role="tab"][aria-selected="true"] {
+  background: var(--uv-grad) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 600 !important;
+}
+
+/* Active tab underline */
+[class*="tab-trigger"][data-state="active"]::after,
+[class*="TabsTrigger"][data-state="active"]::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -1px; left: 0; right: 0 !important;
+  height: 2px !important;
+  background: var(--uv-grad-90) !important;
+}
+
+/* ─────────────────────────────────────────
+   18. SEPARATORS / DIVIDERS
+   ───────────────────────────────────────── */
+
+hr,
+[class*="separator"],
+[class*="Separator"],
+[class*="divider"] {
+  border-color: var(--uv-border) !important;
+  opacity: 1 !important;
+}
+
+/* Gradient separator — use on section breaks */
+.uv-separator-grad {
+  border: none !important;
+  height: 1px !important;
+  background: var(--uv-grad-90) !important;
+  opacity: 0.35 !important;
+}
+
+/* ─────────────────────────────────────────
+   19. SWITCHES / TOGGLES
+   ───────────────────────────────────────── */
+
+[class*="switch"],
+[class*="Switch"],
+[role="switch"] {
+  background: var(--uv-border-h) !important;
+  border-radius: var(--uv-r-full) !important;
+  transition: background var(--uv-dur-fast) !important;
+}
+
+[class*="switch"][data-state="checked"],
+[class*="Switch"][data-state="checked"],
+[role="switch"][aria-checked="true"] {
+  background: var(--uv-grad) !important;
+}
+
+/* ─────────────────────────────────────────
+   20. SLIDERS
+   ───────────────────────────────────────── */
+
+[class*="slider"],
+[class*="Slider"] {
+  background: var(--uv-border) !important;
+}
+
+[class*="slider-track"],
+[class*="SliderTrack"] {
+  background: var(--uv-border) !important;
+}
+
+[class*="slider-range"],
+[class*="SliderRange"] {
+  background: var(--uv-grad-90) !important;
+}
+
+[class*="slider-thumb"],
+[class*="SliderThumb"] {
+  background: var(--uv-magenta) !important;
+  border: 2px solid var(--uv-bg) !important;
+  box-shadow: 0 0 8px rgba(217,85,160,0.6) !important;
+}
+
+/* ─────────────────────────────────────────
+   21. SELECTION PILLS / OPTIONS
+   ───────────────────────────────────────── */
+
+/* Unselected */
+[class*="option"],
+[class*="choice"],
+[class*="pill"] {
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-md) !important;
+  background: rgba(255,255,255,0.02) !important;
+  color: var(--uv-muted) !important;
+  cursor: pointer !important;
+  transition: all var(--uv-dur-fast) !important;
+}
+
+/* Selected / active */
+[class*="option"][data-selected="true"],
+[class*="choice"][data-selected="true"],
+[class*="pill"][data-selected="true"],
+[class*="option"].selected,
+[class*="choice"].selected {
+  border-color: rgba(217,85,160,0.55) !important;
+  background: linear-gradient(135deg,
+    rgba(123,63,196,0.1) 0%,
+    rgba(217,85,160,0.1) 50%,
+    rgba(240,160,32,0.07) 75%,
+    rgba(27,111,232,0.08) 100%) !important;
+  color: var(--uv-text) !important;
+}
+
+/* Interest / hobby tags */
+[class*="tag"],
+[class*="interest"] {
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-full) !important;
+  font-size: var(--uv-text-sm) !important;
+  color: var(--uv-muted) !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: all var(--uv-dur-fast) !important;
+}
+[class*="tag"].selected,
+[class*="interest"].selected,
+[class*="tag"][data-selected="true"] {
+  background: rgba(123,63,196,0.15) !important;
+  border-color: rgba(217,85,160,0.45) !important;
+  color: var(--uv-text) !important;
+}
+
+/* ─────────────────────────────────────────
+   22. MESSAGING BUBBLES
+   ───────────────────────────────────────── */
+
+/* Received message */
+[class*="message-received"],
+[class*="bubble-received"],
+[class*="chat-received"] {
+  background: var(--uv-card) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: 18px 18px 18px 4px !important;
+  color: var(--uv-text) !important;
+}
+
+/* Sent message */
+[class*="message-sent"],
+[class*="bubble-sent"],
+[class*="chat-sent"] {
+  background: linear-gradient(135deg,
+    rgba(123,63,196,0.25) 0%,
+    rgba(217,85,160,0.2) 50%,
+    rgba(27,111,232,0.15) 100%) !important;
+  border: 1px solid rgba(217,85,160,0.2) !important;
+  border-radius: 18px 18px 4px 18px !important;
+  color: var(--uv-text) !important;
+}
+
+/* Chat input bar */
+[class*="message-input"],
+[class*="chat-input"] {
+  background: var(--uv-card) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-full) !important;
+}
+
+/* Voice note waveform */
+[class*="waveform"],
+[class*="voice-note"],
+[class*="audio-wave"] {
+  background: var(--uv-grad-90) !important;
+  opacity: 0.8 !important;
+}
+
+/* ─────────────────────────────────────────
+   23. PROFILE SECTIONS
+   ───────────────────────────────────────── */
+
+/* Veil / blur overlay — reduces as stage progresses */
+[class*="veil"],
+[class*="blurred"],
+[class*="stage-1"] img {
+  filter: blur(12px) !important;
+  transition: filter 0.6s var(--uv-ease) !important;
+}
+[class*="stage-2"] img {
+  filter: blur(6px) !important;
+}
+[class*="stage-3"] img {
+  filter: none !important;
+}
+
+/* Stage indicators */
+[class*="stage-badge"],
+[class*="reveal-stage"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+}
+
+/* ─────────────────────────────────────────
+   24. MEMBERSHIP / PRICING CARDS
+   ───────────────────────────────────────── */
+
+/* Recommended tier gets gradient border + glow */
+[class*="plan-recommended"],
+[class*="tier-premium"],
+[class*="pricing-featured"],
+[data-featured="true"] {
+  border-color: rgba(240,160,32,0.5) !important;
+  box-shadow:
+    0 0 0 1px rgba(240,160,32,0.3),
+    0 16px 48px rgba(0,0,0,0.5),
+    0 0 32px rgba(123,63,196,0.2) !important;
+}
+
+[class*="plan-recommended"]::before,
+[class*="tier-premium"]::before {
+  background: var(--uv-grad-90) !important;
+  opacity: 1 !important;
+}
+
+/* Price number */
+[class*="price"],
+[class*="Price"],
+[class*="amount"] {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 300 !important;
+  color: var(--uv-text) !important;
+}
+
+/* Feature check items */
+[class*="feature-check"],
+[class*="plan-feature"] {
+  color: var(--uv-text-dim) !important;
+  font-size: var(--uv-text-sm) !important;
+}
+[class*="feature-check"] svg,
+[class*="plan-feature"] svg {
+  color: var(--uv-gold) !important;
+  filter: drop-shadow(0 0 4px rgba(240,160,32,0.5)) !important;
+}
+
+/* ─────────────────────────────────────────
+   25. SETTINGS ROWS
+   ───────────────────────────────────────── */
+
+[class*="settings-row"],
+[class*="setting-item"],
+[class*="preference-row"] {
+  border-bottom: 1px solid var(--uv-border) !important;
+  padding: 16px 0 !important;
+  transition: background var(--uv-dur-fast) !important;
+}
+[class*="settings-row"]:hover {
+  background: rgba(255,255,255,0.02) !important;
+  border-radius: var(--uv-r-sm) !important;
+}
+
+[class*="settings-section"],
+[class*="setting-group"] > h2,
+[class*="setting-group"] > h3 {
+  font-family: var(--uv-font-mono) !important;
+  font-size: var(--uv-text-xs) !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+  background: var(--uv-grad) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin-bottom: var(--uv-s-4) !important;
+}
+
+/* ─────────────────────────────────────────
+   26. NOTIFICATIONS
+   ───────────────────────────────────────── */
+
+[class*="notification-row"],
+[class*="notif-item"] {
+  border-radius: var(--uv-r-md) !important;
+  padding: 14px 16px !important;
+  transition: background var(--uv-dur-fast) !important;
+}
+[class*="notification-row"]:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* Unread notification — blue left border */
+[class*="notification-row"].unread,
+[class*="notif-item"][data-unread="true"] {
+  border-left: 2px solid var(--uv-blue) !important;
+  background: rgba(27,111,232,0.05) !important;
+}
+
+/* Notification timestamp */
+[class*="notif-time"],
+[class*="notification-time"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  color: var(--uv-ghost) !important;
+}
+
+/* ─────────────────────────────────────────
+   27. EMPTY STATES & LOADING
+   ───────────────────────────────────────── */
+
+[class*="empty-state"],
+[class*="EmptyState"] {
+  text-align: center !important;
+  color: var(--uv-muted) !important;
+}
+[class*="empty-state"] h3,
+[class*="EmptyState"] h3 {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 300 !important;
+  font-size: var(--uv-text-xl) !important;
+  color: var(--uv-text-dim) !important;
+}
+
+/* Skeleton loading */
+.skeleton,
+[class*="skeleton"],
+[class*="Skeleton"] {
+  background: linear-gradient(90deg,
+    var(--uv-card) 25%,
+    var(--uv-card-2) 50%,
+    var(--uv-card) 75%) !important;
+  background-size: 200% 100% !important;
+  animation: uv-skeleton-shimmer 1.5s ease-in-out infinite !important;
+  border-radius: var(--uv-r-sm) !important;
+}
+
+/* Spinner */
+[class*="spinner"],
+[class*="Spinner"],
+[class*="loading"] {
+  border-color: var(--uv-border) !important;
+  border-top-color: var(--uv-magenta) !important;
+}
+
+/* ─────────────────────────────────────────
+   28. VOICE NOTE RECORDER
+   ───────────────────────────────────────── */
+
+[class*="voice-recorder"],
+[class*="mic-button"],
+[class*="record-btn"] {
+  background: var(--uv-grad) !important;
+  border-radius: var(--uv-r-full) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 24px rgba(217,85,160,0.4) !important;
+}
+[class*="voice-recorder"]:hover,
+[class*="mic-button"]:hover {
+  box-shadow: 0 0 36px rgba(217,85,160,0.6) !important;
+  transform: scale(1.04) !important;
+}
+
+/* Recording state pulse */
+[class*="recording"] {
+  animation: uv-mic-pulse 1s ease infinite !important;
+}
+
+/* ─────────────────────────────────────────
+   29. PASSPORT / MAP
+   ───────────────────────────────────────── */
+
+[class*="passport"],
+[class*="map-card"],
+[class*="location-card"] {
+  background: var(--uv-card) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-lg) !important;
+}
+
+[class*="country-label"],
+[class*="city-label"] {
+  font-family: var(--uv-font-mono) !important;
+  font-size: var(--uv-text-xs) !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+  color: var(--uv-muted) !important;
+}
+
+/* ─────────────────────────────────────────
+   30. VERIFICATION FLOW
+   ───────────────────────────────────────── */
+
+[class*="verify"],
+[class*="Verify"],
+[class*="verification"] {
+  background: var(--uv-card) !important;
+  border-radius: var(--uv-r-lg) !important;
+}
+
+[class*="upload-zone"],
+[class*="drop-zone"],
+[class*="file-drop"] {
+  border: 1.5px dashed rgba(217,85,160,0.4) !important;
+  border-radius: var(--uv-r-lg) !important;
+  background: rgba(217,85,160,0.03) !important;
+  transition: border-color var(--uv-dur-fast),
+              background var(--uv-dur-fast) !important;
+}
+[class*="upload-zone"]:hover,
+[class*="drop-zone"]:hover {
+  border-color: rgba(217,85,160,0.7) !important;
+  background: rgba(217,85,160,0.07) !important;
+}
+
+/* ─────────────────────────────────────────
+   31. KEYFRAME ANIMATIONS
+   ───────────────────────────────────────── */
+
+/* Page entrance */
+@keyframes uv-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Ring breathe — stagger per ring */
+@keyframes uv-ring-breathe {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.03); }
+}
+
+/* Heartbeat — double beat like a real heart */
+@keyframes uv-heartbeat {
+  0%   { transform: scale(1); }
+  14%  { transform: scale(1.18); }
+  28%  { transform: scale(1); }
+  42%  { transform: scale(1.10); }
+  70%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+/* Skeleton shimmer */
+@keyframes uv-skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Mic recording pulse */
+@keyframes uv-mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,85,160,0.5); }
+  50%       { box-shadow: 0 0 0 12px rgba(217,85,160,0); }
+}
+
+/* Gradient spin (for logo ring) */
+@keyframes uv-logo-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Sparkle twinkle */
+@keyframes uv-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  50%       { opacity: 1; transform: scale(1); }
+}
+
+/* Float (for ambient elements) */
+@keyframes uv-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Gradient text shimmer */
+@keyframes uv-grad-move {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─────────────────────────────────────────
+   32. UTILITY CLASSES
+   ───────────────────────────────────────── */
+
+/* Apply these to existing elements to activate the system */
+
+/* Gradient text */
+.uv-text-grad {
+  background: var(--uv-grad) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Gradient border via box-shadow */
+.uv-border-grad {
+  border: 1px solid transparent !important;
+  background-clip: padding-box !important;
+  box-shadow: 0 0 0 1px rgba(217,85,160,0.35) !important;
+}
+
+/* Display heading */
+.uv-display {
+  font-family: var(--uv-font-display) !important;
+  font-weight: 300 !important;
+  line-height: var(--uv-lead-tight) !important;
+}
+
+/* Mono label */
+.uv-mono {
+  font-family: var(--uv-font-mono) !important;
+  font-size: var(--uv-text-xs) !important;
+  letter-spacing: var(--uv-track-mono) !important;
+  text-transform: uppercase !important;
+  color: var(--uv-muted) !important;
+}
+
+/* Glassmorphism card */
+.uv-glass {
+  background: rgba(18, 15, 26, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--uv-border) !important;
+  border-radius: var(--uv-r-lg) !important;
+}
+
+/* Page entrance animation */
+.uv-enter {
+  animation: uv-fade-up var(--uv-dur-slow) var(--uv-ease-out) both !important;
+}
+
+/* Section spacing */
+.uv-section {
+  padding: var(--uv-s-12) 0 !important;
+}
+
+/* ─────────────────────────────────────────
+   33. RESPONSIVE
+   ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  h1 { font-size: clamp(28px, 8vw, 44px) !important; }
+  h2 { font-size: clamp(22px, 6vw, 34px) !important; }
+
+  .card,
+  [class*="Card"] {
+    border-radius: var(--uv-r-md) !important;
+  }
+
+  button[class*="bg-primary"],
+  button[class*="primary"] {
+    padding: 13px 22px !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: clamp(26px, 9vw, 36px) !important; }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  h1 { font-size: clamp(36px, 5vw, 52px) !important; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
