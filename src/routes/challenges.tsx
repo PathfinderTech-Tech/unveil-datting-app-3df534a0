@@ -128,6 +128,7 @@ function Challenges() {
 
 function PublicChallenges() {
   const tiles = [
+    { to: "/challenges/complete-picture", icon: Sparkles, title: "Complete the Picture", desc: "Choose the piece that completes the picture. 10 puzzles, 15s each.", badge: "NEW" },
     { to: "/play",   icon: Calendar,       title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
     { to: "/spark",  icon: MessageCircle,  title: "Icebreakers & Reflections",   desc: "Short prompts that shape your bio and unlock new conversation hooks." },
     { to: "/games",  icon: Sparkles,       title: "Solo Mind Games",             desc: "Puzzles that quietly improve your matching signal." },
@@ -138,9 +139,15 @@ function PublicChallenges() {
     <div className="grid gap-4 md:grid-cols-2">
       {tiles.map((t) => {
         const Icon = t.icon;
+        const isNew = "badge" in t && t.badge === "NEW";
         return (
           <Link key={t.to} to={t.to}
-            className="group rounded-3xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow">
+            className={`group relative rounded-3xl border bg-card p-5 text-left transition-all hover:-translate-y-1 hover:shadow-glow ${
+              isNew ? "border-primary/60 ring-1 ring-primary/40" : "border-border hover:border-primary"
+            }`}>
+            {isNew && (
+              <span className="absolute right-4 top-4 rounded-full bg-gradient-hero px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow">NEW</span>
+            )}
             <Icon className="h-5 w-5 text-accent" />
             <div className="mt-4 font-display text-xl">{t.title}</div>
             <div className="mt-1 text-xs text-muted-foreground">{t.desc}</div>
