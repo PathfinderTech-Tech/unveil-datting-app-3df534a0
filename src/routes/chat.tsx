@@ -437,7 +437,7 @@ function Chat() {
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
         dailyLimit={quota.dailyLimit}
-        isPremium={quota.dailyLimit >= 30}
+        isPremium={quota.dailyLimit >= 35}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
 
@@ -927,7 +927,7 @@ function Chat() {
                   <VoiceMessageRecorder
                     conversationId={active.id}
                     senderId={user.id}
-                    maxSeconds={quota.dailyLimit >= 30 ? 120 : 60}
+                    maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
                     onSent={() => refreshQuota()}
                     onQuotaExhausted={() => setPaywallOpen(true)}
                     disabled={!quota.unlimited && quota.remaining <= 0}

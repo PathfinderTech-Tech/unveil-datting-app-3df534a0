@@ -4,7 +4,7 @@ import { X, Zap, Crown, Infinity as InfinityIcon } from "lucide-react";
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Limit the user just hit (15 free / 30 monthly premium). */
+  /** Limit the user just hit (15 free / 35 monthly premium). */
   dailyLimit?: number;
   /** True when the user is already on the Monthly Premium plan. Hides the monthly CTA. */
   isPremium?: boolean;
@@ -15,7 +15,7 @@ type Props = {
 export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, returnTo }: Props) {
   if (!open) return null;
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
-  const limit = dailyLimit ?? (isPremium ? 30 : 15);
+  const limit = dailyLimit ?? (isPremium ? 35 : 15);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur">
@@ -67,7 +67,7 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
                 </div>
                 <div>
                   <div className="font-medium">1-Month Premium</div>
-                  <div className="text-xs text-muted-foreground">30 interactions per day</div>
+                  <div className="text-xs text-muted-foreground">35 interactions per day</div>
                 </div>
               </div>
             </Link>
