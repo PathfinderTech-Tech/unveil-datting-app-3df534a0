@@ -783,16 +783,26 @@ function Chat() {
                     return (
                       <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2.5"}`}>
                         <div className="relative flex items-end gap-1.5">
-                          <div
-                            title={ts}
-                            className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
-                              mine
-                                ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
-                                : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
-                            }`}
-                          >
-                            {m.content}
-                          </div>
+                          {m.message_type === "voice" && m.media_url ? (
+                            <div className="max-w-[78%]">
+                              <VoiceMessageBubble
+                                mediaPath={m.media_url}
+                                duration={m.duration_seconds ?? null}
+                                mine={mine}
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              title={ts}
+                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
+                                mine
+                                  ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
+                                  : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
+                              }`}
+                            >
+                              {m.content}
+                            </div>
+                          )}
                           <button
                             onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
                             className="opacity-0 transition-opacity group-hover:opacity-100"
