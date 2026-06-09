@@ -555,8 +555,8 @@ function Matches() {
                       <Link to="/match/$userId" params={{ userId: m.userId } as never} className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface" aria-label="Insights">
                         <Info className="h-4 w-4" />
                       </Link>
-                      <button onClick={() => handleLike(m)} aria-label="Send Interest — Open Conversation if Mutual" className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-2 text-[11px] font-medium leading-tight text-primary-foreground shadow-glow">
-                        <Heart className="h-4 w-4 shrink-0" /> Send Interest — Open Conversation if Mutual
+                      <button onClick={() => handleLike(m)} aria-label="Open If Mutual" className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-2 text-sm font-medium whitespace-nowrap text-primary-foreground shadow-glow">
+                        <Heart className="h-4 w-4 shrink-0" /> Open If Mutual
                       </button>
                     </>
                   )}

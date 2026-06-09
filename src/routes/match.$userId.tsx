@@ -297,7 +297,7 @@ function MatchExperience() {
             <p className="text-sm text-muted-foreground">Send interest to unlock the conversation.</p>
             <button onClick={handleLike}
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
-              <Heart className="h-4 w-4" /> Send Interest — Open Conversation if Mutual
+              <Heart className="h-4 w-4" /> Open If Mutual
             </button>
           </div>
         )}
