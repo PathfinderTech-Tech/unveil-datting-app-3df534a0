@@ -13,7 +13,7 @@ export const Route = createFileRoute("/play/")({
 });
 
 const GAMES = [
-  { to: "/challenges", icon: Flag, name: "Red Flag / Green Flag", desc: "Spot what matters — and what doesn't.", tone: "values" },
+  { to: "/play/red-green", icon: Flag, name: "Red Flag / Green Flag", desc: "Spot what matters — and what doesn't.", tone: "values" },
   { to: "/play/predict", icon: Eye, name: "Predict Your Match", desc: "Guess how your match answered.", tone: "discovery" },
   { to: "/play/this-or-that", icon: Zap, name: "This or That", desc: "Fast compatibility round.", tone: "chemistry" },
   { to: "/play/story", icon: BookOpen, name: "Story Builder", desc: "Take turns building a story together.", tone: "creative" },

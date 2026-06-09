@@ -50,6 +50,7 @@ import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as ChallengesIndexRouteImport } from './routes/challenges.index'
 import { Route as PlayThisOrThatRouteImport } from './routes/play.this-or-that'
 import { Route as PlayStoryRouteImport } from './routes/play.story'
+import { Route as PlayRedGreenRouteImport } from './routes/play.red-green'
 import { Route as PlayQuizRouteImport } from './routes/play.quiz'
 import { Route as PlayPredictRouteImport } from './routes/play.predict'
 import { Route as PlayEscapeRouteImport } from './routes/play.escape'
@@ -266,6 +267,11 @@ const PlayStoryRoute = PlayStoryRouteImport.update({
   path: '/play/story',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayRedGreenRoute = PlayRedGreenRouteImport.update({
+  id: '/play/red-green',
+  path: '/play/red-green',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayQuizRoute = PlayQuizRouteImport.update({
   id: '/play/quiz',
   path: '/play/quiz',
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
+  '/play/red-green': typeof PlayRedGreenRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
+  '/play/red-green': typeof PlayRedGreenRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges': typeof ChallengesIndexRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/play/escape': typeof PlayEscapeRoute
   '/play/predict': typeof PlayPredictRoute
   '/play/quiz': typeof PlayQuizRoute
+  '/play/red-green': typeof PlayRedGreenRoute
   '/play/story': typeof PlayStoryRoute
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
+    | '/play/red-green'
     | '/play/story'
     | '/play/this-or-that'
     | '/challenges/'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
+    | '/play/red-green'
     | '/play/story'
     | '/play/this-or-that'
     | '/challenges'
@@ -634,6 +645,7 @@ export interface FileRouteTypes {
     | '/play/escape'
     | '/play/predict'
     | '/play/quiz'
+    | '/play/red-green'
     | '/play/story'
     | '/play/this-or-that'
     | '/challenges/'
@@ -686,6 +698,7 @@ export interface RootRouteChildren {
   PlayEscapeRoute: typeof PlayEscapeRoute
   PlayPredictRoute: typeof PlayPredictRoute
   PlayQuizRoute: typeof PlayQuizRoute
+  PlayRedGreenRoute: typeof PlayRedGreenRoute
   PlayStoryRoute: typeof PlayStoryRoute
   PlayThisOrThatRoute: typeof PlayThisOrThatRoute
   ChallengesIndexRoute: typeof ChallengesIndexRoute
@@ -983,6 +996,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayStoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/red-green': {
+      id: '/play/red-green'
+      path: '/play/red-green'
+      fullPath: '/play/red-green'
+      preLoaderRoute: typeof PlayRedGreenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/play/quiz': {
       id: '/play/quiz'
       path: '/play/quiz'
@@ -1122,6 +1142,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayEscapeRoute: PlayEscapeRoute,
   PlayPredictRoute: PlayPredictRoute,
   PlayQuizRoute: PlayQuizRoute,
+  PlayRedGreenRoute: PlayRedGreenRoute,
   PlayStoryRoute: PlayStoryRoute,
   PlayThisOrThatRoute: PlayThisOrThatRoute,
   ChallengesIndexRoute: ChallengesIndexRoute,

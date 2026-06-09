@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch, Link } from "@tanstack/react-router";
+import { createFileRoute, useRouterState, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, MessageCircle, Heart, Calendar, Lock, Users } from "lucide-react";
@@ -37,7 +37,7 @@ const GROUP_ORDER = ["chemistry", "discovery", "values", "creative"];
 
 function Challenges() {
   const { checking } = useRequireOnboarding();
-  const search = useSearch({ from: "/challenges" }) as SearchParams;
+  const search = useRouterState({ select: (state) => state.location.search }) as SearchParams;
   const { partners, partnerId, setPartnerId, loading } = usePartner(search.u);
 
   const [active, setActive] = useState<string | null>(search.cat ?? null);
@@ -129,7 +129,7 @@ function Challenges() {
 function PublicChallenges() {
   const tiles = [
     { to: "/challenges/complete-picture", icon: Sparkles, title: "Complete the Picture", desc: "Choose the piece that completes the picture. 10 puzzles, 15s each.", badge: "NEW" },
-    { to: "/play",   icon: Calendar,       title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
+    { to: "/insights", icon: Calendar,       title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
     { to: "/spark",  icon: MessageCircle,  title: "Icebreakers & Reflections",   desc: "Short prompts that shape your bio and unlock new conversation hooks." },
     { to: "/games",  icon: Sparkles,       title: "Solo Mind Games",             desc: "Puzzles that quietly improve your matching signal." },
     { to: "/insights", icon: Heart,        title: "Community Reflections",       desc: "See how your answers compare with the wider UNVEIL community." },
