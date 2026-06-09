@@ -522,7 +522,7 @@ function Onboarding() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Profile Photo Studio</h1>
+              <h1 className="font-display text-4xl font-bold">Profile <span className="uo-accent">Photo Studio</span></h1>
               <p className="mt-2 text-muted-foreground">
                 Take a selfie or upload a photo. Real profile photo shows from Day 1 — no AI avatars.
               </p>
