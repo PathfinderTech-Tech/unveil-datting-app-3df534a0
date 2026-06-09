@@ -60,7 +60,7 @@ function Terms() {
       </LegalSection>
 
       <LegalSection title="7. Premium features">
-        <p>Premium plans unlock features such as unlimited Hidden Matches, advanced filters, voice intros at full quality, accelerated reveal journeys, and priority support. Features and pricing may change with notice.</p>
+        <p>Premium plans unlock features such as unlimited Unexpected Matches, advanced filters, voice intros at full quality, accelerated reveal journeys, and priority support. Features and pricing may change with notice.</p>
       </LegalSection>
 
       <LegalSection title="8. Suspension and termination">

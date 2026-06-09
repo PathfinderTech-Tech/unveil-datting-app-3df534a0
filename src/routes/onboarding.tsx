@@ -823,7 +823,7 @@ function Onboarding() {
               </button>
               <button onClick={() => finishOnboarding("hidden")} disabled={saving}
                 className="rounded-full border border-border bg-surface px-6 py-3 font-medium hover:border-foreground/30 disabled:opacity-40">
-                Hidden Matches Preview
+                Unexpected Matches Preview
               </button>
               <button onClick={() => finishOnboarding("profile")} disabled={saving}
                 className="rounded-full border border-border bg-surface px-6 py-3 font-medium hover:border-foreground/30 disabled:opacity-40">
