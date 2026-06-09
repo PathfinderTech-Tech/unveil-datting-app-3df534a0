@@ -126,6 +126,24 @@ function Chat() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const { verified } = useVerification();
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
+  const VERIFY_THRESHOLD = 10;
+  const mustVerify = !verified && sentCount >= VERIFY_THRESHOLD;
+
+  // Load total messages sent by this user (text + voice) to know when to
+  // trigger the selfie verification gate (after VERIFY_THRESHOLD sends).
+  useEffect(() => {
+    if (!user || verified) return;
+    let alive = true;
+    (async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("sender_id", user.id);
+      if (alive && typeof count === "number") setSentCount(count);
+    })();
+    return () => { alive = false; };
+  }, [user, verified]);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [compat, setCompat] = useState<Compat | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
