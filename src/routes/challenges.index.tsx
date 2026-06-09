@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 type SearchParams = { u?: string; cat?: string; tab?: "public" | "match" };
 
-export const Route = createFileRoute("/challenges")({
+export const Route = createFileRoute("/challenges/")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     u: typeof s.u === "string" ? s.u : undefined,
     cat: typeof s.cat === "string" ? s.cat : undefined,

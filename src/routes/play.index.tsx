@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { Flag, Eye, Zap, BookOpen, Trophy, KeyRound, Lock, ArrowRight } from "lucide-react";
 
-export const Route = createFileRoute("/play")({
+export const Route = createFileRoute("/play/")({
   head: () => ({ meta: [
     { title: "Play Together — UNVEIL" },
     { name: "description", content: "Multiplayer match games that build real chemistry. Unlocked after you match." },
