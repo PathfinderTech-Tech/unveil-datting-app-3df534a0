@@ -19,6 +19,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
 import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
+import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -149,11 +150,12 @@ function Chat() {
       const peerIds = list.map((c) => (c.user_a === user.id ? c.user_b : c.user_a));
       const convIds = list.map((c) => c.id);
       if (peerIds.length) {
-        const [{ data: profs }, { data: lastMsgs }] = await Promise.all([
+        const [{ data: profs }, mediaRows, { data: lastMsgs }] = await Promise.all([
           supabase
             .from("profiles")
             .select("id, first_name, avatar_url, photo_url, profile_photo_url, discovery_mode, verified, updated_at")
             .in("id", peerIds),
+          getPrimaryProfileMedia({ data: { userIds: peerIds } }),
           supabase
             .from("messages")
             .select("conversation_id, content, created_at")
@@ -161,14 +163,16 @@ function Chat() {
             .order("created_at", { ascending: false }),
         ]);
         if (!alive) return;
+        const mediaMap = new Map(mediaRows.map((m) => [m.id, m]));
         const pmap: Record<string, PeerProfile> = {};
         for (const p of (profs ?? []) as (PeerRow & { profile_photo_url: string | null })[]) {
+          const media = mediaMap.get(p.id);
           pmap[p.id] = {
             id: p.id,
-            first_name: p.first_name,
-            avatar_url: p.avatar_url,
-            photo_url: p.profile_photo_url ?? p.photo_url,
-            discovery_mode: (p.discovery_mode as "avatar" | "photo" | null) ?? null,
+            first_name: media?.firstName ?? p.first_name?.trim() ?? null,
+            avatar_url: media?.avatarUrl ?? p.avatar_url,
+            photo_url: media?.photoUrl ?? p.profile_photo_url ?? p.photo_url,
+            discovery_mode: media?.hasUploadedPhoto ? "photo" : ((p.discovery_mode as "avatar" | "photo" | null) ?? null),
             verified: p.verified,
             last_seen_at: p.updated_at,
           };
