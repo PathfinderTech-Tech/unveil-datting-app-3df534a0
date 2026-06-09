@@ -1,91 +1,263 @@
-import { useNavigate } from "@tanstack/react-router";
-import { Camera, ShieldCheck, X } from "lucide-react";
-import { useState } from "react";
+import { Camera, Loader2, RefreshCw, ShieldCheck, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { markSelfieVerified } from "@/lib/verification.functions";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Where to return after a successful selfie capture (e.g. /chat?c=abc). */
+  /** Where to return after verification succeeds (defaults to current URL). */
   returnTo?: string;
+  onVerified?: () => void;
 };
 
 /**
- * Selfie verification gate shown before an unverified user sends their
- * first message or voice note. Routes to the existing Photo Studio
- * (/avatar), which captures the selfie and marks the profile verified.
+ * Live selfie verification gate. Opens the device's front-facing camera
+ * directly (synchronous getUserMedia inside the user gesture), captures a
+ * single frame, uploads it privately to the user's profile-photos folder
+ * under /selfies/, marks the profile as verified, then returns the user
+ * to where they came from. The selfie is NEVER set as the public profile
+ * photo here — that's an opt-in action in Profile settings.
  */
-export function SelfieVerifyModal({ open, onClose, returnTo }: Props) {
-  const navigate = useNavigate();
-  const [learnMore, setLearnMore] = useState(false);
-  if (!open) return null;
+export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [phase, setPhase] = useState<"intro" | "live" | "review" | "saving" | "done">("intro");
+  const [error, setError] = useState<string | null>(null);
+  const [snapshot, setSnapshot] = useState<string | null>(null);
 
-  const goCapture = () => {
-    onClose();
-    if (returnTo) {
-      try { sessionStorage.setItem("unveil:verify_return", returnTo); } catch { /* ignore */ }
+  // Cleanup camera on unmount / close.
+  useEffect(() => {
+    if (!open) stopCamera();
+    return () => stopCamera();
+  }, [open]);
+
+  function stopCamera() {
+    const s = streamRef.current;
+    if (s) {
+      s.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
     }
-    navigate({ to: "/avatar" });
-  };
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }
+
+  async function startCamera() {
+    setError(null);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Camera not available on this device or browser.");
+      return;
+    }
+    try {
+      // Synchronous-ish call inside the click handler — required by Safari/iOS.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setPhase("live");
+      // Wait one tick so the <video> element is mounted.
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      }, 0);
+    } catch (e: any) {
+      const name = e?.name ?? "";
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        setError("Camera permission denied. Enable camera access in your browser settings and try again.");
+      } else if (name === "NotFoundError" || name === "OverconstrainedError") {
+        setError("No front-facing camera found on this device.");
+      } else if (name === "NotReadableError") {
+        setError("Your camera is being used by another app. Close it and try again.");
+      } else {
+        setError("Couldn't start the camera. Please try again.");
+      }
+    }
+  }
+
+  function capture() {
+    const v = videoRef.current;
+    if (!v || !v.videoWidth) return;
+    const size = Math.min(v.videoWidth, v.videoHeight);
+    const sx = (v.videoWidth - size) / 2;
+    const sy = (v.videoHeight - size) / 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = 720;
+    canvas.height = 720;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    // Mirror so the snapshot matches what the user sees in the preview.
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(v, sx, sy, size, size, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    setSnapshot(dataUrl);
+    stopCamera();
+    setPhase("review");
+  }
+
+  async function confirm() {
+    if (!snapshot) return;
+    setPhase("saving");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in.");
+      const blob = await (await fetch(snapshot)).blob();
+      // Private path inside the user's folder — not exposed publicly.
+      const path = `${user.id}/selfies/verify-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-photos")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+      if (upErr) throw upErr;
+      await markSelfieVerified();
+      setPhase("done");
+      toast.success("Thank you for helping keep the Unveil community safe.");
+      onVerified?.();
+      // Return the user to where they came from.
+      setTimeout(() => {
+        onClose();
+        const dest = returnTo ?? (typeof window !== "undefined" ? window.location.pathname + window.location.search : null);
+        if (dest && typeof window !== "undefined") window.location.href = dest;
+      }, 1200);
+    } catch (e: any) {
+      console.error("[unveil] selfie verify failed", e);
+      toast.error(e?.message ?? "Could not save selfie.");
+      setPhase("review");
+    }
+  }
+
+  function retake() {
+    setSnapshot(null);
+    void startCamera();
+  }
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-primary/30 bg-card shadow-glow">
         <button
-          onClick={onClose}
-          className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-surface"
+          onClick={() => { stopCamera(); onClose(); }}
+          className="absolute right-3 top-3 z-10 rounded-full bg-background/60 p-1.5 text-muted-foreground hover:bg-surface"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
         </button>
-        <div className="px-6 pt-7 text-center">
-          <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
-            <ShieldCheck className="h-6 w-6" />
-          </div>
-          <h2 className="font-display text-2xl font-light">
-            Verify you're a <span className="text-gradient-aura italic">real person</span>
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Please verify that you are a real person by taking a quick selfie.
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your selfie is used only for safety and authenticity checks. It will not be shown
-            publicly unless you choose to use it as your profile photo. This helps protect the
-            Unveil community from fake profiles.
-          </p>
-          {learnMore && (
-            <div className="mt-4 rounded-2xl border border-border bg-surface/60 p-3 text-left text-[12px] text-muted-foreground">
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-luxury text-foreground/80">
-                What we store
-              </p>
-              <ul className="list-disc space-y-1 pl-4">
-                <li>One private selfie image, stored encrypted in your profile bucket.</li>
-                <li>Verification timestamp so moderators can confirm authenticity.</li>
-                <li>Your public profile photo stays separate — you choose what others see.</li>
-                <li>Selfies are never shown in Discover, Matches, Messages, or Chat.</li>
-              </ul>
+
+        {phase === "intro" && (
+          <div className="px-6 pb-6 pt-7 text-center">
+            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
+              <ShieldCheck className="h-6 w-6" />
             </div>
-          )}
-        </div>
-        <div className="grid gap-2 p-6">
-          <button
-            onClick={goCapture}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow"
-          >
-            <Camera className="h-4 w-4" /> Take Selfie
-          </button>
-          <button
-            onClick={() => setLearnMore((v) => !v)}
-            className="rounded-full border border-border py-2 text-xs text-muted-foreground hover:bg-surface"
-          >
-            {learnMore ? "Hide details" : "Learn More"}
-          </button>
-          <button
-            onClick={onClose}
-            className="rounded-full py-2 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Not Now
-          </button>
-        </div>
+            <h2 className="font-display text-2xl font-light">
+              Verify you're a <span className="text-gradient-aura italic">real person</span>
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Take a quick live selfie. It stays private — used only for safety checks, never shown
+              publicly unless you choose it as your profile photo later in Settings.
+            </p>
+            {error && (
+              <p className="mt-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+                {error}
+              </p>
+            )}
+            <div className="mt-5 grid gap-2">
+              <button
+                onClick={startCamera}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow"
+              >
+                <Camera className="h-4 w-4" /> Take Selfie
+              </button>
+              <button
+                onClick={() => { stopCamera(); onClose(); }}
+                className="rounded-full py-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Not Now
+              </button>
+            </div>
+          </div>
+        )}
+
+        {phase === "live" && (
+          <div className="flex flex-col">
+            <div className="relative aspect-square w-full bg-black">
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                autoPlay
+                className="h-full w-full object-cover"
+                style={{ transform: "scaleX(-1)" }}
+              />
+              <div className="pointer-events-none absolute inset-6 rounded-full border-2 border-white/40" />
+            </div>
+            <div className="grid gap-2 p-5">
+              <p className="text-center text-xs text-muted-foreground">
+                Center your face in the circle, then tap Capture.
+              </p>
+              <button
+                onClick={capture}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow"
+              >
+                <Camera className="h-4 w-4" /> Capture
+              </button>
+              <button
+                onClick={() => { stopCamera(); setPhase("intro"); }}
+                className="rounded-full py-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {phase === "review" && snapshot && (
+          <div className="flex flex-col">
+            <div className="aspect-square w-full bg-black">
+              <img src={snapshot} alt="Selfie preview" className="h-full w-full object-cover" />
+            </div>
+            <div className="grid gap-2 p-5">
+              <p className="text-center text-xs text-muted-foreground">
+                Looks good? This selfie stays private.
+              </p>
+              <button
+                onClick={confirm}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-medium text-primary-foreground shadow-glow"
+              >
+                <ShieldCheck className="h-4 w-4" /> Use this selfie
+              </button>
+              <button
+                onClick={retake}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border py-2 text-xs text-muted-foreground hover:bg-surface"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Retake
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(phase === "saving" || phase === "done") && (
+          <div className="px-6 pb-8 pt-10 text-center">
+            {phase === "saving" ? (
+              <>
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                <p className="mt-4 text-sm text-muted-foreground">Saving your selfie…</p>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-glow">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <h3 className="mt-4 font-display text-xl">You're verified ✓</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Thank you for helping keep the Unveil community safe.
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
