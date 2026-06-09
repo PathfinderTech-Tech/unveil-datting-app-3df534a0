@@ -972,24 +972,33 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
-                  {verified ? (
-                    <VoiceMessageRecorder
-                      conversationId={active.id}
-                      senderId={user.id}
-                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                      onSent={() => refreshQuota()}
-                      onQuotaExhausted={() => setPaywallOpen(true)}
-                      disabled={!quota.unlimited && quota.remaining <= 0}
-                    />
-                  ) : (
+                  {mustVerify ? (
                     <button
                       type="button"
                       onClick={() => setVerifyOpen(true)}
-                      aria-label="Verify to send voice"
+                      aria-label="Verify to continue"
                       className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
                     >
                       <LockIcon className="h-4 w-4 text-muted-foreground" />
                     </button>
+                  ) : (
+                    <VoiceMessageRecorder
+                      conversationId={active.id}
+                      senderId={user.id}
+                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                      onSent={() => {
+                        refreshQuota();
+                        if (!verified) {
+                          setSentCount((n) => {
+                            const next = n + 1;
+                            if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+                            return next;
+                          });
+                        }
+                      }}
+                      onQuotaExhausted={() => setPaywallOpen(true)}
+                      disabled={!quota.unlimited && quota.remaining <= 0}
+                    />
                   )}
                   <input
                     value={draft}
