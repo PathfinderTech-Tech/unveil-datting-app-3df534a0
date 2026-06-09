@@ -456,6 +456,11 @@ function Chat() {
         isPremium={quota.dailyLimit >= 35}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
+      <SelfieVerifyModal
+        open={verifyOpen}
+        onClose={() => setVerifyOpen(false)}
+        returnTo={active ? `/chat?c=${active.id}` : "/chat"}
+      />
 
       <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
