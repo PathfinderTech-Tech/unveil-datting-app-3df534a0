@@ -184,34 +184,11 @@
   .reveal-blur-3 { filter: none; }
   .tracking-luxury { letter-spacing: 0.3em; }
 
-  /* UNVEIL veil motif — subtle brand watermark for cards/sections/loaders */
-  .veil-motif {
-    position: relative;
-    isolation: isolate;
-  }
-  .veil-motif::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("/__l5e/assets-v1/0c7f53d2-d4de-4015-ac04-a0b06ab72314/unveil-masterlogo-bg.jpeg");
-    background-repeat: no-repeat;
-    background-position: center right -20%;
-    background-size: 65% auto;
-    opacity: 0.06;
-    pointer-events: none;
-    z-index: -1;
-    mix-blend-mode: screen;
-  }
-  .veil-motif-center::before {
-    background-position: center center;
-    background-size: 55% auto;
-    opacity: 0.08;
-  }
-  .veil-motif-corner::before {
-    background-position: bottom -10% right -10%;
-    background-size: 45% auto;
-    opacity: 0.07;
-  }
+  /* UNVEIL veil motif — DISABLED. Old background logo removed per request. */
+  .veil-motif { position: relative; isolation: isolate; }
+  .veil-motif::before { content: none; }
+  .veil-motif-center::before { content: none; }
+  .veil-motif-corner::before { content: none; }
   .btn-gradient-primary {
     background: var(--gradient-logo);
     color: var(--primary-foreground);
