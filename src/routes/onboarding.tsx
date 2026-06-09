@@ -471,7 +471,7 @@ function Onboarding() {
         {step === 2 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Tell us who you are.</h1>
+              <h1 className="font-display text-4xl font-bold">Tell us <span className="uo-accent">who you are</span>.</h1>
               <p className="mt-2 text-muted-foreground">The basics for your profile. Phone number is never required.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
