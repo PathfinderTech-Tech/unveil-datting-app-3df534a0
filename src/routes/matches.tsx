@@ -136,6 +136,16 @@ function Matches() {
   type PeerMeta = { avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null };
   const [peerMeta, setPeerMeta] = useState<Record<string, PeerMeta>>({});
 
+  type ConvoStatus = {
+    conversationId: string;
+    unreadText: number;
+    unreadVoice: number;
+    hasMessages: boolean;
+    lastSenderIsMe: boolean;
+    lastMessageAt: string | null;
+  };
+  const [convoStatus, setConvoStatus] = useState<Record<string, ConvoStatus>>({});
+
   useEffect(() => {
     const ids = visible.map((m) => m.userId).filter((id) => !(id in peerMeta));
     if (ids.length === 0) return;
@@ -153,6 +163,77 @@ function Matches() {
       });
     return () => { alive = false; };
   }, [visible]);
+
+  // Conversation-first awareness: load conversations + unread counts so each
+  // match card can surface "Voice Note Received", "Reply Now", "Waiting", etc.
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    async function loadConvos() {
+      const { data: convs } = await supabase
+        .from("conversations")
+        .select("id, user_a, user_b, last_message_at");
+      if (!alive) return;
+      if (!convs?.length) { setConvoStatus({}); return; }
+      const convIds = convs.map((c: any) => c.id);
+      const [{ data: msgs }, { data: reads }] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("id, conversation_id, sender_id, created_at, message_type")
+          .in("conversation_id", convIds)
+          .order("created_at", { ascending: false }),
+        supabase.from("message_reads").select("message_id").eq("user_id", user!.id),
+      ]);
+      if (!alive) return;
+      const readSet = new Set((reads ?? []).map((r: any) => r.message_id));
+      const byConv = new Map<string, any[]>();
+      for (const m of (msgs ?? []) as any[]) {
+        const arr = byConv.get(m.conversation_id) ?? [];
+        arr.push(m); byConv.set(m.conversation_id, arr);
+      }
+      const next: Record<string, ConvoStatus> = {};
+      for (const c of convs as any[]) {
+        const peerId = c.user_a === user!.id ? c.user_b : c.user_a;
+        const arr = byConv.get(c.id) ?? [];
+        let unreadText = 0, unreadVoice = 0;
+        for (const m of arr) {
+          if (m.sender_id !== user!.id && !readSet.has(m.id)) {
+            if (m.message_type === "voice") unreadVoice += 1;
+            else unreadText += 1;
+          }
+        }
+        const last = arr[0];
+        next[peerId] = {
+          conversationId: c.id,
+          unreadText,
+          unreadVoice,
+          hasMessages: arr.length > 0,
+          lastSenderIsMe: !!last && last.sender_id === user!.id,
+          lastMessageAt: c.last_message_at,
+        };
+      }
+      setConvoStatus(next);
+    }
+    loadConvos();
+    const ch = supabase.channel(`matches-convo-${user.id}`)
+      .on("postgres_changes" as any, { event: "*", schema: "public", table: "messages" }, loadConvos as any)
+      .on("postgres_changes" as any, { event: "*", schema: "public", table: "message_reads" }, loadConvos as any)
+      .subscribe();
+    return () => { alive = false; supabase.removeChannel(ch); };
+  }, [user]);
+
+  function priorityFor(userId: string): number {
+    const s = convoStatus[userId];
+    if (!s) return 4;
+    if (s.unreadVoice > 0) return 0;
+    if (s.unreadText > 0) return 1;
+    if (s.hasMessages && s.lastSenderIsMe) return 2;
+    if (s.hasMessages) return 3;
+    return 4;
+  }
+  const sortedVisible = useMemo(() => {
+    return [...visible].sort((a, b) => priorityFor(a.userId) - priorityFor(b.userId));
+  }, [visible, convoStatus]);
 
   if (checking || authLoading || (user && !profileState)) {
     return (
