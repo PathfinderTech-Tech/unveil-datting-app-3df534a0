@@ -764,7 +764,7 @@ function Onboarding() {
         {step === 8 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">How your profile looks.</h1>
+              <h1 className="font-display text-4xl font-bold">How your <span className="uo-accent">profile</span> looks.</h1>
               <p className="mt-2 text-muted-foreground">This is exactly what others will see in Discover and Matches.</p>
             </div>
             <ProfilePreview
