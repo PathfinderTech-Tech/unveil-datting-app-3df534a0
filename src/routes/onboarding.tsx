@@ -694,7 +694,7 @@ function Onboarding() {
         {step === 6 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Personality & Spark.</h1>
+              <h1 className="font-display text-4xl font-bold">Personality & <span className="uo-accent">Spark</span>.</h1>
               <p className="mt-2 text-muted-foreground">Six quick this-or-thats, plus a couple of free-form prompts.</p>
             </div>
             <div className="space-y-4">
