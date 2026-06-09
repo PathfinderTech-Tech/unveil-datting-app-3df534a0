@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
+import { SelfieVerifyModal } from "@/components/SelfieVerifyModal";
+import { useVerification } from "@/hooks/use-verification";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
