@@ -735,7 +735,7 @@ function Onboarding() {
         {step === 7 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Safety basics.</h1>
+              <h1 className="font-display text-4xl font-bold">Safety <span className="uo-accent">basics</span>.</h1>
               <p className="mt-2 text-muted-foreground">
                 Your selfie acts as your trust check. There's no paid verification — every profile starts with the same 15 daily messages.
               </p>
