@@ -124,6 +124,8 @@ function Chat() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const { verified } = useVerification();
+  const [verifyOpen, setVerifyOpen] = useState(false);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [compat, setCompat] = useState<Compat | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
@@ -314,6 +316,7 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
+    if (!verified) { setVerifyOpen(true); return; }
     if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
     const content = draft.trim();
     setDraft("");
