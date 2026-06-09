@@ -919,6 +919,14 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
+                  <VoiceMessageRecorder
+                    conversationId={active.id}
+                    senderId={user.id}
+                    maxSeconds={quota.dailyLimit >= 30 ? 120 : 60}
+                    onSent={() => refreshQuota()}
+                    onQuotaExhausted={() => setPaywallOpen(true)}
+                    disabled={!quota.unlimited && quota.remaining <= 0}
+                  />
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
