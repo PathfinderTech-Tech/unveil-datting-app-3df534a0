@@ -106,10 +106,10 @@ export function HiddenMatchCard({
         {onLike && (
           <button
             onClick={onLike}
-            aria-label="Like"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground shadow-glow"
+            aria-label="Send Interest — Open Conversation if Mutual"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-hero px-3 py-2 text-[10px] font-medium leading-tight text-primary-foreground shadow-glow"
           >
-            <Heart className="h-4 w-4" />
+            <Heart className="h-3.5 w-3.5 shrink-0" /> Send Interest — Open Conversation if Mutual
           </button>
         )}
       </div>
