@@ -461,13 +461,18 @@ function Chat() {
 
           {!quota.loading && !quota.unlimited && (
             <div className="border-b border-border/40 px-5 py-2.5 text-[11px] text-muted-foreground">
-              <span className="font-medium text-foreground/80">{quota.remaining}</span>/{quota.dailyLimit} messages today ·{" "}
+              <span className="font-medium text-foreground/80">{quota.remaining}</span> of {quota.dailyLimit} interactions remaining today ·{" "}
               <button onClick={() => setPaywallOpen(true)} className="text-accent underline-offset-2 hover:underline">Unlock</button>
             </div>
           )}
           {!quota.loading && quota.unlimited && quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date() && (
             <div className="border-b border-accent/30 bg-accent/10 px-5 py-2.5 text-[11px] text-accent">
-              ✦ Unlimited · {formatRemainingTime(quota.messagePassUntil)} left
+              ✦ Unlimited interactions · {formatRemainingTime(quota.messagePassUntil)} left
+            </div>
+          )}
+          {!quota.loading && quota.unlimited && !(quota.messagePassUntil && new Date(quota.messagePassUntil) > new Date()) && (
+            <div className="border-b border-border/40 px-5 py-2.5 text-[11px] text-muted-foreground">
+              ✦ Unlimited interactions
             </div>
           )}
 
