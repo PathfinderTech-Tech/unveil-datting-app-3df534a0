@@ -257,29 +257,29 @@ const ChallengesIndexRoute = ChallengesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayThisOrThatRoute = PlayThisOrThatRouteImport.update({
-  id: '/this-or-that',
-  path: '/this-or-that',
-  getParentRoute: () => PlayRoute,
+  id: '/play/this-or-that',
+  path: '/play/this-or-that',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlayStoryRoute = PlayStoryRouteImport.update({
-  id: '/story',
-  path: '/story',
-  getParentRoute: () => PlayRoute,
+  id: '/play/story',
+  path: '/play/story',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlayQuizRoute = PlayQuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => PlayRoute,
+  id: '/play/quiz',
+  path: '/play/quiz',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlayPredictRoute = PlayPredictRouteImport.update({
-  id: '/predict',
-  path: '/predict',
-  getParentRoute: () => PlayRoute,
+  id: '/play/predict',
+  path: '/play/predict',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlayEscapeRoute = PlayEscapeRouteImport.update({
-  id: '/escape',
-  path: '/escape',
-  getParentRoute: () => PlayRoute,
+  id: '/play/escape',
+  path: '/play/escape',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PUserIdRoute = PUserIdRouteImport.update({
   id: '/p/$userId',
@@ -298,9 +298,9 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
 } as any)
 const ChallengesCompletePictureRoute =
   ChallengesCompletePictureRouteImport.update({
-    id: '/complete-picture',
-    path: '/complete-picture',
-    getParentRoute: () => ChallengesRoute,
+    id: '/challenges/complete-picture',
+    path: '/challenges/complete-picture',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AdminBetaRoute = AdminBetaRouteImport.update({
   id: '/beta',
@@ -680,8 +680,14 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
+  PlayEscapeRoute: typeof PlayEscapeRoute
+  PlayPredictRoute: typeof PlayPredictRoute
+  PlayQuizRoute: typeof PlayQuizRoute
+  PlayStoryRoute: typeof PlayStoryRoute
+  PlayThisOrThatRoute: typeof PlayThisOrThatRoute
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -965,38 +971,38 @@ declare module '@tanstack/react-router' {
     }
     '/play/this-or-that': {
       id: '/play/this-or-that'
-      path: '/this-or-that'
+      path: '/play/this-or-that'
       fullPath: '/play/this-or-that'
       preLoaderRoute: typeof PlayThisOrThatRouteImport
-      parentRoute: typeof PlayRoute
+      parentRoute: typeof rootRouteImport
     }
     '/play/story': {
       id: '/play/story'
-      path: '/story'
+      path: '/play/story'
       fullPath: '/play/story'
       preLoaderRoute: typeof PlayStoryRouteImport
-      parentRoute: typeof PlayRoute
+      parentRoute: typeof rootRouteImport
     }
     '/play/quiz': {
       id: '/play/quiz'
-      path: '/quiz'
+      path: '/play/quiz'
       fullPath: '/play/quiz'
       preLoaderRoute: typeof PlayQuizRouteImport
-      parentRoute: typeof PlayRoute
+      parentRoute: typeof rootRouteImport
     }
     '/play/predict': {
       id: '/play/predict'
-      path: '/predict'
+      path: '/play/predict'
       fullPath: '/play/predict'
       preLoaderRoute: typeof PlayPredictRouteImport
-      parentRoute: typeof PlayRoute
+      parentRoute: typeof rootRouteImport
     }
     '/play/escape': {
       id: '/play/escape'
-      path: '/escape'
+      path: '/play/escape'
       fullPath: '/play/escape'
       preLoaderRoute: typeof PlayEscapeRouteImport
-      parentRoute: typeof PlayRoute
+      parentRoute: typeof rootRouteImport
     }
     '/p/$userId': {
       id: '/p/$userId'
@@ -1021,10 +1027,10 @@ declare module '@tanstack/react-router' {
     }
     '/challenges/complete-picture': {
       id: '/challenges/complete-picture'
-      path: '/complete-picture'
+      path: '/challenges/complete-picture'
       fullPath: '/challenges/complete-picture'
       preLoaderRoute: typeof ChallengesCompletePictureRouteImport
-      parentRoute: typeof ChallengesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/beta': {
       id: '/admin/beta'
@@ -1110,8 +1116,14 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
+  PlayEscapeRoute: PlayEscapeRoute,
+  PlayPredictRoute: PlayPredictRoute,
+  PlayQuizRoute: PlayQuizRoute,
+  PlayStoryRoute: PlayStoryRoute,
+  PlayThisOrThatRoute: PlayThisOrThatRoute,
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -1120,13 +1132,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
