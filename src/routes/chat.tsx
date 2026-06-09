@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
+import { SelfieVerifyModal } from "@/components/SelfieVerifyModal";
+import { useVerification } from "@/hooks/use-verification";
 import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -122,6 +124,8 @@ function Chat() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const { verified } = useVerification();
+  const [verifyOpen, setVerifyOpen] = useState(false);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [compat, setCompat] = useState<Compat | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
@@ -312,6 +316,7 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
+    if (!verified) { setVerifyOpen(true); return; }
     if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
     const content = draft.trim();
     setDraft("");
@@ -449,6 +454,11 @@ function Chat() {
         onClose={() => setPaywallOpen(false)}
         dailyLimit={quota.dailyLimit}
         isPremium={quota.dailyLimit >= 35}
+        returnTo={active ? `/chat?c=${active.id}` : "/chat"}
+      />
+      <SelfieVerifyModal
+        open={verifyOpen}
+        onClose={() => setVerifyOpen(false)}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
 
@@ -937,14 +947,25 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
-                  <VoiceMessageRecorder
-                    conversationId={active.id}
-                    senderId={user.id}
-                    maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                    onSent={() => refreshQuota()}
-                    onQuotaExhausted={() => setPaywallOpen(true)}
-                    disabled={!quota.unlimited && quota.remaining <= 0}
-                  />
+                  {verified ? (
+                    <VoiceMessageRecorder
+                      conversationId={active.id}
+                      senderId={user.id}
+                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                      onSent={() => refreshQuota()}
+                      onQuotaExhausted={() => setPaywallOpen(true)}
+                      disabled={!quota.unlimited && quota.remaining <= 0}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setVerifyOpen(true)}
+                      aria-label="Verify to send voice"
+                      className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                    >
+                      <LockIcon className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}

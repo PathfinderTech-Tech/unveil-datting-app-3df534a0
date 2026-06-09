@@ -8,6 +8,7 @@ import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Search } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({
@@ -29,6 +30,7 @@ type Row = {
   peer_photo: string | null;
   peer_avatar: string | null;
   peer_discovery_mode: "avatar" | "photo" | null;
+  peer_verified: boolean;
   last_text: string | null;
   unread: number;
 };
@@ -82,7 +84,7 @@ function MessagesPage() {
 
       const [{ data: profs }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
-          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode").in("id", peerIds)
+          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode, verified").in("id", peerIds)
           : Promise.resolve({ data: [] as any[] } as any),
         peerIds.length ? getPrimaryProfileMedia({ data: { userIds: peerIds } }) : Promise.resolve([]),
         convIds.length
@@ -130,6 +132,7 @@ function MessagesPage() {
           peer_photo: media?.photoUrl ?? peer?.profile_photo_url ?? peer?.photo_url ?? null,
           peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
           peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
+          peer_verified: !!peer?.verified,
           last_text: previewFor(last),
           unread: unreadByConv.get(c.id) ?? 0,
         };
@@ -156,6 +159,7 @@ function MessagesPage() {
           peer_photo: media?.photoUrl ?? peer?.profile_photo_url ?? peer?.photo_url ?? null,
           peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
           peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
+          peer_verified: !!peer?.verified,
           last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,
           unread: incoming && !t.read_at ? 1 : 0,
         });
@@ -296,6 +300,7 @@ function MessagesPage() {
                         <span className={`truncate ${r.unread > 0 ? "font-semibold" : "font-medium"}`}>
                           {r.peer_name ?? "Match"}
                         </span>
+                        {r.peer_verified && <VerifiedBadge size="xs" />}
                         {r.unread > 0 && (
                           <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
                             New
