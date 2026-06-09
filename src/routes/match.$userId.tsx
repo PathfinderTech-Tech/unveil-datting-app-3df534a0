@@ -233,6 +233,7 @@ function MatchExperience() {
                 avatarUrl={profile.avatar_url ?? null}
                 photoUrl={profile.photo_url ?? null}
                 size={88}
+                veiled={msgs.length === 0}
               />
             </div>
             <div className="min-w-0 flex-1">

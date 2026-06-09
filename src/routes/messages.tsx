@@ -259,6 +259,7 @@ function MessagesPage() {
                       avatarUrl={r.peer_avatar}
                       photoUrl={r.peer_photo}
                       size={48}
+                      veiled={!r.last_message_at || isThought}
                     />
                     {r.unread > 0 && (
                       <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">

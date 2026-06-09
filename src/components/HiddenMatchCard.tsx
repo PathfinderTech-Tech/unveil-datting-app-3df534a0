@@ -30,7 +30,7 @@ export function HiddenMatchCard({
         <div className="relative">
           <div className="flex items-start justify-between">
             <div className="relative">
-              <ProfileAvatar userId={match.id} name="Opposite" photoUrl={match.photoUrl} size={56} />
+              <ProfileAvatar userId={match.id} name="Opposite" photoUrl={match.photoUrl} size={56} veiled />
               <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background ring-1 ring-border">
                 <Lock className="h-3 w-3 text-muted-foreground" />
               </div>
@@ -61,7 +61,7 @@ export function HiddenMatchCard({
       <button onClick={onView} className="text-left">
         <div className="flex items-start justify-between">
           <div className="relative">
-            <ProfileAvatar userId={match.id} name={match.firstName ?? "Hidden"} photoUrl={match.photoUrl} size={56} />
+            <ProfileAvatar userId={match.id} name={match.firstName ?? "Hidden"} photoUrl={match.photoUrl} size={56} veiled />
             <div className="absolute -bottom-1 -right-1 rounded-full bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase text-accent-foreground">
               Hidden
             </div>
