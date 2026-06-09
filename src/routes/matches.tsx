@@ -427,17 +427,51 @@ function Matches() {
         <MatchFilters value={filters} onChange={setFilters} />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visible.map((m) => {
+          {sortedVisible.map((m) => {
             const dist = distanceLabel(m.distanceKm);
             const cityLabel = m.locationPrivacy === "country" ? (m.country || "—")
               : m.locationPrivacy === "hidden" ? "Location hidden"
               : m.city;
             const band = bandLabel(m.pairScore);
+            const s = convoStatus[m.userId];
+            const unreadTotal = (s?.unreadText ?? 0) + (s?.unreadVoice ?? 0);
+            const hasVoice = (s?.unreadVoice ?? 0) > 0;
+            const hasUnread = unreadTotal > 0;
+            const waiting = !!s && s.hasMessages && !hasUnread && s.lastSenderIsMe;
+            const active = !!s && s.hasMessages && !hasUnread && !waiting;
+            const statusLabel = hasVoice ? "Voice Note Received"
+              : (s?.unreadText ?? 0) > 0 ? (s!.unreadText > 1 ? `${s!.unreadText} New Messages` : "Message Received")
+              : waiting ? "Waiting For Reply"
+              : active ? "Active Conversation"
+              : "New Match";
+            const statusTone = hasVoice
+              ? "bg-accent/15 text-accent border-accent/40"
+              : hasUnread
+              ? "bg-primary/15 text-primary border-primary/40"
+              : waiting
+              ? "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400"
+              : active
+              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400"
+              : "bg-surface/60 text-muted-foreground border-border";
+            const ctaLabel = hasVoice ? "Voice Note Received"
+              : (s?.unreadText ?? 0) > 1 ? `${s!.unreadText} New Messages`
+              : (s?.unreadText ?? 0) === 1 ? "Reply Now"
+              : active ? "Continue Conversation"
+              : waiting ? "Waiting For Reply"
+              : null;
+            const cardBorder = hasUnread
+              ? "border-primary shadow-glow ring-1 ring-primary/40 animate-pulse-slow"
+              : "border-border";
             return (
               <div
                 key={m.userId}
-                className="group flex flex-col rounded-3xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow"
+                className={`group relative flex flex-col rounded-3xl border bg-card p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow ${cardBorder}`}
               >
+                {hasUnread && (
+                  <span className="absolute -top-2 -right-2 z-10 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground shadow-glow">
+                    {unreadTotal}
+                  </span>
+                )}
                 <button onClick={() => setActive(m)} className="text-left">
                   <div className="flex items-start justify-between">
                     <div className="relative">
@@ -457,6 +491,13 @@ function Matches() {
                       <div className="font-display text-2xl font-bold text-gradient-hero">{m.pairScore}%</div>
                       <div className={`font-mono text-[10px] uppercase tracking-wider ${band.tone}`}>{band.label}</div>
                     </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusTone}`}>
+                      {hasVoice ? <Mic className="h-3 w-3" /> : hasUnread ? <MessageCircle className="h-3 w-3" /> : null}
+                      {statusLabel}
+                    </span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -494,18 +535,31 @@ function Matches() {
                 </button>
 
                 <div className="mt-4 flex items-center gap-2">
-                  <button onClick={() => handlePass(m)} aria-label="Pass" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
-                    <X className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => handleSave(m)} aria-label="Save" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
-                    <Bookmark className="h-4 w-4" />
-                  </button>
-                  <Link to="/match/$userId" params={{ userId: m.userId } as never} className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface" aria-label="Insights">
-                    <Info className="h-4 w-4" />
-                  </Link>
-                  <button onClick={() => handleLike(m)} aria-label="Like" className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-2 text-sm font-medium text-primary-foreground shadow-glow">
-                    <Heart className="h-4 w-4" /> Like
-                  </button>
+                  {ctaLabel && s ? (
+                    <Link
+                      to="/chat"
+                      search={{ c: s.conversationId } as never}
+                      aria-label={ctaLabel}
+                      className={`ml-auto flex flex-1 items-center justify-center gap-2 rounded-full py-2 text-sm font-medium text-primary-foreground shadow-glow ${hasVoice ? "bg-gradient-aura animate-heartbeat" : hasUnread ? "bg-gradient-hero animate-heartbeat" : "bg-gradient-hero"}`}
+                    >
+                      {hasVoice ? <Mic className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />} {ctaLabel}
+                    </Link>
+                  ) : (
+                    <>
+                      <button onClick={() => handlePass(m)} aria-label="Pass" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
+                        <X className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleSave(m)} aria-label="Save" className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface">
+                        <Bookmark className="h-4 w-4" />
+                      </button>
+                      <Link to="/match/$userId" params={{ userId: m.userId } as never} className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface" aria-label="Insights">
+                        <Info className="h-4 w-4" />
+                      </Link>
+                      <button onClick={() => handleLike(m)} aria-label="Like" className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero py-2 text-sm font-medium text-primary-foreground shadow-glow">
+                        <Heart className="h-4 w-4" /> Like
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             );
