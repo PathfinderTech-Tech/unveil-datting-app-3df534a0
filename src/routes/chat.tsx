@@ -126,6 +126,24 @@ function Chat() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const { verified } = useVerification();
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
+  const VERIFY_THRESHOLD = 10;
+  const mustVerify = !verified && sentCount >= VERIFY_THRESHOLD;
+
+  // Load total messages sent by this user (text + voice) to know when to
+  // trigger the selfie verification gate (after VERIFY_THRESHOLD sends).
+  useEffect(() => {
+    if (!user || verified) return;
+    let alive = true;
+    (async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("sender_id", user.id);
+      if (alive && typeof count === "number") setSentCount(count);
+    })();
+    return () => { alive = false; };
+  }, [user, verified]);
   const [matchInfo, setMatchInfo] = useState<{ id: string; created_at: string } | null>(null);
   const [compat, setCompat] = useState<Compat | null>(null);
   const [contactShareUnlocked, setContactShareUnlocked] = useState<boolean>(false);
@@ -316,7 +334,7 @@ function Chat() {
 
   const send = async () => {
     if (!active || !user || !draft.trim()) return;
-    if (!verified) { setVerifyOpen(true); return; }
+    if (mustVerify) { setVerifyOpen(true); return; }
     if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
     const content = draft.trim();
     setDraft("");
@@ -335,6 +353,13 @@ function Chat() {
     const sb = supabase as unknown as { from: (t: string) => any };
     await sb.from("typing_indicators").delete().eq("conversation_id", active.id).eq("user_id", user.id);
     refreshQuota();
+    if (!verified) {
+      setSentCount((n) => {
+        const next = n + 1;
+        if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+        return next;
+      });
+    }
   };
 
   const onDraftChange = (v: string) => {
@@ -947,24 +972,33 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
-                  {verified ? (
-                    <VoiceMessageRecorder
-                      conversationId={active.id}
-                      senderId={user.id}
-                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                      onSent={() => refreshQuota()}
-                      onQuotaExhausted={() => setPaywallOpen(true)}
-                      disabled={!quota.unlimited && quota.remaining <= 0}
-                    />
-                  ) : (
+                  {mustVerify ? (
                     <button
                       type="button"
                       onClick={() => setVerifyOpen(true)}
-                      aria-label="Verify to send voice"
+                      aria-label="Verify to continue"
                       className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
                     >
                       <LockIcon className="h-4 w-4 text-muted-foreground" />
                     </button>
+                  ) : (
+                    <VoiceMessageRecorder
+                      conversationId={active.id}
+                      senderId={user.id}
+                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                      onSent={() => {
+                        refreshQuota();
+                        if (!verified) {
+                          setSentCount((n) => {
+                            const next = n + 1;
+                            if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+                            return next;
+                          });
+                        }
+                      }}
+                      onQuotaExhausted={() => setPaywallOpen(true)}
+                      disabled={!quota.unlimited && quota.remaining <= 0}
+                    />
                   )}
                   <input
                     value={draft}
