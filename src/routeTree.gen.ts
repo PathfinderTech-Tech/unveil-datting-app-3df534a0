@@ -56,6 +56,7 @@ import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -295,6 +296,12 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const ChallengesCompletePictureRoute =
+  ChallengesCompletePictureRouteImport.update({
+    id: '/complete-picture',
+    path: '/complete-picture',
+    getParentRoute: () => ChallengesRoute,
+  } as any)
 const AdminBetaRoute = AdminBetaRouteImport.update({
   id: '/beta',
   path: '/beta',
@@ -317,7 +324,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRoute
+  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -354,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/admin/beta': typeof AdminBetaRoute
+  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -369,7 +377,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRoute
+  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -406,6 +414,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/admin/beta': typeof AdminBetaRoute
+  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -422,7 +431,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/avatar': typeof AvatarRoute
-  '/challenges': typeof ChallengesRoute
+  '/challenges': typeof ChallengesRouteWithChildren
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/community-guidelines': typeof CommunityGuidelinesRoute
@@ -459,6 +468,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/admin/beta': typeof AdminBetaRoute
+  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -513,6 +523,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/admin/beta'
+    | '/challenges/complete-picture'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/admin/beta'
+    | '/challenges/complete-picture'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -617,6 +629,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/admin/beta'
+    | '/challenges/complete-picture'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -633,7 +646,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AvatarRoute: typeof AvatarRoute
-  ChallengesRoute: typeof ChallengesRoute
+  ChallengesRoute: typeof ChallengesRouteWithChildren
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
@@ -1006,6 +1019,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/challenges/complete-picture': {
+      id: '/challenges/complete-picture'
+      path: '/complete-picture'
+      fullPath: '/challenges/complete-picture'
+      preLoaderRoute: typeof ChallengesCompletePictureRouteImport
+      parentRoute: typeof ChallengesRoute
+    }
     '/admin/beta': {
       id: '/admin/beta'
       path: '/beta'
@@ -1039,6 +1059,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ChallengesRouteChildren {
+  ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
+}
+
+const ChallengesRouteChildren: ChallengesRouteChildren = {
+  ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
+}
+
+const ChallengesRouteWithChildren = ChallengesRoute._addFileChildren(
+  ChallengesRouteChildren,
+)
 
 interface CheckoutRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
@@ -1074,7 +1106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AvatarRoute: AvatarRoute,
-  ChallengesRoute: ChallengesRoute,
+  ChallengesRoute: ChallengesRouteWithChildren,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,

@@ -16,6 +16,8 @@ import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
+import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
@@ -34,7 +36,17 @@ export const Route = createFileRoute("/chat")({
 });
 
 type Conv = { id: string; user_a: string; user_b: string; last_message_at: string | null };
-type Msg = { id: string; sender_id: string; content: string; created_at: string; delivered_at?: string | null };
+type Msg = {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  delivered_at?: string | null;
+  message_type?: string | null;
+  media_url?: string | null;
+  media_type?: string | null;
+  duration_seconds?: number | null;
+};
 type Reaction = { message_id: string; user_id: string; emoji: string };
 type PeerProfile = {
   id: string;
