@@ -158,8 +158,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
 
   // Branch by kind (verified badge + premium one-time retired)
 
-  if (kind === "message_pass_24h") {
-    const hours = Number(session.metadata?.durationHours ?? 24);
+  if (kind === "message_pass_24h" || kind === "message_pass_2w") {
+    const defaultHours = kind === "message_pass_2w" ? 336 : 24;
+    const hours = Number(session.metadata?.durationHours ?? defaultHours);
     if (session.payment_status === "paid") {
       const { data: prof } = await getSupabase()
         .from("profiles")
