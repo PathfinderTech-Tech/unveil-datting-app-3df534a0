@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, Facebook, MessageCircle as WhatsAppIcon, Twitter, Send, Linkedin, Instagram, Music2 } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, MessageSquare, Facebook, MessageCircle as WhatsAppIcon, Twitter, Send, Linkedin, Instagram, Music2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
