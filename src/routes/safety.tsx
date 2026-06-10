@@ -45,6 +45,12 @@ function Safety() {
             </div>
           ))}
         </div>
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-xl font-light">Photo Verified</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This member completed a selfie verification confirming their profile photos are really them.
+          </p>
+        </div>
         <div className="mt-12 rounded-3xl border border-accent/30 bg-accent/5 p-8">
           <Mail className="mb-3 h-6 w-6 text-accent" />
           <h2 className="font-display text-2xl font-light">Need help?</h2>
