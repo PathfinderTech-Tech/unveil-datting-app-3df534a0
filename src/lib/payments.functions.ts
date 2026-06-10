@@ -46,6 +46,7 @@ const PRICE_META: Record<string, { kind: string; durationDays?: number; duration
   premium_quarterly: { kind: "premium_subscription" },
   premium_annual: { kind: "premium_subscription" },
   message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
+  message_pass_2w: { kind: "message_pass_2w", durationHours: 336 },
 };
 
 const ALLOWED_RETURN_HOSTS = new Set([
