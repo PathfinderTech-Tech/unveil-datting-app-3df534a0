@@ -163,6 +163,7 @@ export const Route = createFileRoute("/api/public/passport-og")({
 
         const photo = await readPhoto(profile.avatar_url ?? profile.photo_url ?? profile.profile_photo_url);
         const jpeg = createShareJpeg(profile, photo);
+        const body = jpeg.buffer.slice(jpeg.byteOffset, jpeg.byteOffset + jpeg.byteLength) as ArrayBuffer;
         return new Response(jpeg, {
           headers: {
             "Content-Type": "image/jpeg",
