@@ -33,7 +33,7 @@ function Privacy() {
           <li><strong>Voice introductions</strong> recorded during onboarding or for reveal journeys.</li>
           <li><strong>Messages and communications</strong> with other members (encrypted at rest).</li>
           <li><strong>Compatibility assessments</strong>: quiz answers, personality blueprint, scores, and AI-derived insights.</li>
-          <li><strong>Verification documents</strong> (selfie, government ID) only if you opt into verification.</li>
+          <li><strong>Verification selfies</strong>, collected when you complete the required photo verification.</li>
           <li><strong>Analytics data</strong>: device type, app version, crash reports, feature usage (no advertising IDs).</li>
           <li><strong>Payment information</strong> is processed by Stripe, Inc. UNVEIL never stores full card numbers; we receive only a token and the last four digits.</li>
         </ul>
@@ -44,11 +44,11 @@ function Privacy() {
       </LegalSection>
 
       <LegalSection title="3. Sharing">
-        <p>Matched users see your profile, photos, and shared answers. Stripe processes payments. Apple and Google process App Store / Play subscriptions if used. Verification documents are reviewed by our trust team and never shown to other members. We disclose data when legally required.</p>
+        <p>Matched users see your profile, photos, and shared answers. Stripe processes payments. Apple and Google process App Store / Play subscriptions if used. Verification selfies are reviewed by our trust team and never shown to other members. We disclose data when legally required.</p>
       </LegalSection>
 
       <LegalSection title="4. Storage and security">
-        <p>Data is stored on encrypted infrastructure inside the EU and US. Photos and IDs live in private buckets with row-level access policies. Transport is TLS 1.2+. We run security scans, RLS, and access logging.</p>
+        <p>Data is stored on encrypted infrastructure inside the EU and US. Photos and verification selfies live in private buckets with row-level access policies. Transport is TLS 1.2+. We run security scans, RLS, and access logging.</p>
       </LegalSection>
 
       <LegalSection title="5. Account deletion and data export">
@@ -73,7 +73,7 @@ function Privacy() {
       </LegalSection>
 
       <LegalSection title="10. Retention">
-        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification documents: deleted within 90 days of approval or rejection. Payment receipts: kept 7 years for tax compliance.</p>
+        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification selfies: deleted within 90 days of approval or rejection. Payment receipts: kept 7 years for tax compliance.</p>
       </LegalSection>
 
       <LegalSection title="11. Changes">

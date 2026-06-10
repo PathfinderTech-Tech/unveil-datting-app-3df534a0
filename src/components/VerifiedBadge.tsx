@@ -1,7 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 
-// Selfie/photo onboarding is the trust check. The badge text reads
-// "Photo Checked" — no paid verification, no $9.99 unlock.
+// Free selfie verification confirms the member's profile photos are really them.
+// Badge label is "Photo Verified".
 export function VerifiedBadge({
   size = "sm",
   showLabel = false,
@@ -17,14 +17,14 @@ export function VerifiedBadge({
     <span className="inline-flex items-center gap-1.5 align-middle">
       <span
         className={`inline-flex items-center justify-center rounded-full bg-gradient-logo text-primary-foreground shadow-glow ${dim}`}
-        title="Photo Checked"
-        aria-label="Photo Checked"
+        title="Photo Verified"
+        aria-label="Photo Verified"
       >
         <ShieldCheck className="h-3 w-3" />
       </span>
       {showLabel && (
         <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-          Photo Checked
+          Photo Verified
         </span>
       )}
     </span>

@@ -34,7 +34,7 @@ const FAQ: { q: string; a: string }[] = [
   { q: "How do I cancel my subscription?", a: "Settings → Manage Subscription opens the Stripe portal where you can cancel. Access continues until the end of the paid period." },
   { q: "How do I delete my account?", a: "Settings → Account → Delete Account. Deletion is permanent and removes your profile, matches, and messages within 30 days." },
   { q: "How do I report a user?", a: "Open their profile or chat, tap the three-dot menu, and select Report. Our trust team reviews every report within 24 hours." },
-  { q: "Is my data safe?", a: "Yes. Photos and verification documents are stored in private, encrypted buckets. We never sell your personal data. See our Privacy Policy." },
+  { q: "Is my data safe?", a: "Yes. Photos and verification selfies are stored in private, encrypted buckets. We never sell your personal data. See our Privacy Policy." },
 ];
 
 const CATEGORIES = [
