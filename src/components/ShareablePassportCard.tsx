@@ -279,7 +279,7 @@ export function ShareablePassportCard({
   async function nativeShare() {
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
-        await (navigator as any).share({ title: "UNVEIL Passport", text: shareText, url: shareUrl });
+        await (navigator as any).share({ title: shareTitle, text: shareText, url: shareUrl });
         trackEvent("shareable_card_native_shared", { premium: isPremium });
       } catch {
         /* canceled */
