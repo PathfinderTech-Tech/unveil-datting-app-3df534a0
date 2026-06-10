@@ -138,7 +138,7 @@ function Results() {
             to="/premium"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-4 text-sm hover:bg-surface-2"
           >
-            Explore UNVEIL+
+            Explore UNVEIL Premium
           </Link>
         </div>
       </div>
