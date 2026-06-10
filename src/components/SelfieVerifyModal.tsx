@@ -163,12 +163,11 @@ export function SelfieVerifyModal({ open, onClose, returnTo, onVerified }: Props
               <ShieldCheck className="h-6 w-6" />
             </div>
             <h2 className="font-display text-2xl font-light">
-              Verify You're a <span className="text-gradient-aura italic">Real Person</span>
+              Keep the <span className="text-gradient-aura italic">conversation going</span>
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              You've started building meaningful connections. To help keep Unveil safe and
-              authentic, please take a quick private selfie. It's used only for verification
-              and safety — never shown publicly unless you choose it as your profile photo later.
+              Verify it's really you. Take a quick selfie to confirm your profile photos.
+              It's free, takes under a minute, and keeps UNVEIL safe for everyone.
             </p>
             {error && (
               <p className="mt-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
