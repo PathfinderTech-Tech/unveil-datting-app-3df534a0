@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
-import { Check, Sparkles, Heart, Shield, Zap } from "lucide-react";
+import { Check, Sparkles, Heart, Shield, Zap, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/premium")({
       {
         name: "description",
         content:
-          "UNVEIL is free to use. Premium gives you 15 messages per day, instant contact sharing, and deeper insights.",
+          "UNVEIL is free to use. Premium gives you unlimited messages, instant contact sharing, and deeper insights.",
       },
     ],
   }),
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/premium")({
 });
 
 const FREE_FEATURES = [
-  "5 messages per day",
+  "15 messages & voice notes per day",
   "Full profile creation",
   "Matching & discovery",
   "Compatibility insights",
@@ -27,7 +27,7 @@ const FREE_FEATURES = [
 ];
 
 const PREMIUM_FEATURES = [
-  "15 messages per day",
+  "Unlimited messages & voice notes",
   "Instant contact sharing — no Day 7 wait",
   "Premium badge",
   "Priority discovery placement",
@@ -37,9 +37,9 @@ const PREMIUM_FEATURES = [
 
 type PlanKey = "premium" | "premium_quarterly" | "premium_annual";
 const PLANS: { key: PlanKey; label: string; price: string; cadence: string; sub?: string; featured?: boolean }[] = [
-  { key: "premium",           label: "Monthly",   price: "$15.99",  cadence: "/ month",       sub: "Billed monthly" },
-  { key: "premium_quarterly", label: "Quarterly", price: "$39.99",  cadence: "/ 3 months",    sub: "Save ~17%", featured: true },
-  { key: "premium_annual",    label: "Annual",    price: "$149.99", cadence: "/ year",        sub: "Best value" },
+  { key: "premium",           label: "Monthly",   price: "$15.99",  cadence: "/ month",    sub: "Billed monthly" },
+  { key: "premium_quarterly", label: "Quarterly", price: "$39.99",  cadence: "/ 3 months", sub: "Save 17%", featured: true },
+  { key: "premium_annual",    label: "Annual",    price: "$149.99", cadence: "/ year",     sub: "Save 22%, Best value" },
 ];
 
 function Membership() {
@@ -57,7 +57,7 @@ function Membership() {
             Choose how you want to <span className="text-gradient-aura italic">discover</span>.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-            UNVEIL is free to use. Premium unlocks more daily messages, instant contact sharing, and deeper insights.
+            UNVEIL is free to use. Premium unlocks unlimited daily messages, instant contact sharing, and a deeper experience.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ function Membership() {
             </div>
             <div className="font-display text-2xl font-light">UNVEIL Premium</div>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              For users who want more daily messages, immediate contact sharing, and a deeper experience.
+              For users who want unlimited daily messages, immediate contact sharing, and a deeper experience.
             </p>
             <ul className="mt-6 flex-1 space-y-2.5 text-sm">
               {PREMIUM_FEATURES.map((f) => (
@@ -132,31 +132,72 @@ function Membership() {
           ))}
         </div>
 
-        {/* 24h Pass */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-accent/40 bg-accent/5 p-6 md:p-7">
-          <div className="flex items-start gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-display text-xl font-light">24-Hour Unlimited Pass</h3>
-              <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                Unlimited messaging for the next 24 hours. Works for free and premium users.
-              </p>
-            </div>
+        {/* Passes section */}
+        <div className="mt-12">
+          <div className="text-center">
+            <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Try unlimited — no commitment</p>
+            <h2 className="mt-3 font-display text-2xl font-light">One-time Passes</h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+              Not ready for a subscription? Unlock unlimited messaging with a single purchase. No renewal, no commitment.
+            </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="font-display text-2xl">$1.99</div>
-              <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">24 hours</div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {/* 24h Pass */}
+            <div className="flex flex-col justify-between rounded-3xl border border-accent/40 bg-accent/5 p-6 md:p-7">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-light">24-Hour Unlimited Pass</h3>
+                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                    Unlimited messaging for the next 24 hours. Works for free and premium users.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <div className="font-display text-2xl">$1.99</div>
+                  <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">One-time purchase</div>
+                </div>
+                <Link
+                  to="/checkout"
+                  search={{ product: "message_pass" } as any}
+                  className="inline-flex items-center justify-center rounded-full border border-accent bg-accent/15 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20"
+                >
+                  Get Pass
+                </Link>
+              </div>
             </div>
-            <Link
-              to="/checkout"
-              search={{ product: "message_pass" } as any}
-              className="inline-flex items-center justify-center rounded-full border border-accent bg-accent/15 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20"
-            >
-              Get Pass
-            </Link>
+
+            {/* 2-Week Pass */}
+            <div className="flex flex-col justify-between rounded-3xl border border-primary/40 bg-primary/5 p-6 md:p-7">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-light">2-Week Unlimited Pass</h3>
+                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                    Unlimited messaging for a full 14 days. Perfect for diving deep without a subscription.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <div className="font-display text-2xl">$9.99</div>
+                  <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">One-time purchase</div>
+                </div>
+                <button
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center justify-center rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-muted-foreground opacity-60"
+                  title="Coming soon"
+                >
+                  Coming Soon
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
