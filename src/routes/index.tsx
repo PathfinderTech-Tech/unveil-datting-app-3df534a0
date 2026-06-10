@@ -4,6 +4,7 @@ import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
+import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,6 +14,11 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "UNVEIL" },
       { property: "og:description", content: "Connection begins beneath the surface." },
       { property: "og:url", content: "https://unveil.best/" },
+      { property: "og:image", content: logoAsset.url },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "UNVEIL — Connection begins beneath the surface." },
+      { name: "twitter:image", content: logoAsset.url },
     ],
     links: [{ rel: "canonical", href: "https://unveil.best/" }],
   }),
