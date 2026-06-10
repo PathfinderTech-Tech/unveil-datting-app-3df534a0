@@ -12,18 +12,20 @@ export const Route = createFileRoute("/p/$userId")({
     if (!p) {
       return {
         meta: [
-          { title: "UNVEIL Passport" },
-          { name: "description", content: "Slow love, real connection — UNVEIL." },
-          { property: "og:title", content: "UNVEIL Passport" },
-          { property: "og:description", content: "Slow love, real connection." },
+          { title: "This Passport is not available — UNVEIL" },
+          { name: "description", content: "This UNVEIL Passport isn't available." },
+          { name: "robots", content: "noindex" },
+          { property: "og:title", content: "This Passport is not available" },
+          { property: "og:description", content: "This UNVEIL Passport isn't available." },
           { property: "og:url", content: url },
           { property: "og:type", content: "profile" },
         ],
         links: [{ rel: "canonical", href: url }],
       };
     }
-    const title = "My Unveil Passport — Connection Beneath The Surface";
-    const description = "Discover my personality, values, communication style, and relationship insights on Unveil.";
+    const name = p.firstName ?? "Someone";
+    const title = `${name} on UNVEIL`;
+    const description = "See my UNVEIL Passport — slow love, real connection.";
     const image = p.avatarUrl ?? p.photoUrl ?? p.profilePhotoUrl ?? undefined;
     return {
       meta: [
