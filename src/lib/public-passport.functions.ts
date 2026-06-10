@@ -14,6 +14,7 @@ export type PublicPassport = {
   avatarUrl: string | null;
   photoUrl: string | null;
   profilePhotoUrl: string | null;
+  shareImageUrl: string;
   verified: boolean;
 };
 
@@ -38,7 +39,7 @@ export const loadPublicPassport = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<PublicPassport | null> => {
     const { data: row } = await supabaseAdmin
       .from("profiles")
-      .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, profile_photo_url, verified")
+      .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, profile_photo_url, verified, updated_at")
       .eq("id", data.userId)
       .maybeSingle();
     if (!row) return null;
@@ -57,6 +58,7 @@ export const loadPublicPassport = createServerFn({ method: "GET" })
       avatarUrl: avatar,
       photoUrl: photo,
       profilePhotoUrl: profilePhoto,
+      shareImageUrl: `https://unveil.best/api/public/passport-og?userId=${row.id}&v=${encodeURIComponent(row.updated_at ?? row.id)}`,
       verified: !!row.verified,
     };
   });

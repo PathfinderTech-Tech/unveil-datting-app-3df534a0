@@ -26,7 +26,7 @@ export const Route = createFileRoute("/p/$userId")({
     const name = p.firstName ?? "Someone";
     const title = `${name} on UNVEIL`;
     const description = "See my UNVEIL Passport — slow love, real connection.";
-    const image = p.avatarUrl ?? p.photoUrl ?? p.profilePhotoUrl ?? undefined;
+    const image = p.shareImageUrl;
     return {
       meta: [
         { title },
@@ -35,11 +35,16 @@ export const Route = createFileRoute("/p/$userId")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:url", content: url },
-        ...(image ? [{ property: "og:image", content: image }] : []),
+        { property: "og:image", content: image },
+        { property: "og:image:secure_url", content: image },
+        { property: "og:image:type", content: "image/jpeg" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: `${name}'s UNVEIL Passport profile photo` },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
-        ...(image ? [{ name: "twitter:image", content: image }] : []),
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
     };
