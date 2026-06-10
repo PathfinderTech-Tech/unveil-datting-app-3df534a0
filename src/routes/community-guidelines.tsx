@@ -29,7 +29,7 @@ function Guidelines() {
       </LegalSection>
 
       <LegalSection title="Authentic profiles">
-        <p>Use your real first name, your real age, and recent photos of yourself. No catfishing, no impersonation of other people or brands, no AI-generated identities. Verified members get a checkmark.</p>
+        <p>Use your real first name, your real age, and recent photos of yourself. No catfishing, no impersonation of other people or brands, no AI-generated identities. <strong>Photo Verified</strong> — this member completed a selfie verification confirming their profile photos are really them.</p>
       </LegalSection>
 
       <LegalSection title="No harassment">
