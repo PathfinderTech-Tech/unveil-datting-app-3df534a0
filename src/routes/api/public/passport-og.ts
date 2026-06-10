@@ -19,7 +19,6 @@ type ProfileRow = {
   readiness_score: number | null;
   avatar_url: string | null;
   photo_url: string | null;
-  profile_photo_url: string | null;
   verified: boolean | null;
 };
 
@@ -155,13 +154,13 @@ export const Route = createFileRoute("/api/public/passport-og")({
 
         const { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, profile_photo_url, verified")
+          .select("id, first_name, city, country, archetype, readiness_score, avatar_url, photo_url, verified")
           .eq("id", userId)
           .maybeSingle<ProfileRow>();
 
         if (!profile) return new Response("Not found", { status: 404 });
 
-        const photo = await readPhoto(profile.avatar_url ?? profile.photo_url ?? profile.profile_photo_url);
+        const photo = await readPhoto(profile.avatar_url ?? profile.photo_url);
         const jpeg = createShareJpeg(profile, photo);
         const body = jpeg.buffer.slice(jpeg.byteOffset, jpeg.byteOffset + jpeg.byteLength) as ArrayBuffer;
         return new Response(body, {
