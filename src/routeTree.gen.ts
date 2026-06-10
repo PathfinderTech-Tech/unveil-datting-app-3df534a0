@@ -59,6 +59,7 @@ import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
+import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -313,6 +314,11 @@ const AdminBetaRoute = AdminBetaRouteImport.update({
   path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
+  id: '/api/public/passport-og',
+  path: '/api/public/passport-og',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges': typeof ChallengesIndexRoute
   '/play': typeof PlayIndexRoute
+  '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -486,6 +494,7 @@ export interface FileRoutesById {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges'
     | '/play'
+    | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   id:
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
@@ -703,6 +715,7 @@ export interface RootRouteChildren {
   PlayThisOrThatRoute: typeof PlayThisOrThatRoute
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
+  ApiPublicPassportOgRoute: typeof ApiPublicPassportOgRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -1059,6 +1072,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/passport-og': {
+      id: '/api/public/passport-og'
+      path: '/api/public/passport-og'
+      fullPath: '/api/public/passport-og'
+      preLoaderRoute: typeof ApiPublicPassportOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1147,9 +1167,20 @@ const rootRouteChildren: RootRouteChildren = {
   PlayThisOrThatRoute: PlayThisOrThatRoute,
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
+  ApiPublicPassportOgRoute: ApiPublicPassportOgRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
