@@ -30,7 +30,7 @@ function Terms() {
       </LegalSection>
 
       <LegalSection title="2. Account creation">
-        <p>You must provide accurate information, use your real first name, recent photos of yourself, and a real, unique email. One account per person. You are responsible for your password and any activity on your account.</p>
+        <p>You must provide accurate information, use your real first name, recent photos of yourself, and a real, unique email. One account per person. You are responsible for your password and any activity on your account. To continue messaging beyond your first conversations, you must complete a free selfie verification confirming your profile photos are of you.</p>
       </LegalSection>
 
       <LegalSection title="3. User responsibilities">
