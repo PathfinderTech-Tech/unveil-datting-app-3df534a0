@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, Facebook, MessageCircle as WhatsAppIcon, Twitter, Send, Linkedin, Instagram, Music2 } from "lucide-react";
+import { Copy, Download, Share2, ImageOff, RotateCcw, Mail, MessageSquare, Facebook, MessageCircle as WhatsAppIcon, Twitter, Send, Linkedin, Instagram, Music2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
@@ -196,12 +196,17 @@ export function ShareablePassportCard({
   const activeCrop =
     prefs.choice === "selfie" ? prefs.crops.selfie : prefs.crops.avatar;
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/p/${userId}` : `/p/${userId}`;
-  const shareText = "My Unveil Passport — Connection Beneath The Surface. Discover me on Unveil: unveil.best";
+  // Always share the canonical public Passport URL (unveil.best/p/{id}) so
+  // scrapers fetch user-specific Open Graph metadata, not the homepage.
+  const shareUrl = `https://unveil.best/p/${userId}`;
+  const displayName = data?.first_name?.trim() || "My";
+  const shareTitle = `${displayName === "My" ? "My" : displayName + "'s"} UNVEIL Passport`;
+  const shareText = "See my UNVEIL Passport — slow love, real connection.";
   const enc = encodeURIComponent;
-  const mailtoHref = `mailto:?subject=${enc("My UNVEIL Passport")}&body=${enc(`${shareText}\n\n${shareUrl}`)}`;
-  // Facebook scrapes og tags from the shared URL, so share the user's public
-  // Passport page (which has user-specific og:title/description/image).
+  const mailtoHref = `mailto:?subject=${enc(shareTitle)}&body=${enc(`${shareText}\n\n${shareUrl}`)}`;
+  const smsHref = `sms:?&body=${enc(`${shareText} ${shareUrl}`)}`;
+  // Each link points to the user's public Passport page, which serves
+  // user-specific og:title / og:description / og:image.
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}`;
   const twitterHref = `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareText)}`;
   const whatsappHref = `https://wa.me/?text=${enc(`${shareText} ${shareUrl}`)}`;
@@ -274,7 +279,7 @@ export function ShareablePassportCard({
   async function nativeShare() {
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
-        await (navigator as any).share({ title: "UNVEIL Passport", text: shareText, url: shareUrl });
+        await (navigator as any).share({ title: shareTitle, text: shareText, url: shareUrl });
         trackEvent("shareable_card_native_shared", { premium: isPremium });
       } catch {
         /* canceled */
@@ -448,6 +453,13 @@ export function ShareablePassportCard({
             className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
           >
             <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+          </a>
+          <a
+            href={smsHref}
+            onClick={() => trackEvent("shareable_card_sms_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <MessageSquare className="h-3.5 w-3.5" /> SMS
           </a>
           <button
             type="button"
