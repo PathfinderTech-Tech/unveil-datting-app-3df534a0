@@ -189,13 +189,13 @@ function Membership() {
                   <div className="font-display text-2xl">$9.99</div>
                   <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">One-time purchase</div>
                 </div>
-                <button
-                  disabled
-                  className="inline-flex cursor-not-allowed items-center justify-center rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-muted-foreground opacity-60"
-                  title="Coming soon"
+                <Link
+                  to="/checkout"
+                  search={{ product: "message_pass_2w" } as any}
+                  className="inline-flex items-center justify-center rounded-full border border-primary bg-primary/15 px-5 py-2.5 text-sm font-medium text-primary hover:bg-primary/20"
                 >
-                  Coming Soon
-                </button>
+                  Get Pass
+                </Link>
               </div>
             </div>
           </div>
