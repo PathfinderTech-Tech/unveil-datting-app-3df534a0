@@ -35,10 +35,12 @@ const PRICE_LABEL: Record<string, string> = {
   premium_quarterly: "UNVEIL Premium — 3 Months",
   premium_annual: "UNVEIL Premium — Annual",
   message_pass_24h: "UNVEIL 24-Hour Unlimited Pass",
+  message_pass_2w: "UNVEIL 2-Week Unlimited Pass",
 };
 
 function priceIdFor(product: Product): string {
   if (product === "message_pass") return "message_pass_24h";
+  if (product === "message_pass_2w") return "message_pass_2w";
   if (product === "premium_quarterly") return "premium_quarterly";
   if (product === "premium_annual") return "premium_annual";
   return "premium_monthly";
