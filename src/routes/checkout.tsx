@@ -26,11 +26,15 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
 });
 
+// Display labels intentionally OMIT the price — Stripe Checkout shows the
+// authoritative amount (including any applicable tax) inside the embedded
+// form, so duplicating a base price here causes confusing mismatches like
+// "$1.99" in the title vs "$2.20" in checkout.
 const PRICE_LABEL: Record<string, string> = {
-  premium_monthly: "UNVEIL Premium — $15.99 / month",
-  premium_quarterly: "UNVEIL Premium — $39.99 every 3 months",
-  premium_annual: "UNVEIL Premium — $149.99 / year",
-  message_pass_24h: "UNVEIL 24-Hour Unlimited Pass — $1.99",
+  premium_monthly: "UNVEIL Premium — Monthly",
+  premium_quarterly: "UNVEIL Premium — 3 Months",
+  premium_annual: "UNVEIL Premium — Annual",
+  message_pass_24h: "UNVEIL 24-Hour Unlimited Pass",
 };
 
 function priceIdFor(product: Product): string {
@@ -89,9 +93,9 @@ function Checkout() {
         </Link>
         <div className="mt-6 text-center">
           <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Secure Checkout</p>
-          <h1 className="mt-3 font-display text-3xl font-light md:text-4xl">{PRICE_LABEL[priceId]}</h1>
+          <h1 className="mt-3 font-display text-2xl font-light sm:text-3xl md:text-4xl break-words">{PRICE_LABEL[priceId]}</h1>
           <p className="mx-auto mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground">
-            <Lock className="h-3 w-3" /> Payments processed securely by Stripe
+            <Lock className="h-3 w-3" /> Final price shown below · processed securely by Stripe
           </p>
         </div>
 

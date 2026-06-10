@@ -38,14 +38,15 @@ function CheckoutReturn() {
   }
 
   useEffect(() => {
-    if (!session_id) return;
-    if (product) toast.success(SUCCESS_BANNER[product]);
-    // Always clear the saved checkout-return state once the payment completes.
+    if (session_id && product) toast.success(SUCCESS_BANNER[product]);
+    // Always clear the saved checkout-return state once we land here.
     try { localStorage.removeItem("unveil:checkoutReturn"); } catch { /* ignore */ }
-    if (effectiveReturnTo) {
-      const t = setTimeout(() => { window.location.replace(effectiveReturnTo!); }, 800);
-      return () => clearTimeout(t);
-    }
+    // Return the user to wherever they came from (e.g. /chat?c=ID) — even if
+    // Stripe dropped session_id from the URL. Fall back to /messages so we
+    // never strand them on checkout / home / blank pages.
+    const dest = effectiveReturnTo ?? "/messages";
+    const t = setTimeout(() => { window.location.replace(dest); }, 800);
+    return () => clearTimeout(t);
   }, [session_id, product, effectiveReturnTo, navigate]);
 
   return (
