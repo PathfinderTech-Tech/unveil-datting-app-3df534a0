@@ -48,7 +48,7 @@ function Privacy() {
       </LegalSection>
 
       <LegalSection title="4. Storage and security">
-        <p>Data is stored on encrypted infrastructure inside the EU and US. Photos and IDs live in private buckets with row-level access policies. Transport is TLS 1.2+. We run security scans, RLS, and access logging.</p>
+        <p>Data is stored on encrypted infrastructure inside the EU and US. Photos and verification selfies live in private buckets with row-level access policies. Transport is TLS 1.2+. We run security scans, RLS, and access logging.</p>
       </LegalSection>
 
       <LegalSection title="5. Account deletion and data export">
