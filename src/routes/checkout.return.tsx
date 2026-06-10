@@ -60,21 +60,9 @@ function CheckoutReturn() {
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
           {session_id ? (product ? SUCCESS_BANNER[product] : "Your purchase is confirmed.") : "Welcome to UNVEIL."}
         </p>
-        {effectiveReturnTo ? (
-          <p className="mt-4 text-xs text-muted-foreground">Returning you to your conversation…</p>
-        ) : (
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/matches" className="rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
-              Discover matches
-            </Link>
-            <Link to="/chat" className="rounded-full border border-border bg-surface px-6 py-3 text-sm hover:bg-surface-2">
-              Open messages
-            </Link>
-            <Link to="/manage-subscription" className="rounded-full border border-border bg-surface px-6 py-3 text-sm hover:bg-surface-2">
-              Manage subscription
-            </Link>
-          </div>
-        )}
+        <p className="mt-4 text-xs text-muted-foreground">
+          {effectiveReturnTo?.startsWith("/chat") ? "Returning you to your conversation…" : "Returning you to messages…"}
+        </p>
       </section>
     </div>
   );
