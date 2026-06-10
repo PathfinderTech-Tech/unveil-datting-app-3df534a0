@@ -73,7 +73,7 @@ function PublicPassportPage() {
   const loc = [passport.city, passport.country].filter(Boolean).join(" · ") || "Somewhere on Earth";
   const archetype = (passport.archetype ?? "Signal").replace(/-/g, " ");
   const score = passport.readinessScore ?? 0;
-  const photo = passport.avatarUrl ?? passport.photoUrl ?? passport.profilePhotoUrl;
+  const photo = passport.avatarUrl ?? passport.photoUrl;
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 sm:py-14">
