@@ -44,7 +44,7 @@ function Privacy() {
       </LegalSection>
 
       <LegalSection title="3. Sharing">
-        <p>Matched users see your profile, photos, and shared answers. Stripe processes payments. Apple and Google process App Store / Play subscriptions if used. Verification documents are reviewed by our trust team and never shown to other members. We disclose data when legally required.</p>
+        <p>Matched users see your profile, photos, and shared answers. Stripe processes payments. Apple and Google process App Store / Play subscriptions if used. Verification selfies are reviewed by our trust team and never shown to other members. We disclose data when legally required.</p>
       </LegalSection>
 
       <LegalSection title="4. Storage and security">
