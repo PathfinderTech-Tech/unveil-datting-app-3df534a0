@@ -8,10 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Lock, ArrowLeft } from "lucide-react";
 
-type Product = "premium" | "premium_quarterly" | "premium_annual" | "message_pass";
+type Product = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
 type Search = { product?: Product; returnTo?: string };
 
-const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_quarterly", "premium_annual", "message_pass"];
+const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_quarterly", "premium_annual", "message_pass", "message_pass_2w"];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),
