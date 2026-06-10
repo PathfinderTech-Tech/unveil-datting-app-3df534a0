@@ -73,7 +73,7 @@ function Privacy() {
       </LegalSection>
 
       <LegalSection title="10. Retention">
-        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification documents: deleted within 90 days of approval or rejection. Payment receipts: kept 7 years for tax compliance.</p>
+        <p>Active accounts: retained while active. Deleted accounts: purged within 30 days. Verification selfies: deleted within 90 days of approval or rejection. Payment receipts: kept 7 years for tax compliance.</p>
       </LegalSection>
 
       <LegalSection title="11. Changes">
