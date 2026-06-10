@@ -454,6 +454,13 @@ export function ShareablePassportCard({
           >
             <Linkedin className="h-3.5 w-3.5" /> LinkedIn
           </a>
+          <a
+            href={smsHref}
+            onClick={() => trackEvent("shareable_card_sms_clicked", { premium: isPremium })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:border-primary"
+          >
+            <MessageSquare className="h-3.5 w-3.5" /> SMS
+          </a>
           <button
             type="button"
             onClick={() => copyAndOpen("https://www.instagram.com/", "Instagram")}
