@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
 import { OAuthButtons } from "@/components/OAuthButtons";
 import { ArrowRight } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Create your UNVEIL account." }] }),
@@ -65,7 +66,7 @@ function Signup() {
 
         <form onSubmit={submit} className="space-y-3">
           <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
-          <input type="password" required minLength={8} placeholder="Password (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
+          <PasswordInput required minLength={8} placeholder="Password (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} />
           {err && <p className="text-xs text-destructive">{err}</p>}
           <button disabled={loading} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow disabled:opacity-50">
             {loading ? "Creating…" : <>Begin <ArrowRight className="h-4 w-4" /></>}

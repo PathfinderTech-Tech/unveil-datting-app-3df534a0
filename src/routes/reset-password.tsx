@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark } from "@/components/LogoHeader";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [{ title: "Reset password — UNVEIL" }] }),
@@ -39,7 +40,7 @@ function Reset() {
           <p className="mt-3 text-sm text-muted-foreground">Open the recovery link from your email to continue.</p>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
-            <input type="password" required minLength={8} placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
+            <PasswordInput required minLength={8} placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button className="w-full rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow">Update password</button>
           </form>
         )}
