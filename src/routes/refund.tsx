@@ -24,21 +24,28 @@ function Refund() {
         cancellations, renewals, and refunds work.
       </p>
 
-      <LegalSection title="1. Subscription billing terms">
+      <LegalSection title="1. Subscription and pass billing terms">
         <p>
-          UNVEIL offers paid subscriptions (UNVEIL+, UNVEIL Black) on 1-, 3-, 6-,
-          and 12-month plans. The price, currency, and billing interval are
-          displayed before purchase and on your Stripe receipt. Taxes are added
-          where required by law.
+          UNVEIL offers a single paid subscription, <strong>UNVEIL Premium</strong>,
+          available on three billing intervals: <strong>Monthly ($15.99)</strong>,
+          <strong> Quarterly ($39.99)</strong>, and <strong>Annual ($149.99)</strong>.
+          UNVEIL also offers two one-time, non-renewing <strong>Passes</strong>:
+          the <strong>24-Hour Pass ($1.99)</strong> and the
+          <strong> 2-Week Pass ($9.99)</strong>, which unlock unlimited messaging
+          for their fixed window and then expire automatically with no further
+          charge. Price, currency, and billing interval are displayed before
+          purchase and on your Stripe receipt. Taxes are added where required by law.
         </p>
       </LegalSection>
 
-      <LegalSection title="2. Automatic renewal">
+      <LegalSection title="2. Automatic renewal (subscriptions only)">
         <p>
-          Subscriptions automatically renew at the end of each billing period at
-          the then-current price for the same plan length, unless cancelled at
-          least 24 hours before renewal. You will receive a renewal receipt by
-          email each time we charge your payment method.
+          UNVEIL Premium subscriptions automatically renew at the end of each
+          billing period at the then-current price for the same interval, unless
+          cancelled at least 24 hours before renewal. You will receive a renewal
+          receipt by email each time we charge your payment method. <strong>Passes
+          do not renew</strong> — they are charged once and expire at the end of
+          the 24-hour or 2-week window.
         </p>
       </LegalSection>
 

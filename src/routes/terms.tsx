@@ -55,12 +55,14 @@ function Terms() {
         </ul>
       </LegalSection>
 
-      <LegalSection title="6. Payment terms and subscriptions">
-        <p>UNVEIL+ and UNVEIL Black are paid subscriptions billed by Stripe on 1, 3, 6, or 12-month cycles. <strong>Subscriptions auto-renew</strong> at the then-current price until cancelled. Cancel anytime from Settings → Manage Subscription. Refunds are handled under our <a className="text-accent underline" href="/refund">Refund Policy</a>. App Store and Play Store purchases are governed by those stores' billing terms.</p>
+      <LegalSection title="6. Payment terms, subscriptions, and passes">
+        <p><strong>UNVEIL Premium</strong> is a single paid subscription billed by Stripe on a monthly ($15.99), quarterly ($39.99), or annual ($149.99) cycle. <strong>Subscriptions auto-renew</strong> at the then-current price for the same billing interval until cancelled. Cancel anytime from <strong>Settings → Manage Subscription</strong>; access continues until the end of the paid period.</p>
+        <p>UNVEIL also offers one-time <strong>Passes</strong> that unlock unlimited messaging for a fixed window: the <strong>24-Hour Pass</strong> ($1.99) and the <strong>2-Week Pass</strong> ($9.99). Passes are non-renewing — they are charged once and expire automatically at the end of their window with no further charge.</p>
+        <p>Refunds are handled under our <a className="text-accent underline" href="/refund">Refund Policy</a>. App Store and Play Store purchases are governed by those stores' billing terms.</p>
       </LegalSection>
 
       <LegalSection title="7. Premium features">
-        <p>Premium plans unlock features such as unlimited Unexpected Matches, advanced filters, voice intros at full quality, accelerated reveal journeys, and priority support. Features and pricing may change with notice.</p>
+        <p>UNVEIL Premium unlocks unlimited messages and voice notes, advanced filters, full-quality voice intros, accelerated reveal journeys, and priority support. Passes unlock unlimited messages and voice notes for the duration of the pass only. Features and pricing may change with notice.</p>
       </LegalSection>
 
       <LegalSection title="8. Suspension and termination">
