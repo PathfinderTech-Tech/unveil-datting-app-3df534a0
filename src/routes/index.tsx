@@ -8,10 +8,10 @@ import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UNVEIL — Connection Starts Beneath the Surface" },
-      { name: "description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
-      { property: "og:title", content: "UNVEIL — Connection Starts Beneath the Surface" },
-      { property: "og:description", content: "Compatibility-first dating platform where meaningful connections form before appearance becomes central." },
+      { title: "UNVEIL" },
+      { name: "description", content: "Connection begins beneath the surface." },
+      { property: "og:title", content: "UNVEIL" },
+      { property: "og:description", content: "Connection begins beneath the surface." },
       { property: "og:url", content: "https://unveil.best/" },
     ],
     links: [{ rel: "canonical", href: "https://unveil.best/" }],

@@ -200,7 +200,10 @@ export function ShareablePassportCard({
   const shareText = "My Unveil Passport — Connection Beneath The Surface. Discover me on Unveil: unveil.best";
   const enc = encodeURIComponent;
   const mailtoHref = `mailto:?subject=${enc("My UNVEIL Passport")}&body=${enc(`${shareText}\n\n${shareUrl}`)}`;
-  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText)}`;
+  // Facebook scrapes og tags from the URL, so share the canonical homepage
+  // (which has UNVEIL og:title/description/image). The `quote` param is no
+  // longer rendered by Facebook (deprecated 2017), so we omit it.
+  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc("https://unveil.best")}`;
   const twitterHref = `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareText)}`;
   const whatsappHref = `https://wa.me/?text=${enc(`${shareText} ${shareUrl}`)}`;
   const telegramHref = `https://t.me/share/url?url=${enc(shareUrl)}&text=${enc(shareText)}`;
