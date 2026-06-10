@@ -33,7 +33,7 @@ function Privacy() {
           <li><strong>Voice introductions</strong> recorded during onboarding or for reveal journeys.</li>
           <li><strong>Messages and communications</strong> with other members (encrypted at rest).</li>
           <li><strong>Compatibility assessments</strong>: quiz answers, personality blueprint, scores, and AI-derived insights.</li>
-          <li><strong>Verification documents</strong> (selfie, government ID) only if you opt into verification.</li>
+          <li><strong>Verification selfies</strong>, collected when you complete the required photo verification.</li>
           <li><strong>Analytics data</strong>: device type, app version, crash reports, feature usage (no advertising IDs).</li>
           <li><strong>Payment information</strong> is processed by Stripe, Inc. UNVEIL never stores full card numbers; we receive only a token and the last four digits.</li>
         </ul>
