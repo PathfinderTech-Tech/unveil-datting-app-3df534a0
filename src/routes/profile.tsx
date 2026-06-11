@@ -187,10 +187,24 @@ function ProfilePage() {
                   {profile?.age ? <span className="ml-2 text-muted-foreground font-normal">{profile.age}</span> : null}
                 </h1>
                 {profile?.verified && <VerifiedBadge />}
+                {profile?.trust_level && <TrustLevelBadge level={profile.trust_level} />}
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
-                {[profile?.city, profile?.country].filter(Boolean).join(", ") || "Location not set"}
+                {profile?.travel_status === "travelling" ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Plane className="h-3.5 w-3.5 text-primary" />
+                    Travelling from{" "}
+                    <span className="text-foreground/80">{[profile.home_city, profile.home_country_name].filter(Boolean).join(", ") || "home"}</span>
+                    {" • "}Currently in{" "}
+                    <span className="text-foreground">{[profile.current_city, profile.current_country_name].filter(Boolean).join(", ")}</span>
+                  </span>
+                ) : (
+                  [profile?.home_city ?? profile?.city, profile?.home_country_name ?? profile?.country].filter(Boolean).join(", ") || "Location not set"
+                )}
               </div>
+              {profile?.verified_country_code && (
+                <div className="mt-1 text-[11px] text-muted-foreground">Verified in {profile.verified_country_code}</div>
+              )}
               {profile?.archetype && (
                 <div className="mt-2 inline-flex rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
                   {profile.archetype}
