@@ -225,7 +225,10 @@ function MessagesPage() {
       <UnveilNav />
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
-          <h1 className="text-3xl font-semibold tracking-tight">Messages</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight">Messages</h1>
+            <MyTrustBadge />
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Conversations with people who matched with you.
           </p>
