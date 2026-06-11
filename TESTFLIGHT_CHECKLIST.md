@@ -1,7 +1,61 @@
-# Unveil — TestFlight & App Review Checklist
+# Unveil — Final TestFlight Checklist
 
 Pre-flight checklist for submitting Unveil to TestFlight and Apple App Review.
 Tick each item before clicking **Submit for Review**.
+
+---
+
+## RevenueCat / iOS StoreKit Products
+
+Verify all five products are live in RevenueCat and App Store Connect:
+
+- [ ] `premium_monthly` — Monthly subscription
+- [ ] `premium_quarterly` — Quarterly subscription ($39.99)
+- [ ] `premium_annual` — Annual subscription
+- [ ] `pass_24h` — 24-Hour Pass
+- [ ] `pass_2w` — 2-Week Pass
+
+---
+
+## App Store Connect
+
+- [ ] Build uploaded and processed
+- [ ] Export compliance answered
+- [ ] Screenshots added (6.7" + 5.5" iPhone)
+- [ ] Review notes added (see Section 7 below)
+- [ ] "What to test" completed in TestFlight build info
+
+---
+
+## On-Device TestFlight Smoke Test
+
+Run through the following on a physical device via TestFlight (sandbox):
+
+### Auth & Onboarding
+- [ ] Sign in
+- [ ] Profile creation
+- [ ] Edit photos
+- [ ] Selfie verification
+
+### Core Flow
+- [ ] One match flow
+- [ ] Messaging
+
+### Purchases
+- [ ] Restore purchases
+- [ ] Sandbox purchase for all 5 iOS plans:
+  - [ ] `premium_monthly`
+  - [ ] `premium_quarterly`
+  - [ ] `premium_annual`
+  - [ ] `pass_24h`
+  - [ ] `pass_2w`
+
+### Safety
+- [ ] Delete account
+- [ ] Report user
+- [ ] Block user
+
+---
 
 ## 1. App Store Connect — App Record
 
@@ -16,6 +70,8 @@ Tick each item before clicking **Submit for Review**.
 - [ ] Support URL: `https://unveil.best/support`
 - [ ] Marketing URL: `https://unveil.best`
 
+---
+
 ## 2. Required Assets
 
 - [ ] App icon: 1024×1024 PNG, no transparency, no rounded corners
@@ -26,6 +82,8 @@ Tick each item before clicking **Submit for Review**.
 - [ ] Description (4000 chars max)
 - [ ] Keywords (100 chars max, comma-separated)
 - [ ] What's New (4000 chars max)
+
+---
 
 ## 3. App Privacy (Nutrition Labels)
 
@@ -42,6 +100,8 @@ Map exactly to what's collected (see `src/routes/privacy.tsx`):
 - [ ] Data is **not** used for third-party advertising
 - [ ] Data is **not** sold
 
+---
+
 ## 4. Sign in with Apple
 
 Required by guideline 4.8 when offering social login. Status:
@@ -49,6 +109,8 @@ Required by guideline 4.8 when offering social login. Status:
 - [ ] Apple Sign-In capability enabled in Xcode
 - [ ] Lovable Cloud → Auth → Apple provider enabled (managed by default)
 - [ ] Sign in with Apple button visible on `/login` and `/signup`, alongside other providers
+
+---
 
 ## 5. In-App Purchases
 
@@ -60,6 +122,8 @@ Required by guideline 4.8 when offering social login. Status:
 - [ ] "Restore Purchases" button reachable from Membership, Settings, and Manage Subscription pages → ✅ (`<RestorePurchasesButton />`)
 - [ ] No external links to web payment from inside the iOS build → ✅ (`externalPaymentLinksAllowed()` returns false on iOS)
 
+---
+
 ## 6. Account & Safety
 
 - [ ] In-app account deletion reachable from Settings → Delete Account → ✅ (`/settings`, calls `deleteAccount` server fn)
@@ -68,6 +132,8 @@ Required by guideline 4.8 when offering social login. Status:
 - [ ] User-generated content moderation pipeline documented (Trust panel in `/admin`)
 - [ ] Community Guidelines linked from Settings → ✅ (`/community-guidelines`)
 - [ ] EULA / Terms linked from Settings and signup → ✅
+
+---
 
 ## 7. App Review Notes (REQUIRED)
 
@@ -101,6 +167,8 @@ overflow menu with Report and Block options. Reports are reviewed by
 our trust team within 24 hours.
 ```
 
+---
+
 ## 8. Final Xcode Steps
 
 - [ ] Version bumped in `App/App/Info.plist` (or via target settings)
@@ -111,6 +179,8 @@ our trust team within 24 hours.
 - [ ] Wait for processing (~15–30 minutes)
 - [ ] Add build to TestFlight group(s)
 - [ ] When ready: Submit for Review
+
+---
 
 ## 9. Post-Submission Monitoring
 
