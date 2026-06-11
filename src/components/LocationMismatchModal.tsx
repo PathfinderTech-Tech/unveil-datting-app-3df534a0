@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Plane, MapPin, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationPicker, EMPTY_LOCATION, type LocationValue } from "@/components/LocationPicker";
-import { setTravelMode } from "@/lib/travel-mode.functions";
+import { TravelVerifyModal } from "@/components/TravelVerifyModal";
 
-type Mode = "choices" | "travelling" | "update_home";
+type Mode = "choices" | "verify_travel" | "update_home";
 
 export function LocationMismatchModal({
   open,
@@ -22,25 +21,8 @@ export function LocationMismatchModal({
   const [mode, setMode] = useState<Mode>("choices");
   const [picker, setPicker] = useState<LocationValue>(EMPTY_LOCATION);
   const [busy, setBusy] = useState(false);
-  const setTravelFn = useServerFn(setTravelMode);
 
   if (!open) return null;
-
-  async function confirmTravelling() {
-    if (!picker.country_code || !picker.country) { toast.error("Pick a country."); return; }
-    setBusy(true);
-    try {
-      await setTravelFn({ data: {
-        currentCountryCode: picker.country_code,
-        currentCountryName: picker.country,
-        travelling: true,
-      }});
-      toast.success(`Travel mode on — ${picker.country}`);
-      onClose();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
-    } finally { setBusy(false); }
-  }
 
   async function updateHome() {
     if (!user || !picker.country_code || !picker.country) { toast.error("Pick a country."); return; }
@@ -89,11 +71,11 @@ export function LocationMismatchModal({
         {mode === "choices" && (
           <div className="mt-5 space-y-2">
             <button
-              onClick={() => setMode("travelling")}
+              onClick={() => setMode("verify_travel")}
               className="flex w-full items-center gap-3 rounded-xl border border-border bg-surface/60 p-3 text-left text-sm hover:bg-surface"
             >
               <Plane className="h-4 w-4 text-primary" />
-              <span><span className="font-medium">I'm travelling</span> — set a temporary country, keep my home as-is.</span>
+              <span><span className="font-medium">I'm travelling</span> — verify with a selfie + location check.</span>
             </button>
             <button
               onClick={() => setMode("update_home")}
@@ -112,16 +94,6 @@ export function LocationMismatchModal({
           </div>
         )}
 
-        {mode === "travelling" && (
-          <div className="mt-5 space-y-3">
-            <LocationPicker value={picker} onChange={setPicker} autoDetect labels={{ country: "Where are you now?", city: "City (optional)" }} />
-            <div className="flex gap-2">
-              <button onClick={() => setMode("choices")} className="rounded-full border border-border px-4 py-1.5 text-xs hover:bg-surface">Back</button>
-              <button onClick={confirmTravelling} disabled={busy || !picker.country_code} className="rounded-full bg-gradient-hero px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50">Confirm travel</button>
-            </div>
-          </div>
-        )}
-
         {mode === "update_home" && (
           <div className="mt-5 space-y-3">
             <LocationPicker value={picker} onChange={setPicker} autoDetect labels={{ country: "Your new home country" }} />
@@ -132,6 +104,12 @@ export function LocationMismatchModal({
           </div>
         )}
       </div>
+
+      <TravelVerifyModal
+        open={mode === "verify_travel"}
+        onClose={() => { setMode("choices"); onClose(); }}
+        onActivated={() => { setMode("choices"); onClose(); }}
+      />
     </div>
   );
 }
