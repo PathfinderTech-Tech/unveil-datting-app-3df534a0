@@ -60,9 +60,10 @@ async function loadRC(userId: string): Promise<unknown> {
   rcReady = (async () => {
     // Dynamic import keeps the web bundle clean.
     // The package is installed inside the iOS Capacitor build (see IOS_BUILD.md).
-    const mod = (await import(
-      /* @vite-ignore */ "@revenuecat/purchases-capacitor"
-    ).catch(() => null)) as null | {
+    // Use a runtime-computed specifier so TypeScript doesn't try to resolve
+    // the module at build time (it isn't installed in the web project).
+    const specifier = "@revenuecat/purchases-capacitor";
+    const mod = (await import(/* @vite-ignore */ specifier).catch(() => null)) as null | {
       Purchases: {
         configure: (opts: { apiKey: string; appUserID: string }) => Promise<void>;
       };
