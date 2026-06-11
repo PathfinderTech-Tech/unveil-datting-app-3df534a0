@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Users, AlertTriangle, Mail, Crown, ShieldCheck, CreditCard, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AdminTrustPanel } from "@/components/AdminTrustPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — UNVEIL" }] }),
@@ -295,6 +296,9 @@ function Admin() {
             )}
           </div>
         )}
+
+        {tab === "trust" && <AdminTrustPanel />}
+
 
         {tab === "payments" && (
           <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
