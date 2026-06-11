@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as SparkRouteImport } from './routes/spark'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -76,6 +77,11 @@ const TermsRoute = TermsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionRoute = SubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SparkRoute = SparkRouteImport.update({
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/subscription': typeof SubscriptionRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
@@ -422,6 +429,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/subscription': typeof SubscriptionRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
@@ -478,6 +486,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/spark': typeof SparkRoute
+  '/subscription': typeof SubscriptionRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
@@ -535,6 +544,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/subscription'
     | '/support'
     | '/terms'
     | '/verify'
@@ -590,6 +600,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/subscription'
     | '/support'
     | '/terms'
     | '/verify'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/spark'
+    | '/subscription'
     | '/support'
     | '/terms'
     | '/verify'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SparkRoute: typeof SparkRoute
+  SubscriptionRoute: typeof SubscriptionRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
@@ -741,6 +754,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription': {
+      id: '/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof SubscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/spark': {
@@ -1153,6 +1173,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SparkRoute: SparkRoute,
+  SubscriptionRoute: SubscriptionRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
