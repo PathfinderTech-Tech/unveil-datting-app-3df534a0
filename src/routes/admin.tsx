@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "waitlist" | "verifications" | "payments" | "reports" | "feedback";
+type Tab = "waitlist" | "verifications" | "trust" | "payments" | "reports" | "feedback";
 
 function Admin() {
   const { user, loading } = useAuth();
@@ -148,7 +148,7 @@ function Admin() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
-          {(["waitlist", "verifications", "payments", "reports", "feedback"] as Tab[]).map((t) => (
+          {(["waitlist", "verifications", "trust", "payments", "reports", "feedback"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
