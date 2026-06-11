@@ -47,6 +47,7 @@ type CanonicalPriceId =
 
 type PriceCatalogItem = {
   kind: string;
+  durationDays?: number;
   durationHours?: number;
   durationMonths?: number;
   lookupKey?: Partial<Record<StripeEnv, string>>;
