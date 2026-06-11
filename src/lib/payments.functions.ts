@@ -179,14 +179,21 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const isRecurring = stripePrice.type === "recurring";
       const meta = PRICE_META[data.priceId] ?? { kind: "other" };
 
+      const actualProductId = typeof stripePrice.product === "string"
+        ? stripePrice.product
+        : (stripePrice.product as any).id;
+      const expectedProductId = meta.productId?.[data.environment];
+      if (expectedProductId && actualProductId !== expectedProductId) {
+        throw new Error(`Product mismatch for ${data.priceId}`);
+      }
+
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
       let productDescription: string | undefined;
       if (!isRecurring) {
-        const productId = typeof stripePrice.product === "string"
-          ? stripePrice.product
-          : (stripePrice.product as any).id;
-        const product = await stripe.products.retrieve(productId);
+        const product = typeof stripePrice.product === "string"
+          ? await stripe.products.retrieve(actualProductId)
+          : stripePrice.product as any;
         productDescription = product.name;
       }
 

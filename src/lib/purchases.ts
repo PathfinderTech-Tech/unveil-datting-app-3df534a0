@@ -11,6 +11,7 @@
  *   - premium_quarterly    (auto-renewing subscription)
  *   - premium_annual       (auto-renewing subscription)
  *   - pass_24h             (consumable — 24h unlimited messaging pass)
+ *   - pass_2w              (consumable — 2-week unlimited messaging pass, if enabled in the active offering)
  *   - verification_badge   (non-consumable — one-time verification fee)
  *
  * The RevenueCat SDK is loaded dynamically inside `loadRC()` so the web
@@ -26,6 +27,7 @@ export type ProductId =
   | "premium_quarterly"
   | "premium_annual"
   | "pass_24h"
+  | "pass_2w"
   | "verification_badge";
 
 export const PREMIUM_ENTITLEMENT_ID = "unveil_premium" as const;
@@ -195,8 +197,9 @@ export function getManageSubscriptionUrl(): string {
 /** Static fallback for web — the canonical web catalog lives in /premium and /checkout. */
 const WEB_CATALOG: PurchaseOffer[] = [
   { productId: "pass_24h", displayPrice: "$1.99", title: "24-Hour Pass", description: "Unlimited messaging for 24 hours" },
+  { productId: "pass_2w", displayPrice: "$9.99", title: "2-Week Pass", description: "Unlimited messaging for 14 days" },
   { productId: "premium_monthly", displayPrice: "$15.99", title: "Premium Monthly", description: "Auto-renews monthly" },
-  { productId: "premium_quarterly", displayPrice: "$39.99", title: "Premium Quarterly", description: "Auto-renews every 3 months" },
+  { productId: "premium_quarterly", displayPrice: "$49.99", title: "Premium 3 Months", description: "Three months of Premium access" },
   { productId: "premium_annual", displayPrice: "$149.99", title: "Premium Annual", description: "Auto-renews yearly" },
   { productId: "verification_badge", displayPrice: "$9.99", title: "Verification Badge", description: "One-time identity verification fee" },
 ];
