@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PremiumSuccessOverlay from "@/components/PremiumSuccessOverlay";
 
 type SuccessProduct = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
-const SUCCESS_MAP: Record<ProductId, SuccessProduct> = {
+const SUCCESS_MAP: Partial<Record<ProductId, SuccessProduct>> = {
   pass_24h: "message_pass",
   pass_2w: "message_pass_2w",
   premium_monthly: "premium",
