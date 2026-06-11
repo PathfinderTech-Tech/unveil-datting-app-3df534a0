@@ -61,6 +61,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
+import { Route as ApiPublicCreateQuarterlyLivePriceRouteImport } from './routes/api/public/_create-quarterly-live-price'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -325,6 +326,12 @@ const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
   path: '/api/public/passport-og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCreateQuarterlyLivePriceRoute =
+  ApiPublicCreateQuarterlyLivePriceRouteImport.update({
+    id: '/api/public/_create-quarterly-live-price',
+    path: '/api/public',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -390,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/api/public': typeof ApiPublicCreateQuarterlyLivePriceRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -446,6 +454,7 @@ export interface FileRoutesByTo {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges': typeof ChallengesIndexRoute
   '/play': typeof PlayIndexRoute
+  '/api/public': typeof ApiPublicCreateQuarterlyLivePriceRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -503,6 +512,7 @@ export interface FileRoutesById {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/api/public/_create-quarterly-live-price': typeof ApiPublicCreateQuarterlyLivePriceRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/api/public'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
@@ -617,6 +628,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges'
     | '/play'
+    | '/api/public'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
@@ -673,6 +685,7 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/api/public/_create-quarterly-live-price'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/queue/process'
@@ -728,6 +741,7 @@ export interface RootRouteChildren {
   PlayThisOrThatRoute: typeof PlayThisOrThatRoute
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
+  ApiPublicCreateQuarterlyLivePriceRoute: typeof ApiPublicCreateQuarterlyLivePriceRoute
   ApiPublicPassportOgRoute: typeof ApiPublicPassportOgRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1099,6 +1113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPassportOgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/_create-quarterly-live-price': {
+      id: '/api/public/_create-quarterly-live-price'
+      path: '/api/public'
+      fullPath: '/api/public'
+      preLoaderRoute: typeof ApiPublicCreateQuarterlyLivePriceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1188,6 +1209,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlayThisOrThatRoute: PlayThisOrThatRoute,
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
+  ApiPublicCreateQuarterlyLivePriceRoute:
+    ApiPublicCreateQuarterlyLivePriceRoute,
   ApiPublicPassportOgRoute: ApiPublicPassportOgRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
