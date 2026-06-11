@@ -10,8 +10,10 @@ import { setTravelMode, endTravelMode } from "@/lib/travel-mode.functions";
 type TravelState = {
   home_country_code: string | null;
   home_country_name: string | null;
+  home_city: string | null;
   current_country_code: string | null;
   current_country_name: string | null;
+  current_city: string | null;
   travel_status: string | null;
 };
 
