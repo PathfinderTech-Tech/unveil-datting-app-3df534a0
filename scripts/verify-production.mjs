@@ -151,8 +151,7 @@ function writeHtmlReport(path) {
 </body>
 </html>`;
 
-  const fs = require("fs");
-  fs.writeFileSync(path, html, "utf-8");
+  writeFileSync(path, html, "utf-8");
   console.log(`\n📄 HTML report written to ${path}`);
 }
 
