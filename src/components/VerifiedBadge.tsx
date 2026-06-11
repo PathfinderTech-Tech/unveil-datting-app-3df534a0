@@ -16,11 +16,16 @@ export function VerifiedBadge({
   return (
     <span className="inline-flex items-center gap-1.5 align-middle">
       <span
-        className={`inline-flex items-center justify-center rounded-full bg-gradient-logo text-primary-foreground shadow-glow ${dim}`}
+        className={`inline-flex items-center justify-center rounded-full ${dim}`}
+        style={{
+          background: "#39FF14",
+          color: "#0a0a0a",
+          boxShadow: "0 0 10px -1px rgba(57,255,20,0.75), inset 0 0 0 1px rgba(0,0,0,0.15)",
+        }}
         title="Photo Verified"
         aria-label="Photo Verified"
       >
-        <ShieldCheck className="h-3 w-3" />
+        <ShieldCheck className="h-3 w-3" strokeWidth={3} />
       </span>
       {showLabel && (
         <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
