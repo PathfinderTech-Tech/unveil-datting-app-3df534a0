@@ -1,9 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { X, Zap, Clock, Crown, Sparkles, Star } from "lucide-react";
 import { isIOS } from "@/lib/platform";
 import { toast } from "sonner";
 import { purchase, type ProductId } from "@/lib/purchases";
 import { supabase } from "@/integrations/supabase/client";
+import PremiumSuccessOverlay from "@/components/PremiumSuccessOverlay";
+
+type SuccessProduct = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
+const SUCCESS_MAP: Partial<Record<ProductId, SuccessProduct>> = {
+  pass_24h: "message_pass",
+  pass_2w: "message_pass_2w",
+  premium_monthly: "premium",
+  premium_quarterly: "premium_quarterly",
+  premium_annual: "premium_annual",
+};
 
 type Props = {
   open: boolean;
@@ -80,7 +91,8 @@ const PREMIUM: Option[] = [
 ];
 
 export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, returnTo }: Props) {
-  if (!open) return null;
+  const [successFor, setSuccessFor] = useState<SuccessProduct | null>(null);
+  if (!open && !successFor) return null;
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
   const limit = dailyLimit ?? 15;
 
@@ -92,8 +104,13 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
         return;
       }
       await purchase(productId, user.id);
-      toast.success("Purchase complete!");
-      onClose();
+      const key = SUCCESS_MAP[productId];
+      if (key) {
+        setSuccessFor(key);
+      } else {
+        toast.success("Purchase complete!");
+        onClose();
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Purchase failed");
     }
@@ -159,46 +176,63 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur overflow-y-auto">
-      <div className="relative my-8 w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-glow">
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-surface hover:text-foreground"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <div className="text-center">
-          <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Daily limit reached</p>
-          <h2 className="mt-2 font-display text-2xl font-light">You've used today's {limit} interactions.</h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Text messages and voice notes share the same daily allowance.
-          </p>
-        </div>
+    <>
+      {successFor && (
+        <PremiumSuccessOverlay
+          product={successFor}
+          duration={2000}
+          onComplete={() => {
+            setSuccessFor(null);
+            onClose();
+            if (rt && typeof window !== "undefined") {
+              window.location.assign(rt);
+            }
+          }}
+        />
+      )}
+      {open && !successFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur overflow-y-auto">
+          <div className="relative my-8 w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-glow">
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-surface hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="text-center">
+              <p className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Daily limit reached</p>
+              <h2 className="mt-2 font-display text-2xl font-light">You've used today's {limit} interactions.</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Text messages and voice notes share the same daily allowance.
+              </p>
+            </div>
 
-        <div className="mt-6">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-            Message Passes
-          </p>
-          <div className="space-y-3">{PASSES.map(renderOption)}</div>
-        </div>
+            <div className="mt-6">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                Message Passes
+              </p>
+              <div className="space-y-3">{PASSES.map(renderOption)}</div>
+            </div>
 
-        {!isPremium && (
-          <div className="mt-5">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-              Premium Plans
-            </p>
-            <div className="space-y-3">{PREMIUM.map(renderOption)}</div>
+            {!isPremium && (
+              <div className="mt-5">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+                  Premium Plans
+                </p>
+                <div className="space-y-3">{PREMIUM.map(renderOption)}</div>
+              </div>
+            )}
+
+            <button
+              onClick={onClose}
+              className="mt-5 w-full rounded-full border border-border py-2 text-sm text-muted-foreground hover:bg-surface"
+            >
+              Continue Tomorrow
+            </button>
           </div>
-        )}
-
-        <button
-          onClick={onClose}
-          className="mt-5 w-full rounded-full border border-border py-2 text-sm text-muted-foreground hover:bg-surface"
-        >
-          Continue Tomorrow
-        </button>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
