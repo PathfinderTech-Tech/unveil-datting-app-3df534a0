@@ -18,6 +18,7 @@ import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
 import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
@@ -60,6 +61,10 @@ type PeerProfile = {
   discovery_mode: "avatar" | "photo" | null;
   verified: boolean | null;
   last_seen_at: string | null;
+  travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
 };
 type PeerRow = Omit<PeerProfile, "last_seen_at" | "discovery_mode"> & {
   updated_at: string | null;
@@ -177,7 +182,7 @@ function Chat() {
         const [{ data: profs }, mediaRows, { data: lastMsgs }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("id, first_name, avatar_url, photo_url, profile_photo_url, discovery_mode, verified, updated_at")
+            .select("id, first_name, avatar_url, photo_url, profile_photo_url, discovery_mode, verified, updated_at, travel_status, travel_expires_at, travel_warning_count, account_restricted")
             .in("id", peerIds),
           getPrimaryProfileMedia({ data: { userIds: peerIds } }),
           supabase
@@ -199,6 +204,10 @@ function Chat() {
             discovery_mode: media?.hasUploadedPhoto ? "photo" : ((p.discovery_mode as "avatar" | "photo" | null) ?? null),
             verified: p.verified,
             last_seen_at: p.updated_at,
+            travel_status: p.travel_status,
+            travel_expires_at: p.travel_expires_at,
+            travel_warning_count: p.travel_warning_count,
+            account_restricted: p.account_restricted,
           };
         }
         setPeers(pmap);
@@ -580,6 +589,8 @@ function Chat() {
                       <span className="flex items-center gap-1 truncate text-[15px] font-semibold tracking-tight">
                         {p?.first_name ?? "Match"}
                         {p?.verified ? <VerifiedBadge size="xs" /> : null}
+                        <LocationTrustBadge profile={p} size="xs" showLabel={false} />
+
                       </span>
                       <span className="shrink-0 font-mono text-[10px] text-muted-foreground/80">
                         {timeAgo(c.last_message_at)}
@@ -649,6 +660,8 @@ function Chat() {
                     <div className="flex items-center gap-1.5">
                       <span className="truncate text-lg font-semibold tracking-tight">{peerName}</span>
                       {peer?.verified ? <VerifiedBadge size="xs" /> : null}
+                      <LocationTrustBadge profile={peer} size="xs" />
+
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
                       {overallScore != null && band && (

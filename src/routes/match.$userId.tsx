@@ -12,6 +12,7 @@ import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match — UNVEIL" }] }),
@@ -32,6 +33,10 @@ type Profile = {
   avatar_url?: string | null;
   photo_url?: string | null;
   discovery_mode?: "avatar" | "photo" | null;
+  travel_status?: string | null;
+  travel_expires_at?: string | null;
+  travel_warning_count?: number | null;
+  account_restricted?: boolean | null;
 };
 type Msg = { id: string; sender_id: string; content: string; created_at: string };
 
@@ -116,7 +121,7 @@ function MatchExperience() {
       const [{ data: p }, mediaRows] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode")
+          .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode, travel_status, travel_expires_at, travel_warning_count, account_restricted")
           .eq("id", userId).maybeSingle(),
         getPrimaryProfileMedia({ data: { userIds: [userId] } }),
       ]);
@@ -318,6 +323,8 @@ function MatchExperience() {
                     <ShieldCheck className="h-3 w-3" /> Verified
                   </span>
                 )}
+                <LocationTrustBadge profile={profile} size="xs" />
+
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <MapPin className="h-3 w-3" />

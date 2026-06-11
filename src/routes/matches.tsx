@@ -412,6 +412,7 @@ function Matches() {
             <h1 className="mt-2 font-display text-4xl font-bold">
               {loading ? "Loading minds…" : `${visible.length} ${visible.length === 1 ? "person" : "people"} to discover`}
             </h1>
+            <div className="mt-2"><MatchesTrustBadge /></div>
             <p className="mt-1 text-sm text-muted-foreground">
               Photos are visible from Day 1. The 7-day journey unlocks contact sharing, not photos.
             </p>
@@ -895,3 +896,9 @@ function HiddenMatchesView() {
   );
 }
 
+
+import { LocationTrustBadge, useMyLocationTrust } from "@/components/LocationTrustBadge";
+function MatchesTrustBadge() {
+  const { profile } = useMyLocationTrust();
+  return <LocationTrustBadge profile={profile} size="sm" />;
+}
