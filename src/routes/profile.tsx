@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { TrustLevelBadge } from "@/components/TrustLevelBadge";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { Plane } from "lucide-react";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
 import { SignedImage } from "@/components/SignedImage";

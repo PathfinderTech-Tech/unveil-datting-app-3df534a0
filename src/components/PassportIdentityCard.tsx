@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, MapPin, ShieldCheck, MessageCircle, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { ChemistryBadge } from "@/components/chemistry/ChemistryBadge";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 
@@ -99,6 +100,8 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
               {p?.age ? <span className="text-foreground/60">, {p.age}</span> : null}
             </h2>
             {p?.verified && <VerifiedBadge size="md" />}
+            <LocationTrustBadge profile={p as any} size="sm" />
+
           </div>
           {(p?.city || p?.country) && (
             <div className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
