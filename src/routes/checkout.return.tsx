@@ -18,12 +18,23 @@ export const Route = createFileRoute("/checkout/return")({
 });
 
 const SUCCESS_BANNER: Record<ProductKey, string> = {
-  message_pass: "Daily Pass active — unlimited messaging for 24 hours.",
-  message_pass_2w: "2-Week Pass active — unlimited messaging for 14 days.",
-  premium: "Premium membership activated.",
-  premium_quarterly: "Premium membership activated.",
-  premium_annual: "Premium membership activated.",
+  message_pass: "Your 24-Hour Pass is now active.",
+  message_pass_2w: "Your 2-Week Pass is now active.",
+  premium: "Your Premium membership is now active.",
+  premium_quarterly: "Your Premium membership is now active.",
+  premium_annual: "Your Premium membership is now active.",
 };
+
+function destinationLabel(dest: string): string {
+  if (dest.startsWith("/chat")) return "Returning you to your conversation…";
+  if (dest.startsWith("/match")) return "Returning you to the match…";
+  if (dest.startsWith("/messages")) return "Returning you to your messages…";
+  if (dest.startsWith("/profile")) return "Returning you to your profile…";
+  if (dest.startsWith("/passport")) return "Returning you to your passport…";
+  if (dest.startsWith("/premium") || dest.startsWith("/manage-subscription"))
+    return "Returning you to membership…";
+  return "Returning you to where you left off…";
+}
 
 function CheckoutReturn() {
   const { session_id, product, returnTo } = Route.useSearch() as { session_id?: string; product?: ProductKey; returnTo?: string };
@@ -38,17 +49,24 @@ function CheckoutReturn() {
     } catch { /* ignore */ }
   }
 
+  // Fallback: messages for pass purchases, membership otherwise.
+  const fallback =
+    product === "message_pass" || product === "message_pass_2w"
+      ? "/messages"
+      : "/premium";
+  const dest = effectiveReturnTo ?? fallback;
+
   useEffect(() => {
     if (session_id && product) toast.success(SUCCESS_BANNER[product]);
-    // Always clear the saved checkout-return state once we land here.
     try { localStorage.removeItem("unveil:checkoutReturn"); } catch { /* ignore */ }
-    // Return the user to wherever they came from (e.g. /chat?c=ID) — even if
-    // Stripe dropped session_id from the URL. Fall back to /messages so we
-    // never strand them on checkout / home / blank pages.
-    const dest = effectiveReturnTo ?? "/messages";
-    const t = setTimeout(() => { window.location.replace(dest); }, 800);
+    // Brief pause so the thank-you is legible, then return to source.
+    const t = setTimeout(() => { window.location.replace(dest); }, 2200);
     return () => clearTimeout(t);
-  }, [session_id, product, effectiveReturnTo, navigate]);
+  }, [session_id, product, dest, navigate]);
+
+  const message = session_id
+    ? (product ? SUCCESS_BANNER[product] : "Your purchase is confirmed.")
+    : "Welcome to UNVEIL.";
 
   return (
     <div className="min-h-screen">
@@ -57,13 +75,15 @@ function CheckoutReturn() {
         <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground shadow-glow">
           <Check className="h-7 w-7" />
         </div>
-        <h1 className="mt-6 font-display text-4xl font-light">You're all set</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-          {session_id ? (product ? SUCCESS_BANNER[product] : "Your purchase is confirmed.") : "Welcome to UNVEIL."}
-        </p>
-        <p className="mt-4 text-xs text-muted-foreground">
-          {effectiveReturnTo?.startsWith("/chat") ? "Returning you to your conversation…" : "Returning you to messages…"}
-        </p>
+        <h1 className="mt-6 font-display text-4xl font-light">Thank you for your payment</h1>
+        <p className="mx-auto mt-3 max-w-md text-base text-foreground/85">{message}</p>
+        <p className="mt-6 text-xs text-muted-foreground">{destinationLabel(dest)}</p>
+        <button
+          onClick={() => window.location.replace(dest)}
+          className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow"
+        >
+          Continue now
+        </button>
       </section>
     </div>
   );
