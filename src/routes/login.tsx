@@ -85,6 +85,12 @@ function Login() {
           <button onClick={forgot} className="underline">Forgot password?</button>
           <Link to="/signup">Create account</Link>
         </div>
+        <p className="mt-5 text-center text-[11px] text-muted-foreground">
+          By continuing you agree to our{" "}
+          <Link to="/terms" className="underline hover:text-foreground">Terms</Link>,{" "}
+          <Link to="/privacy" className="underline hover:text-foreground">Privacy</Link>, and{" "}
+          <Link to="/community-guidelines" className="underline hover:text-foreground">Community Guidelines</Link>.
+        </p>
       </div>
     </div>
   );

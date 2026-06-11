@@ -13,6 +13,7 @@ import { deleteAccount } from "@/lib/account.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Zap, Crown, AlertTriangle, Trash2 } from "lucide-react";
+import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 
 
 export const Route = createFileRoute("/settings")({
@@ -106,9 +107,12 @@ function Settings() {
           <TravelModeToggle />
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">{t("premium.manageSubscription")}</h2>
-            <Link to="/manage-subscription" className="mt-3 inline-flex rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow">
-              {t("premium.manageSubscription")}
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link to="/manage-subscription" className="inline-flex rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow">
+                {t("premium.manageSubscription")}
+              </Link>
+              <RestorePurchasesButton />
+            </div>
           </div>
           <FeedbackForm />
           <div className="rounded-2xl border border-border bg-card p-6">

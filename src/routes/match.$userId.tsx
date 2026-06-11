@@ -4,13 +4,14 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { ArrowLeft, MapPin, ShieldCheck, Send, ChevronDown, ChevronUp, Sparkles, AlertTriangle, Heart, MessageCircle } from "lucide-react";
+import { ArrowLeft, MapPin, ShieldCheck, Send, ChevronDown, ChevronUp, Sparkles, AlertTriangle, Heart, MessageCircle, MoreVertical, Flag, Ban } from "lucide-react";
 import { toast } from "sonner";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
+import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match — UNVEIL" }] }),
@@ -100,6 +101,8 @@ function MatchExperience() {
 
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Initial load
   useEffect(() => {
@@ -236,9 +239,60 @@ function MatchExperience() {
       />
 
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6">
-        <Link to="/matches" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link to="/matches" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </Link>
+          {meId && meId !== userId && (
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="More options"
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                className="rounded-full border border-border bg-surface/60 p-1.5 hover:bg-surface"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+              {menuOpen && (
+                <div role="menu" className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                  <button
+                    role="menuitem"
+                    onClick={() => { setMenuOpen(false); setReportOpen(true); }}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"
+                  >
+                    <Flag className="h-4 w-4" /> Report
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      if (!confirm("Block this person? They won't be able to contact you again.")) return;
+                      try {
+                        await blockUser(userId);
+                        toast.success("Blocked.");
+                        navigate({ to: "/matches" });
+                      } catch (e) {
+                        toast.error(e instanceof Error ? e.message : "Couldn't block");
+                      }
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"
+                  >
+                    <Ban className="h-4 w-4" /> Block
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <ReportUserDialog
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          reportedUserId={userId}
+          onBlockToo={async () => {
+            try { await blockUser(userId); } catch { /* ignore */ }
+          }}
+        />
 
         {/* HERO — photo + identity + score */}
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-4 shadow-glow backdrop-blur sm:p-5">

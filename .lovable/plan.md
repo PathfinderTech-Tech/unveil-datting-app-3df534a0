@@ -1,129 +1,106 @@
-# Stage B — Location Trust Verification + Travel Mode
+# TestFlight Readiness Plan
 
-Approved scope extended with travel mode, dual home/current country, trust levels, and moderator signals. Below is exactly what I will build.
+Scope is large — I'll deliver in 6 sequential stages, each independently testable. Frontend-only where possible; backend changes use existing tables where they exist.
 
----
+## Stage 1 — Legal & Policy Pages (no deps, fastest win)
 
-## 1. Database migration (single migration)
+**New routes** (public, no auth):
+- `src/routes/privacy.tsx` — Privacy Policy
+- `src/routes/terms.tsx` — Terms of Service
+- `src/routes/guidelines.tsx` — Community Guidelines
 
-### `profiles` — add columns
-- `home_country_code TEXT` — backfilled from existing `country_code`. Never changes when user toggles travel mode.
-- `home_country_name TEXT` — display name mirror.
-- `current_country_code TEXT` — where the user currently is. Defaults to home.
-- `current_country_name TEXT`
-- `travel_status TEXT DEFAULT 'home'` — enum-like: `home | travelling`.
-- `travel_started_at TIMESTAMPTZ`
-- `verified_country_code TEXT` — last country the selfie verification confirmed them in.
-- `trust_level TEXT DEFAULT 'unverified'` — `unverified | verified | trusted | identity_verified`.
-- `location_risk_score INTEGER DEFAULT 0` — 0–100.
-- `location_mismatch_count INTEGER DEFAULT 0`.
+Production-ready drafts tailored to Unveil / PathfinderTech, Inc. / support@unveil.best, covering:
+- **Privacy**: profile data, photos, voice notes, selfie + identity verification, location/travel/trust data, messaging, subscriptions, GDPR, CCPA, retention, deletion, user rights
+- **Terms**: 18+ requirement, prohibited conduct (fake accounts, harassment, scams, impersonation), subscription terms, refunds, suspension/termination, IP, liability cap
+- **Guidelines**: respect, no harassment/hate/scams/solicitation/underage/nudity/violence; reporting + enforcement
 
-Update `profiles_guard_update` trigger:
-- Users CAN edit: `home_country_*`, `current_country_*`, `travel_status`, `travel_started_at`.
-- Users CANNOT edit: `verified_country_code`, `trust_level`, `location_risk_score`, `location_mismatch_count` (managed by server fn / admin).
+**Links added to**: login, signup, settings, membership, footer.
 
-Backfill: set `home_country_code = country_code`, `current_country_code = country_code`, `home_country_name = country`, `current_country_name = country` for all existing rows.
+## Stage 2 — Report & Block User
 
-### New table `location_verifications`
-- `id UUID PK`
-- `user_id UUID` → auth.users, cascade
-- `created_at TIMESTAMPTZ DEFAULT now()`
-- `profile_country_code TEXT` (home at the time)
-- `current_country_code TEXT` (declared current)
-- `device_country_code TEXT` (browser locale / timezone)
-- `ip_country_code TEXT` (Cloudflare `CF-IPCountry`)
-- `gps_country_code TEXT` (reverse-geocoded, nullable)
-- `match_result TEXT` — `match | partial | mismatch`
-- `risk_level TEXT` — `low | medium | high`
-- `vpn_suspected BOOLEAN DEFAULT false`
-- `selfie_path TEXT` (reuse `verification-docs` bucket)
-- `user_confirmed_traveling BOOLEAN DEFAULT false`
+Use existing `reports` and `blocks` tables (already in schema).
 
-GRANTS: `SELECT` to authenticated (own rows only via RLS), `ALL` to service_role.
-RLS: user can read own rows; only service_role inserts/updates.
+- `src/components/ReportUserDialog.tsx` — categories: Fake profile, Harassment, Scam, Inappropriate content, Underage user, Other (+ free-text)
+- `src/components/BlockUserButton.tsx` — immediate block via `blocks` insert
+- Wire into `src/routes/profile.$id.tsx` (or equivalent profile view) and `src/routes/messages/$id.tsx` (chat header overflow menu)
+- After block: remove conversation visibility, prevent new messages (RLS already enforces; add client-side guard + toast)
+- After report: confirmation toast, optional auto-block prompt
 
-### Helper function
-`set_user_travel_mode(_current_country_code TEXT, _travelling BOOLEAN)` — security-definer, validates input, updates `current_country_*`, `travel_status`, `travel_started_at`. Never touches `home_country_*`.
+## Stage 3 — Account Deletion (in-app, Apple-compliant)
 
----
+Existing `account_deletions` and `account_deletion_attempts` tables present.
 
-## 2. Server functions
+- `src/routes/settings/delete-account.tsx` — multi-step: warning → reason (optional) → password reconfirm → final confirm
+- Server fn `requestAccountDeletion` (`src/lib/account-deletion.functions.ts`): inserts `account_deletions` row with 30-day grace, signs user out
+- Wire button into `src/routes/settings.tsx` under a "Danger Zone" section
+- Apple compliance copy: "Your account and all associated data will be permanently deleted within 30 days. This action cannot be undone."
 
-### `src/lib/location-trust.functions.ts`
-- `recordLocationVerification({ selfiePath, deviceCountry, gpsCountry, currentCountry })`
-  - middleware: `requireSupabaseAuth`
-  - reads IP country from `CF-IPCountry` header
-  - loads profile (`home_country_code`, `current_country_code`, `location_mismatch_count`)
-  - computes `match_result`: all 3 (device, ip, gps where present) align with `current_country_code` → match; one differs → partial; two+ differ → mismatch
-  - computes `risk_level`:
-    - low = match
-    - medium = partial OR single mismatch
-    - high = repeated mismatches (`location_mismatch_count >= 2` in last 7 days) OR `vpn_suspected`
-  - `vpn_suspected` heuristic: ip ≠ device AND ip ≠ gps when gps present
-  - inserts `location_verifications` row (via service-role import inside handler)
-  - on match: bumps `trust_level` to `trusted` if currently `verified`; sets `verified_country_code = current_country_code`
-  - on mismatch: increments `location_mismatch_count`, sets `location_risk_score` (low=0, medium=40, high=80)
-  - returns `{ result, risk, message, requiresAction }`
+## Stage 4 — Apple Reviewer Mode
 
-### `src/lib/travel-mode.functions.ts`
-- `setTravelMode({ currentCountryCode, travelling })` — calls `set_user_travel_mode` RPC.
-- `endTravelMode()` — resets `current_country = home_country`, `travel_status = 'home'`.
+- Hardcoded reviewer email constant `APPLE_REVIEWER_EMAIL = "apple-review@unveil.best"` in `src/lib/reviewer-mode.ts`
+- `useIsReviewer()` hook reads current session email
+- Bypass behaviors when reviewer:
+  - Auto-grant premium entitlements (client-side flag, server-side check via email allowlist in a small RPC `is_reviewer_account`)
+  - Skip selfie/photo gating (still SHOW the flow, just don't block)
+  - Always populate at least 3 fake matches in discovery if none exist
+- `<ReviewerBadge />` rendered in topbar when reviewer is logged in
+- Migration: seed reviewer user via auth admin (manual step in App Store Connect Review Notes; I'll add the seeding script comment)
 
----
+## Stage 5 — Capacitor Wrapper + RevenueCat IAP
 
-## 3. UI components
+This is the largest piece. Web Stripe flow stays untouched.
 
-### `src/components/TravelModeToggle.tsx`
-- Shown in `/settings` and on `/profile`.
-- Banner when `travel_status='travelling'`: **"Currently travelling in [Country]"** with "End travel mode" button.
-- When off: "I'm travelling" button → opens a small dialog with `<LocationPicker />` to pick current country.
+### Capacitor setup
+```bash
+bun add @capacitor/core @capacitor/cli @capacitor/ios
+bun add @revenuecat/purchases-capacitor
+```
+- `capacitor.config.ts` with bundleId `best.unveil.app`, appName `Unveil`, webDir `dist`
+- iOS build target docs in `IOS_BUILD.md`
 
-### `src/components/LocationMismatchModal.tsx`
-- Shown after selfie if `recordLocationVerification` returns `mismatch`.
-- Copy: *"We detected that your current location differs from the country listed on your profile. If you are traveling, you may continue and update your location preferences."*
-- 3 buttons:
-  - **I'm travelling** → opens travel-country picker, calls `setTravelMode`, marks `user_confirmed_traveling=true`.
-  - **Update my home country** → opens `<LocationPicker />`, updates `home_country_*`.
-  - **Retry verification** → closes modal, returns to selfie capture.
+### Unified entitlement layer
+- `src/lib/platform.ts` — `isNative()`, `isIOS()`
+- `src/lib/purchases.ts` — unified API: `getOfferings()`, `purchase(productId)`, `restorePurchases()`, `getEntitlements()`
+  - On iOS: routes to RevenueCat SDK
+  - On web: routes to existing Stripe flow
+- `src/hooks/useEntitlements.ts` — returns `{ unlimited_messaging, premium_access, active_pass }`
 
-### `src/components/TrustLevelBadge.tsx`
-- Renders pill for `unverified | verified | trusted | identity_verified`. Reused on profile, match cards, chat header.
-- `identity_verified` is reserved (no UI to obtain it yet — kept as a forward-compatible slot).
+### Products (configured in App Store Connect + RevenueCat dashboard — instructions in `IOS_BUILD.md`)
+| Product ID | Type | RC Entitlement |
+|---|---|---|
+| `pass_24h` | Consumable | `active_pass` (24h) |
+| `pass_2w` | Non-renewing subscription | `active_pass` (14d) |
+| `premium_monthly` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
+| `premium_quarterly` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
+| `premium_annual` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
 
-### Profile location display (`/profile`, public passport)
-- Show **Home: [Country]** and (if travelling) **Currently in: [Country]** + travel badge.
-- Verification line: *"Verified in [verified_country_code]"* when present.
+### UI changes
+- `src/routes/membership.tsx` — platform-aware pricing cards; "Restore Purchases" button
+- `src/routes/settings.tsx` — "Restore Purchases" link (iOS only)
+- `src/routes/subscription.tsx` (new) — manage subscription, show current entitlement, "Manage in App Store" link (iOS) / "Manage billing" (web)
 
----
+### Secrets
+- `REVENUECAT_IOS_PUBLIC_API_KEY` — added via secrets flow when user is ready
+- Webhook endpoint `src/routes/api/public/revenuecat/webhook.ts` to sync RC events to `subscriptions` table (uses RC webhook auth header)
 
-## 4. Wiring
+## Stage 6 — TestFlight Build Checklist
 
-- `src/routes/avatar.tsx` selfie flow: after existing `markSelfieVerified` succeeds, also call `recordLocationVerification`. If result is `mismatch`, show `<LocationMismatchModal />`. Existing flow unchanged on `match`.
-- `src/routes/settings.tsx`: add `<TravelModeToggle />` section under existing location settings.
-- `src/routes/profile.tsx`: show home/current/travel/verified country block.
-- `src/components/LocationPicker.tsx`: no changes (reused).
+`TESTFLIGHT_CHECKLIST.md` covering:
+- App Store Connect: bundle ID, version, build number, age rating (17+), category (Lifestyle / Social Networking), encryption export compliance
+- Required screenshots (6.7", 6.5", 5.5" iPhone)
+- Privacy nutrition labels mapped to actual data collection
+- App Privacy Policy URL: `https://unveil.best/privacy`
+- Sign in with Apple required (already supported in Lovable Cloud)
+- Reviewer credentials in App Store Connect Review Notes
+- IAP product status: "Ready to Submit"
+- Capacitor build commands: `bun run build && npx cap sync ios && npx cap open ios`
+- Xcode steps: signing team, push capability, ATS exception list (none needed)
 
----
+## Execution order
 
-## 5. Moderator/admin signals (data only, no new dashboard UI yet)
+I'll execute Stages 1 → 4 in this conversation (frontend + small migrations only, no native build deps). Stages 5 and 6 will come after — Stage 5 will pause to request the RevenueCat API key.
 
-- All new columns + the `location_verifications` table are queryable by admins via existing `/admin` patterns. A future admin tab can render them — out of scope for this stage to avoid scope creep, but the data is captured starting now so history is available retroactively. I will note this as "ready for moderator dashboard" in the closing message.
-
----
-
-## 6. Safety guarantees (explicit non-actions)
-
-- No automatic bans for mismatches.
-- No paid government ID flow built — `identity_verified` is a placeholder enum value only.
-- No changes to messaging quota, Stripe, RLS on existing tables, or the selfie verification gate itself.
-- No new paid third-party APIs. IP country uses Cloudflare's free `CF-IPCountry` header; device country uses browser `Intl`; GPS country uses public Nominatim only when GPS permission is already granted.
-
----
-
-## Order of execution
-
-1. Submit migration (you approve).
-2. After migration runs: write server fns, UI components, wire into avatar/settings/profile.
-3. Preview screenshots, stop for review.
-
-Confirm and I'll submit the migration.
+## Out of scope (explicitly frozen)
+- New product features, matching algorithm changes, new AI flows
+- No changes to existing Stripe web checkout
+- No changes to messaging/auth/RLS beyond report/block enforcement that already exists
