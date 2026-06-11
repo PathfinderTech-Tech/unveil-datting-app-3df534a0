@@ -16,9 +16,10 @@ export const Route = createFileRoute("/manage-subscription")({
 
 const PRICE_LABEL: Record<string, string> = {
   premium_monthly: "Premium · Monthly — $15.99/mo",
-  premium_quarterly: "Premium · Quarterly — $39.99 / 3 months",
+  premium_quarterly: "Premium · 3 Months — $49.99",
   premium_annual: "Premium · Annual — $149.99/yr",
   message_pass_24h: "24-Hour Unlimited Pass — $1.99",
+  message_pass_2w: "2-Week Unlimited Pass — $9.99",
 };
 
 function Manage() {

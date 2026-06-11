@@ -39,7 +39,7 @@ const PREMIUM_FEATURES = [
 type PlanKey = "premium" | "premium_quarterly" | "premium_annual";
 const PLANS: { key: PlanKey; label: string; price: string; cadence: string; sub?: string; featured?: boolean }[] = [
   { key: "premium",           label: "Monthly",   price: "$15.99",  cadence: "/ month",    sub: "Billed monthly" },
-  { key: "premium_quarterly", label: "Quarterly", price: "$39.99",  cadence: "/ 3 months", sub: "Save 17%", featured: true },
+  { key: "premium_quarterly", label: "3 Months",  price: "$49.99",  cadence: "/ 3 months", sub: "Three months of Premium", featured: true },
   { key: "premium_annual",    label: "Annual",    price: "$149.99", cadence: "/ year",     sub: "Save 22%, Best value" },
 ];
 

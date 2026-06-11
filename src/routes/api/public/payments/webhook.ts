@@ -30,6 +30,12 @@ async function recordTransaction(row: {
   await getSupabase().from("transactions").insert(row);
 }
 
+function addMonths(from: Date, months: number): Date {
+  const next = new Date(from);
+  next.setUTCMonth(next.getUTCMonth() + months);
+  return next;
+}
+
 async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
@@ -37,7 +43,8 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
     return;
   }
   const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.lookup_key
+  const priceId = subscription.metadata?.priceId
+    || item?.price?.lookup_key
     || item?.price?.metadata?.lovable_external_id
     || item?.price?.id;
   const productId = item?.price?.product;
@@ -77,7 +84,8 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
 
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
   const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.lookup_key
+  const priceId = subscription.metadata?.priceId
+    || item?.price?.lookup_key
     || item?.price?.metadata?.lovable_external_id
     || item?.price?.id;
   const productId = item?.price?.product;
@@ -176,6 +184,27 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         .update({ message_pass_until: newEnd.toISOString(), updated_at: new Date().toISOString() })
         .eq("id", userId);
     }
+  }
+
+  if (kind === "premium_subscription" && session.payment_status === "paid" && !session.subscription) {
+    const months = Math.max(1, Math.min(12, Number(session.metadata?.durationMonths ?? 1)));
+    const { data: prof } = await getSupabase()
+      .from("profiles")
+      .select("premium_until")
+      .eq("id", userId)
+      .maybeSingle();
+    const base = prof?.premium_until && new Date(prof.premium_until) > new Date()
+      ? new Date(prof.premium_until)
+      : new Date();
+    const newEnd = addMonths(base, months);
+    await getSupabase()
+      .from("profiles")
+      .update({
+        premium_until: newEnd.toISOString(),
+        subscription_tier: "premium",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
   }
 }
 

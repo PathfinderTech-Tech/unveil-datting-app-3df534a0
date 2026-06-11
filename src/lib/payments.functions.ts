@@ -38,16 +38,89 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
-// Allowed price IDs for the beta launch. Any other ID is rejected at the
-// server boundary so legacy paths (verified_badge_onetime, premium_quarterly,
-// premium_semiannual, premium_yearly) cannot be reached even via a crafted URL.
-const PRICE_META: Record<string, { kind: string; durationDays?: number; durationHours?: number }> = {
-  premium_monthly: { kind: "premium_subscription" },
-  premium_quarterly: { kind: "premium_subscription" },
-  premium_annual: { kind: "premium_subscription" },
-  message_pass_24h: { kind: "message_pass_24h", durationHours: 24 },
-  message_pass_2w: { kind: "message_pass_2w", durationHours: 336 },
+type CanonicalPriceId =
+  | "premium_monthly"
+  | "premium_quarterly"
+  | "premium_annual"
+  | "message_pass_24h"
+  | "message_pass_2w";
+
+type PriceCatalogItem = {
+  kind: string;
+  durationDays?: number;
+  durationHours?: number;
+  durationMonths?: number;
+  lookupKey?: Partial<Record<StripeEnv, string>>;
+  priceId?: Partial<Record<StripeEnv, string>>;
+  productId: Partial<Record<StripeEnv, string>>;
 };
+
+const PRICE_ALIASES: Record<string, CanonicalPriceId> = {
+  premium: "premium_monthly",
+  premium_monthly: "premium_monthly",
+  premium_quarterly: "premium_quarterly",
+  premium_annual: "premium_annual",
+  premium_yearly: "premium_annual",
+  message_pass: "message_pass_24h",
+  message_pass_24h: "message_pass_24h",
+  pass_24h: "message_pass_24h",
+  message_pass_2w: "message_pass_2w",
+  pass_2w: "message_pass_2w",
+};
+
+// Reconciled against the active Stripe catalog on 2026-06-11. Web checkout uses
+// Stripe only; iOS StoreKit products remain routed through RevenueCat.
+const PRICE_META: Record<CanonicalPriceId, PriceCatalogItem> = {
+  premium_monthly: {
+    kind: "premium_subscription",
+    lookupKey: { sandbox: "premium_monthly" },
+    priceId: { live: "price_1TgrEpHf3gYicX76S4PiXjqK" },
+    productId: { live: "prod_UdQ7Wabs5PYMko", sandbox: "prod_UdKLIDEDA922D2" },
+  },
+  premium_quarterly: {
+    kind: "premium_subscription",
+    durationMonths: 3,
+    lookupKey: { sandbox: "premium_quarterly" },
+    priceId: { live: "price_1Te9HEHf3gYicX76NebsYdzf" },
+    productId: { live: "prod_UdQ7puaj1mqoYZ", sandbox: "prod_UdKLATcdzAm3Uq" },
+  },
+  premium_annual: {
+    kind: "premium_subscription",
+    lookupKey: { sandbox: "premium_annual", live: "premium_yearly" },
+    priceId: { live: "price_1Te9HDHf3gYicX76gz60M4SK" },
+    productId: { live: "prod_UdQ71vCnkeB5y7", sandbox: "prod_UdKLXODhYTpQP5" },
+  },
+  message_pass_24h: {
+    kind: "message_pass_24h",
+    durationHours: 24,
+    lookupKey: { sandbox: "message_pass_24h", live: "message_pass_24h" },
+    priceId: { live: "price_1TeHfRHf3gYicX76NjklNghq" },
+    productId: { live: "prod_UdYmbpjU7EFtnR", sandbox: "prod_UdSH4eqyBt5CJ2" },
+  },
+  message_pass_2w: {
+    kind: "message_pass_2w",
+    durationHours: 336,
+    lookupKey: { sandbox: "message_pass_2w", live: "message_pass_2w" },
+    priceId: { live: "price_1Tgu2THf3gYicX76yNut3m5o" },
+    productId: { live: "prod_UgGZWfjOjP990v", sandbox: "prod_UgF0nzmF2tnfFM" },
+  },
+};
+
+async function resolveCatalogPrice(
+  stripe: ReturnType<typeof createStripeClient>,
+  env: StripeEnv,
+  priceId: CanonicalPriceId,
+) {
+  const meta = PRICE_META[priceId];
+  const explicitPriceId = meta.priceId?.[env];
+  if (explicitPriceId) {
+    return stripe.prices.retrieve(explicitPriceId, { expand: ["product"] });
+  }
+  const lookupKey = meta.lookupKey?.[env] ?? priceId;
+  const prices = await stripe.prices.list({ active: true, lookup_keys: [lookupKey], expand: ["data.product"], limit: 1 });
+  if (!prices.data.length) throw new Error(`Price not found for ${lookupKey}`);
+  return prices.data[0];
+}
 
 const ALLOWED_RETURN_HOSTS = new Set([
   "unveil.best",
@@ -85,10 +158,12 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     environment: StripeEnv;
   }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
-    if (!PRICE_META[data.priceId]) throw new Error("This product is no longer available.");
+    const canonicalPriceId = PRICE_ALIASES[data.priceId];
+    if (!canonicalPriceId || !PRICE_META[canonicalPriceId]) throw new Error("This product is no longer available.");
+    data.priceId = canonicalPriceId;
     if (data.customerEmail && data.customerEmail.length > 254) throw new Error("Invalid email");
     data.returnUrl = validateReturnUrl(data.returnUrl);
-    return data;
+    return data as typeof data & { priceId: CanonicalPriceId };
   })
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     try {
@@ -100,20 +175,25 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       }
       const stripe = createStripeClient(data.environment);
 
-      const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-      if (!prices.data.length) throw new Error("Price not found");
-      const stripePrice = prices.data[0];
+      const stripePrice = await resolveCatalogPrice(stripe, data.environment, data.priceId);
       const isRecurring = stripePrice.type === "recurring";
       const meta = PRICE_META[data.priceId] ?? { kind: "other" };
+
+      const actualProductId = typeof stripePrice.product === "string"
+        ? stripePrice.product
+        : (stripePrice.product as any).id;
+      const expectedProductId = meta.productId?.[data.environment];
+      if (expectedProductId && actualProductId !== expectedProductId) {
+        throw new Error(`Product mismatch for ${data.priceId}`);
+      }
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
       let productDescription: string | undefined;
       if (!isRecurring) {
-        const productId = typeof stripePrice.product === "string"
-          ? stripePrice.product
-          : (stripePrice.product as any).id;
-        const product = await stripe.products.retrieve(productId);
+        const product = typeof stripePrice.product === "string"
+          ? await stripe.products.retrieve(actualProductId)
+          : stripePrice.product as any;
         productDescription = product.name;
       }
 
@@ -124,6 +204,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       };
       if (meta.durationDays) sharedMeta.durationDays = String(meta.durationDays);
       if (meta.durationHours) sharedMeta.durationHours = String(meta.durationHours);
+      if (meta.durationMonths) sharedMeta.durationMonths = String(meta.durationMonths);
 
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
