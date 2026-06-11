@@ -4,13 +4,13 @@ import { toast } from "sonner";
 import { UnveilNav } from "@/components/UnveilNav";
 import { Check } from "lucide-react";
 
-type ProductKey = "premium" | "premium_quarterly" | "premium_annual" | "message_pass";
+type ProductKey = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
 
 export const Route = createFileRoute("/checkout/return")({
   head: () => ({ meta: [{ title: "Payment Complete — UNVEIL" }] }),
   validateSearch: (s: Record<string, unknown>): { session_id?: string; product?: ProductKey; returnTo?: string } => ({
     session_id: typeof s.session_id === "string" ? s.session_id : undefined,
-    product: (["premium","premium_quarterly","premium_annual","message_pass"].includes(s.product as string))
+    product: (["premium","premium_quarterly","premium_annual","message_pass","message_pass_2w"].includes(s.product as string))
       ? (s.product as ProductKey) : undefined,
     returnTo: typeof s.returnTo === "string" && s.returnTo.startsWith("/") ? s.returnTo : undefined,
   }),
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/checkout/return")({
 
 const SUCCESS_BANNER: Record<ProductKey, string> = {
   message_pass: "Daily Pass active — unlimited messaging for 24 hours.",
+  message_pass_2w: "2-Week Pass active — unlimited messaging for 14 days.",
   premium: "Premium membership activated.",
   premium_quarterly: "Premium membership activated.",
   premium_annual: "Premium membership activated.",

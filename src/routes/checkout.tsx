@@ -4,14 +4,15 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isStripeConfigured } from "@/lib/stripe";
+import { isIOS } from "@/lib/platform";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Lock, ArrowLeft } from "lucide-react";
 
-type Product = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
+type Product = "premium" | "premium_monthly" | "premium_quarterly" | "premium_annual" | "premium_yearly" | "message_pass" | "message_pass_24h" | "message_pass_2w" | "pass_24h" | "pass_2w";
 type Search = { product?: Product; returnTo?: string };
 
-const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_quarterly", "premium_annual", "message_pass", "message_pass_2w"];
+const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_monthly", "premium_quarterly", "premium_annual", "premium_yearly", "message_pass", "message_pass_24h", "message_pass_2w", "pass_24h", "pass_2w"];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),
@@ -39,11 +40,19 @@ const PRICE_LABEL: Record<string, string> = {
 };
 
 function priceIdFor(product: Product): string {
-  if (product === "message_pass") return "message_pass_24h";
-  if (product === "message_pass_2w") return "message_pass_2w";
+  if (product === "message_pass" || product === "message_pass_24h" || product === "pass_24h") return "message_pass_24h";
+  if (product === "message_pass_2w" || product === "pass_2w") return "message_pass_2w";
   if (product === "premium_quarterly") return "premium_quarterly";
-  if (product === "premium_annual") return "premium_annual";
+  if (product === "premium_annual" || product === "premium_yearly") return "premium_annual";
   return "premium_monthly";
+}
+
+function returnProductFor(product: Product): string {
+  if (product === "message_pass" || product === "message_pass_24h" || product === "pass_24h") return "message_pass";
+  if (product === "message_pass_2w" || product === "pass_2w") return "message_pass_2w";
+  if (product === "premium_quarterly") return "premium_quarterly";
+  if (product === "premium_annual" || product === "premium_yearly") return "premium_annual";
+  return "premium";
 }
 
 function Checkout() {
@@ -54,6 +63,11 @@ function Checkout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (isIOS()) {
+      toast.error("Use Apple In-App Purchase from the membership screen on iOS.");
+      navigate({ to: "/premium" });
+      return;
+    }
     const raw = new URLSearchParams(window.location.search).get("product");
     if (raw && !(ALLOWED_PRODUCTS as string[]).includes(raw)) {
       toast.error("This product is no longer available.");
@@ -81,7 +95,7 @@ function Checkout() {
   }, [navigate]);
 
   const priceId = priceIdFor(product ?? "premium");
-  const productKey = product ?? "premium";
+  const productKey = returnProductFor(product ?? "premium");
   const returnQp = returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : "";
   const configured = isStripeConfigured();
 
