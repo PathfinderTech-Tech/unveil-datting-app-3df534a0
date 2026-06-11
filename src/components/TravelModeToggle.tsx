@@ -30,7 +30,7 @@ export function TravelModeToggle() {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("home_country_code, home_country_name, current_country_code, current_country_name, travel_status")
+      .select("home_country_code, home_country_name, home_city, current_country_code, current_country_name, current_city, travel_status")
       .eq("id", user.id)
       .maybeSingle();
     setState(data as TravelState | null);
