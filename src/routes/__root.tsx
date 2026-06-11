@@ -144,12 +144,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Larger centered watermark on the landing page; subtler corner placement elsewhere.
+  const isLanding = pathname === "/";
+  const variant: "center" | "corner" | "edge" = isLanding ? "center" : "corner";
+  const opacity = isLanding ? 0.05 : 0.03;
 
   return (
     <QueryClientProvider client={queryClient}>
       <CooldownGuard />
       <RevealNotifier />
-      {/* Background watermark removed per design request */}
+      <VeilBackdrop variant={variant} opacity={opacity} />
       <div className="relative z-10 flex min-h-screen flex-col pb-16 lg:pb-0">
         <div className="flex-1">
           <Outlet />
