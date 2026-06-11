@@ -46,7 +46,7 @@ function Home() {
       <section className="relative overflow-hidden">
         <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-20 text-center md:px-6 md:pt-20 md:pb-24">
           <div className="mb-8 flex justify-center md:mb-10">
-            <LogoMark size={120} className="animate-float md:!w-[140px] md:!h-[140px]" />
+            <LogoMark size={104} glow="ambient" className="animate-float md:!w-[124px] md:!h-[124px]" />
           </div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
