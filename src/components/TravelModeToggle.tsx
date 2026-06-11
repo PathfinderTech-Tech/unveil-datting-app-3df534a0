@@ -52,6 +52,10 @@ export function TravelModeToggle() {
         currentCountryName: picker.country,
         travelling: true,
       }});
+      // City is optional; persisted separately (RPC only handles country)
+      if (user) {
+        await supabase.from("profiles").update({ current_city: picker.city ?? null }).eq("id", user.id);
+      }
       toast.success(`Travel mode on — ${picker.country}`);
       setOpen(false);
       setPicker(EMPTY_LOCATION);
@@ -65,6 +69,10 @@ export function TravelModeToggle() {
     setBusy(true);
     try {
       await endTravelFn();
+      if (user) {
+        // Reset current_city to home_city
+        await supabase.from("profiles").update({ current_city: state?.home_city ?? null }).eq("id", user.id);
+      }
       toast.success("Welcome home.");
       await load();
     } catch (e) {
