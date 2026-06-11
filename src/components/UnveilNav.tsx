@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavBadges } from "@/hooks/use-nav-badges";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Settings as SettingsIcon } from "lucide-react";
+import { ReviewerBadge } from "./ReviewerBadge";
 
 // Desktop primary navigation. Authenticated journey: Discover → Compatibility →
 // Messages → Matches → Insights → Profile → Passport → Settings.
@@ -98,7 +99,7 @@ export function UnveilNav() {
           })}
         </nav>
         <div className="flex items-center gap-2">
-          
+          <ReviewerBadge className="hidden sm:inline-flex" />
           {user ? (
             <>
               <Link

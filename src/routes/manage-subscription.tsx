@@ -7,6 +7,7 @@ import { createPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { CreditCard, Sparkles, RefreshCw, X, Calendar, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 
 export const Route = createFileRoute("/manage-subscription")({
   head: () => ({ meta: [{ title: "Manage Subscription — UNVEIL" }] }),
@@ -119,6 +120,7 @@ function Manage() {
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Change plan
               </Link>
+              <RestorePurchasesButton />
             </div>
           </div>
         </div>

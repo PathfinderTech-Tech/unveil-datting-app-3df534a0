@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
+import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 import { Check, Sparkles, Heart, Shield, Zap, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/premium")({
@@ -220,13 +221,14 @@ function Membership() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-center">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-center">
           <Link
             to="/manage-subscription"
             className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             Manage subscription
           </Link>
+          <RestorePurchasesButton />
         </div>
       </section>
     </div>
