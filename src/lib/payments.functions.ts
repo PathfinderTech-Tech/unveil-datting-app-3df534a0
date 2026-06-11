@@ -80,8 +80,8 @@ const PRICE_META: Record<CanonicalPriceId, PriceCatalogItem> = {
   premium_quarterly: {
     kind: "premium_subscription",
     durationMonths: 3,
-    lookupKey: { sandbox: "premium_quarterly" },
-    priceId: { live: "price_1Te9HEHf3gYicX76NebsYdzf" },
+    lookupKey: { sandbox: "premium_quarterly", live: "premium_quarterly" },
+    priceId: { live: "price_1Th9fZHf3gYicX761AMjRVsb" },
     productId: { live: "prod_UdQ7puaj1mqoYZ", sandbox: "prod_UdKLATcdzAm3Uq" },
   },
   premium_annual: {
