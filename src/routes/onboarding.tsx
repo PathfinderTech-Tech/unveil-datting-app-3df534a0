@@ -24,15 +24,7 @@ export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-const COUNTRIES = [
-  "United States","United Kingdom","Canada","Australia","Ireland","New Zealand",
-  "Germany","France","Spain","Italy","Portugal","Netherlands","Belgium","Switzerland","Austria","Sweden","Norway","Denmark","Finland","Poland",
-  "Brazil","Mexico","Argentina","Chile","Colombia",
-  "Japan","South Korea","Singapore","Hong Kong","India","Indonesia","Philippines","Thailand","Vietnam",
-  "UAE","Saudi Arabia","Israel","Turkey",
-  "South Africa","Nigeria","Kenya","Egypt","Morocco",
-  "Other",
-];
+// Country list now lives in src/lib/countries.ts and is rendered by <LocationPicker />.
 
 const GENDERS = ["Woman", "Man", "Non-binary", "Prefer not to say"];
 const INTERESTED_IN = ["Women", "Men", "Everyone"];
