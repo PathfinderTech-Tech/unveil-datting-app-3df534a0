@@ -499,13 +499,18 @@ function Onboarding() {
                   {INTERESTED_IN.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
-              <Field label="Country *">
-                <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputCls}>
-                  <option value="">Select…</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label="City"><input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Optional" className={inputCls} /></Field>
+              <div className="md:col-span-2">
+                <LocationPicker
+                  required
+                  value={{ country_code: countryCode, country: country || null, state_region: stateRegion || null, city: city || null }}
+                  onChange={(v) => {
+                    setCountryCode(v.country_code);
+                    setCountry(v.country ?? "");
+                    setStateRegion(v.state_region ?? "");
+                    setCity(v.city ?? "");
+                  }}
+                />
+              </div>
               <div className="md:col-span-2">
                 <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
               </div>
