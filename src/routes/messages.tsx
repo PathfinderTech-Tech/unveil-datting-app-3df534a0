@@ -31,6 +31,10 @@ type Row = {
   peer_avatar: string | null;
   peer_discovery_mode: "avatar" | "photo" | null;
   peer_verified: boolean;
+  peer_travel_status: string | null;
+  peer_travel_expires_at: string | null;
+  peer_travel_warning_count: number | null;
+  peer_account_restricted: boolean | null;
   last_text: string | null;
   unread: number;
 };
@@ -84,7 +88,7 @@ function MessagesPage() {
 
       const [{ data: profs }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
-          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode, verified").in("id", peerIds)
+          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode, verified, travel_status, travel_expires_at, travel_warning_count, account_restricted").in("id", peerIds)
           : Promise.resolve({ data: [] as any[] } as any),
         peerIds.length ? getPrimaryProfileMedia({ data: { userIds: peerIds } }) : Promise.resolve([]),
         convIds.length
@@ -133,6 +137,10 @@ function MessagesPage() {
           peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
           peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
           peer_verified: !!peer?.verified,
+          peer_travel_status: peer?.travel_status ?? null,
+          peer_travel_expires_at: peer?.travel_expires_at ?? null,
+          peer_travel_warning_count: peer?.travel_warning_count ?? null,
+          peer_account_restricted: peer?.account_restricted ?? null,
           last_text: previewFor(last),
           unread: unreadByConv.get(c.id) ?? 0,
         };
@@ -160,6 +168,10 @@ function MessagesPage() {
           peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
           peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
           peer_verified: !!peer?.verified,
+          peer_travel_status: peer?.travel_status ?? null,
+          peer_travel_expires_at: peer?.travel_expires_at ?? null,
+          peer_travel_warning_count: peer?.travel_warning_count ?? null,
+          peer_account_restricted: peer?.account_restricted ?? null,
           last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,
           unread: incoming && !t.read_at ? 1 : 0,
         });
@@ -301,6 +313,18 @@ function MessagesPage() {
                           {r.peer_name ?? "Match"}
                         </span>
                         {r.peer_verified && <VerifiedBadge size="xs" />}
+                        <LocationTrustBadge
+                          profile={{
+                            verified: r.peer_verified,
+                            travel_status: r.peer_travel_status,
+                            travel_expires_at: r.peer_travel_expires_at,
+                            travel_warning_count: r.peer_travel_warning_count,
+                            account_restricted: r.peer_account_restricted,
+                          }}
+                          size="xs"
+                          showLabel={false}
+                        />
+
                         {r.unread > 0 && (
                           <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
                             New
