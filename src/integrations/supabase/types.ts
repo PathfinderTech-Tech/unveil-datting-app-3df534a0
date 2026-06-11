@@ -719,6 +719,7 @@ export type Database = {
           created_at: string
           current_country_code: string | null
           device_country_code: string | null
+          device_timezone: string | null
           gps_country_code: string | null
           id: string
           ip_country_code: string | null
@@ -728,12 +729,14 @@ export type Database = {
           selfie_path: string | null
           user_confirmed_traveling: boolean
           user_id: string
+          verified_at: string | null
           vpn_suspected: boolean
         }
         Insert: {
           created_at?: string
           current_country_code?: string | null
           device_country_code?: string | null
+          device_timezone?: string | null
           gps_country_code?: string | null
           id?: string
           ip_country_code?: string | null
@@ -743,12 +746,14 @@ export type Database = {
           selfie_path?: string | null
           user_confirmed_traveling?: boolean
           user_id: string
+          verified_at?: string | null
           vpn_suspected?: boolean
         }
         Update: {
           created_at?: string
           current_country_code?: string | null
           device_country_code?: string | null
+          device_timezone?: string | null
           gps_country_code?: string | null
           id?: string
           ip_country_code?: string | null
@@ -758,6 +763,7 @@ export type Database = {
           selfie_path?: string | null
           user_confirmed_traveling?: boolean
           user_id?: string
+          verified_at?: string | null
           vpn_suspected?: boolean
         }
         Relationships: []
@@ -1041,6 +1047,7 @@ export type Database = {
           country_code: string | null
           created_at: string
           curiosity_level: number | null
+          current_city: string | null
           current_country_code: string | null
           current_country_name: string | null
           daily_message_count: number
@@ -1051,6 +1058,7 @@ export type Database = {
           first_name: string | null
           game_complete: boolean | null
           gender: string | null
+          home_city: string | null
           home_country_code: string | null
           home_country_name: string | null
           id: string
@@ -1105,6 +1113,7 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
+          current_city?: string | null
           current_country_code?: string | null
           current_country_name?: string | null
           daily_message_count?: number
@@ -1115,6 +1124,7 @@ export type Database = {
           first_name?: string | null
           game_complete?: boolean | null
           gender?: string | null
+          home_city?: string | null
           home_country_code?: string | null
           home_country_name?: string | null
           id: string
@@ -1169,6 +1179,7 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
+          current_city?: string | null
           current_country_code?: string | null
           current_country_name?: string | null
           daily_message_count?: number
@@ -1179,6 +1190,7 @@ export type Database = {
           first_name?: string | null
           game_complete?: boolean | null
           gender?: string | null
+          home_city?: string | null
           home_country_code?: string | null
           home_country_name?: string | null
           id?: string
