@@ -21,25 +21,6 @@ export function LocationMismatchModal({
   const [mode, setMode] = useState<Mode>("choices");
   const [picker, setPicker] = useState<LocationValue>(EMPTY_LOCATION);
   const [busy, setBusy] = useState(false);
-  const setTravelFn = useServerFn(setTravelMode);
-
-  if (!open) return null;
-
-  async function confirmTravelling() {
-    if (!picker.country_code || !picker.country) { toast.error("Pick a country."); return; }
-    setBusy(true);
-    try {
-      await setTravelFn({ data: {
-        currentCountryCode: picker.country_code,
-        currentCountryName: picker.country,
-        travelling: true,
-      }});
-      toast.success(`Travel mode on — ${picker.country}`);
-      onClose();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
-    } finally { setBusy(false); }
-  }
 
   async function updateHome() {
     if (!user || !picker.country_code || !picker.country) { toast.error("Pick a country."); return; }
