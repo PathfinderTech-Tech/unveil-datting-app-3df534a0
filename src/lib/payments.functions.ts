@@ -181,6 +181,23 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const isRecurring = stripePrice.type === "recurring";
       const meta = PRICE_META[data.priceId] ?? { kind: "other" };
 
+      // Publish-protection guardrail: premium_quarterly MUST be a recurring
+      // 3-month $39.99 subscription. Hard-reject the invalid
+      // `premium_quarterly_3999` monthly fallback even if a future publish
+      // recreates it in Stripe.
+      if (stripePrice.lookup_key === "premium_quarterly_3999") {
+        throw new Error("Disallowed lookup key premium_quarterly_3999 — quarterly must resolve to premium_quarterly");
+      }
+      if (data.priceId === "premium_quarterly") {
+        const r = (stripePrice as any).recurring;
+        if (!isRecurring || r?.interval !== "month" || r?.interval_count !== 3) {
+          throw new Error("Quarterly price must be recurring every 3 months");
+        }
+        if (stripePrice.unit_amount !== 3999) {
+          throw new Error(`Quarterly price must be $39.99, got ${stripePrice.unit_amount}`);
+        }
+      }
+
       const actualProductId = typeof stripePrice.product === "string"
         ? stripePrice.product
         : (stripePrice.product as any).id;
