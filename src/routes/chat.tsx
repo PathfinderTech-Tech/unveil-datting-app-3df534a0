@@ -22,6 +22,7 @@ import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
 import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
+import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -111,6 +112,7 @@ function Chat() {
   const [typingPeer, setTypingPeer] = useState(false);
   const [draft, setDraft] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<{ text: string; kind: string }[]>([]);
   const [opener, setOpener] = useState<string>("");
@@ -382,21 +384,22 @@ function Chat() {
     setPickerFor(null);
   };
 
-  const reportPeer = async () => {
+  const openReport = () => {
     if (!peerId || !user) return;
-    const reason = window.prompt("Report reason?");
-    if (!reason) return;
-    await supabase.from("reports").insert({ reporter_id: user.id, reported_user_id: peerId, reason });
-    toast.success("Report submitted.");
     setShowMenu(false);
+    setReportOpen(true);
   };
   const blockPeer = async () => {
     if (!peerId || !user) return;
-    if (!confirm("Block this person?")) return;
-    await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: peerId });
-    toast.success("Blocked.");
-    setActive(null);
-    setShowMenu(false);
+    if (!confirm("Block this person? They won't be able to contact you again.")) return;
+    try {
+      await blockUser(peerId);
+      toast.success("Blocked. They can no longer contact you.");
+      setActive(null);
+      setShowMenu(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't block");
+    }
   };
   const unmatch = async () => {
     if (!peerId || !user) return;
@@ -664,7 +667,7 @@ function Chat() {
                   </button>
                   {showMenu && (
                     <div className="absolute right-4 top-20 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
-                      <button onClick={reportPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
+                      <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
                       <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
                       <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
                     </div>
