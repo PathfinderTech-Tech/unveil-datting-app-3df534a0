@@ -1,85 +1,129 @@
-# Plan — Global Location + Location Trust Verification
+# Stage B — Location Trust Verification + Travel Mode
 
-This is large and touches onboarding, profiles, discovery, and verification. I want to split it into two reviewable stages so you can approve / adjust before I move on, exactly like the previous master update.
-
----
-
-## Stage A — Global Location System (Step 1)
-
-### Database (one migration)
-Add to `profiles`:
-- `country_code TEXT` — ISO-3166-1 alpha-2 (e.g. `CI`, `US`, `FR`)
-- `country_name TEXT` — display name
-- `region TEXT` — optional state/province/region
-- `city_name TEXT` — free-text + standardized when possible
-- `match_radius_km INTEGER` — nullable; sentinel values `-1` country, `-2` continent, `0` global
-- `match_continent TEXT` — only used when radius sentinel = `-2` (e.g. `AF`)
-- `open_to_international BOOLEAN DEFAULT false`
-
-Backfill: copy existing `city` → `city_name`, derive `country_code` from existing `country` text where unambiguous (ISO lookup table), leave others null for user to confirm. Existing `discovery_radius_km` preserved → mirrored into `match_radius_km` when set.
-
-`profiles_guard_update` trigger: allow user edits to all new fields.
-
-`discover_profiles` RPC: extend filters to honor `open_to_international`, country sentinel, and continent sentinel without breaking current km-based filtering.
-
-### Data
-- New static module `src/lib/countries.ts` — full ISO list (≈250 entries) with `code, name, name_fr, continent, has_states`.
-- `src/lib/regions.ts` — region lists only for countries where it's meaningful (US, CA, AU, IN, BR, NG, ZA, MX, DE, GB, FR départements, CI districts). Other countries → region field hidden.
-
-### UI
-- New `<LocationPicker />` component: searchable country combobox (cmdk), city text input with optional Nominatim/OSM autocomplete (graceful fallback to free text — no extra API key required, public endpoint), conditional region dropdown.
-- New `<MatchRadiusPicker />`: 10/25/50/100/250 km, "Anywhere in my country", "Anywhere in [continent]", "Anywhere in the world", + "Open to international matches" toggle.
-- Wire into `onboarding.tsx` (replace existing location step) and `settings.tsx` + `NearbyDiscoverySettings.tsx`.
-- Auto-detect country via browser `Intl.DateTimeFormat().resolvedOptions().timeZone` → country map fallback; if GPS already granted, reverse-geocode via Nominatim.
-- Discovery filters (`MatchFilters.tsx`): add Country / Region / "International only" filters.
-
-### i18n
-- All new strings added to `en.json` and `fr.json`; `es.json`/`pt.json` keys present with English fallback so they're ready when translated.
+Approved scope extended with travel mode, dual home/current country, trust levels, and moderator signals. Below is exactly what I will build.
 
 ---
 
-## Stage B — Location Trust Verification (Step 2)
+## 1. Database migration (single migration)
 
-### Database (second migration, after Stage A approved)
-New table `location_verifications`:
-- `user_id`, `created_at`
-- `profile_country_code`, `device_country_code`, `ip_country_code`, `gps_country_code`
-- `match_result` ENUM: `match | mismatch | partial`
-- `risk_level` ENUM: `low | medium | high`
-- `vpn_suspected BOOLEAN`
+### `profiles` — add columns
+- `home_country_code TEXT` — backfilled from existing `country_code`. Never changes when user toggles travel mode.
+- `home_country_name TEXT` — display name mirror.
+- `current_country_code TEXT` — where the user currently is. Defaults to home.
+- `current_country_name TEXT`
+- `travel_status TEXT DEFAULT 'home'` — enum-like: `home | travelling`.
+- `travel_started_at TIMESTAMPTZ`
+- `verified_country_code TEXT` — last country the selfie verification confirmed them in.
+- `trust_level TEXT DEFAULT 'unverified'` — `unverified | verified | trusted | identity_verified`.
+- `location_risk_score INTEGER DEFAULT 0` — 0–100.
+- `location_mismatch_count INTEGER DEFAULT 0`.
+
+Update `profiles_guard_update` trigger:
+- Users CAN edit: `home_country_*`, `current_country_*`, `travel_status`, `travel_started_at`.
+- Users CANNOT edit: `verified_country_code`, `trust_level`, `location_risk_score`, `location_mismatch_count` (managed by server fn / admin).
+
+Backfill: set `home_country_code = country_code`, `current_country_code = country_code`, `home_country_name = country`, `current_country_name = country` for all existing rows.
+
+### New table `location_verifications`
+- `id UUID PK`
+- `user_id UUID` → auth.users, cascade
+- `created_at TIMESTAMPTZ DEFAULT now()`
+- `profile_country_code TEXT` (home at the time)
+- `current_country_code TEXT` (declared current)
+- `device_country_code TEXT` (browser locale / timezone)
+- `ip_country_code TEXT` (Cloudflare `CF-IPCountry`)
+- `gps_country_code TEXT` (reverse-geocoded, nullable)
+- `match_result TEXT` — `match | partial | mismatch`
+- `risk_level TEXT` — `low | medium | high`
+- `vpn_suspected BOOLEAN DEFAULT false`
 - `selfie_path TEXT` (reuse `verification-docs` bucket)
 - `user_confirmed_traveling BOOLEAN DEFAULT false`
 
-Add to `profiles`:
-- `location_risk_level TEXT DEFAULT 'low'`
-- `location_mismatch_count INTEGER DEFAULT 0`
+GRANTS: `SELECT` to authenticated (own rows only via RLS), `ALL` to service_role.
+RLS: user can read own rows; only service_role inserts/updates.
 
-### Server
-- `src/lib/location-trust.functions.ts` — server fn that takes selfie + signals, calls IP geo (Cloudflare `CF-IPCountry` header — free, no key), computes risk, writes row, returns `{ result, risk, message }`.
-- Hook into existing selfie verification flow in `src/routes/avatar.tsx` (current trust check). Existing `markSelfieVerified` stays; new fn runs alongside and records the trust signal.
-- Risk rules exactly as spec: low = match, medium = single mismatch, high = repeated mismatches in short window OR VPN flag.
-
-### UI
-- New `<LocationMismatchModal />` shown after selfie when result = `mismatch`:
-  - Copy: "We detected that your current location differs from the country listed on your profile. If you are traveling, you may continue and update your location preferences."
-  - 3 buttons: **I'm traveling** (sets `user_confirmed_traveling=true`, proceeds), **Update my country** (opens LocationPicker), **Retry verification**.
-- No automatic bans. High-risk accounts get a soft flag surfaced to admin review only (no UX change beyond the modal).
+### Helper function
+`set_user_travel_mode(_current_country_code TEXT, _travelling BOOLEAN)` — security-definer, validates input, updates `current_country_*`, `travel_status`, `travel_started_at`. Never touches `home_country_*`.
 
 ---
 
-## Out of scope / explicit non-goals
-- No paid government ID verification (kept retired per Stage 4 of previous update).
-- No changes to messaging quota, premium, or Stripe.
-- No new third-party paid APIs. Country detection uses browser Intl + Cloudflare IP header; city autocomplete uses public Nominatim with throttle + free-text fallback.
+## 2. Server functions
+
+### `src/lib/location-trust.functions.ts`
+- `recordLocationVerification({ selfiePath, deviceCountry, gpsCountry, currentCountry })`
+  - middleware: `requireSupabaseAuth`
+  - reads IP country from `CF-IPCountry` header
+  - loads profile (`home_country_code`, `current_country_code`, `location_mismatch_count`)
+  - computes `match_result`: all 3 (device, ip, gps where present) align with `current_country_code` → match; one differs → partial; two+ differ → mismatch
+  - computes `risk_level`:
+    - low = match
+    - medium = partial OR single mismatch
+    - high = repeated mismatches (`location_mismatch_count >= 2` in last 7 days) OR `vpn_suspected`
+  - `vpn_suspected` heuristic: ip ≠ device AND ip ≠ gps when gps present
+  - inserts `location_verifications` row (via service-role import inside handler)
+  - on match: bumps `trust_level` to `trusted` if currently `verified`; sets `verified_country_code = current_country_code`
+  - on mismatch: increments `location_mismatch_count`, sets `location_risk_score` (low=0, medium=40, high=80)
+  - returns `{ result, risk, message, requiresAction }`
+
+### `src/lib/travel-mode.functions.ts`
+- `setTravelMode({ currentCountryCode, travelling })` — calls `set_user_travel_mode` RPC.
+- `endTravelMode()` — resets `current_country = home_country`, `travel_status = 'home'`.
+
+---
+
+## 3. UI components
+
+### `src/components/TravelModeToggle.tsx`
+- Shown in `/settings` and on `/profile`.
+- Banner when `travel_status='travelling'`: **"Currently travelling in [Country]"** with "End travel mode" button.
+- When off: "I'm travelling" button → opens a small dialog with `<LocationPicker />` to pick current country.
+
+### `src/components/LocationMismatchModal.tsx`
+- Shown after selfie if `recordLocationVerification` returns `mismatch`.
+- Copy: *"We detected that your current location differs from the country listed on your profile. If you are traveling, you may continue and update your location preferences."*
+- 3 buttons:
+  - **I'm travelling** → opens travel-country picker, calls `setTravelMode`, marks `user_confirmed_traveling=true`.
+  - **Update my home country** → opens `<LocationPicker />`, updates `home_country_*`.
+  - **Retry verification** → closes modal, returns to selfie capture.
+
+### `src/components/TrustLevelBadge.tsx`
+- Renders pill for `unverified | verified | trusted | identity_verified`. Reused on profile, match cards, chat header.
+- `identity_verified` is reserved (no UI to obtain it yet — kept as a forward-compatible slot).
+
+### Profile location display (`/profile`, public passport)
+- Show **Home: [Country]** and (if travelling) **Currently in: [Country]** + travel badge.
+- Verification line: *"Verified in [verified_country_code]"* when present.
+
+---
+
+## 4. Wiring
+
+- `src/routes/avatar.tsx` selfie flow: after existing `markSelfieVerified` succeeds, also call `recordLocationVerification`. If result is `mismatch`, show `<LocationMismatchModal />`. Existing flow unchanged on `match`.
+- `src/routes/settings.tsx`: add `<TravelModeToggle />` section under existing location settings.
+- `src/routes/profile.tsx`: show home/current/travel/verified country block.
+- `src/components/LocationPicker.tsx`: no changes (reused).
+
+---
+
+## 5. Moderator/admin signals (data only, no new dashboard UI yet)
+
+- All new columns + the `location_verifications` table are queryable by admins via existing `/admin` patterns. A future admin tab can render them — out of scope for this stage to avoid scope creep, but the data is captured starting now so history is available retroactively. I will note this as "ready for moderator dashboard" in the closing message.
+
+---
+
+## 6. Safety guarantees (explicit non-actions)
+
+- No automatic bans for mismatches.
+- No paid government ID flow built — `identity_verified` is a placeholder enum value only.
+- No changes to messaging quota, Stripe, RLS on existing tables, or the selfie verification gate itself.
+- No new paid third-party APIs. IP country uses Cloudflare's free `CF-IPCountry` header; device country uses browser `Intl`; GPS country uses public Nominatim only when GPS permission is already granted.
 
 ---
 
 ## Order of execution
-1. Stage A migration (you approve SQL).
-2. Stage A code (countries module, LocationPicker, radius picker, onboarding + settings + discovery wiring, i18n).
-3. Stop, show preview, wait for your approval.
-4. Stage B migration.
-5. Stage B server fn + modal + avatar wiring.
-6. Stop, show preview.
 
-Confirm and I'll start with the Stage A migration.
+1. Submit migration (you approve).
+2. After migration runs: write server fns, UI components, wire into avatar/settings/profile.
+3. Preview screenshots, stop for review.
+
+Confirm and I'll submit the migration.
