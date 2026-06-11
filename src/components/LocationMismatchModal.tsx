@@ -22,6 +22,8 @@ export function LocationMismatchModal({
   const [picker, setPicker] = useState<LocationValue>(EMPTY_LOCATION);
   const [busy, setBusy] = useState(false);
 
+  if (!open) return null;
+
   async function updateHome() {
     if (!user || !picker.country_code || !picker.country) { toast.error("Pick a country."); return; }
     setBusy(true);
