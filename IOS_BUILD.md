@@ -29,49 +29,49 @@ In Xcode (`npx cap open ios`):
 4. Capabilities → add **Sign in with Apple** (we use Lovable Cloud's managed
    Apple provider; the iOS capability is required for the system sheet).
 
-## Environment variables
+## Secrets
 
-Add to `.env.production` (and `.env.development` for sandbox testing):
+The RevenueCat **iOS public SDK key** (`appl_...`) is stored as the
+`REVENUECAT_IOS_PUBLIC_KEY` secret in Lovable Cloud and served to the iOS
+client at runtime via the `getRevenueCatConfig` server function
+(`src/lib/revenuecat-config.functions.ts`). It is never written into the
+web bundle or `.env*` files.
 
-```
-VITE_REVENUECAT_IOS_PUBLIC_KEY=appl_xxxxxxxxxxxxxxxxxxxxxxxx
-```
+Phase 2 (after App Store Connect is linked) will add:
 
-This is the RevenueCat **iOS public SDK key** (starts with `appl_`). It is
-safe to ship in the client bundle — it is not a server secret.
+- `REVENUECAT_REST_API_KEY` — server-side reads + admin lookups
+- `REVENUECAT_WEBHOOK_AUTH` — Authorization header for the webhook endpoint
 
 ## App Store Connect — Products
 
 Create these IAP products under your app in App Store Connect with the
 exact identifiers below (RevenueCat reads them via these identifiers):
 
-| Product ID         | Type                        | Reference name          | Price tier   |
-| ------------------ | --------------------------- | ----------------------- | ------------ |
-| `pass_24h`         | Consumable                  | 24-Hour Pass            | $1.99        |
-| `pass_2w`          | Non-renewing subscription   | 2-Week Pass             | $9.99        |
-| `premium_monthly`  | Auto-renewing subscription  | Premium Monthly         | $15.99 / mo  |
-| `premium_quarterly`| Auto-renewing subscription  | Premium Quarterly       | $39.99 / 3mo |
-| `premium_annual`   | Auto-renewing subscription  | Premium Annual          | $149.99 / yr |
+| Product ID           | Type                        | Reference name          | Price tier   |
+| -------------------- | --------------------------- | ----------------------- | ------------ |
+| `pass_24h`           | Consumable                  | 24-Hour Pass            | $1.99        |
+| `verification_badge` | Non-consumable              | Verification Badge      | $9.99        |
+| `premium_monthly`    | Auto-renewing subscription  | Premium Monthly         | $15.99 / mo  |
+| `premium_quarterly`  | Auto-renewing subscription  | Premium Quarterly       | $39.99 / 3mo |
+| `premium_annual`     | Auto-renewing subscription  | Premium Annual          | $149.99 / yr |
 
 The three auto-renewing subscriptions go into the same **Subscription Group**
-(call it `unveil_premium`) so users can upgrade/downgrade without losing
-access. The non-renewing 2-week pass is in its own group.
+(`unveil_premium_group`) so users can upgrade/downgrade without losing access.
 
 ## RevenueCat configuration
 
 In the RevenueCat dashboard:
 
 1. Create the iOS app, paste your App Store Connect shared secret.
-2. Import the products above. Set RevenueCat **Product Identifiers** to
-   exactly match the App Store IDs.
-3. Create three **Entitlements**:
-   - `premium_access` — attach `premium_monthly`, `premium_quarterly`, `premium_annual`.
-   - `unlimited_messaging` — attach the same three.
-   - `active_pass` — attach `pass_24h` and `pass_2w`.
+2. Import the products above. RevenueCat **Product Identifiers** must
+   match the App Store IDs exactly.
+3. Create one **Entitlement**:
+   - `unveil_premium` — attach `premium_monthly`, `premium_quarterly`,
+     `premium_annual`. (The 24h pass and verification badge are read
+     directly from non-subscription transactions, not via an entitlement.)
 4. Create one **Offering** named `default` and add all five packages.
-5. Configure webhooks to point at:
-   `https://unveil.best/api/public/revenuecat/webhook`
-   (Endpoint to be implemented once the App Store Connect app record exists.)
+5. **Phase 2:** configure webhooks → `https://unveil.best/api/public/revenuecat/webhook`
+   (endpoint shipped once App Store Connect is connected).
 
 ## Build commands
 
