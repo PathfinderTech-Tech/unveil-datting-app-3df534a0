@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, ShieldCheck, Loader2 } from "lucide-react";
+import { MapPin, ShieldCheck, Loader2, Globe } from "lucide-react";
+import { COUNTRY_BY_CODE, CONTINENTS } from "@/lib/countries";
 
 type Privacy = "hidden" | "country" | "city" | "distance";
 
+// Radius sentinels match the SQL convention (profiles.discovery_radius_km):
+//   > 0  literal km
+//    0   anywhere in the world
+//   -1   anywhere in my country
+//   -2   anywhere in my continent
 const RADII = [
-  { km: 8,   label: "5 miles" },
-  { km: 16,  label: "10 miles" },
-  { km: 40,  label: "25 miles" },
-  { km: 80,  label: "50 miles" },
-  { km: 160, label: "100 miles" },
-  { km: 0,   label: "Global" },
+  { km: 10,  label: "10 km" },
+  { km: 25,  label: "25 km" },
+  { km: 50,  label: "50 km" },
+  { km: 100, label: "100 km" },
+  { km: 250, label: "250 km" },
+  { km: -1,  label: "Anywhere in my country" },
+  { km: -2,  label: "Anywhere in my continent" },
+  { km: 0,   label: "Anywhere in the world" },
 ];
 
 const PRIVACY: { v: Privacy; label: string; hint: string }[] = [
