@@ -45,6 +45,9 @@ type ProfileRow = {
   current_country_code: string | null;
   current_city: string | null;
   travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
   verified_country_code: string | null;
   trust_level: "unverified" | "verified" | "trusted" | "identity_verified" | null;
   relationship_intent: string | null;
