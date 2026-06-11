@@ -20,6 +20,10 @@ type PassportProfile = {
   photo_url: string | null;
   discovery_mode: "avatar" | "photo" | null;
   communication_style: Record<string, unknown> | null;
+  travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
 };
 
 type Blueprint = {
@@ -45,7 +49,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
     let alive = true;
     supabase
       .from("profiles")
-      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, profile_photo_url, discovery_mode, communication_style")
+      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, profile_photo_url, discovery_mode, communication_style, travel_status, travel_expires_at, travel_warning_count, account_restricted")
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
