@@ -1,46 +1,31 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
-// UNVEIL — iOS Capacitor wrapper
-// Bundle ID:  best.unveil.app
-// Operated by: PathfinderTech, Inc.
+/**
+ * Capacitor config for the Unveil iOS wrapper.
+ *
+ * Build flow:
+ *   1. `bun run build`               — produce SPA bundle in /dist
+ *   2. `npx cap sync ios`            — copy bundle into ios/App/App/public
+ *   3. `npx cap open ios`            — opens Xcode for archive + TestFlight
+ *
+ * The web build remains the source of truth. iOS swaps Stripe checkout for
+ * StoreKit via RevenueCat (see src/lib/purchases.ts and IOS_BUILD.md).
+ */
 const config: CapacitorConfig = {
   appId: "best.unveil.app",
-  appName: "UNVEIL",
+  appName: "Unveil",
   webDir: "dist",
   ios: {
     contentInset: "always",
+    backgroundColor: "#09070d",
+    // Allow only HTTPS at runtime (we never load mixed content).
     limitsNavigationsToAppBoundDomains: false,
-    backgroundColor: "#0b0b0f",
-    scheme: "UNVEIL",
   },
   server: {
-    // Production: ship the bundled web build inside the IPA (no server.url).
-    // For live-reload during development on a real device, uncomment and point
-    // to the Lovable preview URL, then run `npx cap sync ios`.
-    // url: "https://id-preview--4ea519e3-d640-46a7-8d58-fe8fd35d987d.lovable.app",
-    cleartext: false,
+    // During TestFlight we ship the bundled SPA. To point a build at the
+    // live production site for QA, set `url: "https://unveil.best"` and run
+    // `npx cap sync ios` again.
     androidScheme: "https",
-    iosScheme: "https",
-    allowNavigation: [
-      "unveil.best",
-      "*.unveil.best",
-      "*.lovable.app",
-      "*.supabase.co",
-      "appleid.apple.com",
-      "accounts.google.com",
-      "*.stripe.com",
-      "checkout.stripe.com",
-    ],
-  },
-  plugins: {
-    SplashScreen: {
-      launchShowDuration: 1200,
-      backgroundColor: "#0b0b0f",
-      showSpinner: false,
-    },
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"],
-    },
   },
 };
 
