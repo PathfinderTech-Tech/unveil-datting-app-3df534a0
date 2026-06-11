@@ -291,6 +291,8 @@ function Onboarding() {
     if (step === 2) {
       await persist({}, {
         first_name: name, age, gender, country,
+        country_code: countryCode,
+        continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
         state_region: stateRegion || null, city: city || null,
         interested_in: interestedIn,
         intention: intent, relationship_intent: intent,
@@ -320,6 +322,8 @@ function Onboarding() {
         const summary = allDiscoveryAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
         await supabase.from("profiles").update({
           first_name: name, age, gender, country,
+          country_code: countryCode,
+          continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
           state_region: stateRegion || null, city: city || null,
           interested_in: interestedIn,
           intention: intent, relationship_intent: intent,
