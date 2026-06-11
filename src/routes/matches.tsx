@@ -113,6 +113,8 @@ function Matches() {
       nearbyOnly: filters.nearbyOnly,
       radiusKm: filters.radiusKm || null,
       country: filters.country || null,
+      continent: filters.continent || null,
+      internationalOnly: filters.internationalOnly,
       language: filters.language || null,
       intent: filters.intent || null,
       ageMin: filters.ageMin,
