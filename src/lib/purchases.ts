@@ -87,7 +87,7 @@ async function loadRC(userId: string): Promise<unknown> {
         "RevenueCat SDK not bundled. Run `bun add @revenuecat/purchases-capacitor` in the iOS build."
       );
     }
-    await mod.Purchases.configure({ apiKey: cfg.iosPublicKey, appUserID: userId });
+    await mod.Purchases.configure({ apiKey: cfg.iosPublicKey!, appUserID: userId });
     return mod.Purchases;
   })();
   return rcReady;
