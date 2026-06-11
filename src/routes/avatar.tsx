@@ -61,6 +61,7 @@ function PhotoStudioPage() {
   const [enhancePhase, setEnhancePhase] = useState<"warming" | "enhancing">("warming");
   const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
   const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
+  const [mismatchOpen, setMismatchOpen] = useState(false);
 
   async function enhanceWithAI() {
     if (!user) { toast.error("Please sign in."); return; }
