@@ -350,6 +350,11 @@ function PhotoStudioPage() {
 
   return (
     <div className="min-h-screen">
+      <LocationMismatchModal
+        open={mismatchOpen}
+        onClose={() => setMismatchOpen(false)}
+        onRetry={() => { setMismatchOpen(false); setStep(0); }}
+      />
       <UnveilNav />
       <section className="mx-auto max-w-5xl px-5 py-12 md:py-16">
         <header className="text-center">
