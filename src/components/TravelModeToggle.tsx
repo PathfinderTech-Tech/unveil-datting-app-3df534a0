@@ -89,9 +89,10 @@ export function TravelModeToggle() {
       {travelling ? (
         <div className="mt-3 space-y-3">
           <p className="text-sm">
-            Currently travelling in{" "}
-            <span className="font-medium text-foreground">{state.current_country_name ?? state.current_country_code}</span>.
-            Your home country (<span className="text-muted-foreground">{state.home_country_name ?? state.home_country_code ?? "—"}</span>) is preserved.
+            Travelling from{" "}
+            <span className="text-muted-foreground">{[state.home_city, state.home_country_name ?? state.home_country_code].filter(Boolean).join(", ") || "your home"}</span>{" "}
+            • Currently in{" "}
+            <span className="font-medium text-foreground">{[state.current_city, state.current_country_name ?? state.current_country_code].filter(Boolean).join(", ")}</span>.
           </p>
           <button
             onClick={stopTravel}
