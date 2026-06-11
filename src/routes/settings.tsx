@@ -3,6 +3,7 @@ import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
+import { TravelModeToggle } from "@/components/TravelModeToggle";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
@@ -102,6 +103,7 @@ function Settings() {
             <div className="mt-4"><LanguageSwitcher showSpoken /></div>
           </div>
           <NearbyDiscoverySettings />
+          <TravelModeToggle />
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">{t("premium.manageSubscription")}</h2>
             <Link to="/manage-subscription" className="mt-3 inline-flex rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow">

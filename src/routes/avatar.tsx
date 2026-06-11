@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getDisplayPhotoUrl } from "@/lib/photos";
 import { markSelfieVerified } from "@/lib/verification.functions";
+import { recordLocationVerification } from "@/lib/location-trust.functions";
+import { LocationMismatchModal } from "@/components/LocationMismatchModal";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
@@ -59,6 +61,7 @@ function PhotoStudioPage() {
   const [enhancePhase, setEnhancePhase] = useState<"warming" | "enhancing">("warming");
   const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
   const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
+  const [mismatchOpen, setMismatchOpen] = useState(false);
 
   async function enhanceWithAI() {
     if (!user) { toast.error("Please sign in."); return; }
@@ -300,6 +303,19 @@ function PhotoStudioPage() {
         console.warn("[unveil] markSelfieVerified failed", err);
         toast.success("Profile photo saved.");
       }
+      // Location trust check (non-blocking; opens modal on mismatch)
+      try {
+        const deviceCountry =
+          (typeof Intl !== "undefined" && (Intl as any).Locale
+            ? new (Intl as any).Locale(navigator.language).region
+            : null) ?? null;
+        const trust = await recordLocationVerification({
+          data: { selfiePath: null, deviceCountry, gpsCountry: null },
+        });
+        if (trust.requiresAction) setMismatchOpen(true);
+      } catch (err) {
+        console.warn("[unveil] location trust check failed", err);
+      }
       // If we were sent here from a chat that required verification,
       // return the user back to that exact conversation.
       try {
@@ -334,6 +350,11 @@ function PhotoStudioPage() {
 
   return (
     <div className="min-h-screen">
+      <LocationMismatchModal
+        open={mismatchOpen}
+        onClose={() => setMismatchOpen(false)}
+        onRetry={() => { setMismatchOpen(false); setStep(0); }}
+      />
       <UnveilNav />
       <section className="mx-auto max-w-5xl px-5 py-12 md:py-16">
         <header className="text-center">

@@ -714,6 +714,54 @@ export type Database = {
         }
         Relationships: []
       }
+      location_verifications: {
+        Row: {
+          created_at: string
+          current_country_code: string | null
+          device_country_code: string | null
+          gps_country_code: string | null
+          id: string
+          ip_country_code: string | null
+          match_result: string
+          profile_country_code: string | null
+          risk_level: string
+          selfie_path: string | null
+          user_confirmed_traveling: boolean
+          user_id: string
+          vpn_suspected: boolean
+        }
+        Insert: {
+          created_at?: string
+          current_country_code?: string | null
+          device_country_code?: string | null
+          gps_country_code?: string | null
+          id?: string
+          ip_country_code?: string | null
+          match_result: string
+          profile_country_code?: string | null
+          risk_level: string
+          selfie_path?: string | null
+          user_confirmed_traveling?: boolean
+          user_id: string
+          vpn_suspected?: boolean
+        }
+        Update: {
+          created_at?: string
+          current_country_code?: string | null
+          device_country_code?: string | null
+          gps_country_code?: string | null
+          id?: string
+          ip_country_code?: string | null
+          match_result?: string
+          profile_country_code?: string | null
+          risk_level?: string
+          selfie_path?: string | null
+          user_confirmed_traveling?: boolean
+          user_id?: string
+          vpn_suspected?: boolean
+        }
+        Relationships: []
+      }
       match_day3_answers: {
         Row: {
           answer: string
@@ -993,6 +1041,8 @@ export type Database = {
           country_code: string | null
           created_at: string
           curiosity_level: number | null
+          current_country_code: string | null
+          current_country_name: string | null
           daily_message_count: number
           daily_message_reset_at: string
           discovery_mode: string
@@ -1001,6 +1051,8 @@ export type Database = {
           first_name: string | null
           game_complete: boolean | null
           gender: string | null
+          home_country_code: string | null
+          home_country_name: string | null
           id: string
           intention: string | null
           interested_in: string | null
@@ -1008,7 +1060,9 @@ export type Database = {
           lat_approx: number | null
           lng_approx: number | null
           location_enabled: boolean
+          location_mismatch_count: number
           location_privacy: string
+          location_risk_score: number
           location_updated_at: string | null
           message_pass_until: string | null
           onboarding_complete: boolean | null
@@ -1025,9 +1079,13 @@ export type Database = {
           subscription_tier:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_started_at: string | null
+          travel_status: string
+          trust_level: string
           trust_score: number | null
           updated_at: string
           verified: boolean | null
+          verified_country_code: string | null
         }
         Insert: {
           age?: number | null
@@ -1047,6 +1105,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
+          current_country_code?: string | null
+          current_country_name?: string | null
           daily_message_count?: number
           daily_message_reset_at?: string
           discovery_mode?: string
@@ -1055,6 +1115,8 @@ export type Database = {
           first_name?: string | null
           game_complete?: boolean | null
           gender?: string | null
+          home_country_code?: string | null
+          home_country_name?: string | null
           id: string
           intention?: string | null
           interested_in?: string | null
@@ -1062,7 +1124,9 @@ export type Database = {
           lat_approx?: number | null
           lng_approx?: number | null
           location_enabled?: boolean
+          location_mismatch_count?: number
           location_privacy?: string
+          location_risk_score?: number
           location_updated_at?: string | null
           message_pass_until?: string | null
           onboarding_complete?: boolean | null
@@ -1079,9 +1143,13 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_started_at?: string | null
+          travel_status?: string
+          trust_level?: string
           trust_score?: number | null
           updated_at?: string
           verified?: boolean | null
+          verified_country_code?: string | null
         }
         Update: {
           age?: number | null
@@ -1101,6 +1169,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
+          current_country_code?: string | null
+          current_country_name?: string | null
           daily_message_count?: number
           daily_message_reset_at?: string
           discovery_mode?: string
@@ -1109,6 +1179,8 @@ export type Database = {
           first_name?: string | null
           game_complete?: boolean | null
           gender?: string | null
+          home_country_code?: string | null
+          home_country_name?: string | null
           id?: string
           intention?: string | null
           interested_in?: string | null
@@ -1116,7 +1188,9 @@ export type Database = {
           lat_approx?: number | null
           lng_approx?: number | null
           location_enabled?: boolean
+          location_mismatch_count?: number
           location_privacy?: string
+          location_risk_score?: number
           location_updated_at?: string | null
           message_pass_until?: string | null
           onboarding_complete?: boolean | null
@@ -1133,9 +1207,13 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_started_at?: string | null
+          travel_status?: string
+          trust_level?: string
           trust_score?: number | null
           updated_at?: string
           verified?: boolean | null
+          verified_country_code?: string | null
         }
         Relationships: []
       }
@@ -2008,6 +2086,14 @@ export type Database = {
           mutual: boolean
           thought_id: string
         }[]
+      }
+      set_user_travel_mode: {
+        Args: {
+          _current_country_code: string
+          _current_country_name: string
+          _travelling: boolean
+        }
+        Returns: undefined
       }
       user_has_unlimited_messaging: { Args: { _uid: string }; Returns: boolean }
     }
