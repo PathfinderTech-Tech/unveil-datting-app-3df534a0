@@ -51,8 +51,10 @@ export function LocationMismatchModal({
         .update({
           home_country_code: picker.country_code,
           home_country_name: picker.country,
+          home_city: picker.city ?? null,
           current_country_code: picker.country_code,
           current_country_name: picker.country,
+          current_city: picker.city ?? null,
           country_code: picker.country_code,
           country: picker.country,
           city: picker.city ?? null,
