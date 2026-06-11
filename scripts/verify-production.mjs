@@ -56,7 +56,9 @@ async function checkPremium() {
 async function checkTerms() {
   const { status, body } = await getText("/terms");
   record("/terms loads (200)", status === 200, `status=${status}`);
-  record("/terms has no 'UNVEIL+'", !/UNVEIL\+/.test(body));
+  // Exclude URL-encoded `UNVEIL+Support+Request` in mailto links (`+` = space).
+  const unveilPlus = /UNVEIL\+(?!Support)/.test(body);
+  record("/terms has no 'UNVEIL+' product mention", !unveilPlus);
   record("/terms has no 'UNVEIL Black'", !/UNVEIL\s+Black/i.test(body));
 }
 
