@@ -988,7 +988,9 @@ export type Database = {
           communication_style: Json | null
           compatibility_score: number | null
           connection_score: number | null
+          continent_code: string | null
           country: string | null
+          country_code: string | null
           created_at: string
           curiosity_level: number | null
           daily_message_count: number
@@ -1010,6 +1012,7 @@ export type Database = {
           location_updated_at: string | null
           message_pass_until: string | null
           onboarding_complete: boolean | null
+          open_to_international: boolean
           personality_axes: Json
           photo_url: string | null
           preferred_language: string | null
@@ -1039,7 +1042,9 @@ export type Database = {
           communication_style?: Json | null
           compatibility_score?: number | null
           connection_score?: number | null
+          continent_code?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
           daily_message_count?: number
@@ -1061,6 +1066,7 @@ export type Database = {
           location_updated_at?: string | null
           message_pass_until?: string | null
           onboarding_complete?: boolean | null
+          open_to_international?: boolean
           personality_axes?: Json
           photo_url?: string | null
           preferred_language?: string | null
@@ -1090,7 +1096,9 @@ export type Database = {
           communication_style?: Json | null
           compatibility_score?: number | null
           connection_score?: number | null
+          continent_code?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
           curiosity_level?: number | null
           daily_message_count?: number
@@ -1112,6 +1120,7 @@ export type Database = {
           location_updated_at?: string | null
           message_pass_until?: string | null
           onboarding_complete?: boolean | null
+          open_to_international?: boolean
           personality_axes?: Json
           photo_url?: string | null
           preferred_language?: string | null
