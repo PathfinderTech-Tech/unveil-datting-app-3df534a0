@@ -11,7 +11,7 @@ import { LocationMismatchModal } from "@/components/LocationMismatchModal";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck, Wand2, X,
+  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
@@ -57,144 +57,8 @@ function PhotoStudioPage() {
   const [adj, setAdj] = useState<Adjustments>(PRESETS[1].adj);
   const [busy, setBusy] = useState(false);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
-  const [enhancing, setEnhancing] = useState(false);
-  const [enhancePhase, setEnhancePhase] = useState<"warming" | "enhancing">("warming");
-  const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
-  const [preEnhanceUrl, setPreEnhanceUrl] = useState<string | null>(null);
   const [mismatchOpen, setMismatchOpen] = useState(false);
 
-  async function enhanceWithAI() {
-    if (!user) { toast.error("Please sign in."); return; }
-    const src = sourceBlobUrl ?? sourceUrl;
-    if (!src) { toast.error("Add a photo first."); return; }
-    const originalUrl = src;
-    setEnhancing(true);
-    setEnhancePhase("warming");
-    setEnhancedUrl(null);
-    toast.message("Enhancing started.");
-    console.log("[AI Enhance] 1. Button clicked", {
-      hasSourceUrl: Boolean(sourceUrl),
-      hasLocalPreview: Boolean(sourceBlobUrl),
-      presetId,
-    });
-    // Flip to "Enhancing your photo..." after 10s
-    const phaseTimer = setTimeout(() => setEnhancePhase("enhancing"), 10_000);
-    // Hard client-side timeout so the button never stays stuck.
-    const controller = new AbortController();
-    const abortTimer = setTimeout(() => controller.abort(), 65_000);
-    try {
-      const imageUrl = sourceUrl ? await getDisplayPhotoUrl(sourceUrl) : null;
-      console.log("[AI Enhance] 2. Uploaded image URL resolved", {
-        imageUrl,
-        sourceUrl,
-      });
-
-      // Convert current source to base64 (handles blob/http/signed URLs) and
-      // pass both the signed URL and base64 fallback to the edge function.
-      const fetchSource = sourceBlobUrl ?? imageUrl ?? sourceUrl;
-      if (!fetchSource) throw new Error("No image source available for enhancement");
-      const res = await fetch(fetchSource, { signal: controller.signal, cache: "no-store" });
-      console.log("[AI Enhance] 3. Source image fetch", {
-        status: res.status,
-        ok: res.ok,
-        contentType: res.headers.get("content-type"),
-      });
-      if (!res.ok) throw new Error(`Could not load uploaded image (${res.status})`);
-      const blob = await res.blob();
-      console.log("[AI Enhance] 4. Source image blob ready", { size: blob.size, type: blob.type });
-      if (blob.size > 8 * 1024 * 1024) throw new Error("Image too large (max 8MB)");
-      const dataUrl: string = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(String(r.result));
-        r.onerror = () => reject(new Error("Could not read image"));
-        r.readAsDataURL(blob);
-      });
-
-      const edgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enhance-photo`;
-      const { data: sessionData } = await supabase.auth.getSession();
-      const bearer = sessionData.session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      console.log("[AI Enhance] 5. Calling enhance-photo Edge Function", {
-        edgeUrl,
-        imageUrl,
-        base64Size: dataUrl.length,
-        hasUserToken: Boolean(sessionData.session?.access_token),
-      });
-      const response = await fetch(edgeUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${bearer}`,
-        },
-        body: JSON.stringify({ imageUrl, image: dataUrl }),
-        signal: controller.signal,
-      });
-      console.log("[AI Enhance] 6. Edge function status:", response.status);
-      const responseText = await response.clone().text();
-      console.log("[AI Enhance] 7. Edge function response:", responseText);
-      const data = responseText ? JSON.parse(responseText) : null;
-      if (!response.ok) throw new Error(data?.error || data?.message || `Edge function returned ${response.status}`);
-      if (!data?.image || typeof data.image !== "string") throw new Error("Edge function did not return an enhanced image");
-      if (!data.image.startsWith("data:image/")) throw new Error("Edge function returned an invalid image format");
-      console.log("[AI Enhance] 8. Valid enhanced image received", { size: data.image.length });
-
-      const enhancedBlob = dataUrlToBlob(data.image);
-      const ext = enhancedBlob.type.includes("png") ? "png" : "jpg";
-      const path = `${user.id}/enhanced-${Date.now()}.${ext}`;
-      console.log("[AI Enhance] 9. Saving enhanced image to storage", { path, size: enhancedBlob.size, type: enhancedBlob.type });
-      const { error: uploadError } = await supabase.storage
-        .from("profile-photos")
-        .upload(path, enhancedBlob, { upsert: true, contentType: enhancedBlob.type || "image/png", cacheControl: "3600" });
-      if (uploadError) throw uploadError;
-
-      const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
-      const displayUrl = await getDisplayPhotoUrl(pub.publicUrl);
-      setPreEnhanceUrl(originalUrl);
-      setSourceUrl(pub.publicUrl);
-      setSourceBlobUrl(displayUrl ?? data.image);
-      setEnhancedUrl(displayUrl ?? data.image);
-      console.log("[AI Enhance] 10. Frontend replaced old image with enhanced image", { path, publicUrl: pub.publicUrl });
-      toast.success("Enhancement successful.");
-    } catch (e) {
-      const reason = enhancementErrorReason(e);
-      console.error("[AI Enhance] Enhancement failed with reason:", reason, e);
-      toast.error(`Enhancement failed: ${reason}`);
-    } finally {
-      clearTimeout(phaseTimer);
-      clearTimeout(abortTimer);
-      setEnhancing(false);
-    }
-  }
-
-  function applyEnhanced() {
-    if (!enhancedUrl) return;
-    if ((sourceBlobUrl ?? sourceUrl) !== enhancedUrl) {
-      setPreEnhanceUrl(sourceBlobUrl ?? sourceUrl);
-      if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
-      setSourceBlobUrl(enhancedUrl);
-      setSourceUrl(enhancedUrl);
-    }
-    setEnhancedUrl(null);
-    toast.success("Using enhanced photo. Adjust filters and save.");
-  }
-
-  function discardEnhanced() {
-    if (preEnhanceUrl && enhancedUrl && (sourceBlobUrl ?? sourceUrl) === enhancedUrl) {
-      setSourceBlobUrl(preEnhanceUrl.startsWith("data:") ? preEnhanceUrl : null);
-      setSourceUrl(preEnhanceUrl);
-      setPreEnhanceUrl(null);
-    }
-    setEnhancedUrl(null);
-    toast.message("AI enhancement discarded.");
-  }
-
-  function revertEnhanced() {
-    if (!preEnhanceUrl) return;
-    setSourceBlobUrl(preEnhanceUrl.startsWith("data:") ? preEnhanceUrl : null);
-    setSourceUrl(preEnhanceUrl);
-    setPreEnhanceUrl(null);
-    toast.message("Reverted to original photo.");
-  }
 
   useEffect(() => {
     if (!user) return;
@@ -491,73 +355,7 @@ function PhotoStudioPage() {
                   >
                     <RefreshCw className="h-3 w-3" /> Reset
                   </button>
-                  <button
-                    onClick={enhanceWithAI}
-                    disabled={enhancing}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-60"
-                    title="Use AI to gently retouch your photo"
-                  >
-                    {enhancing
-                      ? <><Loader2 className="h-3 w-3 animate-spin" /> {enhancePhase === "warming" ? "Warming up AI…" : "Enhancing your photo…"}</>
-                      : <><Wand2 className="h-3 w-3" /> Enhance with AI</>}
-                  </button>
-                  {preEnhanceUrl && (
-                    <button
-                      onClick={revertEnhanced}
-                      className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs hover:bg-surface-2"
-                    >
-                      <X className="h-3 w-3" /> Revert AI
-                    </button>
-                  )}
                 </div>
-
-                {(enhancing || enhancedUrl) && (
-                  <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3">
-                    <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-primary">
-                      <Wand2 className="h-3 w-3" /> AI enhancement
-                    </div>
-                    {enhancing && !enhancedUrl && (
-                      <div className="flex items-center gap-2 py-6 text-xs text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        {enhancePhase === "warming" ? "Warming up AI…" : "Enhancing your photo…"}
-                      </div>
-                    )}
-                    {enhancedUrl && (
-                      <>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="overflow-hidden rounded-xl border border-border bg-surface-2">
-                            <div className="aspect-square w-full">
-                                {(preEnhanceUrl ?? previewSrc) && (
-                                  <img src={preEnhanceUrl ?? previewSrc ?? ""} alt="Before" className="h-full w-full object-cover" />
-                              )}
-                            </div>
-                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Before</div>
-                          </div>
-                          <div className="overflow-hidden rounded-xl border border-primary shadow-glow">
-                            <div className="aspect-square w-full">
-                              <img src={enhancedUrl} alt="After" className="h-full w-full object-cover" />
-                            </div>
-                            <div className="px-2 py-1 text-center font-mono text-[10px] uppercase tracking-luxury text-primary">After (AI)</div>
-                          </div>
-                        </div>
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={applyEnhanced}
-                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-hero px-3 py-2 text-xs font-medium text-primary-foreground shadow-glow"
-                          >
-                            <Check className="h-3.5 w-3.5" /> Use enhanced
-                          </button>
-                          <button
-                            onClick={discardEnhanced}
-                            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs hover:bg-surface-2"
-                          >
-                            <X className="h-3.5 w-3.5" /> Discard
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
 
@@ -631,23 +429,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function dataUrlToBlob(dataUrl: string): Blob {
-  const [meta, encoded] = dataUrl.split(",");
-  if (!meta || !encoded) throw new Error("Invalid enhanced image data");
-  const mime = meta.match(/^data:([^;]+);base64$/)?.[1] ?? "image/png";
-  const binary = atob(encoded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
-
-function enhancementErrorReason(error: unknown): string {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return "the request timed out";
-  }
-  if (error instanceof Error) return error.message;
-  return String(error || "AI Enhancement unavailable right now — try again in a moment.");
-}
 
 function Slider({ label, value, min, max, step, onChange }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
