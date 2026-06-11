@@ -303,6 +303,19 @@ function PhotoStudioPage() {
         console.warn("[unveil] markSelfieVerified failed", err);
         toast.success("Profile photo saved.");
       }
+      // Location trust check (non-blocking; opens modal on mismatch)
+      try {
+        const deviceCountry =
+          (typeof Intl !== "undefined" && (Intl as any).Locale
+            ? new (Intl as any).Locale(navigator.language).region
+            : null) ?? null;
+        const trust = await recordLocationVerification({
+          data: { selfiePath: null, deviceCountry, gpsCountry: null },
+        });
+        if (trust.requiresAction) setMismatchOpen(true);
+      } catch (err) {
+        console.warn("[unveil] location trust check failed", err);
+      }
       // If we were sent here from a chat that required verification,
       // return the user back to that exact conversation.
       try {
