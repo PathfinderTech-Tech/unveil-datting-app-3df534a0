@@ -1,9 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { X, Zap, Clock, Crown, Sparkles, Star } from "lucide-react";
 import { isIOS } from "@/lib/platform";
 import { toast } from "sonner";
 import { purchase, type ProductId } from "@/lib/purchases";
 import { supabase } from "@/integrations/supabase/client";
+import PremiumSuccessOverlay from "@/components/PremiumSuccessOverlay";
+
+type SuccessProduct = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
+const SUCCESS_MAP: Record<ProductId, SuccessProduct> = {
+  pass_24h: "message_pass",
+  pass_2w: "message_pass_2w",
+  premium_monthly: "premium",
+  premium_quarterly: "premium_quarterly",
+  premium_annual: "premium_annual",
+};
 
 type Props = {
   open: boolean;
