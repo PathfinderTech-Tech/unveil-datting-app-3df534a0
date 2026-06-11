@@ -75,10 +75,27 @@ function Checkout() {
     }
     // Persist the return destination so we can recover it on /checkout/return
     // even if Stripe drops the search param (some redirect paths strip it).
+    // If no explicit returnTo was provided, fall back to the previous page
+    // (document.referrer) so users land back where they triggered checkout.
     try {
-      if (returnTo && returnTo.startsWith("/")) {
-        localStorage.setItem("unveil:checkoutReturn", returnTo);
+      let dest = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
+      if (!dest && typeof document !== "undefined" && document.referrer) {
+        try {
+          const ref = new URL(document.referrer);
+          if (ref.origin === window.location.origin) {
+            const path = ref.pathname + ref.search;
+            if (
+              path.startsWith("/") &&
+              !path.startsWith("/checkout") &&
+              !path.startsWith("/login") &&
+              !path.startsWith("/signup")
+            ) {
+              dest = path;
+            }
+          }
+        } catch { /* ignore */ }
       }
+      if (dest) localStorage.setItem("unveil:checkoutReturn", dest);
     } catch { /* ignore quota / privacy errors */ }
   }, [navigate, returnTo]);
 
