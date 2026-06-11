@@ -52,12 +52,9 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
   }, []);
 
   const active =
-    value.nearbyOnly || value.country || value.region || value.continent ||
+    value.nearbyOnly || value.country || value.continent ||
     value.internationalOnly || value.language || value.intent ||
     value.ageMin !== 18 || value.ageMax !== 70;
-
-  const countryRegions = value.country ? REGIONS[value.country] ?? [] : [];
-  const hasCountryRegions = countryRegions.length > 0;
 
   return (
     <div className="mb-6">
@@ -110,7 +107,7 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
           <Field label="Country">
             <select
               value={value.country}
-              onChange={(e) => onChange({ ...value, country: e.target.value, region: "" })}
+              onChange={(e) => onChange({ ...value, country: e.target.value })}
               className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
             >
               <option value="">Any</option>
@@ -129,18 +126,6 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
             </select>
           </Field>
 
-          {hasCountryRegions && (
-            <Field label={`Region in ${COUNTRY_BY_CODE[value.country]?.name ?? ""}`}>
-              <select
-                value={value.region}
-                onChange={(e) => onChange({ ...value, region: e.target.value })}
-                className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
-              >
-                <option value="">Any</option>
-                {countryRegions.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </Field>
-          )}
 
           <Field label="Language">
             <select value={value.language} onChange={(e) => onChange({ ...value, language: e.target.value })}
