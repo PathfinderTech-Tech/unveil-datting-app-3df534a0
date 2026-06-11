@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Plane, MapPin, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationPicker, EMPTY_LOCATION, type LocationValue } from "@/components/LocationPicker";
-import { setTravelMode } from "@/lib/travel-mode.functions";
+import { TravelVerifyModal } from "@/components/TravelVerifyModal";
 
-type Mode = "choices" | "travelling" | "update_home";
+type Mode = "choices" | "verify_travel" | "update_home";
 
 export function LocationMismatchModal({
   open,
