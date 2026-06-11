@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { UnveilNav } from "@/components/UnveilNav";
 import { Check } from "lucide-react";
+import PremiumSuccessOverlay from "@/components/PremiumSuccessOverlay";
 
 type ProductKey = "premium" | "premium_quarterly" | "premium_annual" | "message_pass" | "message_pass_2w";
 
@@ -39,6 +40,8 @@ function destinationLabel(dest: string): string {
 function CheckoutReturn() {
   const { session_id, product, returnTo } = Route.useSearch() as { session_id?: string; product?: ProductKey; returnTo?: string };
   const navigate = useNavigate();
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayDone, setOverlayDone] = useState(false);
 
   // Recover returnTo from localStorage if Stripe dropped the search param.
   let effectiveReturnTo: string | undefined = returnTo;
@@ -56,13 +59,21 @@ function CheckoutReturn() {
       : "/premium";
   const dest = effectiveReturnTo ?? fallback;
 
+  // Show premium success overlay on valid purchases.
   useEffect(() => {
-    if (session_id && product) toast.success(SUCCESS_BANNER[product]);
+    if (session_id && product) {
+      setShowOverlay(true);
+      toast.success(SUCCESS_BANNER[product]);
+    }
     try { localStorage.removeItem("unveil:checkoutReturn"); } catch { /* ignore */ }
-    // Brief pause so the thank-you is legible, then return to source.
-    const t = setTimeout(() => { window.location.replace(dest); }, 2200);
+  }, [session_id, product]);
+
+  // Redirect after overlay completes.
+  useEffect(() => {
+    if (!overlayDone) return;
+    const t = setTimeout(() => { window.location.replace(dest); }, 400);
     return () => clearTimeout(t);
-  }, [session_id, product, dest, navigate]);
+  }, [overlayDone, dest, navigate]);
 
   const message = session_id
     ? (product ? SUCCESS_BANNER[product] : "Your purchase is confirmed.")
@@ -70,6 +81,13 @@ function CheckoutReturn() {
 
   return (
     <div className="min-h-screen">
+      {showOverlay && product && !overlayDone && (
+        <PremiumSuccessOverlay
+          product={product}
+          duration={2000}
+          onComplete={() => setOverlayDone(true)}
+        />
+      )}
       <UnveilNav />
       <section className="mx-auto max-w-2xl px-5 py-20 text-center">
         <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground shadow-glow">
