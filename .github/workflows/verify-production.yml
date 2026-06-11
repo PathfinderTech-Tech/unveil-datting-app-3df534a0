@@ -55,14 +55,41 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('verify-report.html', 'utf-8');
-            const passed = (report.match(/class="pill pass"/g) || []).length;
-            const failed = (report.match(/class="pill fail"/g) || []).length;
+
+            // Count individual check rows (not summary pills)
+            const passRows = report.match(/<tr class="pass">/g) || [];
+            const failRows = report.match(/<tr class="fail">/g) || [];
+            const passed = passRows.length;
+            const failed = failRows.length;
             const total = passed + failed;
+
+            // Extract failed check names from second <td> of each fail row
+            const failRegex = /<tr class="fail">[\s\S]*?<td>[^<]*<\/td>\s*<td>([^<]+)<\/td>/g;
+            const failedNames = [];
+            let m;
+            while ((m = failRegex.exec(report)) !== null) {
+              failedNames.push(m[1].trim());
+            }
+
             const status = failed > 0 ? '❌ Failed' : '✅ Passed';
-            const body = `## ${status} — Production Verification\n\n` +
-              `**URL:** ${process.env.BASE_URL || 'https://unveil.best'}\n` +
-              `**Checks:** ${total - failed}/${total} passed\n\n` +
-              `📄 [Download full HTML report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            const url = process.env.BASE_URL || 'https://unveil.best';
+            const runUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+            let body = `## ${status} — Production Verification\n\n` +
+              `**URL:** ${url}\n` +
+              `**Total:** ${total} checks\n` +
+              `**Passed:** ${passed}\n` +
+              `**Failed:** ${failed}\n`;
+
+            if (failedNames.length > 0) {
+              body += `\n### Failed Checks\n`;
+              for (const name of failedNames) {
+                body += `- ${name}\n`;
+              }
+            }
+
+            body += `\n📄 [View full HTML report](${runUrl})`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
