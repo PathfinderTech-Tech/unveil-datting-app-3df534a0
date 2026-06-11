@@ -489,6 +489,14 @@ function Chat() {
         onClose={() => setVerifyOpen(false)}
         returnTo={active ? `/chat?c=${active.id}` : "/chat"}
       />
+      {peerId && (
+        <ReportUserDialog
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          reportedUserId={peerId}
+          onBlockToo={blockPeer}
+        />
+      )}
 
       <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
