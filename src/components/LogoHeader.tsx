@@ -1,19 +1,30 @@
 import { Link } from "@tanstack/react-router";
-import logoAsset from "@/assets/unveil-logo.png.asset.json";
+import logoAsset from "@/assets/unveil-logo-transparent.png.asset.json";
 
-export function LogoMark({ size = 36, className = "" }: { size?: number; className?: string }) {
+export function LogoMark({
+  size = 36,
+  className = "",
+  glow = "soft",
+}: {
+  size?: number;
+  className?: string;
+  /** Glow intensity. "soft" = nav/inline, "ambient" = hero. */
+  glow?: "none" | "soft" | "ambient";
+}) {
+  const filter =
+    glow === "none"
+      ? undefined
+      : glow === "ambient"
+      ? "drop-shadow(0 0 36px color-mix(in oklch, var(--logo-magenta) 55%, transparent)) drop-shadow(0 0 28px color-mix(in oklch, var(--logo-purple) 50%, transparent)) drop-shadow(0 0 22px color-mix(in oklch, var(--logo-gold) 32%, transparent))"
+      : "drop-shadow(0 0 14px color-mix(in oklch, var(--logo-magenta) 50%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 34%, transparent))";
   return (
     <img
       src={logoAsset.url}
       alt="UNVEIL"
       width={size}
       height={size}
-      className={`object-contain ${className}`}
-      style={{
-        mixBlendMode: "screen",
-        filter:
-          "drop-shadow(0 0 14px color-mix(in oklch, var(--logo-magenta) 50%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 34%, transparent))",
-      }}
+      className={`object-contain bg-transparent ${className}`}
+      style={{ filter }}
     />
   );
 }
