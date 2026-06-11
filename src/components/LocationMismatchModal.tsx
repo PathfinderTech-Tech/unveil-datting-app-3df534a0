@@ -71,11 +71,11 @@ export function LocationMismatchModal({
         {mode === "choices" && (
           <div className="mt-5 space-y-2">
             <button
-              onClick={() => setMode("travelling")}
+              onClick={() => setMode("verify_travel")}
               className="flex w-full items-center gap-3 rounded-xl border border-border bg-surface/60 p-3 text-left text-sm hover:bg-surface"
             >
               <Plane className="h-4 w-4 text-primary" />
-              <span><span className="font-medium">I'm travelling</span> — set a temporary country, keep my home as-is.</span>
+              <span><span className="font-medium">I'm travelling</span> — verify with a selfie + location check.</span>
             </button>
             <button
               onClick={() => setMode("update_home")}
@@ -94,16 +94,6 @@ export function LocationMismatchModal({
           </div>
         )}
 
-        {mode === "travelling" && (
-          <div className="mt-5 space-y-3">
-            <LocationPicker value={picker} onChange={setPicker} autoDetect labels={{ country: "Where are you now?", city: "City (optional)" }} />
-            <div className="flex gap-2">
-              <button onClick={() => setMode("choices")} className="rounded-full border border-border px-4 py-1.5 text-xs hover:bg-surface">Back</button>
-              <button onClick={confirmTravelling} disabled={busy || !picker.country_code} className="rounded-full bg-gradient-hero px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-glow disabled:opacity-50">Confirm travel</button>
-            </div>
-          </div>
-        )}
-
         {mode === "update_home" && (
           <div className="mt-5 space-y-3">
             <LocationPicker value={picker} onChange={setPicker} autoDetect labels={{ country: "Your new home country" }} />
@@ -114,6 +104,12 @@ export function LocationMismatchModal({
           </div>
         )}
       </div>
+
+      <TravelVerifyModal
+        open={mode === "verify_travel"}
+        onClose={() => { setMode("choices"); onClose(); }}
+        onActivated={() => { setMode("choices"); onClose(); }}
+      />
     </div>
   );
 }
