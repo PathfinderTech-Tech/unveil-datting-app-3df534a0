@@ -188,6 +188,8 @@ function ProfilePage() {
                 </h1>
                 {profile?.verified && <VerifiedBadge />}
                 {profile?.trust_level && <TrustLevelBadge level={profile.trust_level} />}
+                <LocationTrustBadge profile={profile as any} />
+
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
                 {profile?.travel_status === "travelling" ? (
