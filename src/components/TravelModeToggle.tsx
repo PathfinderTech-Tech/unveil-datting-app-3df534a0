@@ -10,8 +10,10 @@ import { setTravelMode, endTravelMode } from "@/lib/travel-mode.functions";
 type TravelState = {
   home_country_code: string | null;
   home_country_name: string | null;
+  home_city: string | null;
   current_country_code: string | null;
   current_country_name: string | null;
+  current_city: string | null;
   travel_status: string | null;
 };
 
@@ -28,7 +30,7 @@ export function TravelModeToggle() {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("home_country_code, home_country_name, current_country_code, current_country_name, travel_status")
+      .select("home_country_code, home_country_name, home_city, current_country_code, current_country_name, current_city, travel_status")
       .eq("id", user.id)
       .maybeSingle();
     setState(data as TravelState | null);
@@ -50,6 +52,10 @@ export function TravelModeToggle() {
         currentCountryName: picker.country,
         travelling: true,
       }});
+      // City is optional; persisted separately (RPC only handles country)
+      if (user) {
+        await supabase.from("profiles").update({ current_city: picker.city ?? null }).eq("id", user.id);
+      }
       toast.success(`Travel mode on — ${picker.country}`);
       setOpen(false);
       setPicker(EMPTY_LOCATION);
@@ -63,6 +69,10 @@ export function TravelModeToggle() {
     setBusy(true);
     try {
       await endTravelFn();
+      if (user) {
+        // Reset current_city to home_city
+        await supabase.from("profiles").update({ current_city: state?.home_city ?? null }).eq("id", user.id);
+      }
       toast.success("Welcome home.");
       await load();
     } catch (e) {
@@ -79,9 +89,10 @@ export function TravelModeToggle() {
       {travelling ? (
         <div className="mt-3 space-y-3">
           <p className="text-sm">
-            Currently travelling in{" "}
-            <span className="font-medium text-foreground">{state.current_country_name ?? state.current_country_code}</span>.
-            Your home country (<span className="text-muted-foreground">{state.home_country_name ?? state.home_country_code ?? "—"}</span>) is preserved.
+            Travelling from{" "}
+            <span className="text-muted-foreground">{[state.home_city, state.home_country_name ?? state.home_country_code].filter(Boolean).join(", ") || "your home"}</span>{" "}
+            • Currently in{" "}
+            <span className="font-medium text-foreground">{[state.current_city, state.current_country_name ?? state.current_country_code].filter(Boolean).join(", ")}</span>.
           </p>
           <button
             onClick={stopTravel}

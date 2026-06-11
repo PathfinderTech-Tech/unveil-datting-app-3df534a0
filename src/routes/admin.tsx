@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Users, AlertTriangle, Mail, Crown, ShieldCheck, CreditCard, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AdminTrustPanel } from "@/components/AdminTrustPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — UNVEIL" }] }),
   component: Admin,
 });
 
-type Tab = "waitlist" | "verifications" | "payments" | "reports" | "feedback";
+type Tab = "waitlist" | "verifications" | "trust" | "payments" | "reports" | "feedback";
 
 function Admin() {
   const { user, loading } = useAuth();
@@ -148,7 +149,7 @@ function Admin() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
-          {(["waitlist", "verifications", "payments", "reports", "feedback"] as Tab[]).map((t) => (
+          {(["waitlist", "verifications", "trust", "payments", "reports", "feedback"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -295,6 +296,9 @@ function Admin() {
             )}
           </div>
         )}
+
+        {tab === "trust" && <AdminTrustPanel />}
+
 
         {tab === "payments" && (
           <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">

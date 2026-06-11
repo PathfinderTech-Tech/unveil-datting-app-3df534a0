@@ -20,6 +20,7 @@ export const recordLocationVerification = createServerFn({ method: "POST" })
   .inputValidator((input: {
     selfiePath?: string | null;
     deviceCountry?: string | null;
+    deviceTimezone?: string | null;
     gpsCountry?: string | null;
   }) => input)
   .handler(async ({ data, context }): Promise<LocationTrustResult> => {
@@ -78,12 +79,14 @@ export const recordLocationVerification = createServerFn({ method: "POST" })
       profile_country_code: profileCountry,
       current_country_code: currentCountry,
       device_country_code: deviceCountry,
+      device_timezone: data.deviceTimezone ?? null,
       ip_country_code: ipCountry,
       gps_country_code: gpsCountry,
       match_result: matchResult,
       risk_level: risk,
       vpn_suspected: vpnSuspected,
       selfie_path: data.selfiePath ?? null,
+      verified_at: new Date().toISOString(),
     });
 
     // Update profile trust signals
