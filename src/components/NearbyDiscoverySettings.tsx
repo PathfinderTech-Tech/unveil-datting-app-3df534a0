@@ -148,19 +148,26 @@ export function NearbyDiscoverySettings() {
           </div>
 
           <div className="mt-6">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Discovery radius</div>
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Matching radius</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {RADII.map((r) => (
-                <button
-                  key={r.km}
-                  onClick={async () => { setRadius(r.km); await persist({ discovery_radius_km: r.km }); }}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                    radius === r.km ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-surface"
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
+              {RADII.map((r) => {
+                const label =
+                  r.km === -1 && countryCode ? `Anywhere in ${COUNTRY_BY_CODE[countryCode]?.name ?? "my country"}`
+                  : r.km === -2 && countryCode
+                    ? `Anywhere in ${CONTINENTS.find((c) => c.code === COUNTRY_BY_CODE[countryCode]?.continent)?.name ?? "my continent"}`
+                  : r.label;
+                return (
+                  <button
+                    key={r.km}
+                    onClick={async () => { setRadius(r.km); await persist({ discovery_radius_km: r.km }); }}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                      radius === r.km ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-surface"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
             {!hasCoords && (
               <p className="mt-3 text-[11px] text-amber-500">
@@ -171,6 +178,29 @@ export function NearbyDiscoverySettings() {
               <ShieldCheck className="h-3 w-3" /> Exact addresses and live GPS are never shown to anyone.
             </p>
           </div>
+
+          <div className="mt-6">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-background p-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-primary"
+                checked={openInternational}
+                onChange={async (e) => {
+                  setOpenInternational(e.target.checked);
+                  await persist({ open_to_international: e.target.checked });
+                }}
+              />
+              <span>
+                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                  <Globe className="h-3.5 w-3.5" /> Open to international matches
+                </span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  Allow matches outside your country. Distance becomes informational only.
+                </span>
+              </span>
+            </label>
+          </div>
+
         </>
       )}
     </div>
