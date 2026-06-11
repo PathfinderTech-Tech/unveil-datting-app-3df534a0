@@ -309,8 +309,9 @@ function PhotoStudioPage() {
           (typeof Intl !== "undefined" && (Intl as any).Locale
             ? new (Intl as any).Locale(navigator.language).region
             : null) ?? null;
+        const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
         const trust = await recordLocationVerification({
-          data: { selfiePath: null, deviceCountry, gpsCountry: null },
+          data: { selfiePath: null, deviceCountry, deviceTimezone, gpsCountry: null },
         });
         if (trust.requiresAction) setMismatchOpen(true);
       } catch (err) {
