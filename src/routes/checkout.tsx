@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isStripeConfigured } from "@/lib/stripe";
 import { isIOS } from "@/lib/platform";
@@ -118,7 +118,7 @@ function Checkout() {
 
   return (
     <div className="min-h-screen">
-      <PaymentTestModeBanner />
+      
       <UnveilNav />
       <section className="mx-auto max-w-3xl px-5 py-10 md:py-14">
         <Link to="/premium" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
