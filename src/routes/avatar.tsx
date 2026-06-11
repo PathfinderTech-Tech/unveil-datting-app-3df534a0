@@ -11,7 +11,7 @@ import { LocationMismatchModal } from "@/components/LocationMismatchModal";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
-  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck, Wand2, X,
+  Sparkles, RefreshCw, Sun, Sliders, ShieldCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/avatar")({
