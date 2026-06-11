@@ -69,8 +69,11 @@ function validateReturnUrl(raw: string): string {
     host.endsWith(".lovableproject.com") ||
     host.endsWith(".lovable.host");
   if (!ok) throw new Error("returnUrl host not allowed");
-  return u.toString();
+  // Return raw — URL.toString() percent-encodes `{CHECKOUT_SESSION_ID}`,
+  // which breaks Stripe's server-side placeholder substitution.
+  return raw;
 }
+
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
