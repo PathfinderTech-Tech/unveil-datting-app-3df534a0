@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DiscoverFilters } from "@/lib/matching-api";
 import { Filter, X } from "lucide-react";
-import { COUNTRIES, CONTINENTS, REGIONS, COUNTRY_BY_CODE } from "@/lib/countries";
+import { COUNTRIES, CONTINENTS } from "@/lib/countries";
 
 const LANGS = [
   ["en","English"],["es","Español"],["fr","Français"],["pt","Português"],["de","Deutsch"],
@@ -14,7 +14,6 @@ const INTENTS = ["friendship","dating","serious","exploring","open"] as const;
 export type FilterState = Required<Pick<DiscoverFilters, "nearbyOnly">> & {
   radiusKm: number;
   country: string;       // ISO alpha-2, "" = any
-  region: string;        // free-text, "" = any
   continent: string;     // ISO continent, "" = any
   internationalOnly: boolean;
   language: string;
@@ -27,7 +26,6 @@ export const DEFAULT_FILTERS: FilterState = {
   nearbyOnly: false,
   radiusKm: 80,
   country: "",
-  region: "",
   continent: "",
   internationalOnly: false,
   language: "",
