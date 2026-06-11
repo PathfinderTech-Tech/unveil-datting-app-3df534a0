@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getDisplayPhotoUrl } from "@/lib/photos";
 import { markSelfieVerified } from "@/lib/verification.functions";
+import { recordLocationVerification } from "@/lib/location-trust.functions";
+import { LocationMismatchModal } from "@/components/LocationMismatchModal";
 import { toast } from "sonner";
 import {
   Camera, Loader2, Upload, ArrowRight, ArrowLeft, Check,
