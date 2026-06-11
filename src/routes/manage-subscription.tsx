@@ -120,6 +120,12 @@ function Manage() {
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Change plan
               </Link>
+              <Link
+                to="/subscription"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-2 text-xs hover:bg-surface-2"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Entitlements
+              </Link>
               <RestorePurchasesButton />
             </div>
           </div>
