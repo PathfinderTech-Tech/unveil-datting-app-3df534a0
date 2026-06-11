@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import "@/styles/unveil-onboarding.css";
+import { LocationPicker } from "@/components/LocationPicker";
+import { COUNTRY_BY_CODE, codeForName } from "@/lib/countries";
 
 
 
@@ -128,6 +130,7 @@ function Onboarding() {
   const [age, setAge] = useState(28);
   const [gender, setGender] = useState("");
   const [country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateRegion, setStateRegion] = useState("");
   const [city, setCity] = useState("");
   const [interestedIn, setInterestedIn] = useState("");
@@ -179,7 +182,7 @@ function Onboarding() {
     (async () => {
       const [{ data: prof }, { data: onb }] = await Promise.all([
         supabase.from("profiles")
-          .select("first_name, age, gender, country, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+          .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
           .eq("id", user.id).maybeSingle(),
         supabase.from("onboarding_answers")
           .select("answers").eq("user_id", user.id).maybeSingle(),
@@ -194,6 +197,9 @@ function Onboarding() {
       if (typeof prof?.age === "number") setAge(prof.age);
       if (prof?.gender) setGender(prof.gender);
       if (prof?.country) setCountry(prof.country);
+      // Backfill country_code from the legacy free-text country if missing
+      const initialCode = (prof as { country_code?: string | null } | null)?.country_code ?? codeForName(prof?.country);
+      if (initialCode) setCountryCode(initialCode);
       if (prof?.state_region) setStateRegion(prof.state_region);
       if (prof?.city) setCity(prof.city);
       if (prof?.interested_in) setInterestedIn(prof.interested_in);
