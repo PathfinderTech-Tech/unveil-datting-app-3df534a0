@@ -146,10 +146,10 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // Larger centered watermark on the landing page; subtler corner placement elsewhere.
+  // Watermark is extremely subtle — center nearly invisible, edges barely perceptible.
   const isLanding = pathname === "/";
   const variant: "center" | "corner" | "edge" = isLanding ? "center" : "corner";
-  const opacity = isLanding ? 0.05 : 0.03;
+  const opacity = isLanding ? 0.008 : 0.005;
 
   return (
     <QueryClientProvider client={queryClient}>

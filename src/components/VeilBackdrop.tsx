@@ -41,14 +41,14 @@ export function VeilBackdrop({
       aria-hidden
       className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className}`}
     >
-      {/* Soft radial veil pattern — brand-colored halo, never interferes with text */}
+      {/* Soft radial veil pattern — brand-colored halo, heavily subdued */}
       <div
         className="absolute inset-0"
         style={{
           background:
             variant === "center"
-              ? "radial-gradient(ellipse at 50% 45%, color-mix(in oklch, var(--logo-purple) 14%, transparent) 0%, color-mix(in oklch, var(--logo-magenta) 8%, transparent) 35%, transparent 70%)"
-              : "radial-gradient(ellipse at 80% 60%, color-mix(in oklch, var(--logo-violet) 10%, transparent) 0%, color-mix(in oklch, var(--logo-gold) 6%, transparent) 40%, transparent 75%)",
+              ? "radial-gradient(ellipse at 50% 45%, color-mix(in oklch, var(--logo-purple) 5%, transparent) 0%, color-mix(in oklch, var(--logo-magenta) 3%, transparent) 35%, transparent 70%)"
+              : "radial-gradient(ellipse at 80% 60%, color-mix(in oklch, var(--logo-violet) 4%, transparent) 0%, color-mix(in oklch, var(--logo-gold) 2%, transparent) 40%, transparent 75%)",
         }}
       />
       {/* The watermark itself */}
@@ -67,11 +67,11 @@ export function VeilBackdrop({
           transform: (layout as any).transform,
           opacity,
           filter:
-            "blur(2px) drop-shadow(0 0 80px color-mix(in oklch, var(--logo-purple) 40%, transparent))",
+            "blur(3px) drop-shadow(0 0 48px color-mix(in oklch, var(--logo-purple) 14%, transparent))",
           maskImage:
-            "radial-gradient(circle at center, black 55%, transparent 85%)",
+            "radial-gradient(circle at center, transparent 40%, black 72%, transparent 92%)",
           WebkitMaskImage:
-            "radial-gradient(circle at center, black 55%, transparent 85%)",
+            "radial-gradient(circle at center, transparent 40%, black 72%, transparent 92%)",
         }}
       />
     </div>
