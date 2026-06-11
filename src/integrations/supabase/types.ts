@@ -1030,6 +1030,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_restricted: boolean
+          account_restricted_at: string | null
+          account_restricted_reason: string | null
           age: number | null
           archetype: string | null
           avatar_generated_at: string | null
@@ -1087,8 +1090,12 @@ export type Database = {
           subscription_tier:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_claimed_country_code: string | null
+          travel_expires_at: string | null
           travel_started_at: string | null
           travel_status: string
+          travel_verified_at: string | null
+          travel_warning_count: number
           trust_level: string
           trust_score: number | null
           updated_at: string
@@ -1096,6 +1103,9 @@ export type Database = {
           verified_country_code: string | null
         }
         Insert: {
+          account_restricted?: boolean
+          account_restricted_at?: string | null
+          account_restricted_reason?: string | null
           age?: number | null
           archetype?: string | null
           avatar_generated_at?: string | null
@@ -1153,8 +1163,12 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_claimed_country_code?: string | null
+          travel_expires_at?: string | null
           travel_started_at?: string | null
           travel_status?: string
+          travel_verified_at?: string | null
+          travel_warning_count?: number
           trust_level?: string
           trust_score?: number | null
           updated_at?: string
@@ -1162,6 +1176,9 @@ export type Database = {
           verified_country_code?: string | null
         }
         Update: {
+          account_restricted?: boolean
+          account_restricted_at?: string | null
+          account_restricted_reason?: string | null
           age?: number | null
           archetype?: string | null
           avatar_generated_at?: string | null
@@ -1219,8 +1236,12 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier"]
             | null
+          travel_claimed_country_code?: string | null
+          travel_expires_at?: string | null
           travel_started_at?: string | null
           travel_status?: string
+          travel_verified_at?: string | null
+          travel_warning_count?: number
           trust_level?: string
           trust_score?: number | null
           updated_at?: string
@@ -2106,6 +2127,17 @@ export type Database = {
           _travelling: boolean
         }
         Returns: undefined
+      }
+      start_verified_travel: {
+        Args: {
+          _claimed_country_code: string
+          _claimed_country_name: string
+          _device_country_code: string
+          _device_timezone: string
+          _gps_country_code: string
+          _ip_country_code: string
+        }
+        Returns: Json
       }
       user_has_unlimited_messaging: { Args: { _uid: string }; Returns: boolean }
     }
