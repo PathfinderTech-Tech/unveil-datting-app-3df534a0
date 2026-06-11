@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DiscoverFilters } from "@/lib/matching-api";
 import { Filter, X } from "lucide-react";
+import { COUNTRIES, CONTINENTS, REGIONS, COUNTRY_BY_CODE } from "@/lib/countries";
 
 const LANGS = [
   ["en","English"],["es","Español"],["fr","Français"],["pt","Português"],["de","Deutsch"],
@@ -12,7 +13,10 @@ const INTENTS = ["friendship","dating","serious","exploring","open"] as const;
 
 export type FilterState = Required<Pick<DiscoverFilters, "nearbyOnly">> & {
   radiusKm: number;
-  country: string;
+  country: string;       // ISO alpha-2, "" = any
+  region: string;        // free-text, "" = any
+  continent: string;     // ISO continent, "" = any
+  internationalOnly: boolean;
   language: string;
   intent: string;
   ageMin: number;
@@ -23,6 +27,9 @@ export const DEFAULT_FILTERS: FilterState = {
   nearbyOnly: false,
   radiusKm: 80,
   country: "",
+  region: "",
+  continent: "",
+  internationalOnly: false,
   language: "",
   intent: "",
   ageMin: 18,
@@ -39,16 +46,20 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
       const { data } = await supabase.from("profiles")
-        .select("discovery_radius_km, location_enabled, country")
+        .select("discovery_radius_km, location_enabled, country_code")
         .eq("id", u.user.id).maybeSingle();
-      if (data?.discovery_radius_km) setDefaultRadius(data.discovery_radius_km);
+      if (data?.discovery_radius_km && data.discovery_radius_km > 0) setDefaultRadius(data.discovery_radius_km);
       setLocOn(!!data?.location_enabled);
     })();
   }, []);
 
   const active =
-    value.nearbyOnly || value.country || value.language || value.intent ||
+    value.nearbyOnly || value.country || value.region || value.continent ||
+    value.internationalOnly || value.language || value.intent ||
     value.ageMin !== 18 || value.ageMax !== 70;
+
+  const countryRegions = value.country ? REGIONS[value.country] ?? [] : [];
+  const hasCountryRegions = countryRegions.length > 0;
 
   return (
     <div className="mb-6">
@@ -63,6 +74,14 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
         >
           📍 Nearby
         </button>
+        <button
+          onClick={() => onChange({ ...value, internationalOnly: !value.internationalOnly })}
+          className={`rounded-full border px-3 py-1.5 text-xs transition ${
+            value.internationalOnly ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-surface"
+          }`}
+        >
+          🌍 International only
+        </button>
         <button onClick={() => setOpen((o) => !o)} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:bg-surface">
           <Filter className="h-3 w-3" /> Filters {active && <span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />}
         </button>
@@ -75,29 +94,55 @@ export function MatchFilters({ value, onChange }: { value: FilterState; onChange
 
       {open && (
         <div className="mt-3 grid gap-4 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Radius (when Nearby)">
+          <Field label="Distance (when Nearby)">
             <select
               value={value.radiusKm}
               onChange={(e) => onChange({ ...value, radiusKm: Number(e.target.value) })}
               className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
             >
-              <option value={8}>5 miles</option>
-              <option value={16}>10 miles</option>
-              <option value={40}>25 miles</option>
-              <option value={80}>50 miles</option>
-              <option value={160}>100 miles</option>
-              <option value={0}>Global</option>
+              <option value={10}>10 km</option>
+              <option value={25}>25 km</option>
+              <option value={50}>50 km</option>
+              <option value={100}>100 km</option>
+              <option value={250}>250 km</option>
+              <option value={0}>Anywhere in the world</option>
             </select>
           </Field>
 
-          <Field label="Country (ISO, e.g. US, GB)">
-            <input
+          <Field label="Country">
+            <select
               value={value.country}
-              onChange={(e) => onChange({ ...value, country: e.target.value.toUpperCase().slice(0, 2) })}
-              className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm uppercase"
-              placeholder="Any"
-            />
+              onChange={(e) => onChange({ ...value, country: e.target.value, region: "" })}
+              className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">Any</option>
+              {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+            </select>
           </Field>
+
+          <Field label="Continent">
+            <select
+              value={value.continent}
+              onChange={(e) => onChange({ ...value, continent: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">Any</option>
+              {CONTINENTS.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+            </select>
+          </Field>
+
+          {hasCountryRegions && (
+            <Field label={`Region in ${COUNTRY_BY_CODE[value.country]?.name ?? ""}`}>
+              <select
+                value={value.region}
+                onChange={(e) => onChange({ ...value, region: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+              >
+                <option value="">Any</option>
+                {countryRegions.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </Field>
+          )}
 
           <Field label="Language">
             <select value={value.language} onChange={(e) => onChange({ ...value, language: e.target.value })}
