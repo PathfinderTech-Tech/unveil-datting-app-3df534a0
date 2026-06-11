@@ -3,7 +3,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createStripeClient } from "@/lib/stripe.server";
 
-export const Route = createFileRoute("/api/public/_create-quarterly-live-price")({
+export const Route = createFileRoute("/api/public/tmp-create-q-price")({
   server: {
     handlers: {
       POST: async () => {
