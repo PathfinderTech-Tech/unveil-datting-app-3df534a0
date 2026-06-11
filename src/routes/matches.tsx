@@ -896,3 +896,9 @@ function HiddenMatchesView() {
   );
 }
 
+
+import { LocationTrustBadge, useMyLocationTrust } from "@/components/LocationTrustBadge";
+function MatchesTrustBadge() {
+  const { profile } = useMyLocationTrust();
+  return <LocationTrustBadge profile={profile} size="sm" />;
+}
