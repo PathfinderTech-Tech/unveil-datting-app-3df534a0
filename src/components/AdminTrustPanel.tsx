@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, BadgeCheck, AlertTriangle, Plane } from "lucide-react";
 
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
+
 type Row = {
   id: string;
   first_name: string | null;
@@ -9,6 +11,9 @@ type Row = {
   location_risk_score: number | null;
   location_mismatch_count: number | null;
   travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
   home_country_code: string | null;
   current_country_code: string | null;
   verified_country_code: string | null;
@@ -41,7 +46,7 @@ export function AdminTrustPanel() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, trust_level, location_risk_score, location_mismatch_count, travel_status, home_country_code, current_country_code, verified_country_code, verified")
+        .select("id, first_name, trust_level, location_risk_score, location_mismatch_count, travel_status, travel_expires_at, travel_warning_count, account_restricted, home_country_code, current_country_code, verified_country_code, verified")
         .order("location_risk_score", { ascending: false })
         .limit(200);
       setRows((data ?? []) as Row[]);
@@ -87,7 +92,10 @@ export function AdminTrustPanel() {
                     </div>
                   </td>
                   <td>
-                    <TrustPill level={r.trust_level} />
+                    <div className="flex items-center gap-1.5">
+                      <TrustPill level={r.trust_level} />
+                      <LocationTrustBadge profile={r} size="xs" showLabel={false} />
+                    </div>
                   </td>
                   <td>
                     <RiskPill score={r.location_risk_score ?? 0} />
