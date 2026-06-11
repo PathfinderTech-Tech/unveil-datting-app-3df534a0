@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, MapPin, ShieldCheck, MessageCircle, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { ChemistryBadge } from "@/components/chemistry/ChemistryBadge";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 
@@ -19,6 +20,10 @@ type PassportProfile = {
   photo_url: string | null;
   discovery_mode: "avatar" | "photo" | null;
   communication_style: Record<string, unknown> | null;
+  travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
 };
 
 type Blueprint = {
@@ -44,7 +49,7 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
     let alive = true;
     supabase
       .from("profiles")
-      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, profile_photo_url, discovery_mode, communication_style")
+      .select("first_name, age, city, country, archetype, bio, verified, beta_member, readiness_score, avatar_url, photo_url, profile_photo_url, discovery_mode, communication_style, travel_status, travel_expires_at, travel_warning_count, account_restricted")
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
@@ -99,6 +104,8 @@ export function PassportIdentityCard({ userId, onShare }: { userId: string; onSh
               {p?.age ? <span className="text-foreground/60">, {p.age}</span> : null}
             </h2>
             {p?.verified && <VerifiedBadge size="md" />}
+            <LocationTrustBadge profile={p as any} size="sm" />
+
           </div>
           {(p?.city || p?.country) && (
             <div className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">

@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { TrustLevelBadge } from "@/components/TrustLevelBadge";
+import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { Plane } from "lucide-react";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
 import { SignedImage } from "@/components/SignedImage";
@@ -44,6 +45,9 @@ type ProfileRow = {
   current_country_code: string | null;
   current_city: string | null;
   travel_status: string | null;
+  travel_expires_at: string | null;
+  travel_warning_count: number | null;
+  account_restricted: boolean | null;
   verified_country_code: string | null;
   trust_level: "unverified" | "verified" | "trusted" | "identity_verified" | null;
   relationship_intent: string | null;
@@ -188,6 +192,8 @@ function ProfilePage() {
                 </h1>
                 {profile?.verified && <VerifiedBadge />}
                 {profile?.trust_level && <TrustLevelBadge level={profile.trust_level} />}
+                <LocationTrustBadge profile={profile as any} />
+
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
                 {profile?.travel_status === "travelling" ? (
