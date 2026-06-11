@@ -199,7 +199,7 @@ const WEB_CATALOG: PurchaseOffer[] = [
   { productId: "pass_24h", displayPrice: "$1.99", title: "24-Hour Pass", description: "Unlimited messaging for 24 hours" },
   { productId: "pass_2w", displayPrice: "$9.99", title: "2-Week Pass", description: "Unlimited messaging for 14 days" },
   { productId: "premium_monthly", displayPrice: "$15.99", title: "Premium Monthly", description: "Auto-renews monthly" },
-  { productId: "premium_quarterly", displayPrice: "$49.99", title: "Premium 3 Months", description: "Three months of Premium access" },
+  { productId: "premium_quarterly", displayPrice: "$39.99", title: "Premium 3 Months", description: "Save 17% vs monthly" },
   { productId: "premium_annual", displayPrice: "$149.99", title: "Premium Annual", description: "Auto-renews yearly" },
   { productId: "verification_badge", displayPrice: "$9.99", title: "Verification Badge", description: "One-time identity verification fee" },
 ];
