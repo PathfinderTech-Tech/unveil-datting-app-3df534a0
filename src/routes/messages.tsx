@@ -369,3 +369,8 @@ function formatTime(iso: string): string {
   if (diffDays < 7) return d.toLocaleDateString(undefined, { weekday: "short" });
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
+
+function MyTrustBadge() {
+  const { profile } = useMyLocationTrust();
+  return <LocationTrustBadge profile={profile} size="sm" />;
+}
