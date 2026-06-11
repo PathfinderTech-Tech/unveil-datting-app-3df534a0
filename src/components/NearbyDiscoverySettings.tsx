@@ -34,8 +34,10 @@ export function NearbyDiscoverySettings() {
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [privacy, setPrivacy] = useState<Privacy>("distance");
-  const [radius, setRadius] = useState(80);
+  const [radius, setRadius] = useState(50);
   const [hasCoords, setHasCoords] = useState(false);
+  const [openInternational, setOpenInternational] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -44,13 +46,16 @@ export function NearbyDiscoverySettings() {
       if (!u.user) { setLoading(false); return; }
       const { data } = await supabase
         .from("profiles")
-        .select("location_enabled, location_privacy, discovery_radius_km, lat_approx")
+        .select("location_enabled, location_privacy, discovery_radius_km, lat_approx, open_to_international, country_code")
         .eq("id", u.user.id).maybeSingle();
       if (!alive) return;
       setEnabled(!!data?.location_enabled);
       setPrivacy((data?.location_privacy as Privacy) || "distance");
-      setRadius(data?.discovery_radius_km ?? 80);
+      setRadius(data?.discovery_radius_km ?? 50);
       setHasCoords(data?.lat_approx != null);
+      const d = data as { open_to_international?: boolean | null; country_code?: string | null } | null;
+      setOpenInternational(!!d?.open_to_international);
+      setCountryCode(d?.country_code ?? null);
       setLoading(false);
     })();
     return () => { alive = false; };
