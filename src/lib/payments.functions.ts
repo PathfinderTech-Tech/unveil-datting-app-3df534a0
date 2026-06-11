@@ -81,7 +81,9 @@ const PRICE_META: Record<CanonicalPriceId, PriceCatalogItem> = {
     kind: "premium_subscription",
     durationMonths: 3,
     lookupKey: { sandbox: "premium_quarterly", live: "premium_quarterly" },
-    priceId: { live: "price_1Th9fZHf3gYicX761AMjRVsb" },
+    // Live $39.99 / 3 months — created 2026-06-11. Legacy $49.99 price
+    // (price_1Th9fZHf3gYicX761AMjRVsb) preserved in Stripe, no longer routed.
+    priceId: { live: "price_1ThAYGHf3gYicX76ASb24ENN" },
     productId: { live: "prod_UdQ7puaj1mqoYZ", sandbox: "prod_UdKLATcdzAm3Uq" },
   },
   premium_annual: {
