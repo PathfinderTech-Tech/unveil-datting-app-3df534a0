@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import "@/styles/unveil-onboarding.css";
+import { LocationPicker } from "@/components/LocationPicker";
+import { COUNTRY_BY_CODE, codeForName } from "@/lib/countries";
 
 
 
@@ -22,15 +24,7 @@ export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-const COUNTRIES = [
-  "United States","United Kingdom","Canada","Australia","Ireland","New Zealand",
-  "Germany","France","Spain","Italy","Portugal","Netherlands","Belgium","Switzerland","Austria","Sweden","Norway","Denmark","Finland","Poland",
-  "Brazil","Mexico","Argentina","Chile","Colombia",
-  "Japan","South Korea","Singapore","Hong Kong","India","Indonesia","Philippines","Thailand","Vietnam",
-  "UAE","Saudi Arabia","Israel","Turkey",
-  "South Africa","Nigeria","Kenya","Egypt","Morocco",
-  "Other",
-];
+// Country list now lives in src/lib/countries.ts and is rendered by <LocationPicker />.
 
 const GENDERS = ["Woman", "Man", "Non-binary", "Prefer not to say"];
 const INTERESTED_IN = ["Women", "Men", "Everyone"];
@@ -128,6 +122,7 @@ function Onboarding() {
   const [age, setAge] = useState(28);
   const [gender, setGender] = useState("");
   const [country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateRegion, setStateRegion] = useState("");
   const [city, setCity] = useState("");
   const [interestedIn, setInterestedIn] = useState("");
@@ -179,7 +174,7 @@ function Onboarding() {
     (async () => {
       const [{ data: prof }, { data: onb }] = await Promise.all([
         supabase.from("profiles")
-          .select("first_name, age, gender, country, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+          .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
           .eq("id", user.id).maybeSingle(),
         supabase.from("onboarding_answers")
           .select("answers").eq("user_id", user.id).maybeSingle(),
@@ -194,6 +189,9 @@ function Onboarding() {
       if (typeof prof?.age === "number") setAge(prof.age);
       if (prof?.gender) setGender(prof.gender);
       if (prof?.country) setCountry(prof.country);
+      // Backfill country_code from the legacy free-text country if missing
+      const initialCode = (prof as { country_code?: string | null } | null)?.country_code ?? codeForName(prof?.country);
+      if (initialCode) setCountryCode(initialCode);
       if (prof?.state_region) setStateRegion(prof.state_region);
       if (prof?.city) setCity(prof.city);
       if (prof?.interested_in) setInterestedIn(prof.interested_in);
@@ -285,6 +283,8 @@ function Onboarding() {
     if (step === 2) {
       await persist({}, {
         first_name: name, age, gender, country,
+        country_code: countryCode,
+        continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
         state_region: stateRegion || null, city: city || null,
         interested_in: interestedIn,
         intention: intent, relationship_intent: intent,
@@ -314,6 +314,8 @@ function Onboarding() {
         const summary = allDiscoveryAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
         await supabase.from("profiles").update({
           first_name: name, age, gender, country,
+          country_code: countryCode,
+          continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
           state_region: stateRegion || null, city: city || null,
           interested_in: interestedIn,
           intention: intent, relationship_intent: intent,
@@ -489,13 +491,18 @@ function Onboarding() {
                   {INTERESTED_IN.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
-              <Field label="Country *">
-                <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputCls}>
-                  <option value="">Select…</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label="City"><input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Optional" className={inputCls} /></Field>
+              <div className="md:col-span-2">
+                <LocationPicker
+                  required
+                  value={{ country_code: countryCode, country: country || null, state_region: stateRegion || null, city: city || null }}
+                  onChange={(v) => {
+                    setCountryCode(v.country_code);
+                    setCountry(v.country ?? "");
+                    setStateRegion(v.state_region ?? "");
+                    setCity(v.city ?? "");
+                  }}
+                />
+              </div>
               <div className="md:col-span-2">
                 <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
               </div>

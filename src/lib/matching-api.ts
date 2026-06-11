@@ -54,7 +54,12 @@ export type DiscoverFilters = {
   limit?: number;
   nearbyOnly?: boolean;
   radiusKm?: number | null;
+  /** ISO alpha-2 country code, e.g. "US", "CI". Client-side filter. */
   country?: string | null;
+  /** ISO continent code, e.g. "AF". Client-side filter. */
+  continent?: string | null;
+  /** Show only profiles whose country differs from mine. */
+  internationalOnly?: boolean;
   language?: string | null;
   intent?: string | null;
   ageMin?: number | null;
@@ -160,11 +165,15 @@ async function loadMe(): Promise<Me> {
 export async function loadRealMatches(filters: DiscoverFilters | number = 40): Promise<RealMatch[]> {
   const f: DiscoverFilters = typeof filters === "number" ? { limit: filters } : filters;
   const me = await loadMe();
+  // Country filter is sent to the RPC by display name (the RPC expects text);
+  // resolve the ISO code → display name via the countries module.
+  const { COUNTRY_BY_CODE, codeForName } = await import("@/lib/countries");
+  const countryName = f.country ? COUNTRY_BY_CODE[f.country]?.name ?? null : null;
   const { data, error } = await supabase.rpc("discover_profiles", {
     _limit: f.limit ?? 40,
     _radius_km: f.radiusKm ?? null,
     _nearby_only: !!f.nearbyOnly,
-    _country: f.country ?? null,
+    _country: countryName,
     _language: f.language ?? null,
     _intent: f.intent ?? null,
     _age_min: f.ageMin ?? null,
@@ -174,7 +183,16 @@ export async function loadRealMatches(filters: DiscoverFilters | number = 40): P
     console.warn("[unveil] discover_profiles failed", error);
     return [];
   }
-  const rows = (data ?? []) as DiscoverRow[];
+  let rows = (data ?? []) as DiscoverRow[];
+  if (f.continent) {
+    rows = rows.filter((r) => {
+      const code = codeForName(r.country);
+      return code ? COUNTRY_BY_CODE[code]?.continent === f.continent : false;
+    });
+  }
+  if (f.internationalOnly && me.country) {
+    rows = rows.filter((r) => r.country && r.country.toLowerCase() !== me.country!.toLowerCase());
+  }
   // Prefer the real selfie (profile_photo_url, private bucket) over the
   // public photo_url which may hold a generated initial-style avatar.
   const ids = rows.map((r) => r.id).filter(Boolean);

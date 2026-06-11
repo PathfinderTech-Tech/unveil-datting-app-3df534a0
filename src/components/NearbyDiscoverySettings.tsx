@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, ShieldCheck, Loader2 } from "lucide-react";
+import { MapPin, ShieldCheck, Loader2, Globe } from "lucide-react";
+import { COUNTRY_BY_CODE, CONTINENTS } from "@/lib/countries";
 
 type Privacy = "hidden" | "country" | "city" | "distance";
 
+// Radius sentinels match the SQL convention (profiles.discovery_radius_km):
+//   > 0  literal km
+//    0   anywhere in the world
+//   -1   anywhere in my country
+//   -2   anywhere in my continent
 const RADII = [
-  { km: 8,   label: "5 miles" },
-  { km: 16,  label: "10 miles" },
-  { km: 40,  label: "25 miles" },
-  { km: 80,  label: "50 miles" },
-  { km: 160, label: "100 miles" },
-  { km: 0,   label: "Global" },
+  { km: 10,  label: "10 km" },
+  { km: 25,  label: "25 km" },
+  { km: 50,  label: "50 km" },
+  { km: 100, label: "100 km" },
+  { km: 250, label: "250 km" },
+  { km: -1,  label: "Anywhere in my country" },
+  { km: -2,  label: "Anywhere in my continent" },
+  { km: 0,   label: "Anywhere in the world" },
 ];
 
 const PRIVACY: { v: Privacy; label: string; hint: string }[] = [
@@ -26,8 +34,10 @@ export function NearbyDiscoverySettings() {
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [privacy, setPrivacy] = useState<Privacy>("distance");
-  const [radius, setRadius] = useState(80);
+  const [radius, setRadius] = useState(50);
   const [hasCoords, setHasCoords] = useState(false);
+  const [openInternational, setOpenInternational] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -36,13 +46,16 @@ export function NearbyDiscoverySettings() {
       if (!u.user) { setLoading(false); return; }
       const { data } = await supabase
         .from("profiles")
-        .select("location_enabled, location_privacy, discovery_radius_km, lat_approx")
+        .select("location_enabled, location_privacy, discovery_radius_km, lat_approx, open_to_international, country_code")
         .eq("id", u.user.id).maybeSingle();
       if (!alive) return;
       setEnabled(!!data?.location_enabled);
       setPrivacy((data?.location_privacy as Privacy) || "distance");
-      setRadius(data?.discovery_radius_km ?? 80);
+      setRadius(data?.discovery_radius_km ?? 50);
       setHasCoords(data?.lat_approx != null);
+      const d = data as { open_to_international?: boolean | null; country_code?: string | null } | null;
+      setOpenInternational(!!d?.open_to_international);
+      setCountryCode(d?.country_code ?? null);
       setLoading(false);
     })();
     return () => { alive = false; };
@@ -135,19 +148,26 @@ export function NearbyDiscoverySettings() {
           </div>
 
           <div className="mt-6">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Discovery radius</div>
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Matching radius</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {RADII.map((r) => (
-                <button
-                  key={r.km}
-                  onClick={async () => { setRadius(r.km); await persist({ discovery_radius_km: r.km }); }}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                    radius === r.km ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-surface"
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
+              {RADII.map((r) => {
+                const label =
+                  r.km === -1 && countryCode ? `Anywhere in ${COUNTRY_BY_CODE[countryCode]?.name ?? "my country"}`
+                  : r.km === -2 && countryCode
+                    ? `Anywhere in ${CONTINENTS.find((c) => c.code === COUNTRY_BY_CODE[countryCode]?.continent)?.name ?? "my continent"}`
+                  : r.label;
+                return (
+                  <button
+                    key={r.km}
+                    onClick={async () => { setRadius(r.km); await persist({ discovery_radius_km: r.km }); }}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                      radius === r.km ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-surface"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
             {!hasCoords && (
               <p className="mt-3 text-[11px] text-amber-500">
@@ -158,6 +178,29 @@ export function NearbyDiscoverySettings() {
               <ShieldCheck className="h-3 w-3" /> Exact addresses and live GPS are never shown to anyone.
             </p>
           </div>
+
+          <div className="mt-6">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-background p-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-primary"
+                checked={openInternational}
+                onChange={async (e) => {
+                  setOpenInternational(e.target.checked);
+                  await persist({ open_to_international: e.target.checked });
+                }}
+              />
+              <span>
+                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                  <Globe className="h-3.5 w-3.5" /> Open to international matches
+                </span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  Allow matches outside your country. Distance becomes informational only.
+                </span>
+              </span>
+            </label>
+          </div>
+
         </>
       )}
     </div>

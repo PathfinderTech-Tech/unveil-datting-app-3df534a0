@@ -1,81 +1,85 @@
-# Launch-Critical UI Fixes
+# Plan — Global Location + Location Trust Verification
 
-Scope is **UI/presentation only** — no changes to matching logic, verification logic, DB schema, or onboarding. All four blockers + Slow Reveal polish addressed together.
-
----
-
-## 1. Avatar rendering on every surface
-
-**Problem:** Match cards, Discover cards, Messages list and Slow Reveal thread sometimes show gradient/blank circles even when the user has an avatar or selfie.
-
-**Fix:** Standardize on `<ProfileAvatar />` (already exists in `src/components/ProfileAvatar.tsx`) which signs `profile-photos` URLs and falls back to a deterministic gradient + initial only when there is truly no image. Audit each surface and replace ad-hoc `<Avatar seed=…>` / `<img src=avatar_url>` usages.
-
-**Render priority** (already implemented in `resolveProfileImage`):
-1. `discoveryMode === "photo"` → `photo_url` (selfie)
-2. `avatar_url` (generated avatar)
-3. `photo_url`
-4. gradient + initial SVG fallback
-
-**Files to update:**
-- `src/routes/matches.tsx` — match cards
-- `src/routes/discover.tsx` — discover cards (verify)
-- `src/routes/messages.tsx` — thread list
-- `src/routes/chat.tsx` — header + slow-reveal thread peer avatar
-- `src/components/HiddenMatchCard.tsx` (if it renders peer image)
-
-Each must pass `userId`, `name`, `discoveryMode`, `avatar_url`, `photo_url` — never an empty string.
+This is large and touches onboarding, profiles, discovery, and verification. I want to split it into two reviewable stages so you can approve / adjust before I move on, exactly like the previous master update.
 
 ---
 
-## 2. Messages unread badge + per-thread indicator
+## Stage A — Global Location System (Step 1)
 
-**Problem:** No unread count on bottom-nav Messages icon, no per-thread dot.
+### Database (one migration)
+Add to `profiles`:
+- `country_code TEXT` — ISO-3166-1 alpha-2 (e.g. `CI`, `US`, `FR`)
+- `country_name TEXT` — display name
+- `region TEXT` — optional state/province/region
+- `city_name TEXT` — free-text + standardized when possible
+- `match_radius_km INTEGER` — nullable; sentinel values `-1` country, `-2` continent, `0` global
+- `match_continent TEXT` — only used when radius sentinel = `-2` (e.g. `AF`)
+- `open_to_international BOOLEAN DEFAULT false`
 
-**Fix:**
-- Extend existing `src/hooks/use-unread.ts` to expose `{ total, perConversation }` derived from `messages` where `recipient_id = me AND read_at IS NULL`, with a Realtime subscription on `messages` for live updates.
-- Bottom nav (`src/components/MobileBottomNav.tsx` + `UnveilNav.tsx`): show count badge on Messages tab.
-- `src/routes/messages.tsx`: small pulse dot + bold thread row when `perConversation[id] > 0`.
-- `src/routes/chat.tsx`: on open, mark messages read (existing RPC) — confirm count clears.
+Backfill: copy existing `city` → `city_name`, derive `country_code` from existing `country` text where unambiguous (ISO lookup table), leave others null for user to confirm. Existing `discovery_radius_km` preserved → mirrored into `match_radius_km` when set.
 
-No schema changes; `messages.read_at` already exists.
+`profiles_guard_update` trigger: allow user edits to all new fields.
 
----
+`discover_profiles` RPC: extend filters to honor `open_to_international`, country sentinel, and continent sentinel without breaking current km-based filtering.
 
-## 3. Passport share card actually shares the card
+### Data
+- New static module `src/lib/countries.ts` — full ISO list (≈250 entries) with `code, name, name_fr, continent, has_states`.
+- `src/lib/regions.ts` — region lists only for countries where it's meaningful (US, CA, AU, IN, BR, NG, ZA, MX, DE, GB, FR départements, CI districts). Other countries → region field hidden.
 
-**Problem:** Facebook/email shares show only UNVEIL logo, not the user's Passport.
+### UI
+- New `<LocationPicker />` component: searchable country combobox (cmdk), city text input with optional Nominatim/OSM autocomplete (graceful fallback to free text — no extra API key required, public endpoint), conditional region dropdown.
+- New `<MatchRadiusPicker />`: 10/25/50/100/250 km, "Anywhere in my country", "Anywhere in [continent]", "Anywhere in the world", + "Open to international matches" toggle.
+- Wire into `onboarding.tsx` (replace existing location step) and `settings.tsx` + `NearbyDiscoverySettings.tsx`.
+- Auto-detect country via browser `Intl.DateTimeFormat().resolvedOptions().timeZone` → country map fallback; if GPS already granted, reverse-geocode via Nominatim.
+- Discovery filters (`MatchFilters.tsx`): add Country / Region / "International only" filters.
 
-**Fix in `src/components/ShareablePassportCard.tsx`:**
-- Add **PNG export** alongside SVG so social previews work (render SVG → `<canvas>` → `toBlob('image/png')`, save to `profile-photos/share/<uid>.png` via existing bucket, return signed URL).
-- Add an `/api/public/passport/:userId` server route that returns an HTML page with OG meta tags (`og:image`, `og:title`, `og:description`) pointing at the rendered PNG, so Facebook scrape returns the card not the app logo.
-- Update Share button to use that public URL as the share link.
-- Email share: `mailto:` body includes the public passport URL.
-
----
-
-## 4. Slow Reveal conversational polish (UI only)
-
-**Files:** `src/routes/chat.tsx` + new `src/components/RevealAnswerCard.tsx`, `src/components/RevealStageBadge.tsx`.
-
-- Replace plain Q/A rows with answer cards: prompt in serif italic ("The thing I value most…"), answer in card with soft border + gradient edge.
-- Empty state copy: "Waiting for their response · They'll see your answer once you share."
-- Stage badge above thread:
-  - Day 1 → "First Discovery"
-  - Day 2 → "Building Trust"
-  - Day 3-4 → "Meaningful Conversation"
-  - Day 5+ → "Reveal Approaching"
-- Day X of 7 progress (reuse existing `SlowRevealTimeline`).
-- Reward toast after answer submit: rotating copy ("Great answer." / "You've shared something meaningful." / "Trust is growing.").
-- Verification gate copy update (`src/components/VerificationGate.tsx`): "Trust comes first. Only verified members can continue conversations. Verification helps protect meaningful connections."
-- Animations: Tailwind `animate-in fade-in slide-in-from-bottom-2` only. No flashy motion.
+### i18n
+- All new strings added to `en.json` and `fr.json`; `es.json`/`pt.json` keys present with English fallback so they're ready when translated.
 
 ---
 
-## Out of scope
-- No DB migrations.
-- No changes to like/match/verification RPCs.
-- No new routes besides the public OG endpoint for Passport sharing.
-- No redesign of nav, onboarding, or matching screens.
+## Stage B — Location Trust Verification (Step 2)
 
-## Verification
-After implementation: load `/matches`, `/messages`, `/chat?...`, `/passport` in preview to confirm avatars render and unread badge updates. Use Facebook's [Sharing Debugger](https://developers.facebook.com/tools/debug/) URL pattern (note in summary — user must test on live).
+### Database (second migration, after Stage A approved)
+New table `location_verifications`:
+- `user_id`, `created_at`
+- `profile_country_code`, `device_country_code`, `ip_country_code`, `gps_country_code`
+- `match_result` ENUM: `match | mismatch | partial`
+- `risk_level` ENUM: `low | medium | high`
+- `vpn_suspected BOOLEAN`
+- `selfie_path TEXT` (reuse `verification-docs` bucket)
+- `user_confirmed_traveling BOOLEAN DEFAULT false`
+
+Add to `profiles`:
+- `location_risk_level TEXT DEFAULT 'low'`
+- `location_mismatch_count INTEGER DEFAULT 0`
+
+### Server
+- `src/lib/location-trust.functions.ts` — server fn that takes selfie + signals, calls IP geo (Cloudflare `CF-IPCountry` header — free, no key), computes risk, writes row, returns `{ result, risk, message }`.
+- Hook into existing selfie verification flow in `src/routes/avatar.tsx` (current trust check). Existing `markSelfieVerified` stays; new fn runs alongside and records the trust signal.
+- Risk rules exactly as spec: low = match, medium = single mismatch, high = repeated mismatches in short window OR VPN flag.
+
+### UI
+- New `<LocationMismatchModal />` shown after selfie when result = `mismatch`:
+  - Copy: "We detected that your current location differs from the country listed on your profile. If you are traveling, you may continue and update your location preferences."
+  - 3 buttons: **I'm traveling** (sets `user_confirmed_traveling=true`, proceeds), **Update my country** (opens LocationPicker), **Retry verification**.
+- No automatic bans. High-risk accounts get a soft flag surfaced to admin review only (no UX change beyond the modal).
+
+---
+
+## Out of scope / explicit non-goals
+- No paid government ID verification (kept retired per Stage 4 of previous update).
+- No changes to messaging quota, premium, or Stripe.
+- No new third-party paid APIs. Country detection uses browser Intl + Cloudflare IP header; city autocomplete uses public Nominatim with throttle + free-text fallback.
+
+---
+
+## Order of execution
+1. Stage A migration (you approve SQL).
+2. Stage A code (countries module, LocationPicker, radius picker, onboarding + settings + discovery wiring, i18n).
+3. Stop, show preview, wait for your approval.
+4. Stage B migration.
+5. Stage B server fn + modal + avatar wiring.
+6. Stop, show preview.
+
+Confirm and I'll start with the Stage A migration.
