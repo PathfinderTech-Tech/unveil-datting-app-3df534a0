@@ -252,10 +252,10 @@ function ProfilePage() {
           </div>
         </Section>
 
-        {/* Photos & Avatar */}
-        <Section title="Photos & avatar"
+        {/* Profile photo */}
+        <Section title="Profile photo"
           action={
-            <Link to="/avatar" className="text-xs font-medium text-primary hover:underline">Edit avatar →</Link>
+            <Link to="/avatar" className="text-xs font-medium text-primary hover:underline">Edit photos →</Link>
           }
         >
           <div className="flex flex-wrap items-center gap-4">
@@ -269,23 +269,12 @@ function ProfilePage() {
                 )}
               </div>
             </div>
-            <div className="text-center">
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Avatar ({profile?.avatar_style ?? "real"})</div>
-              <div className="mt-2">
-                {profile?.avatar_url ? (
-                  <SignedImage src={profile.avatar_url} alt="Avatar" className="h-24 w-24 rounded-2xl object-cover" fallback={<GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-220`} size={96} label={profile?.first_name ?? "U"} />} />
-                ) : (
-                  <GradientAvatar seed={`${profile?.id?.slice(0, 6) ?? "you"}-220`} size={96} label={profile?.first_name ?? "U"} />
-                )}
-              </div>
-            </div>
             <div className="ml-auto flex flex-col gap-2">
-              <a href="/onboarding?edit=1" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit photos</a>
-              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit avatar</Link>
+              <Link to="/avatar" className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface text-center">Edit photos</Link>
             </div>
-
           </div>
         </Section>
+
 
         {/* Interests */}
         <Section title="Interests">
