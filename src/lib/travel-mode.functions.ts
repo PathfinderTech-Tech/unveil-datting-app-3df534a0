@@ -44,15 +44,15 @@ export const startVerifiedTravel = createServerFn({ method: "POST" })
   }) => input)
   .handler(async ({ data, context }) => {
     const ipCountry =
-      (getRequestHeader("cf-ipcountry") ?? getRequestHeader("CF-IPCountry") ?? "")?.toUpperCase() || null;
+      (getRequestHeader("cf-ipcountry") ?? getRequestHeader("CF-IPCountry") ?? "").toUpperCase();
 
     const { data: rpcData, error } = await context.supabase.rpc("start_verified_travel", {
       _claimed_country_code: data.claimedCountryCode,
       _claimed_country_name: data.claimedCountryName,
-      _device_country_code: data.deviceCountryCode ?? null,
-      _gps_country_code: data.gpsCountryCode ?? null,
+      _device_country_code: data.deviceCountryCode ?? "",
+      _gps_country_code: data.gpsCountryCode ?? "",
       _ip_country_code: ipCountry,
-      _device_timezone: data.deviceTimezone ?? null,
+      _device_timezone: data.deviceTimezone ?? "",
     });
     if (error) throw new Error(error.message);
 
