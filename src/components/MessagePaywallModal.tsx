@@ -91,7 +91,8 @@ const PREMIUM: Option[] = [
 ];
 
 export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, returnTo }: Props) {
-  if (!open) return null;
+  const [successFor, setSuccessFor] = useState<SuccessProduct | null>(null);
+  if (!open && !successFor) return null;
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
   const limit = dailyLimit ?? 15;
 
@@ -103,8 +104,13 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
         return;
       }
       await purchase(productId, user.id);
-      toast.success("Purchase complete!");
-      onClose();
+      const key = SUCCESS_MAP[productId];
+      if (key) {
+        setSuccessFor(key);
+      } else {
+        toast.success("Purchase complete!");
+        onClose();
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Purchase failed");
     }
