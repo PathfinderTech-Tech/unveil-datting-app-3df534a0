@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { writeFileSync } from "fs";
 /**
  * Post-deploy production verification for unveil.best.
  *
