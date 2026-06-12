@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
   Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
-  Heart, Lock as LockIcon, ChevronUp, ChevronRight, Search,
+  Lock as LockIcon, ChevronUp, ChevronRight, Search,
   Heart as HeartIcon, Calendar, MessageSquare, Phone,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -520,14 +520,8 @@ function Chat() {
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
           style={{ height: "calc(100dvh - 72px)" }}
         >
-          <div className="border-b border-border/40 px-5 pt-5 pb-3">
-            <div className="flex items-center justify-between">
-              <h1 className="font-display text-2xl font-light tracking-tight bg-gradient-hero bg-clip-text text-transparent">UNVEIL</h1>
-              <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
-                <Heart className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="relative mt-4">
+          <div className="border-b border-border/40 px-5 pt-3 pb-3">
+            <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={search}
