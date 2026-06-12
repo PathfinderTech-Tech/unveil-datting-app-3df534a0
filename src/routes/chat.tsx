@@ -635,9 +635,9 @@ function Chat() {
             </div>
           ) : (
             <>
-              {/* ============ HERO HEADER ============ */}
+              {/* ============ COMPACT HEADER ============ */}
               <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
                   <button
                     onClick={() => {
                       setActive(null);
@@ -658,39 +658,38 @@ function Chat() {
                             discoveryMode={peer?.discovery_mode}
                             avatarUrl={peer?.avatar_url}
                             photoUrl={peer?.photo_url}
-                            size={56}
+                            size={44}
                             veiled={msgs.length === 0}
                           />
                         </div>
                       </div>
                       {isOnline(peer?.last_seen_at) && (
-                        <span className="absolute -bottom-0.5 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card)),0_0_12px_rgba(52,211,153,0.7)]" />
+                        <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
                       )}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="truncate text-lg font-semibold tracking-tight">{peerName}</span>
+                      <span className="truncate text-[15px] font-semibold tracking-tight">{peerName}</span>
                       {peer?.verified ? <VerifiedBadge size="xs" /> : null}
-                      <LocationTrustBadge profile={peer} size="xs" />
-
+                      <LocationTrustBadge profile={peer} size="xs" showLabel={false} />
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
-                      {overallScore != null && band && (
-                        <span className={`inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-mono font-semibold ${band.tone}`}>
-                          <Heart className="h-2.5 w-2.5 fill-current" /> {overallScore}% Compatible
-                        </span>
-                      )}
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       {isOnline(peer?.last_seen_at) ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
-                        </span>
+                        <span className="text-emerald-400">Active now</span>
                       ) : peer?.last_seen_at ? (
-                        <span className="text-muted-foreground">Active {timeAgo(peer.last_seen_at)} ago</span>
+                        <span>Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}
-                      {typingPeer && <span className="italic text-primary">typing…</span>}
+                      {typingPeer && <span className="italic text-primary">· typing…</span>}
                     </div>
                   </div>
+                  <button
+                    onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
+                    className="hidden shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/20 sm:inline-flex"
+                    aria-label="Insights"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" /> Insights
+                  </button>
                   <button
                     onClick={() => setShowMenu((v) => !v)}
                     className="rounded-full p-2 hover:bg-surface"
@@ -699,7 +698,7 @@ function Chat() {
                     <MoreVertical className="h-4 w-4" />
                   </button>
                   {showMenu && (
-                    <div className="absolute right-4 top-20 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
+                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
                       <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
                       <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
                       <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
@@ -707,126 +706,35 @@ function Chat() {
                   )}
                 </div>
 
-                {/* Day progress */}
-                {dayN && (
-                  <div className="px-5 pb-3">
-                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                      <span className="font-mono uppercase tracking-luxury">Day {dayN} of 7</span>
-                      <span className="text-muted-foreground">{7 - dayN} days to contact unlock</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
-                      <div
-                        className="h-full rounded-full bg-gradient-hero shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-all duration-700"
-                        style={{ width: `${(dayN / 7) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Compatibility dashboard (collapsible) */}
-                {metrics.length > 0 && (
-                  <div className="border-t border-border/30 px-5 py-2.5">
-                    <button
-                      onClick={() => setCompatOpen((v) => !v)}
-                      className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-3 text-left backdrop-blur-xl transition-colors hover:border-primary/50"
-                      aria-expanded={compatOpen}
-                    >
-                      <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
-                      </div>
-                      {overallScore != null && (
-                        <span className="font-display text-xl font-light tracking-tight text-foreground">{overallScore}%</span>
-                      )}
-                      <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    {compatOpen && (
-                      <div className="pt-3">
-                        {insights.length > 0 && (
-                          <ul className="mb-3 grid gap-1.5 sm:grid-cols-2">
-                            {insights.map((line) => (
-                              <li key={line} className="flex items-start gap-2 text-[12px] text-foreground/85">
-                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                                  <Check className="h-2.5 w-2.5" />
-                                </span>
-                                {line}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <div className="grid grid-cols-2 gap-2">
-                          {metrics.map((m) => (
-                            <div
-                              key={m.label}
-                              className="rounded-2xl border border-border/60 bg-surface/40 p-3 backdrop-blur-xl transition-colors hover:border-primary/30"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] text-muted-foreground">{m.label}</span>
-                                <span className="font-mono text-sm font-semibold text-foreground">{m.value}%</span>
-                              </div>
-                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
-                                <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
-                              </div>
-                            </div>
-                          ))}
+                {/* Slim compatibility + day-progress strip */}
+                {(overallScore != null || dayN) && (
+                  <button
+                    onClick={() => { setPanelTab(overallScore != null ? "insights" : "discovery"); setPanelOpen(true); }}
+                    className="flex w-full items-center gap-3 border-t border-border/30 px-4 py-2 text-left transition-colors hover:bg-surface/40 sm:px-5"
+                  >
+                    {overallScore != null && (
+                      <span className="font-mono text-[11px] font-semibold text-primary">
+                        {overallScore}% <span className="font-normal text-muted-foreground">compatible</span>
+                      </span>
+                    )}
+                    {dayN && (
+                      <>
+                        <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Day {dayN}/7</span>
+                        <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-surface/80">
+                          <div
+                            className="h-full rounded-full bg-gradient-hero"
+                            style={{ width: `${(dayN / 7) * 100}%` }}
+                          />
                         </div>
-                      </div>
+                        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                          <LockIcon className="mr-0.5 inline h-2.5 w-2.5" />{7 - dayN}d
+                        </span>
+                      </>
                     )}
-                  </div>
-                )}
-
-                {/* Collapsible discovery chips */}
-                {matchInfo && peerId && (
-                  <div className="border-t border-border/30 px-5 py-2.5">
-                    <div className="flex flex-wrap gap-1.5">
-                      <button
-                        onClick={() => setScaffoldOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
-                          scaffoldOpen
-                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
-                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        <Sparkles className="h-3 w-3" /> Day {dayN ?? 1} discovery
-                      </button>
-                      <button
-                        onClick={() => fetchIcebreakers(ideaCategory)}
-                        disabled={ideasLoading}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground disabled:opacity-50"
-                      >
-                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Icebreakers
-                      </button>
-                      <button
-                        onClick={() => setRevealOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
-                          revealOpen
-                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
-                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        <LockIcon className="h-3 w-3" /> Contact reveal
-                      </button>
-                    </div>
-                    {scaffoldOpen && (
-                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
-                        <ConversationScaffold
-                          matchId={matchInfo.id}
-                          matchCreatedAt={matchInfo.created_at}
-                          selfId={user.id}
-                          peerId={peerId}
-                          peerName={peerName}
-                          onChatGateChange={() => { /* DB trigger is source of truth */ }}
-                        />
-                      </div>
-                    )}
-                    {revealOpen && (
-                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
-                        <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
-                      </div>
-                    )}
-                  </div>
+                  </button>
                 )}
               </header>
+
 
               {/* ============ MESSAGES ============ */}
               <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
