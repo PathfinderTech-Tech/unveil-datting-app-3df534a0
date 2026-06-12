@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
