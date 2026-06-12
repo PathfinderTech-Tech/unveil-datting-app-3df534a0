@@ -520,16 +520,39 @@ function Chat() {
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
           style={{ height: "calc(100dvh - 72px)" }}
         >
-          <div className="flex items-center justify-between border-b border-border/40 px-5 py-5">
-            <div>
-              <h1 className="font-display text-2xl font-light tracking-tight">Messages</h1>
-              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                {convs.length} {convs.length === 1 ? "connection" : "connections"}
-              </p>
+          <div className="border-b border-border/40 px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between">
+              <h1 className="font-display text-2xl font-light tracking-tight bg-gradient-hero bg-clip-text text-transparent">UNVEIL</h1>
+              <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
+                <Heart className="h-4 w-4" />
+              </Link>
             </div>
-            <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
-              <Heart className="h-4 w-4" />
-            </Link>
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search conversations"
+                className="w-full rounded-full border border-border/60 bg-surface/60 py-2 pl-9 pr-3 text-[13px] outline-none placeholder:text-muted-foreground focus:border-primary"
+              />
+            </div>
+            <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {([
+                ["all","All"],["active","Active"],["d13","Day 1-3"],["d47","Day 4-7"],["locked","Locked"],
+              ] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setFilter(k)}
+                  className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-all ${
+                    filter === k
+                      ? "bg-gradient-hero text-primary-foreground shadow-glow"
+                      : "border border-border/60 text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {!quota.loading && !quota.unlimited && (
