@@ -5,8 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
-  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft, ChevronDown,
-  Heart, Lock as LockIcon,
+  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
+  Heart, Lock as LockIcon, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -24,6 +24,9 @@ import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -124,9 +127,10 @@ function Chat() {
   const [ideaCategory, setIdeaCategory] = useState<IcebreakerCategory | undefined>(undefined);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
-  const [scaffoldOpen, setScaffoldOpen] = useState(false);
-  const [compatOpen, setCompatOpen] = useState(false);
-  const [revealOpen, setRevealOpen] = useState(false);
+  // (legacy collapsible state replaced by unified panel below)
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
+  const isMobile = useIsMobile();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
@@ -629,9 +633,9 @@ function Chat() {
             </div>
           ) : (
             <>
-              {/* ============ HERO HEADER ============ */}
+              {/* ============ COMPACT HEADER ============ */}
               <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
                   <button
                     onClick={() => {
                       setActive(null);
@@ -652,39 +656,38 @@ function Chat() {
                             discoveryMode={peer?.discovery_mode}
                             avatarUrl={peer?.avatar_url}
                             photoUrl={peer?.photo_url}
-                            size={56}
+                            size={44}
                             veiled={msgs.length === 0}
                           />
                         </div>
                       </div>
                       {isOnline(peer?.last_seen_at) && (
-                        <span className="absolute -bottom-0.5 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card)),0_0_12px_rgba(52,211,153,0.7)]" />
+                        <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
                       )}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="truncate text-lg font-semibold tracking-tight">{peerName}</span>
+                      <span className="truncate text-[15px] font-semibold tracking-tight">{peerName}</span>
                       {peer?.verified ? <VerifiedBadge size="xs" /> : null}
-                      <LocationTrustBadge profile={peer} size="xs" />
-
+                      <LocationTrustBadge profile={peer} size="xs" showLabel={false} />
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
-                      {overallScore != null && band && (
-                        <span className={`inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-mono font-semibold ${band.tone}`}>
-                          <Heart className="h-2.5 w-2.5 fill-current" /> {overallScore}% Compatible
-                        </span>
-                      )}
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       {isOnline(peer?.last_seen_at) ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
-                        </span>
+                        <span className="text-emerald-400">Active now</span>
                       ) : peer?.last_seen_at ? (
-                        <span className="text-muted-foreground">Active {timeAgo(peer.last_seen_at)} ago</span>
+                        <span>Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}
-                      {typingPeer && <span className="italic text-primary">typing…</span>}
+                      {typingPeer && <span className="italic text-primary">· typing…</span>}
                     </div>
                   </div>
+                  <button
+                    onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
+                    className="hidden shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/20 sm:inline-flex"
+                    aria-label="Insights"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" /> Insights
+                  </button>
                   <button
                     onClick={() => setShowMenu((v) => !v)}
                     className="rounded-full p-2 hover:bg-surface"
@@ -693,7 +696,7 @@ function Chat() {
                     <MoreVertical className="h-4 w-4" />
                   </button>
                   {showMenu && (
-                    <div className="absolute right-4 top-20 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
+                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
                       <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
                       <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
                       <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
@@ -701,126 +704,35 @@ function Chat() {
                   )}
                 </div>
 
-                {/* Day progress */}
-                {dayN && (
-                  <div className="px-5 pb-3">
-                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                      <span className="font-mono uppercase tracking-luxury">Day {dayN} of 7</span>
-                      <span className="text-muted-foreground">{7 - dayN} days to contact unlock</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
-                      <div
-                        className="h-full rounded-full bg-gradient-hero shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-all duration-700"
-                        style={{ width: `${(dayN / 7) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Compatibility dashboard (collapsible) */}
-                {metrics.length > 0 && (
-                  <div className="border-t border-border/30 px-5 py-2.5">
-                    <button
-                      onClick={() => setCompatOpen((v) => !v)}
-                      className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-3 text-left backdrop-blur-xl transition-colors hover:border-primary/50"
-                      aria-expanded={compatOpen}
-                    >
-                      <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
-                      </div>
-                      {overallScore != null && (
-                        <span className="font-display text-xl font-light tracking-tight text-foreground">{overallScore}%</span>
-                      )}
-                      <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    {compatOpen && (
-                      <div className="pt-3">
-                        {insights.length > 0 && (
-                          <ul className="mb-3 grid gap-1.5 sm:grid-cols-2">
-                            {insights.map((line) => (
-                              <li key={line} className="flex items-start gap-2 text-[12px] text-foreground/85">
-                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                                  <Check className="h-2.5 w-2.5" />
-                                </span>
-                                {line}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <div className="grid grid-cols-2 gap-2">
-                          {metrics.map((m) => (
-                            <div
-                              key={m.label}
-                              className="rounded-2xl border border-border/60 bg-surface/40 p-3 backdrop-blur-xl transition-colors hover:border-primary/30"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] text-muted-foreground">{m.label}</span>
-                                <span className="font-mono text-sm font-semibold text-foreground">{m.value}%</span>
-                              </div>
-                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
-                                <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
-                              </div>
-                            </div>
-                          ))}
+                {/* Slim compatibility + day-progress strip */}
+                {(overallScore != null || dayN) && (
+                  <button
+                    onClick={() => { setPanelTab(overallScore != null ? "insights" : "discovery"); setPanelOpen(true); }}
+                    className="flex w-full items-center gap-3 border-t border-border/30 px-4 py-2 text-left transition-colors hover:bg-surface/40 sm:px-5"
+                  >
+                    {overallScore != null && (
+                      <span className="font-mono text-[11px] font-semibold text-primary">
+                        {overallScore}% <span className="font-normal text-muted-foreground">compatible</span>
+                      </span>
+                    )}
+                    {dayN && (
+                      <>
+                        <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Day {dayN}/7</span>
+                        <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-surface/80">
+                          <div
+                            className="h-full rounded-full bg-gradient-hero"
+                            style={{ width: `${(dayN / 7) * 100}%` }}
+                          />
                         </div>
-                      </div>
+                        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                          <LockIcon className="mr-0.5 inline h-2.5 w-2.5" />{7 - dayN}d
+                        </span>
+                      </>
                     )}
-                  </div>
-                )}
-
-                {/* Collapsible discovery chips */}
-                {matchInfo && peerId && (
-                  <div className="border-t border-border/30 px-5 py-2.5">
-                    <div className="flex flex-wrap gap-1.5">
-                      <button
-                        onClick={() => setScaffoldOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
-                          scaffoldOpen
-                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
-                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        <Sparkles className="h-3 w-3" /> Day {dayN ?? 1} discovery
-                      </button>
-                      <button
-                        onClick={() => fetchIcebreakers(ideaCategory)}
-                        disabled={ideasLoading}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground disabled:opacity-50"
-                      >
-                        <RefreshCw className={`h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Icebreakers
-                      </button>
-                      <button
-                        onClick={() => setRevealOpen((v) => !v)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wide transition-all ${
-                          revealOpen
-                            ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_-4px_hsl(var(--primary)/0.5)]"
-                            : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        <LockIcon className="h-3 w-3" /> Contact reveal
-                      </button>
-                    </div>
-                    {scaffoldOpen && (
-                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
-                        <ConversationScaffold
-                          matchId={matchInfo.id}
-                          matchCreatedAt={matchInfo.created_at}
-                          selfId={user.id}
-                          peerId={peerId}
-                          peerName={peerName}
-                          onChatGateChange={() => { /* DB trigger is source of truth */ }}
-                        />
-                      </div>
-                    )}
-                    {revealOpen && (
-                      <div className="mt-2.5 rounded-2xl border border-border/60 bg-surface/30 p-3.5 backdrop-blur-xl">
-                        <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
-                      </div>
-                    )}
-                  </div>
+                  </button>
                 )}
               </header>
+
 
               {/* ============ MESSAGES ============ */}
               <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
@@ -930,51 +842,8 @@ function Chat() {
                 </div>
               </div>
 
-              {/* ============ ICEBREAKERS DRAWER ============ */}
-              {ideasOpen && (
-                <div className="shrink-0 border-t border-border/50 bg-surface/50 p-3.5 backdrop-blur-2xl">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                      <Sparkles className="h-3 w-3 text-accent" /> AI Icebreakers
-                    </div>
-                    <button onClick={() => setIdeasOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Close</button>
-                  </div>
-                  <div className="mb-2 flex flex-wrap gap-1.5">
-                    <button onClick={() => fetchIcebreakers(undefined)}
-                      className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>Mix</button>
-                    {ICE_CATEGORIES.map((c) => (
-                      <button key={c.id} onClick={() => fetchIcebreakers(c.id)}
-                        className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                  {opener && !ideasLoading && (
-                    <div className="mb-2 rounded-2xl border border-accent/40 bg-accent/10 p-3">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">Suggested opener</span>
-                        <button onClick={() => { setDraft(opener); setIdeasOpen(false); }}
-                          className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use</button>
-                      </div>
-                      <p className="text-xs leading-relaxed">{opener}</p>
-                    </div>
-                  )}
-                  {ideasLoading && ideas.length === 0 ? (
-                    <div className="py-3 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {ideas.map((i, idx) => (
-                        <button key={idx} type="button"
-                          onClick={() => { setDraft(i.text); setIdeasOpen(false); }}
-                          className="max-w-full rounded-2xl border border-border bg-card px-3 py-2 text-left text-xs hover:border-primary">
-                          <span className="mr-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] uppercase text-primary">{i.kind}</span>
-                          {i.text}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Icebreakers moved to bottom sheet → Icebreakers tab */}
+
 
               {showContactWarning && (
                 <div className="shrink-0 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
@@ -991,8 +860,8 @@ function Chat() {
                 <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                   <button
                     type="button"
-                    onClick={() => fetchIcebreakers(ideaCategory)}
-                    disabled={!peerId || ideasLoading}
+                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                    disabled={!peerId}
                     title="AI Icebreakers"
                     aria-label="AI Icebreakers"
                     className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
@@ -1047,9 +916,148 @@ function Chat() {
                   Phone numbers, emails, and social handles are hidden until you both choose to share.
                 </p>
               </form>
+
+              {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / REVEAL SHEET ============ */}
+              <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
+                <SheetContent
+                  side={isMobile ? "bottom" : "right"}
+                  className={
+                    isMobile
+                      ? "h-[85vh] rounded-t-3xl border-border/60 bg-card/95 p-0 backdrop-blur-2xl"
+                      : "w-full sm:max-w-md border-border/60 bg-card/95 p-0 backdrop-blur-2xl"
+                  }
+                >
+                  <SheetHeader className="border-b border-border/40 px-5 py-4">
+                    <SheetTitle className="font-display text-xl font-light tracking-tight">
+                      {peerName} · Details
+                    </SheetTitle>
+                  </SheetHeader>
+                  <Tabs value={panelTab} onValueChange={(v) => setPanelTab(v as typeof panelTab)} className="flex h-[calc(100%-65px)] flex-col">
+                    <TabsList className="mx-5 mt-3 grid grid-cols-4 bg-surface/60">
+                      <TabsTrigger value="insights" className="text-[11px]">Insights</TabsTrigger>
+                      <TabsTrigger value="discovery" className="text-[11px]">Discovery</TabsTrigger>
+                      <TabsTrigger value="icebreakers" className="text-[11px]">Icebreakers</TabsTrigger>
+                      <TabsTrigger value="reveal" className="text-[11px]">Reveal</TabsTrigger>
+                    </TabsList>
+
+                    <div className="flex-1 overflow-y-auto px-5 py-4">
+                      <TabsContent value="insights" className="mt-0 space-y-3">
+                        {overallScore != null && band && (
+                          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-4">
+                            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
+                            <div className="mt-1 flex items-baseline gap-2">
+                              <span className="font-display text-4xl font-light tracking-tight">{overallScore}%</span>
+                              <span className={`text-xs ${band.tone}`}>{band.label}</span>
+                            </div>
+                          </div>
+                        )}
+                        {insights.length > 0 && (
+                          <ul className="grid gap-1.5">
+                            {insights.map((line) => (
+                              <li key={line} className="flex items-start gap-2 rounded-xl border border-border/40 bg-surface/40 p-3 text-[13px] text-foreground/85">
+                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                                  <Check className="h-2.5 w-2.5" />
+                                </span>
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          {metrics.map((m) => (
+                            <div key={m.label} className="rounded-2xl border border-border/60 bg-surface/40 p-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-muted-foreground">{m.label}</span>
+                                <span className="font-mono text-sm font-semibold">{m.value}%</span>
+                              </div>
+                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                                <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="discovery" className="mt-0">
+                        {matchInfo && peerId ? (
+                          <ConversationScaffold
+                            matchId={matchInfo.id}
+                            matchCreatedAt={matchInfo.created_at}
+                            selfId={user.id}
+                            peerId={peerId}
+                            peerName={peerName}
+                            onChatGateChange={() => { /* DB trigger is source of truth */ }}
+                          />
+                        ) : (
+                          <p className="text-center text-sm text-muted-foreground">Discovery unlocks once you match.</p>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="icebreakers" className="mt-0 space-y-3">
+                        <div className="flex flex-wrap gap-1.5">
+                          <button onClick={() => fetchIcebreakers(undefined)}
+                            className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>Mix</button>
+                          {ICE_CATEGORIES.map((c) => (
+                            <button key={c.id} onClick={() => fetchIcebreakers(c.id)}
+                              className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>
+                              {c.label}
+                            </button>
+                          ))}
+                          <button onClick={() => fetchIcebreakers(ideaCategory)} disabled={ideasLoading}
+                            className="ml-auto rounded-full border border-border px-2.5 py-1 text-[10px] uppercase tracking-wide text-muted-foreground hover:border-primary disabled:opacity-50">
+                            <RefreshCw className={`mr-1 inline h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Generate
+                          </button>
+                        </div>
+                        {opener && !ideasLoading && (
+                          <div className="rounded-2xl border border-accent/40 bg-accent/10 p-3">
+                            <div className="mb-1 flex items-center justify-between">
+                              <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">Suggested opener</span>
+                              <button onClick={() => { setDraft(opener); setPanelOpen(false); }}
+                                className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use</button>
+                            </div>
+                            <p className="text-xs leading-relaxed">{opener}</p>
+                          </div>
+                        )}
+                        {ideasLoading && ideas.length === 0 ? (
+                          <div className="py-6 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
+                        ) : ideas.length === 0 ? (
+                          <div className="py-6 text-center text-xs text-muted-foreground">Tap Generate to get personalized icebreakers.</div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            {ideas.map((i, idx) => (
+                              <button key={idx} type="button"
+                                onClick={() => { setDraft(i.text); setPanelOpen(false); }}
+                                className="rounded-2xl border border-border bg-card px-3 py-2.5 text-left text-xs hover:border-primary">
+                                <span className="mr-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] uppercase text-primary">{i.kind}</span>
+                                {i.text}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="reveal" className="mt-0">
+                        {peerId ? (
+                          <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                        ) : null}
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </SheetContent>
+              </Sheet>
+
+              {/* Floating Insights handle (mobile) */}
+              <button
+                onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
+                className="absolute bottom-[88px] right-4 z-10 flex items-center gap-1.5 rounded-full border border-primary/40 bg-card/90 px-3 py-1.5 text-[11px] font-medium text-primary shadow-glow backdrop-blur-xl sm:hidden"
+                aria-label="Open insights"
+              >
+                <ChevronUp className="h-3.5 w-3.5" /> Insights
+              </button>
             </>
           )}
         </section>
+
       </div>
     </div>
   );
