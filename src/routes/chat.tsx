@@ -125,7 +125,7 @@ function Chat() {
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const [scaffoldOpen, setScaffoldOpen] = useState(false);
-  const [compatOpen, setCompatOpen] = useState(true);
+  const [compatOpen, setCompatOpen] = useState(false);
   const [revealOpen, setRevealOpen] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
