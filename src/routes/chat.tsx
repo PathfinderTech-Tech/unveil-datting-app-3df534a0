@@ -556,7 +556,10 @@ function Chat() {
               return (
                 <button
                   key={c.id}
-                  onClick={() => setActive(c)}
+                  onClick={() => {
+                    setActive(c);
+                    navigate({ to: "/chat", search: { c: c.id }, replace: true });
+                  }}
                   className={`group mb-1.5 flex w-full items-center gap-3.5 rounded-2xl p-3 text-left transition-all ${
                     isActive
                       ? "bg-gradient-to-r from-primary/20 to-accent/10 ring-1 ring-primary/40 shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.4)]"
@@ -630,7 +633,10 @@ function Chat() {
               <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
                 <div className="flex items-center gap-4 px-5 py-4">
                   <button
-                    onClick={() => setActive(null)}
+                    onClick={() => {
+                      setActive(null);
+                      navigate({ to: "/chat", search: {}, replace: true });
+                    }}
                     className="rounded-full p-1.5 hover:bg-surface lg:hidden"
                     aria-label="Back"
                   >
