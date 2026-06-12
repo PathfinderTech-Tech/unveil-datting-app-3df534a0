@@ -888,7 +888,7 @@ function Chat() {
                             <Smile className="h-4 w-4 text-muted-foreground" />
                           </button>
                           {pickerFor === m.id && (
-                            <div className="absolute -top-10 right-0 z-10 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
+                            <div className="absolute -top-10 right-0 z-30 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
                               {QUICK_EMOJI.map((e) => (
                                 <button key={e} onClick={() => react(m.id, e)} className="rounded-full px-1.5 text-base hover:bg-surface">{e}</button>
                               ))}
