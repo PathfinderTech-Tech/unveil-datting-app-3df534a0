@@ -184,7 +184,7 @@ export function VoiceMessageRecorder({
         disabled={disabled}
         title="Record voice note"
         aria-label="Record voice note"
-        className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+        className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Mic className="h-4 w-4 text-accent" />
       </button>
