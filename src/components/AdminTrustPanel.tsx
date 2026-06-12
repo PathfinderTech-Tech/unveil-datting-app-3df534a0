@@ -44,11 +44,7 @@ export function AdminTrustPanel() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, first_name, trust_level, location_risk_score, location_mismatch_count, travel_status, travel_expires_at, travel_warning_count, account_restricted, home_country_code, current_country_code, verified_country_code, verified")
-        .order("location_risk_score", { ascending: false })
-        .limit(200);
+      const { data } = await (supabase as any).rpc("admin_list_trust_profiles");
       setRows((data ?? []) as Row[]);
       setLoading(false);
     })();
