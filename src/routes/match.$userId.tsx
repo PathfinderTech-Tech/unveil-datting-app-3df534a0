@@ -329,7 +329,12 @@ function MatchExperience() {
         {/* CONVERSATION — dominant surface */}
         {mutual && conversationId ? (
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-1 py-3 sm:px-2">
+            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-2 py-4 sm:px-3">
+              {msgs.length > 0 && (
+                <div className="flex justify-center">
+                  <span className="text-[11px] font-medium text-muted-foreground">Today</span>
+                </div>
+              )}
               {msgs.length === 0 && (
                 <div className="m-auto max-w-xs pt-8 text-center text-sm text-muted-foreground">
                   Say hi to {profile.first_name}. Lead with something that matters to you.
@@ -337,14 +342,35 @@ function MatchExperience() {
               )}
               {msgs.map((m) => {
                 const mine = m.sender_id === meId;
+                const time = new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+                if (mine) {
+                  return (
+                    <div key={m.id} className="flex justify-end">
+                      <div className="max-w-[78%] rounded-3xl rounded-br-md bg-gradient-to-br from-primary to-accent px-4 py-2.5 text-sm text-primary-foreground shadow-lg shadow-primary/20">
+                        <div className="whitespace-pre-wrap">{m.content}</div>
+                        <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-primary-foreground/80">
+                          <span>{time}</span>
+                          <span aria-hidden>✓✓</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
-                  <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
-                      mine
-                        ? "bg-gradient-to-br from-primary to-accent text-primary-foreground"
-                        : "border border-border bg-surface/70 text-foreground"
-                    }`}>
-                      {m.content}
+                  <div key={m.id} className="flex items-end justify-start gap-2">
+                    <div className="shrink-0">
+                      <ProfileAvatar
+                        userId={profile.id}
+                        name={profile.first_name}
+                        discoveryMode={profile.discovery_mode ?? "photo"}
+                        avatarUrl={profile.avatar_url ?? null}
+                        photoUrl={profile.photo_url ?? null}
+                        size={28}
+                      />
+                    </div>
+                    <div className="max-w-[75%] rounded-3xl rounded-bl-md bg-surface/80 px-4 py-2.5 text-sm text-foreground shadow-sm">
+                      <div className="whitespace-pre-wrap">{m.content}</div>
+                      <div className="mt-1 text-[10px] text-muted-foreground">{time}</div>
                     </div>
                   </div>
                 );
@@ -353,28 +379,36 @@ function MatchExperience() {
 
             {/* Composer pinned at bottom */}
             <div
-              className="shrink-0 border-t border-border bg-card/90 px-2 pt-2 backdrop-blur"
+              className="shrink-0 bg-background/95 px-3 pt-2 backdrop-blur"
               style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
             >
               {!quota.loading && !quota.unlimited && (
-                <div className="mb-1.5 px-1 text-[10px] text-muted-foreground">
+                <div className="mb-1.5 px-1 text-center text-[10px] text-muted-foreground">
                   {quota.remaining} of {quota.dailyLimit} interactions remaining ·{" "}
                   <Link to="/checkout" search={{ product: "message_pass", returnTo: `/match/${userId}` } as never} className="text-accent underline">Daily Pass $1.99</Link>
                 </div>
               )}
               <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDiscoveryOpen(true)}
+                  aria-label="Open features"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow"
+                >
+                  <span className="text-xl leading-none">+</span>
+                </button>
                 <textarea
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
                   placeholder={`Message ${profile.first_name}…`}
                   rows={1}
-                  className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  className="max-h-32 min-h-11 flex-1 resize-none rounded-full border border-border bg-surface/70 px-4 py-2.5 text-sm placeholder:text-muted-foreground outline-none focus:border-primary"
                 />
                 <button
                   type="submit"
                   disabled={sending || !draft.trim()}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-hero text-primary-foreground shadow-glow disabled:opacity-50"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-glow disabled:opacity-50"
                   aria-label="Send"
                 >
                   <Send className="h-4 w-4" />
