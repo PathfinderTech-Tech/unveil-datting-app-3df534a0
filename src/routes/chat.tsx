@@ -5,8 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
-  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft, ChevronDown,
-  Heart, Lock as LockIcon,
+  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
+  Heart, Lock as LockIcon, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -24,6 +24,9 @@ import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
