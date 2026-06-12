@@ -918,9 +918,148 @@ function Chat() {
                   Phone numbers, emails, and social handles are hidden until you both choose to share.
                 </p>
               </form>
+
+              {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / REVEAL SHEET ============ */}
+              <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
+                <SheetContent
+                  side={isMobile ? "bottom" : "right"}
+                  className={
+                    isMobile
+                      ? "h-[85vh] rounded-t-3xl border-border/60 bg-card/95 p-0 backdrop-blur-2xl"
+                      : "w-full sm:max-w-md border-border/60 bg-card/95 p-0 backdrop-blur-2xl"
+                  }
+                >
+                  <SheetHeader className="border-b border-border/40 px-5 py-4">
+                    <SheetTitle className="font-display text-xl font-light tracking-tight">
+                      {peerName} · Details
+                    </SheetTitle>
+                  </SheetHeader>
+                  <Tabs value={panelTab} onValueChange={(v) => setPanelTab(v as typeof panelTab)} className="flex h-[calc(100%-65px)] flex-col">
+                    <TabsList className="mx-5 mt-3 grid grid-cols-4 bg-surface/60">
+                      <TabsTrigger value="insights" className="text-[11px]">Insights</TabsTrigger>
+                      <TabsTrigger value="discovery" className="text-[11px]">Discovery</TabsTrigger>
+                      <TabsTrigger value="icebreakers" className="text-[11px]">Icebreakers</TabsTrigger>
+                      <TabsTrigger value="reveal" className="text-[11px]">Reveal</TabsTrigger>
+                    </TabsList>
+
+                    <div className="flex-1 overflow-y-auto px-5 py-4">
+                      <TabsContent value="insights" className="mt-0 space-y-3">
+                        {overallScore != null && band && (
+                          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-4">
+                            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
+                            <div className="mt-1 flex items-baseline gap-2">
+                              <span className="font-display text-4xl font-light tracking-tight">{overallScore}%</span>
+                              <span className={`text-xs ${band.tone}`}>{band.label}</span>
+                            </div>
+                          </div>
+                        )}
+                        {insights.length > 0 && (
+                          <ul className="grid gap-1.5">
+                            {insights.map((line) => (
+                              <li key={line} className="flex items-start gap-2 rounded-xl border border-border/40 bg-surface/40 p-3 text-[13px] text-foreground/85">
+                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                                  <Check className="h-2.5 w-2.5" />
+                                </span>
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          {metrics.map((m) => (
+                            <div key={m.label} className="rounded-2xl border border-border/60 bg-surface/40 p-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-muted-foreground">{m.label}</span>
+                                <span className="font-mono text-sm font-semibold">{m.value}%</span>
+                              </div>
+                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                                <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, m.value)}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="discovery" className="mt-0">
+                        {matchInfo && peerId ? (
+                          <ConversationScaffold
+                            matchId={matchInfo.id}
+                            matchCreatedAt={matchInfo.created_at}
+                            selfId={user.id}
+                            peerId={peerId}
+                            peerName={peerName}
+                            onChatGateChange={() => { /* DB trigger is source of truth */ }}
+                          />
+                        ) : (
+                          <p className="text-center text-sm text-muted-foreground">Discovery unlocks once you match.</p>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="icebreakers" className="mt-0 space-y-3">
+                        <div className="flex flex-wrap gap-1.5">
+                          <button onClick={() => fetchIcebreakers(undefined)}
+                            className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${!ideaCategory ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>Mix</button>
+                          {ICE_CATEGORIES.map((c) => (
+                            <button key={c.id} onClick={() => fetchIcebreakers(c.id)}
+                              className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide ${ideaCategory === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>
+                              {c.label}
+                            </button>
+                          ))}
+                          <button onClick={() => fetchIcebreakers(ideaCategory)} disabled={ideasLoading}
+                            className="ml-auto rounded-full border border-border px-2.5 py-1 text-[10px] uppercase tracking-wide text-muted-foreground hover:border-primary disabled:opacity-50">
+                            <RefreshCw className={`mr-1 inline h-3 w-3 ${ideasLoading ? "animate-spin" : ""}`} /> Generate
+                          </button>
+                        </div>
+                        {opener && !ideasLoading && (
+                          <div className="rounded-2xl border border-accent/40 bg-accent/10 p-3">
+                            <div className="mb-1 flex items-center justify-between">
+                              <span className="font-mono text-[9px] uppercase tracking-luxury text-accent">Suggested opener</span>
+                              <button onClick={() => { setDraft(opener); setPanelOpen(false); }}
+                                className="rounded-full bg-gradient-hero px-2.5 py-0.5 text-[10px] font-medium text-primary-foreground">Use</button>
+                            </div>
+                            <p className="text-xs leading-relaxed">{opener}</p>
+                          </div>
+                        )}
+                        {ideasLoading && ideas.length === 0 ? (
+                          <div className="py-6 text-center text-xs text-muted-foreground">Reading your compatibility…</div>
+                        ) : ideas.length === 0 ? (
+                          <div className="py-6 text-center text-xs text-muted-foreground">Tap Generate to get personalized icebreakers.</div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            {ideas.map((i, idx) => (
+                              <button key={idx} type="button"
+                                onClick={() => { setDraft(i.text); setPanelOpen(false); }}
+                                className="rounded-2xl border border-border bg-card px-3 py-2.5 text-left text-xs hover:border-primary">
+                                <span className="mr-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] uppercase text-primary">{i.kind}</span>
+                                {i.text}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="reveal" className="mt-0">
+                        {peerId ? (
+                          <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                        ) : null}
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </SheetContent>
+              </Sheet>
+
+              {/* Floating Insights handle (mobile) */}
+              <button
+                onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
+                className="absolute bottom-[88px] right-4 z-10 flex items-center gap-1.5 rounded-full border border-primary/40 bg-card/90 px-3 py-1.5 text-[11px] font-medium text-primary shadow-glow backdrop-blur-xl sm:hidden"
+                aria-label="Open insights"
+              >
+                <ChevronUp className="h-3.5 w-3.5" /> Insights
+              </button>
             </>
           )}
         </section>
+
       </div>
     </div>
   );
