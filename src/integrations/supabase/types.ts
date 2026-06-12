@@ -1932,6 +1932,24 @@ export type Database = {
           severity: string
         }[]
       }
+      admin_list_trust_profiles: {
+        Args: never
+        Returns: {
+          account_restricted: boolean
+          current_country_code: string
+          first_name: string
+          home_country_code: string
+          id: string
+          location_mismatch_count: number
+          location_risk_score: number
+          travel_expires_at: string
+          travel_status: string
+          travel_warning_count: number
+          trust_level: string
+          verified: boolean
+          verified_country_code: string
+        }[]
+      }
       admin_monetization_stats: {
         Args: never
         Returns: {
@@ -2056,6 +2074,17 @@ export type Database = {
           resets_at: string
           unlimited: boolean
           used: number
+        }[]
+      }
+      get_my_profile_extras: {
+        Args: never
+        Returns: {
+          account_restricted_at: string
+          account_restricted_reason: string
+          location_mismatch_count: number
+          location_risk_score: number
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          trust_score: number
         }[]
       }
       get_puzzle_round: {

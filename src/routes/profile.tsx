@@ -112,8 +112,18 @@ function ProfilePage() {
     if (!user) return;
     let alive = true;
     (async () => {
-      const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-      if (alive) setProfile(p as ProfileRow | null);
+      // NOTE: trust_score, location_risk_score, location_mismatch_count,
+      // account_restricted_reason/at, and subscription_tier are not directly
+      // SELECTable from the profiles table (column-level grant restriction).
+      // Sensitive fields for self are read via the get_my_profile_extras RPC.
+      const SAFE_PROFILE_COLS =
+        "account_restricted, age, archetype, avatar_generated_at, avatar_style, avatar_url, badge_paid, beta_member, bio, city, communication_style, compatibility_score, connection_score, continent_code, country, country_code, created_at, curiosity_level, current_city, current_country_code, current_country_name, daily_message_count, daily_message_reset_at, discovery_mode, discovery_radius_km, emotional_rhythm, first_name, game_complete, gender, home_city, home_country_code, home_country_name, id, intention, interested_in, interests, lat_approx, lng_approx, location_enabled, location_privacy, location_updated_at, message_pass_until, onboarding_complete, open_to_international, personality_axes, photo_url, preferred_language, premium_until, profile_photo_url, readiness_breakdown, readiness_score, relationship_intent, state_region, travel_claimed_country_code, travel_expires_at, travel_started_at, travel_status, travel_verified_at, travel_warning_count, trust_level, updated_at, verified, verified_country_code";
+      const [{ data: p }, { data: extras }] = await Promise.all([
+        supabase.from("profiles").select(SAFE_PROFILE_COLS).eq("id", user.id).maybeSingle(),
+        (supabase as any).rpc("get_my_profile_extras"),
+      ]);
+      const extra = Array.isArray(extras) ? extras[0] : extras;
+      if (alive) setProfile(p ? ({ ...p, subscription_tier: extra?.subscription_tier ?? null } as ProfileRow) : null);
       const { data: v } = await supabase
         .from("voice_prompts")
         .select("id, prompt, audio_url, duration_seconds")

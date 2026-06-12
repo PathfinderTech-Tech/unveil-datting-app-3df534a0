@@ -24,8 +24,9 @@ export function RevealProgressCard({ userId }: { userId: string }) {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const [{ data: prof }, convs, chals] = await Promise.all([
-        supabase.from("profiles").select("trust_score, verified, created_at").eq("id", userId).maybeSingle(),
+      const [{ data: prof }, { data: extras }, convs, chals] = await Promise.all([
+        supabase.from("profiles").select("verified, created_at").eq("id", userId).maybeSingle(),
+        (supabase as any).rpc("get_my_profile_extras"),
         supabase.from("conversations").select("id", { count: "exact", head: true })
           .or(`user_a.eq.${userId},user_b.eq.${userId}`),
         supabase.from("challenge_results").select("id", { count: "exact", head: true })
@@ -35,8 +36,9 @@ export function RevealProgressCard({ userId }: { userId: string }) {
       const days = prof?.created_at
         ? Math.max(0, Math.floor((Date.now() - new Date(prof.created_at).getTime()) / 86_400_000))
         : 0;
+      const extra = Array.isArray(extras) ? extras[0] : extras;
       setS({
-        trustScore: prof?.trust_score ?? 0,
+        trustScore: extra?.trust_score ?? 0,
         conversations: convs.count ?? 0,
         challenges: chals.count ?? 0,
         verified: !!prof?.verified,
