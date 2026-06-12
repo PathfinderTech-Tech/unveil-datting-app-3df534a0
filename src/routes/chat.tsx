@@ -659,7 +659,8 @@ function Chat() {
                   </div>
                 </button>
               );
-            })}
+            });
+            })()}
           </div>
         </aside>
 
