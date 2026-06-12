@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
   Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
-  Heart, Lock as LockIcon, ChevronUp,
+  Heart, Lock as LockIcon, ChevronUp, ChevronRight, Search,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
