@@ -225,15 +225,14 @@ function MatchExperience() {
   }
 
   if (loading || !profile) {
-    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
+    return <div className="min-h-[100dvh] bg-background"><div className="p-12 text-center text-muted-foreground">…</div></div>;
   }
 
   const band = compat ? bandLabel(compat.overall) : null;
   const score = compat?.overall ?? 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <UnveilNav />
+    <div className="min-h-[100dvh] bg-background">
       <MessagePaywallModal
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
@@ -242,7 +241,7 @@ function MatchExperience() {
         returnTo={`/match/${userId}`}
       />
 
-      <div className="mx-auto flex h-[calc(100dvh-3.5rem)] max-w-3xl flex-col px-2 sm:px-4">
+      <div className="mx-auto flex h-[100dvh] max-w-3xl flex-col px-2 sm:px-4" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         {/* COMPACT STICKY HEADER */}
         <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-1 py-2 backdrop-blur sm:gap-3">
           <Link to="/matches" aria-label="Back" className="rounded-full p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">
