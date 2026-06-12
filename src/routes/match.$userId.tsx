@@ -286,7 +286,7 @@ function MatchExperience() {
             />
           </div>
           <button
-            onClick={() => setDiscoveryOpen(true)}
+            onClick={() => openSheet("compat")}
             className="min-w-0 flex-1 text-left"
             aria-label="Open compatibility & insights"
           >
@@ -300,6 +300,13 @@ function MatchExperience() {
               <Heart className="h-3 w-3 fill-current" />
               <span className="font-medium">{score}% Compatible</span>
             </div>
+          </button>
+          <button
+            onClick={() => openSheet("icebreakers")}
+            aria-label="Icebreakers"
+            className="shrink-0 rounded-full border border-primary/30 p-1.5 text-primary hover:bg-primary/10"
+          >
+            <Sparkles className="h-4 w-4" />
           </button>
           {meId && meId !== userId && (
             <div className="relative shrink-0">
