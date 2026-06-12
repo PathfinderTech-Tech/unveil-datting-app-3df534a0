@@ -28,7 +28,7 @@ export const recordLocationVerification = createServerFn({ method: "POST" })
     const uid = context.userId;
 
     // Profile snapshot
-    const { data: prof } = await context.supabase
+    const { data: prof } = await supabaseAdmin
       .from("profiles")
       .select("home_country_code, current_country_code, location_mismatch_count, trust_level, verified")
       .eq("id", uid)
