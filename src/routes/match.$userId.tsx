@@ -258,24 +258,21 @@ function MatchExperience() {
               veiled={msgs.length === 0}
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h1 className="truncate font-display text-sm font-bold sm:text-base">
-                {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
-              </h1>
-              {profile.verified && <ShieldCheck className="h-3 w-3 shrink-0 text-primary" aria-label="Verified" />}
-            </div>
-            <div className="truncate text-[10px] text-muted-foreground">
-              {profile.city ?? profile.country ?? "—"}
-            </div>
-          </div>
           <button
             onClick={() => setDiscoveryOpen(true)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/15"
+            className="min-w-0 flex-1 text-left"
             aria-label="Open compatibility & insights"
           >
-            <Sparkles className="h-3 w-3" />
-            <span className="font-mono">{score}%</span>
+            <div className="flex items-center gap-1.5">
+              <span className="truncate font-display text-base font-bold">
+                {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
+              </span>
+              {profile.verified && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-label="Verified" />}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-primary">
+              <Heart className="h-3 w-3 fill-current" />
+              <span className="font-medium">{score}% Compatible</span>
+            </div>
           </button>
           {meId && meId !== userId && (
             <div className="relative shrink-0">
