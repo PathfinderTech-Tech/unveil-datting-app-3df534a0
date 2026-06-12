@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
   Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
-  Heart, Lock as LockIcon, ChevronUp,
+  Heart, Lock as LockIcon, ChevronUp, ChevronRight, Search,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -130,6 +131,8 @@ function Chat() {
   // (legacy collapsible state replaced by unified panel below)
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
   const isMobile = useIsMobile();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -517,16 +520,39 @@ function Chat() {
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
           style={{ height: "calc(100dvh - 72px)" }}
         >
-          <div className="flex items-center justify-between border-b border-border/40 px-5 py-5">
-            <div>
-              <h1 className="font-display text-2xl font-light tracking-tight">Messages</h1>
-              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                {convs.length} {convs.length === 1 ? "connection" : "connections"}
-              </p>
+          <div className="border-b border-border/40 px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between">
+              <h1 className="font-display text-2xl font-light tracking-tight bg-gradient-hero bg-clip-text text-transparent">UNVEIL</h1>
+              <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
+                <Heart className="h-4 w-4" />
+              </Link>
             </div>
-            <Link to="/matches" className="rounded-full bg-gradient-hero p-2.5 text-primary-foreground shadow-glow transition-transform hover:scale-105">
-              <Heart className="h-4 w-4" />
-            </Link>
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search conversations"
+                className="w-full rounded-full border border-border/60 bg-surface/60 py-2 pl-9 pr-3 text-[13px] outline-none placeholder:text-muted-foreground focus:border-primary"
+              />
+            </div>
+            <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {([
+                ["all","All"],["active","Active"],["d13","Day 1-3"],["d47","Day 4-7"],["locked","Locked"],
+              ] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setFilter(k)}
+                  className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-all ${
+                    filter === k
+                      ? "bg-gradient-hero text-primary-foreground shadow-glow"
+                      : "border border-border/60 text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {!quota.loading && !quota.unlimited && (
@@ -547,11 +573,30 @@ function Chat() {
           )}
 
           <div className="flex-1 overflow-y-auto p-2.5">
-            {convs.length === 0 ? (
-              <div className="m-2 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
-                No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.
-              </div>
-            ) : convs.map((c) => {
+            {(() => {
+              const q = search.trim().toLowerCase();
+              const filtered = convs.filter((c) => {
+                const pid = c.user_a === user.id ? c.user_b : c.user_a;
+                const p = peers[pid];
+                if (q && !(p?.first_name ?? "").toLowerCase().includes(q)) return false;
+                if (filter === "active") return isOnline(p?.last_seen_at);
+                if (filter === "locked") return !convLastMsg[c.id];
+                // d13 / d47 best-effort: based on last message age
+                if (filter === "d13" || filter === "d47") {
+                  if (!c.last_message_at) return false;
+                  const d = Math.floor((Date.now() - new Date(c.last_message_at).getTime()) / 86_400_000) + 1;
+                  return filter === "d13" ? d <= 3 : d >= 4 && d <= 7;
+                }
+                return true;
+              });
+              if (filtered.length === 0) {
+                return (
+                  <div className="m-2 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+                    {convs.length === 0 ? <>No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.</> : "No conversations match this filter."}
+                  </div>
+                );
+              }
+              return filtered.map((c) => {
               const pid = c.user_a === user.id ? c.user_b : c.user_a;
               const p = peers[pid];
               const pct = convCompat[c.id];
@@ -614,7 +659,8 @@ function Chat() {
                   </div>
                 </button>
               );
-            })}
+            });
+            })()}
           </div>
         </aside>
 
@@ -942,27 +988,123 @@ function Chat() {
 
                     <div className="flex-1 overflow-y-auto px-5 py-4">
                       <TabsContent value="insights" className="mt-0 space-y-3">
-                        {overallScore != null && band && (
-                          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-4">
-                            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
-                            <div className="mt-1 flex items-baseline gap-2">
-                              <span className="font-display text-4xl font-light tracking-tight">{overallScore}%</span>
-                              <span className={`text-xs ${band.tone}`}>{band.label}</span>
+                        {/* Compatibility card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("discovery")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                            <Sparkles className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Compatibility</span>
+                              <span className="font-mono text-xs text-primary">{overallScore ?? 0}%</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">{band?.label ?? "—"}</p>
+                            <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, overallScore ?? 0)}%` }} />
                             </div>
                           </div>
-                        )}
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Reveal Journey card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("reveal")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+                            <Calendar className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Reveal Journey</span>
+                              <span className="font-mono text-xs text-muted-foreground">Day {dayN ?? 1} of 7</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {contactShareUnlocked ? "Contact reveal unlocked" : "You're in the discovery phase"}
+                            </p>
+                            <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${((dayN ?? 1) / 7) * 100}%` }} />
+                            </div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Icebreakers card */}
+                        <button
+                          type="button"
+                          onClick={() => { setPanelTab("icebreakers"); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                            <MessageSquare className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Icebreakers</span>
+                              <span className="font-mono text-xs text-muted-foreground">{ideas.length || 3}</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">AI-generated questions</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Contact Reveal card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("reveal")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+                            {contactShareUnlocked ? <Phone className="h-4 w-4" /> : <LockIcon className="h-4 w-4" />}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Contact Reveal</span>
+                              <span className={`font-mono text-xs ${contactShareUnlocked ? "text-emerald-400" : "text-muted-foreground"}`}>
+                                {contactShareUnlocked ? "Unlocked" : "Locked"}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {contactShareUnlocked ? "You can exchange contacts" : "Complete Day 7 to unlock"}
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Shared Interests card */}
                         {insights.length > 0 && (
-                          <ul className="grid gap-1.5">
-                            {insights.map((line) => (
-                              <li key={line} className="flex items-start gap-2 rounded-xl border border-border/40 bg-surface/40 p-3 text-[13px] text-foreground/85">
-                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                                  <Check className="h-2.5 w-2.5" />
-                                </span>
-                                {line}
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="rounded-2xl border border-border/60 bg-surface/40 p-4">
+                            <div className="flex items-center gap-3">
+                              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                                <HeartIcon className="h-4 w-4" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[13px] font-semibold">Shared Interests</span>
+                                  <span className="font-mono text-xs text-muted-foreground">{insights.length}</span>
+                                </div>
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">Things you have in common</p>
+                              </div>
+                            </div>
+                            <ul className="mt-3 grid gap-1.5">
+                              {insights.map((line) => (
+                                <li key={line} className="flex items-start gap-2 text-[12px] text-foreground/85">
+                                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                                    <Check className="h-2.5 w-2.5" />
+                                  </span>
+                                  {line}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
+
+                        {/* Compatibility metrics breakdown */}
                         <div className="grid grid-cols-2 gap-2">
                           {metrics.map((m) => (
                             <div key={m.label} className="rounded-2xl border border-border/60 bg-surface/40 p-3">
