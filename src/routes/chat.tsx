@@ -713,19 +713,23 @@ function Chat() {
 
                 {/* Compatibility dashboard (collapsible) */}
                 {metrics.length > 0 && (
-                  <div className="border-t border-border/30">
+                  <div className="border-t border-border/30 px-5 py-2.5">
                     <button
                       onClick={() => setCompatOpen((v) => !v)}
-                      className="flex w-full items-center justify-between px-5 py-2.5 text-left transition-colors hover:bg-surface/30"
+                      className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-3 text-left backdrop-blur-xl transition-colors hover:border-primary/50"
+                      aria-expanded={compatOpen}
                     >
-                      <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
-                        <Sparkles className="h-3 w-3 text-accent" /> Why you match
-                      </span>
-                      <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
+                      </div>
+                      {overallScore != null && (
+                        <span className="font-display text-xl font-light tracking-tight text-foreground">{overallScore}%</span>
+                      )}
+                      <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${compatOpen ? "rotate-180" : ""}`} />
                     </button>
                     {compatOpen && (
-                      <div className="px-5 pb-4 pt-1">
-                        {/* Insights */}
+                      <div className="pt-3">
                         {insights.length > 0 && (
                           <ul className="mb-3 grid gap-1.5 sm:grid-cols-2">
                             {insights.map((line) => (
@@ -737,15 +741,6 @@ function Chat() {
                               </li>
                             ))}
                           </ul>
-                        )}
-                        {/* Overall + metric cards */}
-                        {overallScore != null && (
-                          <div className="mb-2.5 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-3.5 backdrop-blur-xl">
-                            <div className="flex items-center justify-between">
-                              <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</span>
-                              <span className="font-display text-2xl font-light tracking-tight text-foreground">{overallScore}%</span>
-                            </div>
-                          </div>
                         )}
                         <div className="grid grid-cols-2 gap-2">
                           {metrics.map((m) => (
