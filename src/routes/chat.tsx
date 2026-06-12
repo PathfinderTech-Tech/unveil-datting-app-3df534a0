@@ -614,7 +614,7 @@ function Chat() {
         {/* ============ CHAT PANEL ============ */}
         <section
           className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100vh - 72px)" }}
+          style={{ height: "calc(100dvh - 72px)" }}
         >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
