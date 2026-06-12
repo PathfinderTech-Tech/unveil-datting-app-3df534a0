@@ -633,7 +633,10 @@ function Chat() {
               <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
                 <div className="flex items-center gap-4 px-5 py-4">
                   <button
-                    onClick={() => setActive(null)}
+                    onClick={() => {
+                      setActive(null);
+                      navigate({ to: "/chat", search: {}, replace: true });
+                    }}
                     className="rounded-full p-1.5 hover:bg-surface lg:hidden"
                     aria-label="Back"
                   >
