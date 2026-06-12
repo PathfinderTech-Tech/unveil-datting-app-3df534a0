@@ -102,7 +102,33 @@ function MatchExperience() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [discoveryOpen, setDiscoveryOpen] = useState(false);
+  const [sheetTab, setSheetTab] = useState<"compat" | "discovery" | "icebreakers" | "reveal">("compat");
+  const [icebreakers, setIcebreakers] = useState<Icebreaker[] | null>(null);
+  const [icebreakersLoading, setIcebreakersLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  function openSheet(tab: typeof sheetTab) { setSheetTab(tab); setDiscoveryOpen(true); }
+
+  async function loadIcebreakers(force = false) {
+    if (icebreakersLoading) return;
+    if (icebreakers && !force) return;
+    setIcebreakersLoading(true);
+    try {
+      const res = await generateIcebreakers({ data: { peerId: userId } });
+      if ("error" in res) { toast.error(res.error); }
+      else { setIcebreakers(res.icebreakers); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't load icebreakers");
+    } finally {
+      setIcebreakersLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (discoveryOpen && sheetTab === "icebreakers" && !icebreakers) void loadIcebreakers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discoveryOpen, sheetTab]);
+
 
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
