@@ -556,7 +556,10 @@ function Chat() {
               return (
                 <button
                   key={c.id}
-                  onClick={() => setActive(c)}
+                  onClick={() => {
+                    setActive(c);
+                    navigate({ to: "/chat", search: { c: c.id }, replace: true });
+                  }}
                   className={`group mb-1.5 flex w-full items-center gap-3.5 rounded-2xl p-3 text-left transition-all ${
                     isActive
                       ? "bg-gradient-to-r from-primary/20 to-accent/10 ring-1 ring-primary/40 shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.4)]"
