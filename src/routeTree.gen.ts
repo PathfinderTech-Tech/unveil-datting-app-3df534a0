@@ -30,6 +30,7 @@ import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MatchesRouteImport } from './routes/matches'
+import { Route as MatchDemoRouteImport } from './routes/match-demo'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InsightsRouteImport } from './routes/insights'
@@ -167,6 +168,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const MatchesRoute = MatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchDemoRoute = MatchDemoRouteImport.update({
+  id: '/match-demo',
+  path: '/match-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManageSubscriptionRoute = ManageSubscriptionRouteImport.update({
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
+  '/match-demo': typeof MatchDemoRoute
   '/matches': typeof MatchesRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
@@ -412,6 +419,7 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
+  '/match-demo': typeof MatchDemoRoute
   '/matches': typeof MatchesRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
@@ -469,6 +477,7 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
+  '/match-demo': typeof MatchDemoRoute
   '/matches': typeof MatchesRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
@@ -527,6 +536,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/login'
     | '/manage-subscription'
+    | '/match-demo'
     | '/matches'
     | '/messages'
     | '/onboarding'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/login'
     | '/manage-subscription'
+    | '/match-demo'
     | '/matches'
     | '/messages'
     | '/onboarding'
@@ -639,6 +650,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/login'
     | '/manage-subscription'
+    | '/match-demo'
     | '/matches'
     | '/messages'
     | '/onboarding'
@@ -696,6 +708,7 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   LoginRoute: typeof LoginRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
+  MatchDemoRoute: typeof MatchDemoRoute
   MatchesRoute: typeof MatchesRoute
   MessagesRoute: typeof MessagesRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -880,6 +893,13 @@ declare module '@tanstack/react-router' {
       path: '/matches'
       fullPath: '/matches'
       preLoaderRoute: typeof MatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/match-demo': {
+      id: '/match-demo'
+      path: '/match-demo'
+      fullPath: '/match-demo'
+      preLoaderRoute: typeof MatchDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manage-subscription': {
@@ -1156,6 +1176,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   LoginRoute: LoginRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
+  MatchDemoRoute: MatchDemoRoute,
   MatchesRoute: MatchesRoute,
   MessagesRoute: MessagesRoute,
   OnboardingRoute: OnboardingRoute,
