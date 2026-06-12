@@ -127,9 +127,7 @@ function Chat() {
   const [ideaCategory, setIdeaCategory] = useState<IcebreakerCategory | undefined>(undefined);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [ideasLoading, setIdeasLoading] = useState(false);
-  const [scaffoldOpen, setScaffoldOpen] = useState(false);
-  const [compatOpen, setCompatOpen] = useState(false);
-  const [revealOpen, setRevealOpen] = useState(false);
+  // (legacy collapsible state replaced by unified panel below)
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
   const isMobile = useIsMobile();
