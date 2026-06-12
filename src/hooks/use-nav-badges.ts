@@ -19,20 +19,15 @@ export function useNavBadges() {
 
   const refresh = useCallback(async () => {
     if (!userId) { setMatches(0); setDiscover(0); return; }
-    const [{ data: mutuals }, { data: incoming }] = await Promise.all([
+    const [{ data: mutuals }, { data: incomingCount }] = await Promise.all([
       supabase.from("matches")
         .select("id, created_at, user_id, matched_user_id")
         .eq("mutual_interest", true)
         .gte("created_at", new Date(Date.now() - 7 * 86400_000).toISOString()),
-      supabase.from("matches")
-        .select("id")
-        .eq("matched_user_id", userId)
-        .eq("user_interested", true)
-        .eq("mutual_interest", false)
-        .eq("passed", false),
+      (supabase as any).rpc("get_pending_likes_count"),
     ]);
     setMatches((mutuals ?? []).length);
-    setDiscover((incoming ?? []).length);
+    setDiscover(typeof incomingCount === "number" ? incomingCount : 0);
   }, [userId]);
 
   useEffect(() => {
