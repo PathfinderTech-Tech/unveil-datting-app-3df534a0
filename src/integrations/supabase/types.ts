@@ -2087,6 +2087,7 @@ export type Database = {
           trust_score: number
         }[]
       }
+      get_pending_likes_count: { Args: never; Returns: number }
       get_puzzle_round: {
         Args: { _category: string; _limit?: number }
         Returns: {
