@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban, X, Lock, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
@@ -11,6 +11,7 @@ import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
+import { generateIcebreakers, type Icebreaker } from "@/lib/icebreakers.functions";
 
 
 export const Route = createFileRoute("/match/$userId")({
