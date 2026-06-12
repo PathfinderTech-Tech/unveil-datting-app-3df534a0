@@ -425,7 +425,7 @@ function MatchExperience() {
               <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setDiscoveryOpen(true)}
+                  onClick={() => openSheet("compat")}
                   aria-label="Open features"
                   className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow"
                 >
