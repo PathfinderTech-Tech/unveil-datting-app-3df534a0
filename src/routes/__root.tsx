@@ -154,7 +154,7 @@ function RootComponent() {
   // Full-screen, composer-driven views: suppress site footer and mobile bottom
   // nav so they cannot layer behind the chat composer / emoji tray / voice
   // recorder on iPhone screen sizes (SE → Pro Max).
-  const isChromeless = pathname.startsWith("/chat");
+  const isChromeless = pathname.startsWith("/chat") || pathname.startsWith("/match/");
 
   return (
     <QueryClientProvider client={queryClient}>
