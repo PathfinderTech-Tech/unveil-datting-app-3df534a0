@@ -862,8 +862,8 @@ function Chat() {
                 <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                   <button
                     type="button"
-                    onClick={() => fetchIcebreakers(ideaCategory)}
-                    disabled={!peerId || ideasLoading}
+                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                    disabled={!peerId}
                     title="AI Icebreakers"
                     aria-label="AI Icebreakers"
                     className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
