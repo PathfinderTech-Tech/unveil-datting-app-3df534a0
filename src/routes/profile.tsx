@@ -112,8 +112,12 @@ function ProfilePage() {
     if (!user) return;
     let alive = true;
     (async () => {
-      const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-      if (alive) setProfile(p as ProfileRow | null);
+      const [{ data: p }, { data: extras }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        (supabase as any).rpc("get_my_profile_extras"),
+      ]);
+      const extra = Array.isArray(extras) ? extras[0] : extras;
+      if (alive) setProfile(p ? ({ ...p, subscription_tier: extra?.subscription_tier ?? null } as ProfileRow) : null);
       const { data: v } = await supabase
         .from("voice_prompts")
         .select("id, prompt, audio_url, duration_seconds")
