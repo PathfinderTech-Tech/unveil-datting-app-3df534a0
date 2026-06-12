@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -226,15 +225,14 @@ function MatchExperience() {
   }
 
   if (loading || !profile) {
-    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
+    return <div className="min-h-[100dvh] bg-background"><div className="p-12 text-center text-muted-foreground">…</div></div>;
   }
 
   const band = compat ? bandLabel(compat.overall) : null;
   const score = compat?.overall ?? 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <UnveilNav />
+    <div className="min-h-[100dvh] bg-background">
       <MessagePaywallModal
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
@@ -243,7 +241,7 @@ function MatchExperience() {
         returnTo={`/match/${userId}`}
       />
 
-      <div className="mx-auto flex h-[calc(100dvh-3.5rem)] max-w-3xl flex-col px-2 sm:px-4">
+      <div className="mx-auto flex h-[100dvh] max-w-3xl flex-col px-2 sm:px-4" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         {/* COMPACT STICKY HEADER */}
         <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-1 py-2 backdrop-blur sm:gap-3">
           <Link to="/matches" aria-label="Back" className="rounded-full p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">
@@ -260,24 +258,21 @@ function MatchExperience() {
               veiled={msgs.length === 0}
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h1 className="truncate font-display text-sm font-bold sm:text-base">
-                {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
-              </h1>
-              {profile.verified && <ShieldCheck className="h-3 w-3 shrink-0 text-primary" aria-label="Verified" />}
-            </div>
-            <div className="truncate text-[10px] text-muted-foreground">
-              {profile.city ?? profile.country ?? "—"}
-            </div>
-          </div>
           <button
             onClick={() => setDiscoveryOpen(true)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/15"
+            className="min-w-0 flex-1 text-left"
             aria-label="Open compatibility & insights"
           >
-            <Sparkles className="h-3 w-3" />
-            <span className="font-mono">{score}%</span>
+            <div className="flex items-center gap-1.5">
+              <span className="truncate font-display text-base font-bold">
+                {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
+              </span>
+              {profile.verified && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-label="Verified" />}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-primary">
+              <Heart className="h-3 w-3 fill-current" />
+              <span className="font-medium">{score}% Compatible</span>
+            </div>
           </button>
           {meId && meId !== userId && (
             <div className="relative shrink-0">
