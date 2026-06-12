@@ -38,12 +38,14 @@ function Manage() {
     }
     (async () => {
       const env = getStripeEnvironment();
-      const [{ data: p }, { data: s }, { data: t }] = await Promise.all([
-        supabase.from("profiles").select("verified, badge_paid, premium_until, subscription_tier").eq("id", user.id).maybeSingle(),
+      const [{ data: p }, { data: extras }, { data: s }, { data: t }] = await Promise.all([
+        supabase.from("profiles").select("verified, badge_paid, premium_until").eq("id", user.id).maybeSingle(),
+        (supabase as any).rpc("get_my_profile_extras"),
         supabase.from("subscriptions").select("*").eq("user_id", user.id).eq("environment", env).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
       ]);
-      setProfile(p);
+      const extra = Array.isArray(extras) ? extras[0] : extras;
+      setProfile(p ? { ...p, subscription_tier: extra?.subscription_tier ?? null } : p);
       setSub(s);
       setTx(t || []);
     })();
