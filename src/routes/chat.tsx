@@ -511,12 +511,12 @@ function Chat() {
         {/* ============ SIDEBAR / MATCH LIST ============ */}
         <aside
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100vh - 72px)" }}
+          style={{ height: "calc(100dvh - 72px)" }}
         >
           <div className="flex items-center justify-between border-b border-border/40 px-5 py-5">
             <div>
               <h1 className="font-display text-2xl font-light tracking-tight">Messages</h1>
-              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/80">
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                 {convs.length} {convs.length === 1 ? "connection" : "connections"}
               </p>
             </div>
