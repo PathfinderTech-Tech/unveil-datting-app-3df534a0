@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { ArrowLeft, MapPin, ShieldCheck, Send, ChevronDown, ChevronUp, Sparkles, AlertTriangle, Heart, MessageCircle, MoreVertical, Flag, Ban } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban } from "lucide-react";
 import { toast } from "sonner";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
@@ -12,7 +12,7 @@ import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
-import { LocationTrustBadge } from "@/components/LocationTrustBadge";
+
 
 export const Route = createFileRoute("/match/$userId")({
   head: () => ({ meta: [{ title: "Match — UNVEIL" }] }),
@@ -243,24 +243,55 @@ function MatchExperience() {
         returnTo={`/match/${userId}`}
       />
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6">
-        <div className="flex items-center justify-between">
-          <Link to="/matches" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back
+      <div className="mx-auto flex h-[calc(100dvh-3.5rem)] max-w-3xl flex-col px-2 sm:px-4">
+        {/* COMPACT STICKY HEADER */}
+        <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-1 py-2 backdrop-blur sm:gap-3">
+          <Link to="/matches" aria-label="Back" className="rounded-full p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" />
           </Link>
+          <div className="shrink-0">
+            <ProfileAvatar
+              userId={profile.id}
+              name={profile.first_name}
+              discoveryMode={profile.discovery_mode ?? "photo"}
+              avatarUrl={profile.avatar_url ?? null}
+              photoUrl={profile.photo_url ?? null}
+              size={36}
+              veiled={msgs.length === 0}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <h1 className="truncate font-display text-sm font-bold sm:text-base">
+                {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
+              </h1>
+              {profile.verified && <ShieldCheck className="h-3 w-3 shrink-0 text-primary" aria-label="Verified" />}
+            </div>
+            <div className="truncate text-[10px] text-muted-foreground">
+              {profile.city ?? profile.country ?? "—"}
+            </div>
+          </div>
+          <button
+            onClick={() => setDiscoveryOpen(true)}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/15"
+            aria-label="Open compatibility & insights"
+          >
+            <Sparkles className="h-3 w-3" />
+            <span className="font-mono">{score}%</span>
+          </button>
           {meId && meId !== userId && (
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="More options"
                 aria-haspopup="true"
                 aria-expanded={menuOpen}
-                className="rounded-full border border-border bg-surface/60 p-1.5 hover:bg-surface"
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground"
               >
                 <MoreVertical className="h-4 w-4" />
               </button>
               {menuOpen && (
-                <div role="menu" className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                <div role="menu" className="absolute right-0 z-30 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                   <button
                     role="menuitem"
                     onClick={() => { setMenuOpen(false); setReportOpen(true); }}
@@ -289,7 +320,8 @@ function MatchExperience() {
               )}
             </div>
           )}
-        </div>
+        </header>
+
         <ReportUserDialog
           open={reportOpen}
           onClose={() => setReportOpen(false)}
@@ -299,124 +331,12 @@ function MatchExperience() {
           }}
         />
 
-        {/* HERO — photo + identity + score */}
-        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-4 shadow-glow backdrop-blur sm:p-5">
-          <div className="flex items-center gap-4">
-            <div className="shrink-0">
-              <ProfileAvatar
-                userId={profile.id}
-                name={profile.first_name}
-                discoveryMode={profile.discovery_mode ?? "photo"}
-                avatarUrl={profile.avatar_url ?? null}
-                photoUrl={profile.photo_url ?? null}
-                size={88}
-                veiled={msgs.length === 0}
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <h1 className="truncate font-display text-xl font-bold sm:text-2xl">
-                  {profile.first_name}{profile.age ? `, ${profile.age}` : ""}
-                </h1>
-                {profile.verified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
-                    <ShieldCheck className="h-3 w-3" /> Verified
-                  </span>
-                )}
-                <LocationTrustBadge profile={profile} size="xs" />
-
-              </div>
-              <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                <span className="truncate">{profile.city ?? profile.country ?? "—"}</span>
-              </div>
-              {band && (
-                <div className={`mt-1.5 font-mono text-[10px] uppercase tracking-widest ${band.tone}`}>{band.label}</div>
-              )}
-            </div>
-            <div className="shrink-0"><ScoreRing value={score} size={84} /></div>
-          </div>
-
-          {/* Compatibility dashboard */}
-          {compat && (
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-              <ScoreBar label="Values" value={compat.values_score} />
-              <ScoreBar label="Lifestyle" value={compat.lifestyle} />
-              <ScoreBar label="Communication" value={compat.communication} />
-              <ScoreBar label="Goals" value={compat.goals} />
-            </div>
-          )}
-
-          <div className="mt-3">
-            <SlowRevealTimeline day={day} />
-          </div>
-        </div>
-
-        {/* Not mutual yet — show interest CTA */}
-        {!mutual && (
-          <div className="rounded-3xl border border-border bg-card p-5 text-center">
-            <p className="text-sm text-muted-foreground">Send interest to unlock the conversation.</p>
-            <button onClick={handleLike}
-              className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
-              <Heart className="h-4 w-4" /> Open If Mutual
-            </button>
-          </div>
-        )}
-
-        {/* Discovery cards (collapsible) */}
-        {mutual && (
-          <div className="rounded-3xl border border-border bg-card/70 backdrop-blur">
-            <button
-              onClick={() => setDiscoveryOpen((v) => !v)}
-              className="flex w-full items-center justify-between px-4 py-3 text-left"
-            >
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Discovery · journey day {day}
-              </span>
-              {discoveryOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-            {discoveryOpen && (
-              <div className="space-y-3 px-4 pb-4">
-                {profile.bio && (
-                  <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
-                )}
-                {compat?.strengths?.length ? (
-                  <div className="rounded-2xl border border-border bg-surface/50 p-3">
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Strengths</div>
-                    <ul className="mt-1.5 space-y-1 text-xs">
-                      {compat.strengths.slice(0, 3).map((s) => (
-                        <li key={s} className="flex items-start gap-1.5"><Sparkles className="mt-0.5 h-3 w-3 text-accent" />{s}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {compat?.friction?.length ? (
-                  <div className="rounded-2xl border border-border bg-surface/50 p-3">
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Friction to watch</div>
-                    <ul className="mt-1.5 space-y-1 text-xs">
-                      {compat.friction.slice(0, 2).map((s) => (
-                        <li key={s} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3 w-3 text-yellow-500" />{s}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* CONVERSATION — dominant 60vh+ surface */}
-        {mutual && conversationId && (
-          <section className="flex min-h-[60vh] flex-col overflow-hidden rounded-3xl border border-primary/20 bg-card shadow-glow">
-            <div className="flex items-center gap-2 border-b border-border bg-gradient-to-r from-primary/5 to-accent/5 px-4 py-2.5">
-              <MessageCircle className="h-3.5 w-3.5 text-primary" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Conversation with {profile.first_name}</span>
-            </div>
-
-            <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-4 sm:px-4">
+        {/* CONVERSATION — dominant surface */}
+        {mutual && conversationId ? (
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-1 py-3 sm:px-2">
               {msgs.length === 0 && (
-                <div className="m-auto max-w-xs text-center text-sm text-muted-foreground">
+                <div className="m-auto max-w-xs pt-8 text-center text-sm text-muted-foreground">
                   Say hi to {profile.first_name}. Lead with something that matters to you.
                 </div>
               )}
@@ -436,17 +356,18 @@ function MatchExperience() {
               })}
             </div>
 
-            <div className="border-t border-border bg-card/80 p-2.5 backdrop-blur">
+            {/* Composer pinned at bottom */}
+            <div
+              className="shrink-0 border-t border-border bg-card/90 px-2 pt-2 backdrop-blur"
+              style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+            >
               {!quota.loading && !quota.unlimited && (
                 <div className="mb-1.5 px-1 text-[10px] text-muted-foreground">
                   {quota.remaining} of {quota.dailyLimit} interactions remaining ·{" "}
                   <Link to="/checkout" search={{ product: "message_pass", returnTo: `/match/${userId}` } as never} className="text-accent underline">Daily Pass $1.99</Link>
                 </div>
               )}
-              <form
-                onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="flex items-end gap-2"
-              >
+              <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
                 <textarea
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
@@ -466,8 +387,99 @@ function MatchExperience() {
               </form>
             </div>
           </section>
+        ) : (
+          /* Not mutual yet — show interest CTA */
+          <div className="flex flex-1 items-center justify-center p-6">
+            <div className="rounded-3xl border border-border bg-card p-6 text-center">
+              <p className="text-sm text-muted-foreground">Send interest to unlock the conversation.</p>
+              <button onClick={handleLike}
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
+                <Heart className="h-4 w-4" /> Open If Mutual
+              </button>
+            </div>
+          </div>
         )}
       </div>
+
+      {/* BOTTOM SHEET — secondary features */}
+      {discoveryOpen && (
+        <div className="fixed inset-0 z-40 flex flex-col justify-end" role="dialog" aria-modal="true">
+          <button
+            aria-label="Close insights"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setDiscoveryOpen(false)}
+          />
+          <div className="relative max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-border bg-card shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
+              <div>
+                <div className="font-display text-base font-bold">Compatibility & Discovery</div>
+                {band && (
+                  <div className={`font-mono text-[10px] uppercase tracking-widest ${band.tone}`}>{band.label} · {score}%</div>
+                )}
+              </div>
+              <button
+                onClick={() => setDiscoveryOpen(false)}
+                className="rounded-full border border-border bg-surface/60 px-3 py-1 text-xs hover:bg-surface"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-4 px-4 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+              {/* Overall Compatibility */}
+              <div className="flex items-center gap-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 p-4">
+                <ScoreRing value={score} size={84} />
+                {compat && (
+                  <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2">
+                    <ScoreBar label="Values" value={compat.values_score} />
+                    <ScoreBar label="Lifestyle" value={compat.lifestyle} />
+                    <ScoreBar label="Communication" value={compat.communication} />
+                    <ScoreBar label="Goals" value={compat.goals} />
+                  </div>
+                )}
+              </div>
+
+              {/* Day Discovery / Slow Reveal */}
+              <div className="rounded-2xl border border-border bg-surface/40 p-3">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Discovery · journey day {day}
+                </div>
+                <SlowRevealTimeline day={day} />
+              </div>
+
+              {/* Bio + strengths + friction */}
+              {profile.bio && (
+                <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
+              )}
+              {compat?.strengths?.length ? (
+                <div className="rounded-2xl border border-border bg-surface/50 p-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Strengths</div>
+                  <ul className="mt-1.5 space-y-1 text-xs">
+                    {compat.strengths.slice(0, 3).map((s) => (
+                      <li key={s} className="flex items-start gap-1.5"><Sparkles className="mt-0.5 h-3 w-3 text-accent" />{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {compat?.friction?.length ? (
+                <div className="rounded-2xl border border-border bg-surface/50 p-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Friction to watch</div>
+                  <ul className="mt-1.5 space-y-1 text-xs">
+                    {compat.friction.slice(0, 2).map((s) => (
+                      <li key={s} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3 w-3 text-yellow-500" />{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {/* Contact reveal */}
+              {mutual && (
+                <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
