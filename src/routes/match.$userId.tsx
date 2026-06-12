@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { ArrowLeft, MapPin, ShieldCheck, Send, ChevronDown, ChevronUp, Sparkles, AlertTriangle, Heart, MessageCircle, MoreVertical, Flag, Ban } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban } from "lucide-react";
 import { toast } from "sonner";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
