@@ -130,6 +130,9 @@ function Chat() {
   const [scaffoldOpen, setScaffoldOpen] = useState(false);
   const [compatOpen, setCompatOpen] = useState(false);
   const [revealOpen, setRevealOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
+  const isMobile = useIsMobile();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
