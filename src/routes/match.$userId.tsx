@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban, X, Lock, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
@@ -11,6 +11,7 @@ import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
+import { generateIcebreakers, type Icebreaker } from "@/lib/icebreakers.functions";
 
 
 export const Route = createFileRoute("/match/$userId")({
@@ -101,7 +102,33 @@ function MatchExperience() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [discoveryOpen, setDiscoveryOpen] = useState(false);
+  const [sheetTab, setSheetTab] = useState<"compat" | "discovery" | "icebreakers" | "reveal">("compat");
+  const [icebreakers, setIcebreakers] = useState<Icebreaker[] | null>(null);
+  const [icebreakersLoading, setIcebreakersLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  function openSheet(tab: typeof sheetTab) { setSheetTab(tab); setDiscoveryOpen(true); }
+
+  async function loadIcebreakers(force = false) {
+    if (icebreakersLoading) return;
+    if (icebreakers && !force) return;
+    setIcebreakersLoading(true);
+    try {
+      const res = await generateIcebreakers({ data: { peerId: userId } });
+      if ("error" in res) { toast.error(res.error); }
+      else { setIcebreakers(res.icebreakers); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't load icebreakers");
+    } finally {
+      setIcebreakersLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (discoveryOpen && sheetTab === "icebreakers" && !icebreakers) void loadIcebreakers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discoveryOpen, sheetTab]);
+
 
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -259,7 +286,7 @@ function MatchExperience() {
             />
           </div>
           <button
-            onClick={() => setDiscoveryOpen(true)}
+            onClick={() => openSheet("compat")}
             className="min-w-0 flex-1 text-left"
             aria-label="Open compatibility & insights"
           >
@@ -273,6 +300,13 @@ function MatchExperience() {
               <Heart className="h-3 w-3 fill-current" />
               <span className="font-medium">{score}% Compatible</span>
             </div>
+          </button>
+          <button
+            onClick={() => openSheet("icebreakers")}
+            aria-label="Icebreakers"
+            className="shrink-0 rounded-full border border-primary/30 p-1.5 text-primary hover:bg-primary/10"
+          >
+            <Sparkles className="h-4 w-4" />
           </button>
           {meId && meId !== userId && (
             <div className="relative shrink-0">
@@ -391,7 +425,7 @@ function MatchExperience() {
               <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setDiscoveryOpen(true)}
+                  onClick={() => openSheet("compat")}
                   aria-label="Open features"
                   className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow"
                 >
@@ -430,7 +464,7 @@ function MatchExperience() {
         )}
       </div>
 
-      {/* BOTTOM SHEET — secondary features */}
+      {/* BOTTOM SHEET — tabbed extra features (matches prototype) */}
       {discoveryOpen && (
         <div className="fixed inset-0 z-40 flex flex-col justify-end" role="dialog" aria-modal="true">
           <button
@@ -438,72 +472,172 @@ function MatchExperience() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setDiscoveryOpen(false)}
           />
-          <div className="relative max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-border bg-card shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
-              <div>
-                <div className="font-display text-base font-bold">Compatibility & Discovery</div>
-                {band && (
-                  <div className={`font-mono text-[10px] uppercase tracking-widest ${band.tone}`}>{band.label} · {score}%</div>
-                )}
-              </div>
+          <div className="relative max-h-[85dvh] overflow-hidden rounded-t-3xl border-t border-border bg-card shadow-2xl">
+            {/* Grab handle */}
+            <div className="flex justify-center pt-2">
+              <div className="h-1 w-10 rounded-full bg-border" />
+            </div>
+
+            {/* Tab strip */}
+            <div className="flex items-center gap-1 overflow-x-auto px-3 pb-2 pt-3">
+              {([
+                { id: "compat", label: "Compatibility" },
+                { id: "discovery", label: `Day ${day} Discovery` },
+                { id: "icebreakers", label: "Icebreakers" },
+                { id: "reveal", label: "Contact Reveal" },
+              ] as const).map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setSheetTab(t.id)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    sheetTab === t.id
+                      ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-glow"
+                      : "bg-surface/70 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
               <button
                 onClick={() => setDiscoveryOpen(false)}
-                className="rounded-full border border-border bg-surface/60 px-3 py-1 text-xs hover:bg-surface"
+                aria-label="Close"
+                className="ml-auto shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground"
               >
-                Close
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="space-y-4 px-4 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-              {/* Overall Compatibility */}
-              <div className="flex items-center gap-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 p-4">
-                <ScoreRing value={score} size={84} />
-                {compat && (
-                  <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2">
-                    <ScoreBar label="Values" value={compat.values_score} />
-                    <ScoreBar label="Lifestyle" value={compat.lifestyle} />
-                    <ScoreBar label="Communication" value={compat.communication} />
-                    <ScoreBar label="Goals" value={compat.goals} />
+            <div
+              className="max-h-[70dvh] overflow-y-auto px-4 pb-6 pt-2"
+              style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+            >
+              {/* ── COMPATIBILITY TAB ── */}
+              {sheetTab === "compat" && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 p-5">
+                    <ScoreRing value={score} size={120} />
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-foreground">Overall Compatibility</div>
+                      {band && (
+                        <div className={`mt-0.5 font-mono text-[10px] uppercase tracking-widest ${band.tone}`}>{band.label}</div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* Day Discovery / Slow Reveal */}
-              <div className="rounded-2xl border border-border bg-surface/40 p-3">
-                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Discovery · journey day {day}
+                  {compat && (
+                    <div className="space-y-3 rounded-2xl border border-border bg-surface/40 p-4">
+                      <ScoreBar label="Values" value={compat.values_score} />
+                      <ScoreBar label="Communication" value={compat.communication} />
+                      <ScoreBar label="Lifestyle" value={compat.lifestyle} />
+                      <ScoreBar label="Future Goals" value={compat.goals} />
+                    </div>
+                  )}
+                  {compat?.strengths?.length ? (
+                    <div className="rounded-2xl border border-border bg-surface/50 p-3">
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Strengths</div>
+                      <ul className="mt-1.5 space-y-1 text-xs">
+                        {compat.strengths.slice(0, 3).map((s) => (
+                          <li key={s} className="flex items-start gap-1.5"><Sparkles className="mt-0.5 h-3 w-3 text-accent" />{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {compat?.friction?.length ? (
+                    <div className="rounded-2xl border border-border bg-surface/50 p-3">
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Friction to watch</div>
+                      <ul className="mt-1.5 space-y-1 text-xs">
+                        {compat.friction.slice(0, 2).map((s) => (
+                          <li key={s} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3 w-3 text-yellow-500" />{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {profile.bio && (
+                    <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
+                  )}
                 </div>
-                <SlowRevealTimeline day={day} />
-              </div>
-
-              {/* Bio + strengths + friction */}
-              {profile.bio && (
-                <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
               )}
-              {compat?.strengths?.length ? (
-                <div className="rounded-2xl border border-border bg-surface/50 p-3">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Strengths</div>
-                  <ul className="mt-1.5 space-y-1 text-xs">
-                    {compat.strengths.slice(0, 3).map((s) => (
-                      <li key={s} className="flex items-start gap-1.5"><Sparkles className="mt-0.5 h-3 w-3 text-accent" />{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {compat?.friction?.length ? (
-                <div className="rounded-2xl border border-border bg-surface/50 p-3">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Friction to watch</div>
-                  <ul className="mt-1.5 space-y-1 text-xs">
-                    {compat.friction.slice(0, 2).map((s) => (
-                      <li key={s} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3 w-3 text-yellow-500" />{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
 
-              {/* Contact reveal */}
-              {mutual && (
-                <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
+              {/* ── DAY DISCOVERY TAB ── */}
+              {sheetTab === "discovery" && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 p-5 text-center">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Day {day} of 7</div>
+                    <ScoreRing value={Math.round((day / 7) * 100)} size={110} />
+                    <p className="max-w-xs text-sm text-foreground/85">
+                      You're in the discovery phase. Continue chatting to unlock more about each other.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface/40 p-3">
+                    <SlowRevealTimeline day={day} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── ICEBREAKERS TAB ── */}
+              {sheetTab === "icebreakers" && (
+                <div className="space-y-3">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Break the ice with meaningful questions.</p>
+                  </div>
+                  {icebreakersLoading && (
+                    <div className="py-8 text-center text-sm text-muted-foreground">Generating prompts…</div>
+                  )}
+                  {!icebreakersLoading && icebreakers && icebreakers.length === 0 && (
+                    <div className="py-8 text-center text-sm text-muted-foreground">No prompts yet.</div>
+                  )}
+                  {!icebreakersLoading && icebreakers?.map((ib, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setDraft(ib.text); setDiscoveryOpen(false); }}
+                      className="block w-full rounded-2xl border border-border bg-surface/60 p-4 text-left text-sm text-foreground hover:border-primary/40 hover:bg-surface"
+                    >
+                      {ib.text}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => loadIcebreakers(true)}
+                    disabled={icebreakersLoading}
+                    className="mx-auto mt-2 flex items-center gap-2 rounded-full border border-border bg-surface/70 px-4 py-2 text-xs text-foreground hover:bg-surface disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${icebreakersLoading ? "animate-spin" : ""}`} />
+                    Suggest Another
+                  </button>
+                </div>
+              )}
+
+              {/* ── CONTACT REVEAL TAB ── */}
+              {sheetTab === "reveal" && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface/40 p-6 text-center">
+                    <div className="grid h-16 w-16 place-items-center rounded-full border border-primary/30 bg-primary/10">
+                      <Lock className="h-7 w-7 text-primary" />
+                    </div>
+                    <p className="max-w-xs text-sm text-foreground/85">
+                      Reveal contact info to continue outside UNVEIL.
+                    </p>
+                  </div>
+                  <ul className="space-y-2 rounded-2xl border border-border bg-surface/40 p-4 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className={`h-4 w-4 ${day >= 7 ? "text-emerald-400" : "text-muted-foreground/50"}`} />
+                      <span className={day >= 7 ? "text-foreground" : "text-muted-foreground"}>Complete Day 7</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className={`h-4 w-4 ${score >= 70 ? "text-emerald-400" : "text-muted-foreground/50"}`} />
+                      <span className={score >= 70 ? "text-foreground" : "text-muted-foreground"}>High Compatibility</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className={`h-4 w-4 ${mutual ? "text-emerald-400" : "text-muted-foreground/50"}`} />
+                      <span className={mutual ? "text-foreground" : "text-muted-foreground"}>Both Agree to Reveal</span>
+                    </li>
+                  </ul>
+                  {mutual ? (
+                    <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
+                  ) : (
+                    <button disabled className="w-full rounded-full bg-surface/60 px-4 py-3 text-sm text-muted-foreground">
+                      Reveal Contact
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
