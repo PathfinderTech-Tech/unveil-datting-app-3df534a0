@@ -573,11 +573,30 @@ function Chat() {
           )}
 
           <div className="flex-1 overflow-y-auto p-2.5">
-            {convs.length === 0 ? (
-              <div className="m-2 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
-                No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.
-              </div>
-            ) : convs.map((c) => {
+            {(() => {
+              const q = search.trim().toLowerCase();
+              const filtered = convs.filter((c) => {
+                const pid = c.user_a === user.id ? c.user_b : c.user_a;
+                const p = peers[pid];
+                if (q && !(p?.first_name ?? "").toLowerCase().includes(q)) return false;
+                if (filter === "active") return isOnline(p?.last_seen_at);
+                if (filter === "locked") return !convLastMsg[c.id];
+                // d13 / d47 best-effort: based on last message age
+                if (filter === "d13" || filter === "d47") {
+                  if (!c.last_message_at) return false;
+                  const d = Math.floor((Date.now() - new Date(c.last_message_at).getTime()) / 86_400_000) + 1;
+                  return filter === "d13" ? d <= 3 : d >= 4 && d <= 7;
+                }
+                return true;
+              });
+              if (filtered.length === 0) {
+                return (
+                  <div className="m-2 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+                    {convs.length === 0 ? <>No conversations yet. <Link to="/matches" className="text-primary">Find your band</Link>.</> : "No conversations match this filter."}
+                  </div>
+                );
+              }
+              return filtered.map((c) => {
               const pid = c.user_a === user.id ? c.user_b : c.user_a;
               const p = peers[pid];
               const pct = convCompat[c.id];
