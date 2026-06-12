@@ -988,27 +988,123 @@ function Chat() {
 
                     <div className="flex-1 overflow-y-auto px-5 py-4">
                       <TabsContent value="insights" className="mt-0 space-y-3">
-                        {overallScore != null && band && (
-                          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-4">
-                            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Overall Compatibility</div>
-                            <div className="mt-1 flex items-baseline gap-2">
-                              <span className="font-display text-4xl font-light tracking-tight">{overallScore}%</span>
-                              <span className={`text-xs ${band.tone}`}>{band.label}</span>
+                        {/* Compatibility card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("discovery")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                            <Sparkles className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Compatibility</span>
+                              <span className="font-mono text-xs text-primary">{overallScore ?? 0}%</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">{band?.label ?? "—"}</p>
+                            <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${Math.max(4, overallScore ?? 0)}%` }} />
                             </div>
                           </div>
-                        )}
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Reveal Journey card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("reveal")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+                            <Calendar className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Reveal Journey</span>
+                              <span className="font-mono text-xs text-muted-foreground">Day {dayN ?? 1} of 7</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {contactShareUnlocked ? "Contact reveal unlocked" : "You're in the discovery phase"}
+                            </p>
+                            <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
+                              <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${((dayN ?? 1) / 7) * 100}%` }} />
+                            </div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Icebreakers card */}
+                        <button
+                          type="button"
+                          onClick={() => { setPanelTab("icebreakers"); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                            <MessageSquare className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Icebreakers</span>
+                              <span className="font-mono text-xs text-muted-foreground">{ideas.length || 3}</span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">AI-generated questions</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Contact Reveal card */}
+                        <button
+                          type="button"
+                          onClick={() => setPanelTab("reveal")}
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-all hover:border-primary/40"
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+                            {contactShareUnlocked ? <Phone className="h-4 w-4" /> : <LockIcon className="h-4 w-4" />}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[13px] font-semibold">Contact Reveal</span>
+                              <span className={`font-mono text-xs ${contactShareUnlocked ? "text-emerald-400" : "text-muted-foreground"}`}>
+                                {contactShareUnlocked ? "Unlocked" : "Locked"}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {contactShareUnlocked ? "You can exchange contacts" : "Complete Day 7 to unlock"}
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                        </button>
+
+                        {/* Shared Interests card */}
                         {insights.length > 0 && (
-                          <ul className="grid gap-1.5">
-                            {insights.map((line) => (
-                              <li key={line} className="flex items-start gap-2 rounded-xl border border-border/40 bg-surface/40 p-3 text-[13px] text-foreground/85">
-                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                                  <Check className="h-2.5 w-2.5" />
-                                </span>
-                                {line}
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="rounded-2xl border border-border/60 bg-surface/40 p-4">
+                            <div className="flex items-center gap-3">
+                              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                                <HeartIcon className="h-4 w-4" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[13px] font-semibold">Shared Interests</span>
+                                  <span className="font-mono text-xs text-muted-foreground">{insights.length}</span>
+                                </div>
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">Things you have in common</p>
+                              </div>
+                            </div>
+                            <ul className="mt-3 grid gap-1.5">
+                              {insights.map((line) => (
+                                <li key={line} className="flex items-start gap-2 text-[12px] text-foreground/85">
+                                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                                    <Check className="h-2.5 w-2.5" />
+                                  </span>
+                                  {line}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
+
+                        {/* Compatibility metrics breakdown */}
                         <div className="grid grid-cols-2 gap-2">
                           {metrics.map((m) => (
                             <div key={m.label} className="rounded-2xl border border-border/60 bg-surface/40 p-3">
