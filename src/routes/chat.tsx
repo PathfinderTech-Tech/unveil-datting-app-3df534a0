@@ -984,15 +984,17 @@ function Chat() {
               {/* ============ COMPOSER ============ */}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="shrink-0 border-t border-border/50 bg-card/80 p-3.5 backdrop-blur-2xl"
+                className="relative z-20 shrink-0 border-t border-border/50 bg-card/90 p-3 backdrop-blur-2xl sm:p-3.5"
+                style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                   <button
                     type="button"
                     onClick={() => fetchIcebreakers(ideaCategory)}
                     disabled={!peerId || ideasLoading}
                     title="AI Icebreakers"
-                    className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
+                    aria-label="AI Icebreakers"
+                    className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
@@ -1001,7 +1003,7 @@ function Chat() {
                       type="button"
                       onClick={() => setVerifyOpen(true)}
                       aria-label="Verify to continue"
-                      className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                      className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
                     >
                       <LockIcon className="h-4 w-4 text-muted-foreground" />
                     </button>
@@ -1028,18 +1030,19 @@ function Chat() {
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
                     placeholder={`Message ${peerName}…`}
-                    className="flex-1 rounded-full border border-border/60 bg-surface/70 px-5 py-3 text-[15px] outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:bg-surface/90 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                    aria-label={`Message ${peerName}`}
+                    className="min-w-0 flex-1 rounded-full border border-border/60 bg-surface/80 px-4 py-3 text-[15px] text-foreground outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-surface focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] sm:px-5"
                   />
                   <button
                     type="submit"
                     disabled={!draft.trim()}
-                    className="rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                    className="shrink-0 rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     aria-label="Send"
                   >
                     <Send className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground/70">
+                <p className="mt-2 text-center text-[10px] text-muted-foreground">
                   Phone numbers, emails, and social handles are hidden until you both choose to share.
                 </p>
               </form>
