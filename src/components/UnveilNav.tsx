@@ -65,10 +65,12 @@ export function UnveilNav() {
 
   return (
     <header className="sticky top-0 z-50 glass-strong">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link to="/" className="flex items-center gap-3">
-          <LogoMark size={32} />
-          <LogoWordmark size={18} />
+      <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3">
+          <LogoMark size={24} className="sm:hidden" />
+          <LogoMark size={32} className="hidden sm:block" />
+          <span className="sm:hidden"><LogoWordmark size={13} /></span>
+          <span className="hidden sm:inline"><LogoWordmark size={18} /></span>
         </Link>
         <nav className="hidden gap-1 lg:flex">
           {PRIMARY.map((l) => {
@@ -106,13 +108,13 @@ export function UnveilNav() {
                 to="/settings"
                 aria-label="Settings"
                 title="Settings"
-                className="rounded-full border border-border bg-surface/60 p-2 hover:bg-surface"
+                className="hidden rounded-full border border-border bg-surface/60 p-2 hover:bg-surface lg:inline-flex"
               >
                 <SettingsIcon className="h-4 w-4" />
               </Link>
               <button
                 onClick={() => supabase.auth.signOut()}
-                className="rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface"
+                className="hidden rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface lg:inline-flex"
               >
                 Sign out
               </button>
@@ -123,7 +125,7 @@ export function UnveilNav() {
               <Link to="/signup" className="rounded-full bg-gradient-hero px-5 py-2 text-xs font-medium text-primary-foreground shadow-glow transition-transform hover:scale-105">Sign up</Link>
             </div>
           )}
-          <button onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" className="rounded-full border border-border bg-surface/60 p-2 lg:hidden">
+          <button onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" className="rounded-full border border-border bg-surface/60 p-1.5 sm:p-2 lg:hidden">
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
