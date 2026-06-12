@@ -131,6 +131,8 @@ function Chat() {
   // (legacy collapsible state replaced by unified panel below)
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
   const isMobile = useIsMobile();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
