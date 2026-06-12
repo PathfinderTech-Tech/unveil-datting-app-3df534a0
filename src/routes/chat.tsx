@@ -592,15 +592,15 @@ function Chat() {
                         <LocationTrustBadge profile={p} size="xs" showLabel={false} />
 
                       </span>
-                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground/80">
+                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
                         {timeAgo(c.last_message_at)}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center justify-between gap-2">
-                      <p className="truncate text-xs text-muted-foreground/90">
+                      <p className="truncate text-xs text-muted-foreground">
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
-                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground/70"}`}>
+                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
                         {online ? "Online now" : `Active ${timeAgo(p?.last_seen_at ?? null)}`}
                       </span>
                     </div>
@@ -622,7 +622,7 @@ function Chat() {
                 <MessageCircle className="h-7 w-7 text-primary/70" />
               </div>
               <h2 className="font-display text-2xl font-light tracking-tight">Select a conversation</h2>
-              <p className="mt-2 text-sm text-muted-foreground/80">Slow, intentional, voice-first.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Slow, intentional, voice-first.</p>
             </div>
           ) : (
             <>
@@ -674,7 +674,7 @@ function Chat() {
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
                         </span>
                       ) : peer?.last_seen_at ? (
-                        <span className="text-muted-foreground/80">Active {timeAgo(peer.last_seen_at)} ago</span>
+                        <span className="text-muted-foreground">Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}
                       {typingPeer && <span className="italic text-primary">typing…</span>}
                     </div>
@@ -698,9 +698,9 @@ function Chat() {
                 {/* Day progress */}
                 {dayN && (
                   <div className="px-5 pb-3">
-                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground/80">
+                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
                       <span className="font-mono uppercase tracking-luxury">Day {dayN} of 7</span>
-                      <span className="text-muted-foreground/60">{7 - dayN} days to contact unlock</span>
+                      <span className="text-muted-foreground">{7 - dayN} days to contact unlock</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
                       <div
@@ -829,11 +829,11 @@ function Chat() {
                       <Sparkles className="h-6 w-6 text-primary" />
                     </div>
                     <h3 className="font-display text-xl font-light tracking-tight">Start your first conversation</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground/85">
+                    <p className="mt-1.5 text-sm text-muted-foreground">
                       Meaningful connections begin with curiosity.
                     </p>
                     <div className="mt-5 space-y-2 text-left">
-                      <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/70">
+                      <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                         Suggested icebreakers
                       </p>
                       {SUGGESTED_OPENERS.map((line) => (
@@ -905,7 +905,7 @@ function Chat() {
                           </div>
                         )}
                         {mine && (
-                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                             <span>{ts}</span>
                             <span>·</span>
                             {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
