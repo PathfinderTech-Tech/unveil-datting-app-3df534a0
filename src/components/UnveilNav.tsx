@@ -160,7 +160,16 @@ export function UnveilNav() {
                 </div>
               </div>
             ))}
-            {!user && (
+            {user ? (
+              <div className="mt-4 border-t border-border pt-4">
+                <button
+                  onClick={() => { setOpen(false); supabase.auth.signOut(); }}
+                  className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-center text-sm font-medium hover:bg-surface"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
               <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
                 <Link to="/login" onClick={() => setOpen(false)} className="rounded-xl border border-border px-3 py-2 text-center text-sm">Log in</Link>
                 <Link to="/signup" onClick={() => setOpen(false)} className="rounded-xl bg-gradient-hero px-3 py-2 text-center text-sm text-primary-foreground">Sign up</Link>
