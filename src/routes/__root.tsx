@@ -151,17 +151,22 @@ function RootComponent() {
   const variant: "center" | "corner" | "edge" = isLanding ? "center" : "corner";
   const opacity = isLanding ? 0.008 : 0.005;
 
+  // Full-screen, composer-driven views: suppress site footer and mobile bottom
+  // nav so they cannot layer behind the chat composer / emoji tray / voice
+  // recorder on iPhone screen sizes (SE → Pro Max).
+  const isChromeless = pathname.startsWith("/chat");
+
   return (
     <QueryClientProvider client={queryClient}>
       <CooldownGuard />
       <RevealNotifier />
       <VeilBackdrop variant={variant} opacity={opacity} />
-      <div className="relative z-10 flex min-h-screen flex-col pb-16 lg:pb-0">
+      <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-16 lg:pb-0"}`}>
         <div className="flex-1">
           <Outlet />
         </div>
-        <SiteFooter />
-        <MobileBottomNav />
+        {!isChromeless && <SiteFooter />}
+        {!isChromeless && <MobileBottomNav />}
         {import.meta.env.DEV && <ThemeTokenSwitcher />}
       </div>
     </QueryClientProvider>

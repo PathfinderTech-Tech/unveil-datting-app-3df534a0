@@ -99,7 +99,7 @@ function Membership() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-xs italic text-foreground/70">
+            <p className="mt-6 text-xs italic text-foreground/80">
               Cancel anytime from your account. Tax calculated at checkout.
             </p>
           </div>

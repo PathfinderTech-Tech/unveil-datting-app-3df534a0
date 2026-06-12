@@ -511,12 +511,12 @@ function Chat() {
         {/* ============ SIDEBAR / MATCH LIST ============ */}
         <aside
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100vh - 72px)" }}
+          style={{ height: "calc(100dvh - 72px)" }}
         >
           <div className="flex items-center justify-between border-b border-border/40 px-5 py-5">
             <div>
               <h1 className="font-display text-2xl font-light tracking-tight">Messages</h1>
-              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/80">
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                 {convs.length} {convs.length === 1 ? "connection" : "connections"}
               </p>
             </div>
@@ -592,15 +592,15 @@ function Chat() {
                         <LocationTrustBadge profile={p} size="xs" showLabel={false} />
 
                       </span>
-                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground/80">
+                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
                         {timeAgo(c.last_message_at)}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center justify-between gap-2">
-                      <p className="truncate text-xs text-muted-foreground/90">
+                      <p className="truncate text-xs text-muted-foreground">
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
-                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground/70"}`}>
+                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
                         {online ? "Online now" : `Active ${timeAgo(p?.last_seen_at ?? null)}`}
                       </span>
                     </div>
@@ -614,7 +614,7 @@ function Chat() {
         {/* ============ CHAT PANEL ============ */}
         <section
           className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100vh - 72px)" }}
+          style={{ height: "calc(100dvh - 72px)" }}
         >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
@@ -622,7 +622,7 @@ function Chat() {
                 <MessageCircle className="h-7 w-7 text-primary/70" />
               </div>
               <h2 className="font-display text-2xl font-light tracking-tight">Select a conversation</h2>
-              <p className="mt-2 text-sm text-muted-foreground/80">Slow, intentional, voice-first.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Slow, intentional, voice-first.</p>
             </div>
           ) : (
             <>
@@ -674,7 +674,7 @@ function Chat() {
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
                         </span>
                       ) : peer?.last_seen_at ? (
-                        <span className="text-muted-foreground/80">Active {timeAgo(peer.last_seen_at)} ago</span>
+                        <span className="text-muted-foreground">Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}
                       {typingPeer && <span className="italic text-primary">typing…</span>}
                     </div>
@@ -698,9 +698,9 @@ function Chat() {
                 {/* Day progress */}
                 {dayN && (
                   <div className="px-5 pb-3">
-                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground/80">
+                    <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
                       <span className="font-mono uppercase tracking-luxury">Day {dayN} of 7</span>
-                      <span className="text-muted-foreground/60">{7 - dayN} days to contact unlock</span>
+                      <span className="text-muted-foreground">{7 - dayN} days to contact unlock</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
                       <div
@@ -829,11 +829,11 @@ function Chat() {
                       <Sparkles className="h-6 w-6 text-primary" />
                     </div>
                     <h3 className="font-display text-xl font-light tracking-tight">Start your first conversation</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground/85">
+                    <p className="mt-1.5 text-sm text-muted-foreground">
                       Meaningful connections begin with curiosity.
                     </p>
                     <div className="mt-5 space-y-2 text-left">
-                      <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground/70">
+                      <p className="text-center font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
                         Suggested icebreakers
                       </p>
                       {SUGGESTED_OPENERS.map((line) => (
@@ -888,7 +888,7 @@ function Chat() {
                             <Smile className="h-4 w-4 text-muted-foreground" />
                           </button>
                           {pickerFor === m.id && (
-                            <div className="absolute -top-10 right-0 z-10 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
+                            <div className="absolute -top-10 right-0 z-30 flex gap-1 rounded-full border border-border bg-card p-1 shadow-glow">
                               {QUICK_EMOJI.map((e) => (
                                 <button key={e} onClick={() => react(m.id, e)} className="rounded-full px-1.5 text-base hover:bg-surface">{e}</button>
                               ))}
@@ -905,7 +905,7 @@ function Chat() {
                           </div>
                         )}
                         {mine && (
-                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                             <span>{ts}</span>
                             <span>·</span>
                             {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
@@ -984,15 +984,17 @@ function Chat() {
               {/* ============ COMPOSER ============ */}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="shrink-0 border-t border-border/50 bg-card/80 p-3.5 backdrop-blur-2xl"
+                className="relative z-20 shrink-0 border-t border-border/50 bg-card/90 p-3 backdrop-blur-2xl sm:p-3.5"
+                style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                   <button
                     type="button"
                     onClick={() => fetchIcebreakers(ideaCategory)}
                     disabled={!peerId || ideasLoading}
                     title="AI Icebreakers"
-                    className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
+                    aria-label="AI Icebreakers"
+                    className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
@@ -1001,7 +1003,7 @@ function Chat() {
                       type="button"
                       onClick={() => setVerifyOpen(true)}
                       aria-label="Verify to continue"
-                      className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                      className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
                     >
                       <LockIcon className="h-4 w-4 text-muted-foreground" />
                     </button>
@@ -1028,18 +1030,19 @@ function Chat() {
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
                     placeholder={`Message ${peerName}…`}
-                    className="flex-1 rounded-full border border-border/60 bg-surface/70 px-5 py-3 text-[15px] outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:bg-surface/90 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                    aria-label={`Message ${peerName}`}
+                    className="min-w-0 flex-1 rounded-full border border-border/60 bg-surface/80 px-4 py-3 text-[15px] text-foreground outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-surface focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] sm:px-5"
                   />
                   <button
                     type="submit"
                     disabled={!draft.trim()}
-                    className="rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                    className="shrink-0 rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     aria-label="Send"
                   >
                     <Send className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground/70">
+                <p className="mt-2 text-center text-[10px] text-muted-foreground">
                   Phone numbers, emails, and social handles are hidden until you both choose to share.
                 </p>
               </form>

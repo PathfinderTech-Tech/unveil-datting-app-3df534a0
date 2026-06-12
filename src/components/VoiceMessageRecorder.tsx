@@ -184,7 +184,7 @@ export function VoiceMessageRecorder({
         disabled={disabled}
         title="Record voice note"
         aria-label="Record voice note"
-        className="rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+        className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Mic className="h-4 w-4 text-accent" />
       </button>
@@ -193,21 +193,21 @@ export function VoiceMessageRecorder({
 
   if (phase === "recording") {
     return (
-      <div className="flex flex-1 items-center gap-3 rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2">
-        <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-destructive" />
-        <span className="font-mono text-sm">{mm}:{ss}</span>
+      <div className="order-last flex w-full min-w-0 basis-full items-center gap-3 rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2 sm:order-none sm:w-auto sm:basis-auto sm:flex-1">
+        <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-destructive" />
+        <span className="font-mono text-sm text-foreground">{mm}:{ss}</span>
         <span className="text-xs text-muted-foreground">/ {String(Math.floor(maxSeconds/60)).padStart(2,"0")}:{String(maxSeconds%60).padStart(2,"0")}</span>
         <div className="flex-1" />
         <button
           onClick={cancel}
-          className="rounded-full border border-border bg-card p-1.5 text-muted-foreground hover:text-foreground"
+          className="shrink-0 rounded-full border border-border bg-card p-1.5 text-muted-foreground hover:text-foreground"
           aria-label="Cancel recording"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={stop}
-          className="rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow"
+          className="shrink-0 rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow"
           aria-label="Stop recording"
         >
           <Square className="h-3.5 w-3.5 fill-current" />
@@ -218,23 +218,23 @@ export function VoiceMessageRecorder({
 
   // preview / uploading
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-full border border-primary/40 bg-primary/10 px-3 py-2">
+    <div className="order-last flex w-full min-w-0 basis-full items-center gap-3 rounded-full border border-primary/40 bg-primary/10 px-3 py-2 sm:order-none sm:w-auto sm:basis-auto sm:flex-1">
       <button
         type="button"
         onClick={togglePlay}
-        className="rounded-full bg-card p-2 text-primary"
+        className="shrink-0 rounded-full bg-card p-2 text-primary"
         aria-label={playing ? "Pause" : "Play"}
       >
         {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
       </button>
       {previewUrl && <audio ref={audioRef} src={previewUrl} onEnded={() => setPlaying(false)} />}
-      <span className="font-mono text-sm">{mm}:{ss}</span>
+      <span className="font-mono text-sm text-foreground">{mm}:{ss}</span>
       <div className="flex-1" />
       <button
         type="button"
         onClick={cancel}
         disabled={phase === "uploading"}
-        className="rounded-full border border-border bg-card p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-40"
+        className="shrink-0 rounded-full border border-border bg-card p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-40"
         aria-label="Delete and re-record"
       >
         <Trash2 className="h-3.5 w-3.5" />
@@ -243,7 +243,7 @@ export function VoiceMessageRecorder({
         type="button"
         onClick={send}
         disabled={phase === "uploading"}
-        className="rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow disabled:opacity-50"
+        className="shrink-0 rounded-full bg-gradient-hero p-2 text-primary-foreground shadow-glow disabled:opacity-50"
         aria-label="Send voice note"
       >
         {phase === "uploading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
