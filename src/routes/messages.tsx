@@ -9,8 +9,7 @@ import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, Search } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { LocationTrustBadge } from "@/components/LocationTrustBadge";
-import { useMyLocationTrust } from "@/components/LocationTrustBadge";
+import { useMyLocationTrust, LocationTrustBadge } from "@/components/LocationTrustBadge";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({
