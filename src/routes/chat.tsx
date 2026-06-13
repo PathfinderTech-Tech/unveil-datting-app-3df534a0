@@ -951,7 +951,7 @@ function Chat() {
                 </p>
               </form>
 
-              {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / REVEAL SHEET ============ */}
+              {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / EXCHANGE SHEET ============ */}
               <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
                 <SheetContent
                   side={isMobile ? "bottom" : "right"}
@@ -971,7 +971,7 @@ function Chat() {
                       <TabsTrigger value="insights" className="text-[11px]">Insights</TabsTrigger>
                       <TabsTrigger value="discovery" className="text-[11px]">Discovery</TabsTrigger>
                       <TabsTrigger value="icebreakers" className="text-[11px]">Icebreakers</TabsTrigger>
-                      <TabsTrigger value="reveal" className="text-[11px]">Reveal</TabsTrigger>
+                      <TabsTrigger value="reveal" className="text-[11px]">Exchange</TabsTrigger>
                     </TabsList>
 
                     <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -998,7 +998,7 @@ function Chat() {
                           <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                         </button>
 
-                        {/* Reveal Journey card */}
+                        {/* Connection Progress card */}
                         <button
                           type="button"
                           onClick={() => setPanelTab("reveal")}
@@ -1009,11 +1009,11 @@ function Chat() {
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[13px] font-semibold">Reveal Journey</span>
+                              <span className="text-[13px] font-semibold">Connection Progress</span>
                               <span className="font-mono text-xs text-muted-foreground">Day {dayN ?? 1} of 7</span>
                             </div>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              {contactShareUnlocked ? "Contact reveal unlocked" : "You're in the discovery phase"}
+                              {contactShareUnlocked ? "Contact exchange unlocked" : "Building rapport — keep the conversation going"}
                             </p>
                             <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
                               <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${((dayN ?? 1) / 7) * 100}%` }} />
@@ -1041,7 +1041,7 @@ function Chat() {
                           <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                         </button>
 
-                        {/* Contact Reveal card */}
+                        {/* Contact Exchange card */}
                         <button
                           type="button"
                           onClick={() => setPanelTab("reveal")}
@@ -1052,13 +1052,13 @@ function Chat() {
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[13px] font-semibold">Contact Reveal</span>
+                              <span className="text-[13px] font-semibold">Contact Exchange</span>
                               <span className={`font-mono text-xs ${contactShareUnlocked ? "text-emerald-400" : "text-muted-foreground"}`}>
                                 {contactShareUnlocked ? "Unlocked" : "Locked"}
                               </span>
                             </div>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              {contactShareUnlocked ? "You can exchange contacts" : "Complete Day 7 to unlock"}
+                              {contactShareUnlocked ? "You can exchange phone, email, or social handles" : "Unlocks after the 7-day journey"}
                             </p>
                           </div>
                           <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

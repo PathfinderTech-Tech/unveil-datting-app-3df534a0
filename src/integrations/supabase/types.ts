@@ -1370,30 +1370,6 @@ export type Database = {
         }
         Relationships: []
       }
-      reveal_progress: {
-        Row: {
-          day: number
-          id: string
-          match_id: string
-          unlocked_at: string
-          user_id: string
-        }
-        Insert: {
-          day?: number
-          id?: string
-          match_id: string
-          unlocked_at?: string
-          user_id: string
-        }
-        Update: {
-          day?: number
-          id?: string
-          match_id?: string
-          unlocked_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       saved_profiles: {
         Row: {
           created_at: string

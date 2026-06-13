@@ -62,7 +62,7 @@ function Terms() {
       </LegalSection>
 
       <LegalSection title="7. Premium features">
-        <p>UNVEIL Premium unlocks unlimited messages and voice notes, advanced filters, full-quality voice intros, accelerated reveal journeys, and priority support. Passes unlock unlimited messages and voice notes for the duration of the pass only. Features and pricing may change with notice.</p>
+        <p>UNVEIL Premium unlocks unlimited messages and voice notes, advanced filters, full-quality voice intros, an accelerated 7-Day Contact Exchange Journey, and priority support. Passes unlock unlimited messages and voice notes for the duration of the pass only. Features and pricing may change with notice.</p>
       </LegalSection>
 
       <LegalSection title="8. Suspension and termination">

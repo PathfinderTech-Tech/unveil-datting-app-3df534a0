@@ -5,7 +5,7 @@ import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban, X, Lock, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
+import { ContactExchangeCountdown } from "@/components/ContactExchangeCountdown";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
@@ -479,7 +479,7 @@ function MatchExperience() {
                 { id: "compat", label: "Compatibility" },
                 { id: "discovery", label: `Day ${day} Discovery` },
                 { id: "icebreakers", label: "Icebreakers" },
-                { id: "reveal", label: "Contact Reveal" },
+                { id: "reveal", label: "Contact Exchange" },
               ] as const).map((t) => (
                 <button
                   key={t.id}
@@ -563,7 +563,7 @@ function MatchExperience() {
                     </p>
                   </div>
                   <div className="rounded-2xl border border-border bg-surface/40 p-3">
-                    <SlowRevealTimeline day={day} />
+                    <ContactExchangeCountdown day={day} />
                   </div>
                 </div>
               )}
@@ -600,7 +600,7 @@ function MatchExperience() {
                 </div>
               )}
 
-              {/* ── CONTACT REVEAL TAB ── */}
+              {/* ── CONTACT EXCHANGE TAB ── */}
               {sheetTab === "reveal" && (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface/40 p-6 text-center">
@@ -608,13 +608,13 @@ function MatchExperience() {
                       <Lock className="h-7 w-7 text-primary" />
                     </div>
                     <p className="max-w-xs text-sm text-foreground/85">
-                      Reveal contact info to continue outside UNVEIL.
+                      Exchange phone, email, or social handles to continue the conversation outside UNVEIL.
                     </p>
                   </div>
                   <ul className="space-y-2 rounded-2xl border border-border bg-surface/40 p-4 text-sm">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className={`h-4 w-4 ${day >= 7 ? "text-emerald-400" : "text-muted-foreground/50"}`} />
-                      <span className={day >= 7 ? "text-foreground" : "text-muted-foreground"}>Complete Day 7</span>
+                      <span className={day >= 7 ? "text-foreground" : "text-muted-foreground"}>Complete the 7-day journey</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className={`h-4 w-4 ${score >= 70 ? "text-emerald-400" : "text-muted-foreground/50"}`} />
@@ -622,14 +622,14 @@ function MatchExperience() {
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className={`h-4 w-4 ${mutual ? "text-emerald-400" : "text-muted-foreground/50"}`} />
-                      <span className={mutual ? "text-foreground" : "text-muted-foreground"}>Both Agree to Reveal</span>
+                      <span className={mutual ? "text-foreground" : "text-muted-foreground"}>Both Agree to Exchange</span>
                     </li>
                   </ul>
                   {mutual ? (
                     <ContactRevealPanel peerUserId={userId} peerName={profile.first_name} />
                   ) : (
                     <button disabled className="w-full rounded-full bg-surface/60 px-4 py-3 text-sm text-muted-foreground">
-                      Reveal Contact
+                      Exchange Contact
                     </button>
                   )}
                 </div>

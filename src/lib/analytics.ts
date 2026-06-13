@@ -27,7 +27,7 @@ export const ANALYTICS = {
   dailyAnswerSubmitted: "daily_answer_submitted",
   quizCompleted: "quiz_completed",
   challengeCompleted: "challenge_completed",
-  revealUnlocked: "reveal_unlocked",
+  contactExchangeUnlocked: "contact_exchange_unlocked",
   matchConverted: "match_converted",
   icebreakerGenerated: "icebreaker_generated",
 } as const;

@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ThemeTokenSwitcher } from "@/components/ThemeTokenSwitcher";
 import { CooldownGuard } from "@/components/CooldownGuard";
-import { useRevealNotifications } from "@/hooks/use-reveal-notifications";
+
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { useRouterState } from "@tanstack/react-router";
@@ -159,7 +159,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CooldownGuard />
-      <RevealNotifier />
+      
       <VeilBackdrop variant={variant} opacity={opacity} />
       <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-16 lg:pb-0"}`}>
         <div className="flex-1">
@@ -171,10 +171,4 @@ function RootComponent() {
       </div>
     </QueryClientProvider>
   );
-}
-
-function RevealNotifier() {
-  // Subscribes to reveal_progress and toasts on newly available stages.
-  useRevealNotifications();
-  return null;
 }

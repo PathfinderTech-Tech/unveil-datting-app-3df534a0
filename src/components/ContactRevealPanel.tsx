@@ -3,7 +3,7 @@ import { Lock, Sparkles, ShieldCheck, Phone, Link as LinkIcon } from "lucide-rea
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { JourneyCompletionCard } from "@/components/SlowRevealTimeline";
+import { ContactExchangeReadyCard } from "@/components/ContactExchangeCountdown";
 
 type Status = {
   mutual: boolean;
@@ -15,9 +15,10 @@ type Status = {
 };
 
 /**
- * Contact reveal — replaces the old Photo Reveal flow.
- * Profile photos are visible from Day 1; the journey reward is the right to
- * exchange real-world contact info (phone, email, social handles).
+ * Contact Exchange panel — the reward at the end of the 7-Day Contact
+ * Exchange Journey. Photos are NEVER gated here (the veil lifts after
+ * the first meaningful message). This screen only governs the exchange
+ * of real-world contact info (phone, email, social handles).
  *
  * Eligibility (enforced by DB function `can_share_contacts`):
  *   mutual match  AND  both verified  AND  (>=7 days OR either is premium)
@@ -95,7 +96,7 @@ export function ContactRevealPanel({
 
   return (
     <div className="space-y-4">
-      {status.eligible && <JourneyCompletionCard eligible />}
+      {status.eligible && <ContactExchangeReadyCard eligible />}
       <div className="rounded-3xl border border-primary/20 bg-card p-6 shadow-glow">
         <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
           {status.shareUnlocked ? <LinkIcon className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -130,7 +131,7 @@ export function ContactRevealPanel({
             </li>
             <li className="flex items-center gap-2">
               <Sparkles className={`h-3.5 w-3.5 ${status.eligible ? "text-accent" : "text-muted-foreground/60"}`} />
-              7-day journey complete (or Premium fast-track) {status.eligible ? "✓" : "—"}
+              7-Day Contact Exchange Journey complete (or Premium fast-track) {status.eligible ? "✓" : "—"}
             </li>
             <li className="flex items-center gap-2">
               <Sparkles className={`h-3.5 w-3.5 ${status.youConsented ? "text-accent" : "text-muted-foreground/60"}`} />
@@ -144,7 +145,7 @@ export function ContactRevealPanel({
 
           {!status.eligible && (
             <p className="mt-3 text-xs text-muted-foreground">
-              Contact sharing becomes available after both members complete verification and finish the UNVEIL journey.
+              Contact sharing becomes available after both members complete verification and finish the 7-day journey together.
               <span className="ml-1 text-primary">Premium members can accelerate meaningful connections.</span>
             </p>
           )}

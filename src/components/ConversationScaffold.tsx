@@ -4,7 +4,7 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { Lock, X, CheckCircle2, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
-import { RevealStageBadge } from "@/components/RevealStageBadge";
+import { ConversationStageBadge } from "@/components/ConversationStageBadge";
 
 const REWARD_LINES = [
   "Great answer.",
@@ -172,7 +172,7 @@ export function ConversationScaffold({
 
   return (
     <div className="border-b border-border bg-surface/30 p-4 space-y-3">
-      <RevealStageBadge day={day} />
+      <ConversationStageBadge day={day} />
 
 
 

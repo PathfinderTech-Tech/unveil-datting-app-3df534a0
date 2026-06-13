@@ -11,7 +11,7 @@ import { LocationTrustBadge } from "@/components/LocationTrustBadge";
 import { Plane } from "lucide-react";
 import { Avatar as GradientAvatar } from "@/components/Avatar";
 import { SignedImage } from "@/components/SignedImage";
-import { RevealProgressCard } from "@/components/RevealProgressCard";
+
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -152,8 +152,8 @@ function ProfilePage() {
     );
   }
 
-  // Public-facing identity is always the avatar; the real selfie stays gated
-  // by the reveal system and is only shown in the "Photos & avatar" section.
+  // Public-facing identity is always the avatar; the real selfie is only
+  // shown in the "Photos & avatar" section after the user uploads it.
   const displayPhoto = profile?.avatar_url || profile?.photo_url || null;
   const completion = completionPercent(profile, voices.length);
   const missing = missingSections(profile, voices.length);
@@ -252,8 +252,6 @@ function ProfilePage() {
           )}
         </div>
 
-        {/* Reveal progress — gates when real photos unlock */}
-        {profile?.id && <RevealProgressCard userId={profile.id} />}
 
         {/* About */}
         <Section title="About me">
