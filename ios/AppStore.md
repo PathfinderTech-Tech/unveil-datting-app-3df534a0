@@ -130,7 +130,7 @@ Voice before appearance. Connection before contact details.
 • 18+. No minors. Ever.
 
 — UNVEIL+ AND UNVEIL BLACK —
-Optional premium subscriptions unlock unlimited Hidden Matches, accelerated reveals, priority support, and advanced filters. Cancel anytime in Settings → Manage Subscription. Auto-renews until cancelled.
+Optional premium subscriptions unlock unlimited Hidden Matches, fast-tracked contact exchange, priority support, and advanced filters. Cancel anytime in Settings → Manage Subscription. Auto-renews until cancelled.
 
 Privacy: https://unveil.best/privacy
 Terms: https://unveil.best/terms
