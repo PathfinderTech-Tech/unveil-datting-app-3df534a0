@@ -19,7 +19,7 @@ import { ConversationScaffold } from "@/components/ConversationScaffold";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { LocationTrustBadge } from "@/components/LocationTrustBadge";
+
 import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
 import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
