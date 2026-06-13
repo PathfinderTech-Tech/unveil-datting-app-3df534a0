@@ -73,8 +73,10 @@ const PRICE_ALIASES: Record<string, CanonicalPriceId> = {
 const PRICE_META: Record<CanonicalPriceId, PriceCatalogItem> = {
   premium_monthly: {
     kind: "premium_subscription",
-    lookupKey: { sandbox: "premium_monthly" },
-    priceId: { live: "price_1TgrEpHf3gYicX76S4PiXjqK" },
+    lookupKey: { sandbox: "premium_monthly", live: "premium_monthly" },
+    // Live $15.99 Premium Monthly — created 2026-06-13 (price_1ThiflHf3gYicX76tdDIfHRN).
+    // Legacy $19.99 price (price_1TgrEpHf3gYicX76S4PiXjqK) preserved in Stripe, lookup_key
+    // transferred to the new $15.99 price; old price no longer routed.
     productId: { live: "prod_UdQ7Wabs5PYMko", sandbox: "prod_UdKLIDEDA922D2" },
   },
   premium_quarterly: {

@@ -27,7 +27,6 @@ const REQUIRED = {
 const REQUIRED_ONE_TIME = {
   message_pass_24h: { unit_amount: 199 },
   message_pass_2w:  { unit_amount: 999 },
-  verification_badge: { unit_amount: 999 },
 };
 
 async function listByLookup(lookup) {
