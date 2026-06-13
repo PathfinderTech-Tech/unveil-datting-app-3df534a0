@@ -161,10 +161,6 @@ function MessagesPage() {
           peer_avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
           peer_discovery_mode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
           peer_verified: !!peer?.verified,
-          peer_travel_status: peer?.travel_status ?? null,
-          peer_travel_expires_at: peer?.travel_expires_at ?? null,
-          peer_travel_warning_count: peer?.travel_warning_count ?? null,
-          peer_account_restricted: peer?.account_restricted ?? null,
           last_text: incoming ? `💭 ${t.content}` : `💭 You sent: ${t.content}`,
           unread: incoming && !t.read_at ? 1 : 0,
         });
