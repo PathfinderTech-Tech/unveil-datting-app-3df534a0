@@ -629,7 +629,7 @@ function Chat() {
                       <span className="flex items-center gap-1 truncate text-[15px] font-semibold tracking-tight">
                         {p?.first_name ?? "Match"}
                         {p?.verified ? <VerifiedBadge size="xs" /> : null}
-                        <LocationTrustBadge profile={p} size="xs" showLabel={false} />
+
 
                       </span>
                       <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
