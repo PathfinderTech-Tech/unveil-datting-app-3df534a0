@@ -2088,6 +2088,30 @@ export type Database = {
         }[]
       }
       get_pending_likes_count: { Args: never; Returns: number }
+      get_public_match_profile: {
+        Args: { _target: string }
+        Returns: {
+          age: number
+          archetype: string
+          avatar_url: string
+          bio: string
+          city: string
+          country: string
+          curiosity_level: number
+          emotional_rhythm: Json
+          first_name: string
+          gender: string
+          id: string
+          intention: string
+          interested_in: string
+          location_enabled: boolean
+          location_privacy: string
+          photo_url: string
+          preferred_language: string
+          relationship_intent: string
+          verified: boolean
+        }[]
+      }
       get_puzzle_round: {
         Args: { _category: string; _limit?: number }
         Returns: {
