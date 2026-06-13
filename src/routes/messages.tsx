@@ -305,17 +305,8 @@ function MessagesPage() {
                           {r.peer_name ?? "Match"}
                         </span>
                         {r.peer_verified && <VerifiedBadge size="xs" />}
-                        <LocationTrustBadge
-                          profile={{
-                            verified: r.peer_verified,
-                            travel_status: r.peer_travel_status,
-                            travel_expires_at: r.peer_travel_expires_at,
-                            travel_warning_count: r.peer_travel_warning_count,
-                            account_restricted: r.peer_account_restricted,
-                          }}
-                          size="xs"
-                          showLabel={false}
-                        />
+
+
 
                         {r.unread > 0 && (
                           <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
