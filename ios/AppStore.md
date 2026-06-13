@@ -141,7 +141,7 @@ Made with intention by PathfinderTech, Inc.
 ```
 
 ### What's New in This Version (4000 char max)
-> First public TestFlight build of UNVEIL. We're inviting our first 100 members to experience compatibility-first dating: Hidden Matches™, AI Icebreakers, and the 7-Day Reveal Journey. Tell us what feels right — and what doesn't. We read every message.
+> First public TestFlight build of UNVEIL. We're inviting our first 100 members to experience compatibility-first dating: Hidden Matches™, AI Icebreakers, and the 7-Day Contact Exchange Journey. Tell us what feels right — and what doesn't. We read every message.
 
 ---
 
