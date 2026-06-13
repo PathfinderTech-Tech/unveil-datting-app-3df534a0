@@ -21,8 +21,12 @@ const GW = "https://connector-gateway.lovable.dev/stripe/v1";
 const FORBIDDEN = ["premium_quarterly_3999"];
 const REQUIRED = {
   premium_quarterly: { interval: "month", interval_count: 3, unit_amount: 3999 },
-  premium_monthly:   { interval: "month", interval_count: 1, unit_amount: 1999 },
+  premium_monthly:   { interval: "month", interval_count: 1, unit_amount: 1599 },
   premium_yearly:    { interval: "year",  interval_count: 1, unit_amount: 14999 },
+};
+const REQUIRED_ONE_TIME = {
+  message_pass_24h: { unit_amount: 199 },
+  message_pass_2w:  { unit_amount: 999 },
 };
 
 async function listByLookup(lookup) {
@@ -56,6 +60,17 @@ for (const [k, want] of Object.entries(REQUIRED)) {
     failures++;
   } else {
     console.log(`✅ ${k} → ${p.id} (${p.unit_amount/100} ${p.currency} every ${p.recurring.interval_count} ${p.recurring.interval})`);
+  }
+}
+for (const [k, want] of Object.entries(REQUIRED_ONE_TIME)) {
+  const found = await listByLookup(k);
+  if (!found.length) { console.error(`❌ Required one-time price missing: ${k}`); failures++; continue; }
+  const p = found[0];
+  if (p.unit_amount !== want.unit_amount || p.recurring) {
+    console.error(`❌ ${k} shape wrong: amount=${p.unit_amount} recurring=${!!p.recurring}, want one-time ${want.unit_amount}`);
+    failures++;
+  } else {
+    console.log(`✅ ${k} → ${p.id} ($${p.unit_amount/100} one-time)`);
   }
 }
 if (failures) { console.error(`\n${failures} failure(s) in ${env} catalog`); process.exit(1); }
