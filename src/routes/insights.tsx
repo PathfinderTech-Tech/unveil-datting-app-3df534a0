@@ -19,7 +19,7 @@ export const Route = createFileRoute("/insights")({
   head: () => ({
     meta: [
       { title: "Insights — UNVEIL" },
-      { name: "description", content: "Daily compatibility, readiness score, personality blueprint, and reveal journey." },
+      { name: "description", content: "Daily compatibility, readiness score, personality blueprint, and your Contact Exchange Journey." },
     ],
   }),
   component: InsightsPage,
