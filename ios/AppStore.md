@@ -112,10 +112,11 @@ To test on device: register a real iPhone, open the app, sign in, confirm a row 
 ```
 UNVEIL is a compatibility-first dating app for adults who want a real connection — not endless swiping.
 
-We hide photos until your minds have already met.
+Voice before appearance. Connection before contact details.
 
 — THE UNVEIL METHOD —
-• Voice first, photos last. Day 1 you hear them. Day 7 you finally see them.
+• Photos start softly veiled; the veil lifts the moment a real conversation begins.
+• Voice notes, not just text — hear them before you see them clearly.
 • Compatibility scoring across values, communication, lifestyle and goals.
 • Hidden Matches™ surfaces people you'd swipe past — but who actually fit.
 • Why We Match™ shows in plain language why two people belong together.
