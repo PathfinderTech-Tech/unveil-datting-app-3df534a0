@@ -2,14 +2,18 @@ import { Globe2, Users, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import { trackEvent } from "@/lib/analytics";
 
+// Aggregate, anonymized rhythm of the 7-Day Contact Exchange Journey.
+// Photos are visible from Day 1; these milestones are conversation rapport
+// signals, NOT photo-reveal stages. The final stop is the contact-exchange
+// unlock at Day 7.
 const STOPS = [
   { day: 1, label: "First spark", share: 100 },
   { day: 2, label: "Voice arrives", share: 78 },
-  { day: 3, label: "Values revealed", share: 62 },
+  { day: 3, label: "Values shared", share: 62 },
   { day: 4, label: "Communication map", share: 48 },
-  { day: 5, label: "Photo softens", share: 36 },
+  { day: 5, label: "Future goals", share: 36 },
   { day: 6, label: "Shared question", share: 25 },
-  { day: 7, label: "Meet — if it feels right", share: 14 },
+  { day: 7, label: "Contact exchange unlocked", share: 14 },
 ];
 
 const CITIES = [
@@ -18,7 +22,8 @@ const CITIES = [
 ];
 
 /**
- * Global Passport Journeys — anonymized rhythm view of the 7-day reveal.
+ * Global Passport Journeys — anonymized rhythm view of the
+ * 7-Day Contact Exchange Journey across UNVEIL.
  */
 export function GlobalPassportJourneys() {
   useEffect(() => {
@@ -33,7 +38,7 @@ export function GlobalPassportJourneys() {
             <Globe2 className="h-3.5 w-3.5" /> Global Passport Journeys
           </div>
           <h2 className="mt-2 font-display text-2xl font-light md:text-3xl">
-            How the world is slowly revealing.
+            How connections unfold across the world.
           </h2>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
             A live rhythm of how UNVEIL connections unfold across cities — anonymous, aggregate, gentle.
