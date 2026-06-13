@@ -188,10 +188,7 @@ function Chat() {
       const convIds = list.map((c) => c.id);
       if (peerIds.length) {
         const [{ data: profs }, mediaRows, { data: lastMsgs }] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, first_name, avatar_url, photo_url, profile_photo_url, discovery_mode, verified, updated_at, travel_status, travel_expires_at, travel_warning_count, account_restricted")
-            .in("id", peerIds),
+          (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds }),
           getPrimaryProfileMedia({ data: { userIds: peerIds } }),
           supabase
             .from("messages")
@@ -209,13 +206,9 @@ function Chat() {
             first_name: media?.firstName ?? p.first_name?.trim() ?? null,
             avatar_url: media?.avatarUrl ?? p.avatar_url,
             photo_url: media?.photoUrl ?? p.profile_photo_url ?? p.photo_url,
-            discovery_mode: media?.hasUploadedPhoto ? "photo" : ((p.discovery_mode as "avatar" | "photo" | null) ?? null),
+            discovery_mode: media?.hasUploadedPhoto ? "photo" : null,
             verified: p.verified,
             last_seen_at: p.updated_at,
-            travel_status: p.travel_status,
-            travel_expires_at: p.travel_expires_at,
-            travel_warning_count: p.travel_warning_count,
-            account_restricted: p.account_restricted,
           };
         }
         setPeers(pmap);
