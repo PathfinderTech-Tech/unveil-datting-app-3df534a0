@@ -211,9 +211,9 @@ Submit **3 to 10** screenshots per size, JPG or PNG, sRGB, no transparency.
 
 Suggested screen captures (in this order):
 1. Hero: "Compatibility first. Photos last." — landing card.
-2. Discovery feed with locked photos and compatibility %.
+2. Discovery feed with softly-veiled photos and compatibility %.
 3. Hidden Matches™ list with "Why We Match" pill.
-4. 7-Day Reveal Journey timeline.
+4. 7-Day Contact Exchange Journey timeline.
 5. AI Icebreakers picker (Fun · Deep · Romantic · Career · Travel · Family).
 6. Personality Blueprint radar.
 7. Chat with voice intro player.
