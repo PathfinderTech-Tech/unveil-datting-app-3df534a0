@@ -103,19 +103,20 @@ To test on device: register a real iPhone, open the app, sign in, confirm a row 
 > **Date who you're compatible with**  *(30)*
 
 ### Promotional Text (170 char max, can be updated without re-review)
-> Photos are revealed last. Match on values, voice, and personality first. Try Hidden Matches™, the 7-Day Reveal, and AI Icebreakers — all in a luxury, ad-free app.
+> Voice before appearance. Photos appear softly veiled, then unveil the moment a real conversation begins. Try Hidden Matches™, the 7-Day Contact Exchange Journey, and AI Icebreakers — luxury, ad-free.
 
 ### Keywords (100 char total, comma-separated)
-> compatibility,dating,relationships,love,match,intentional,voice,personality,hidden,reveal,premium,quiz
+> compatibility,dating,relationships,love,match,intentional,voice,personality,hidden,connection,premium,quiz
 
 ### Description (4000 char max)
 ```
 UNVEIL is a compatibility-first dating app for adults who want a real connection — not endless swiping.
 
-We hide photos until your minds have already met.
+Voice before appearance. Connection before contact details.
 
 — THE UNVEIL METHOD —
-• Voice first, photos last. Day 1 you hear them. Day 7 you finally see them.
+• Photos start softly veiled; the veil lifts the moment a real conversation begins.
+• Voice notes, not just text — hear them before you see them clearly.
 • Compatibility scoring across values, communication, lifestyle and goals.
 • Hidden Matches™ surfaces people you'd swipe past — but who actually fit.
 • Why We Match™ shows in plain language why two people belong together.
@@ -129,7 +130,7 @@ We hide photos until your minds have already met.
 • 18+. No minors. Ever.
 
 — UNVEIL+ AND UNVEIL BLACK —
-Optional premium subscriptions unlock unlimited Hidden Matches, accelerated reveals, priority support, and advanced filters. Cancel anytime in Settings → Manage Subscription. Auto-renews until cancelled.
+Optional premium subscriptions unlock unlimited Hidden Matches, fast-tracked contact exchange, priority support, and advanced filters. Cancel anytime in Settings → Manage Subscription. Auto-renews until cancelled.
 
 Privacy: https://unveil.best/privacy
 Terms: https://unveil.best/terms
@@ -140,7 +141,7 @@ Made with intention by PathfinderTech, Inc.
 ```
 
 ### What's New in This Version (4000 char max)
-> First public TestFlight build of UNVEIL. We're inviting our first 100 members to experience compatibility-first dating: Hidden Matches™, AI Icebreakers, and the 7-Day Reveal Journey. Tell us what feels right — and what doesn't. We read every message.
+> First public TestFlight build of UNVEIL. We're inviting our first 100 members to experience compatibility-first dating: Hidden Matches™, AI Icebreakers, and the 7-Day Contact Exchange Journey. Tell us what feels right — and what doesn't. We read every message.
 
 ---
 
@@ -210,9 +211,9 @@ Submit **3 to 10** screenshots per size, JPG or PNG, sRGB, no transparency.
 
 Suggested screen captures (in this order):
 1. Hero: "Compatibility first. Photos last." — landing card.
-2. Discovery feed with locked photos and compatibility %.
+2. Discovery feed with softly-veiled photos and compatibility %.
 3. Hidden Matches™ list with "Why We Match" pill.
-4. 7-Day Reveal Journey timeline.
+4. 7-Day Contact Exchange Journey timeline.
 5. AI Icebreakers picker (Fun · Deep · Romantic · Career · Travel · Family).
 6. Personality Blueprint radar.
 7. Chat with voice intro player.
@@ -251,7 +252,7 @@ Because Capacitor renders the actual web app inside a `WKWebView`, every feature
 | Why We Match™ | ✅ |
 | AI Icebreakers | ✅ |
 | Daily Compatibility | ✅ |
-| 7-Day Reveal Journey | ✅ |
+| 7-Day Contact Exchange Journey | ✅ |
 | Stripe subscriptions | ✅ (Stripe Checkout in system browser — App Store §3.1.3(b) "reader" exception applies because the user account is created on web at unveil.best) |
 | Push notifications | ✅ token registration; sender pending |
 

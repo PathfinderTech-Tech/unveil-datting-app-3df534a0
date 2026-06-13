@@ -112,7 +112,7 @@ export function HomeDashboard({ user }: { user: User }) {
     if (newMatches > 0) {
       return {
         title: "Your next introduction is ready",
-        body: "Open a fresh match and start the slow reveal.",
+        body: "Open a fresh match and start the conversation.",
         cta: "Meet your match",
         to: "/matches",
       } as const;
