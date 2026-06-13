@@ -1041,7 +1041,7 @@ function Chat() {
                           <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                         </button>
 
-                        {/* Contact Reveal card */}
+                        {/* Contact Exchange card */}
                         <button
                           type="button"
                           onClick={() => setPanelTab("reveal")}
@@ -1052,13 +1052,13 @@ function Chat() {
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[13px] font-semibold">Contact Reveal</span>
+                              <span className="text-[13px] font-semibold">Contact Exchange</span>
                               <span className={`font-mono text-xs ${contactShareUnlocked ? "text-emerald-400" : "text-muted-foreground"}`}>
                                 {contactShareUnlocked ? "Unlocked" : "Locked"}
                               </span>
                             </div>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              {contactShareUnlocked ? "You can exchange contacts" : "Complete Day 7 to unlock"}
+                              {contactShareUnlocked ? "You can exchange phone, email, or social handles" : "Unlocks after the 7-day journey"}
                             </p>
                           </div>
                           <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
