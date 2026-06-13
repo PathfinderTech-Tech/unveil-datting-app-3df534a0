@@ -704,7 +704,7 @@ function Chat() {
                     <div className="flex items-center gap-1.5">
                       <span className="truncate text-[15px] font-semibold tracking-tight">{peerName}</span>
                       {peer?.verified ? <VerifiedBadge size="xs" /> : null}
-                      <LocationTrustBadge profile={peer} size="xs" showLabel={false} />
+                      
                     </div>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       {isOnline(peer?.last_seen_at) ? (
