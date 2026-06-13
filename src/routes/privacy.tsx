@@ -30,7 +30,7 @@ function Privacy() {
           <li><strong>Account data</strong>: email, password hash, date of birth, gender, location city, language.</li>
           <li><strong>Profile information</strong>: display name, bio, prompts, interests, values, lifestyle answers, relationship goals.</li>
           <li><strong>Photos and videos</strong> you upload to your profile or send in chat.</li>
-          <li><strong>Voice introductions</strong> recorded during onboarding or for reveal journeys.</li>
+          <li><strong>Voice introductions</strong> recorded during onboarding or shared with matches inside chat.</li>
           <li><strong>Messages and communications</strong> with other members (encrypted at rest).</li>
           <li><strong>Compatibility assessments</strong>: quiz answers, personality blueprint, scores, and AI-derived insights.</li>
           <li><strong>Verification selfies</strong>, collected when you complete the required photo verification.</li>

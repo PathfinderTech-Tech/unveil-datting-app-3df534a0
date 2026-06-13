@@ -414,7 +414,7 @@ function Matches() {
             </h1>
             <div className="mt-2"><MatchesTrustBadge /></div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Photos are visible from Day 1. The 7-day journey unlocks contact sharing, not photos.
+              Photos are visible from Day 1. The 7-Day Contact Exchange Journey unlocks phone, email, and social sharing — not photos.
             </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
@@ -610,7 +610,7 @@ function Matches() {
 type Stage = 1 | 2 | 3;
 
 function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { match: RealMatch; you: SynapseProfile; peerMeta?: { avatar_url: string | null; photo_url: string | null; discovery_mode: "avatar" | "photo" | null }; onClose: () => void; onLike: () => void; onThought: () => void }) {
-  // Progressive reveal — earned, not timed.
+  // Progressive connection — earned, not timed.
   const [stage, setStage] = useState<Stage>(1);
   const arch = ARCHETYPES[normalizeArchetype(match.archetype)];
   const presence = match.presence ? PRESENCE_LABELS[match.presence] : null;

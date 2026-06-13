@@ -71,15 +71,15 @@ function Home() {
         </div>
       </section>
 
-      {/* PROGRESSIVE REVEAL */}
+      {/* CONNECTION BEFORE CONTACT */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-12 text-center">
-          <div className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">The Reveal</div>
+          <div className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">The Journey</div>
           <h2 className="mt-3 font-display text-4xl font-light md:text-5xl">
-            What unfolds <span className="text-gradient-aura italic">is earned</span>.
+            Voice before appearance. <span className="text-gradient-aura italic">Connection before contact details.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Photos blur. Voices speak first. Profiles reveal as mutual curiosity grows.
+            Photos start softly veiled. The veil lifts the moment a real conversation begins. Phone, email, and social handles unlock only after seven days of meaningful exchange.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
