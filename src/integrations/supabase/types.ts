@@ -2112,6 +2112,33 @@ export type Database = {
           verified: boolean
         }[]
       }
+      get_public_match_profiles: {
+        Args: { _targets: string[] }
+        Returns: {
+          age: number
+          archetype: string
+          avatar_url: string
+          bio: string
+          city: string
+          country: string
+          curiosity_level: number
+          emotional_rhythm: Json
+          first_name: string
+          gender: string
+          id: string
+          intention: string
+          interested_in: string
+          interests: string[]
+          location_enabled: boolean
+          location_privacy: string
+          photo_url: string
+          preferred_language: string
+          profile_photo_url: string
+          relationship_intent: string
+          updated_at: string
+          verified: boolean
+        }[]
+      }
       get_puzzle_round: {
         Args: { _category: string; _limit?: number }
         Returns: {

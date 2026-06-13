@@ -33,10 +33,6 @@ type Profile = {
   avatar_url?: string | null;
   photo_url?: string | null;
   discovery_mode?: "avatar" | "photo" | null;
-  travel_status?: string | null;
-  travel_expires_at?: string | null;
-  travel_warning_count?: number | null;
-  account_restricted?: boolean | null;
 };
 type Msg = { id: string; sender_id: string; content: string; created_at: string };
 
@@ -145,10 +141,9 @@ function MatchExperience() {
       if (uid && uid === userId) { navigate({ to: "/profile", replace: true }); return; }
 
       const [{ data: p }, mediaRows] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, first_name, age, city, country, relationship_intent, bio, verified, interests, avatar_url, photo_url, profile_photo_url, discovery_mode, travel_status, travel_expires_at, travel_warning_count, account_restricted")
-          .eq("id", userId).maybeSingle(),
+        (supabase as any)
+          .rpc("get_public_match_profiles", { _targets: [userId] })
+          .then((res: any) => ({ data: Array.isArray(res?.data) ? res.data[0] : null })),
         getPrimaryProfileMedia({ data: { userIds: [userId] } }),
       ]);
       const prow = p as (Profile & { profile_photo_url?: string | null }) | null;
