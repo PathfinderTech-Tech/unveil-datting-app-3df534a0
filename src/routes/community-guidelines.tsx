@@ -65,7 +65,7 @@ function Guidelines() {
       </LegalSection>
 
       <LegalSection title="Reporting process">
-        <p>Use the in-app report button on any profile, message, or photo. You can also email <a className="text-accent underline" href="mailto:support@unveil.best">support@unveil.best</a> or use the form on our <a className="text-accent underline" href="/support">Support Center</a>. Our trust team reviews every report within 24 hours. Consequences range from warnings to permanent removal and, in serious cases, legal referral.</p>
+        <p>Use the in-app report button on any profile, message, or photo. You can also email <a className="text-accent underline" href="mailto:support@unveil.best">support@unveil.best</a> or use the form on our <a className="text-accent underline" href="/support">Support Center</a>. <strong>All user reports are reviewed within 24 hours.</strong> Consequences range from warnings to permanent removal and, in serious cases, legal referral.</p>
         <div className="mt-2"><MailActions subject="Community report" /></div>
       </LegalSection>
     </LegalShell>
