@@ -5,7 +5,7 @@ import { loadCompatibility, likeProfile, bandLabel } from "@/lib/matching-api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { ArrowLeft, ShieldCheck, Send, Sparkles, AlertTriangle, Heart, MoreVertical, Flag, Ban, X, Lock, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { SlowRevealTimeline } from "@/components/SlowRevealTimeline";
+import { ContactExchangeCountdown } from "@/components/ContactExchangeCountdown";
 import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { useMessageQuota } from "@/hooks/use-message-quota";
 import { MessagePaywallModal } from "@/components/MessagePaywallModal";
@@ -563,7 +563,7 @@ function MatchExperience() {
                     </p>
                   </div>
                   <div className="rounded-2xl border border-border bg-surface/40 p-3">
-                    <SlowRevealTimeline day={day} />
+                    <ContactExchangeCountdown day={day} />
                   </div>
                 </div>
               )}
