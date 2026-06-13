@@ -21,8 +21,13 @@ const GW = "https://connector-gateway.lovable.dev/stripe/v1";
 const FORBIDDEN = ["premium_quarterly_3999"];
 const REQUIRED = {
   premium_quarterly: { interval: "month", interval_count: 3, unit_amount: 3999 },
-  premium_monthly:   { interval: "month", interval_count: 1, unit_amount: 1999 },
+  premium_monthly:   { interval: "month", interval_count: 1, unit_amount: 1599 },
   premium_yearly:    { interval: "year",  interval_count: 1, unit_amount: 14999 },
+};
+const REQUIRED_ONE_TIME = {
+  message_pass_24h: { unit_amount: 199 },
+  message_pass_2w:  { unit_amount: 999 },
+  verification_badge: { unit_amount: 999 },
 };
 
 async function listByLookup(lookup) {
