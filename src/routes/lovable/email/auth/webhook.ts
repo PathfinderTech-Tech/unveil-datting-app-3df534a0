@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "mind-match-maze"
+const SITE_NAME = "Unveil"
 const SENDER_DOMAIN = "notify.unveil.best"
 const ROOT_DOMAIN = "unveil.best"
 const FROM_DOMAIN = "notify.unveil.best"
