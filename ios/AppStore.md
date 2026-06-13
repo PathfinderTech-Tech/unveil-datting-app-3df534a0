@@ -252,7 +252,7 @@ Because Capacitor renders the actual web app inside a `WKWebView`, every feature
 | Why We Match™ | ✅ |
 | AI Icebreakers | ✅ |
 | Daily Compatibility | ✅ |
-| 7-Day Reveal Journey | ✅ |
+| 7-Day Contact Exchange Journey | ✅ |
 | Stripe subscriptions | ✅ (Stripe Checkout in system browser — App Store §3.1.3(b) "reader" exception applies because the user account is created on web at unveil.best) |
 | Push notifications | ✅ token registration; sender pending |
 
