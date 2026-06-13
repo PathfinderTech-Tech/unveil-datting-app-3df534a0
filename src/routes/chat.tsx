@@ -65,14 +65,15 @@ type PeerProfile = {
   discovery_mode: "avatar" | "photo" | null;
   verified: boolean | null;
   last_seen_at: string | null;
-  travel_status: string | null;
-  travel_expires_at: string | null;
-  travel_warning_count: number | null;
-  account_restricted: boolean | null;
 };
-type PeerRow = Omit<PeerProfile, "last_seen_at" | "discovery_mode"> & {
+type PeerRow = {
+  id: string;
+  first_name: string | null;
+  avatar_url: string | null;
+  photo_url: string | null;
+  profile_photo_url: string | null;
+  verified: boolean | null;
   updated_at: string | null;
-  discovery_mode: string | null;
 };
 type Compat = Awaited<ReturnType<typeof loadCompatibility>>;
 
