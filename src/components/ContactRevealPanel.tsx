@@ -55,13 +55,12 @@ export function ContactRevealPanel({
       _b: peerUserId,
     });
 
-    // Verification of both sides — read from profiles for accurate UI hint.
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, verified")
-      .in("id", [user.id, peerUserId]);
-    const meV = !!profs?.find((p) => p.id === user.id)?.verified;
-    const peerV = !!profs?.find((p) => p.id === peerUserId)?.verified;
+    // Verification of both sides — use the privacy-safe peer RPC.
+    const { data: profs } = await (supabase as any)
+      .rpc("get_public_match_profiles", { _targets: [user.id, peerUserId] });
+    const list = (profs ?? []) as Array<{ id: string; verified: boolean | null }>;
+    const meV = !!list.find((p) => p.id === user.id)?.verified;
+    const peerV = !!list.find((p) => p.id === peerUserId)?.verified;
 
     setStatus({
       mutual,

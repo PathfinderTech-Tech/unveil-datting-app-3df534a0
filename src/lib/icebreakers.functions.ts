@@ -85,7 +85,7 @@ export const generateIcebreakers = createServerFn({ method: "POST" })
       if (!matchRow) return { error: "You can only generate icebreakers with a mutual match." };
       const [me, them, compat, mineAns, theirAns] = await Promise.all([
         supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio").eq("id", userId).maybeSingle(),
-        supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio").eq("id", data.peerId).maybeSingle(),
+        (supabase as any).rpc("get_public_match_profiles", { _targets: [data.peerId] }).then((r: any) => ({ data: (r.data ?? [])[0] ?? null })),
         supabase.rpc("compute_compatibility", { _a: userId, _b: data.peerId }).maybeSingle(),
         supabase.from("daily_answers").select("answer, daily_questions(prompt,category)").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
         supabase.from("daily_answers").select("answer, daily_questions(prompt,category)").eq("user_id", data.peerId).order("created_at", { ascending: false }).limit(5),

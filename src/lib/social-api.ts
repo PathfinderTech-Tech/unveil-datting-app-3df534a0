@@ -27,11 +27,8 @@ export async function loadMutualPartners(): Promise<Partner[]> {
     .eq("mutual_interest", true);
   if (!rows?.length) return [];
   const ids = rows.map((r) => r.matched_user_id);
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, first_name, city, country, photo_url, profile_photo_url")
-    .in("id", ids);
-  const map = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const { data: profiles } = await (supabase as any).rpc("get_public_match_profiles", { _targets: ids });
+  const map = new Map(((profiles ?? []) as any[]).map((p: any) => [p.id, p]));
   const media = new Map((await getPrimaryProfileMedia({ data: { userIds: ids } })).map((p) => [p.id, p]));
   return rows.map((r) => {
     const p = map.get(r.matched_user_id);

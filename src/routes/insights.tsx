@@ -356,7 +356,7 @@ function ConnectionTab({ userId }: { userId: string }) {
       const list = data ?? [];
       const peerIds = list.map((m: any) => (m.user_id === userId ? m.matched_user_id : m.user_id));
       const { data: profs } = peerIds.length
-        ? await supabase.from("profiles").select("id, first_name, photo_url, avatar_url").in("id", peerIds)
+        ? await (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds })
         : { data: [] as any[] };
       const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
       const enriched = list.map((m: any) => {
