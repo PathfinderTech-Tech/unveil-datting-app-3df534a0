@@ -32,10 +32,6 @@ type Row = {
   peer_avatar: string | null;
   peer_discovery_mode: "avatar" | "photo" | null;
   peer_verified: boolean;
-  peer_travel_status: string | null;
-  peer_travel_expires_at: string | null;
-  peer_travel_warning_count: number | null;
-  peer_account_restricted: boolean | null;
   last_text: string | null;
   unread: number;
 };
