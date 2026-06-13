@@ -9,7 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getTodayBundle, saveDailyAnswer, getAnswerHistory } from "@/lib/daily.functions";
 import { trackEvent, ANALYTICS } from "@/lib/analytics";
 import { getBlueprint, updateBlueprint, STYLE_OPTIONS } from "@/lib/blueprint.functions";
-import { RevealJourney } from "@/components/RevealJourney";
+import { ContactExchangeCountdown, ContactExchangeReadyCard } from "@/components/ContactExchangeCountdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flame, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -62,12 +62,12 @@ function InsightsPage() {
             <TabsTrigger value="today">Today</TabsTrigger>
             <TabsTrigger value="readiness">Readiness</TabsTrigger>
             <TabsTrigger value="blueprint">Blueprint</TabsTrigger>
-            <TabsTrigger value="reveal">Reveal</TabsTrigger>
+            <TabsTrigger value="connection">Connection</TabsTrigger>
           </TabsList>
           <TabsContent value="today" className="mt-6"><TodayTab /></TabsContent>
           <TabsContent value="readiness" className="mt-6"><ReadinessTab userId={user.id} /></TabsContent>
           <TabsContent value="blueprint" className="mt-6"><BlueprintTab /></TabsContent>
-          <TabsContent value="reveal" className="mt-6"><RevealTab userId={user.id} /></TabsContent>
+          <TabsContent value="connection" className="mt-6"><ConnectionTab userId={user.id} /></TabsContent>
         </Tabs>
       </main>
     </div>
@@ -342,8 +342,8 @@ function BlueprintTab() {
   );
 }
 
-/* ---------------- Reveal ---------------- */
-function RevealTab({ userId }: { userId: string }) {
+/* ---------------- Connection (Contact Exchange Countdown) ---------------- */
+function ConnectionTab({ userId }: { userId: string }) {
   const [matches, setMatches] = useState<any[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -351,7 +351,7 @@ function RevealTab({ userId }: { userId: string }) {
     (async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id, user_id, matched_user_id, mutual_interest")
+        .select("id, user_id, matched_user_id, mutual_interest, created_at")
         .eq("mutual_interest", true);
       const list = data ?? [];
       const peerIds = list.map((m: any) => (m.user_id === userId ? m.matched_user_id : m.user_id));
@@ -369,10 +369,17 @@ function RevealTab({ userId }: { userId: string }) {
   }, [userId]);
 
   if (!matches.length) {
-    return <p className="text-muted-foreground">When you have mutual matches, your 7-day reveal journeys appear here.</p>;
+    return (
+      <p className="text-muted-foreground">
+        When you have mutual matches, your 7-Day Contact Exchange Journey will appear here.
+      </p>
+    );
   }
 
   const active = matches.find((m) => m.id === selected);
+  const day = active?.created_at
+    ? Math.max(1, Math.min(7, Math.floor((Date.now() - new Date(active.created_at).getTime()) / 86_400_000) + 1))
+    : 1;
 
   return (
     <div className="space-y-4">
@@ -391,7 +398,16 @@ function RevealTab({ userId }: { userId: string }) {
       </div>
 
       {selected && (
-        <RevealJourney matchId={selected} peerName={active?.peer?.first_name} />
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-border bg-surface/40 p-4">
+            <ContactExchangeCountdown day={day} />
+            <p className="mt-3 text-xs text-muted-foreground">
+              Photos are visible from the moment you match — the veil lifts as soon as your conversation begins.
+              The 7-day countdown only unlocks the option to exchange phone, email, or social handles.
+            </p>
+          </div>
+          {day >= 7 && <ContactExchangeReadyCard eligible />}
+        </div>
       )}
     </div>
   );

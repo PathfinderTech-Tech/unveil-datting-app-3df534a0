@@ -37,7 +37,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
         "blocks",
         "reports",
         "date_plans",
-        "reveal_progress",
+        
         "first_impression_responses",
         "spark_answers",
         "daily_answers",
