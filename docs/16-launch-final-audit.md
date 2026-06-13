@@ -15,8 +15,9 @@ UNVEIL uses **human-readable lookup keys** (resolved via `stripe.prices.list({ l
 |---|---|---|---|---|
 | **Verified Badge** | one-time | `verification_badge` | $9.99 | `profiles.badge_paid = true` → unlocks verification submission; on admin approval sets `profiles.verified = true` (15 msg/day + verified-only pool) |
 | **24-hour Message Pass** | one-time | `message_pass_24h` | $1.99 | `profiles.message_pass_until = now() + 24h` → `user_has_unlimited_messaging()` returns true → unlimited messages for 24h |
-| **Premium (monthly)** | recurring | `premium_monthly` | $19.99 / mo | `subscriptions.status = active`, `profiles.subscription_tier = 'premium'`, `profiles.premium_until = current_period_end` |
-| **Premium (yearly)** | recurring | `premium_yearly` | $199.99 / yr | same as monthly, longer period |
+| **Premium (monthly)** | recurring | `premium_monthly` | $15.99 / mo | `subscriptions.status = active`, `profiles.subscription_tier = 'premium'`, `profiles.premium_until = current_period_end` |
+| **Premium (yearly)** | recurring | `premium_yearly` | $149.99 / yr | same as monthly, longer period |
+| **2-Week Pass** | one-time | `message_pass_2w` | $9.99 | `profiles.message_pass_until = now() + 14d` → unlimited messaging + voice notes for 14d |
 
 > Action item: confirm the four `lookup_key` values above exist in **both** Stripe sandbox **and** live via `payments--batch_create_product`. If a product is missing in live, checkout returns `Price not found` after go-live.
 

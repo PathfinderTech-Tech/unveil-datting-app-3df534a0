@@ -63,5 +63,16 @@ for (const [k, want] of Object.entries(REQUIRED)) {
     console.log(`✅ ${k} → ${p.id} (${p.unit_amount/100} ${p.currency} every ${p.recurring.interval_count} ${p.recurring.interval})`);
   }
 }
+for (const [k, want] of Object.entries(REQUIRED_ONE_TIME)) {
+  const found = await listByLookup(k);
+  if (!found.length) { console.error(`❌ Required one-time price missing: ${k}`); failures++; continue; }
+  const p = found[0];
+  if (p.unit_amount !== want.unit_amount || p.recurring) {
+    console.error(`❌ ${k} shape wrong: amount=${p.unit_amount} recurring=${!!p.recurring}, want one-time ${want.unit_amount}`);
+    failures++;
+  } else {
+    console.log(`✅ ${k} → ${p.id} ($${p.unit_amount/100} one-time)`);
+  }
+}
 if (failures) { console.error(`\n${failures} failure(s) in ${env} catalog`); process.exit(1); }
 console.log(`\n✅ ${env} catalog clean`);
