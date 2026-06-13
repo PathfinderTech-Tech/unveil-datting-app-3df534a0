@@ -103,10 +103,10 @@ To test on device: register a real iPhone, open the app, sign in, confirm a row 
 > **Date who you're compatible with**  *(30)*
 
 ### Promotional Text (170 char max, can be updated without re-review)
-> Photos are revealed last. Match on values, voice, and personality first. Try Hidden Matches™, the 7-Day Reveal, and AI Icebreakers — all in a luxury, ad-free app.
+> Voice before appearance. Photos appear softly veiled, then unveil the moment a real conversation begins. Try Hidden Matches™, the 7-Day Contact Exchange Journey, and AI Icebreakers — luxury, ad-free.
 
 ### Keywords (100 char total, comma-separated)
-> compatibility,dating,relationships,love,match,intentional,voice,personality,hidden,reveal,premium,quiz
+> compatibility,dating,relationships,love,match,intentional,voice,personality,hidden,connection,premium,quiz
 
 ### Description (4000 char max)
 ```
