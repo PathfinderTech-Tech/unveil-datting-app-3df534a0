@@ -85,7 +85,7 @@ function MessagesPage() {
 
       const [{ data: profs }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
-          ? supabase.from("profiles").select("id, first_name, photo_url, profile_photo_url, avatar_url, discovery_mode, verified, travel_status, travel_expires_at, travel_warning_count, account_restricted").in("id", peerIds)
+          ? (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds })
           : Promise.resolve({ data: [] as any[] } as any),
         peerIds.length ? getPrimaryProfileMedia({ data: { userIds: peerIds } }) : Promise.resolve([]),
         convIds.length
