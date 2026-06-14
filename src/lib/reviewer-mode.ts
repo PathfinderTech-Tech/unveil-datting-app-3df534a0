@@ -15,9 +15,18 @@
  * This is purely a client-side UX accommodation; the reviewer still hits
  * RLS, rate limits, and the same trust pipeline as any other user.
  */
-export const APPLE_REVIEWER_EMAIL = "apple-review@unveil.best";
+/**
+ * Reviewer email is the App Store Connect demo account documented in
+ * App Review Information. Keep this in sync with ASC; both addresses are
+ * accepted so the historical alias keeps working.
+ */
+export const APPLE_REVIEWER_EMAIL = "support@unveil.best";
+const REVIEWER_EMAIL_ALIASES = new Set<string>([
+  "support@unveil.best",
+  "apple-review@unveil.best",
+]);
 
 export function isReviewerEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return email.trim().toLowerCase() === APPLE_REVIEWER_EMAIL;
+  return REVIEWER_EMAIL_ALIASES.has(email.trim().toLowerCase());
 }
