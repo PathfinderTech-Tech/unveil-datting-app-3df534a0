@@ -244,6 +244,14 @@ function Chat() {
     if (found && active?.id !== found.id) setActive(found);
   }, [wantId, convs, active?.id]);
 
+  // Remember the active conversation so Insights → Back to Messages
+  // can return the user directly to the chat they came from.
+  useEffect(() => {
+    if (active?.id) {
+      void import("@/lib/last-conversation").then((m) => m.rememberConversation(active.id));
+    }
+  }, [active?.id]);
+
   const peerId = useMemo(() => {
     if (!active || !user) return null;
     return active.user_a === user.id ? active.user_b : active.user_a;
