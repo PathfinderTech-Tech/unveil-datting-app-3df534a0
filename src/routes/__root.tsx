@@ -14,6 +14,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ThemeTokenSwitcher } from "@/components/ThemeTokenSwitcher";
 import { CooldownGuard } from "@/components/CooldownGuard";
+import { PresenceProvider } from "@/hooks/use-presence";
 
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
