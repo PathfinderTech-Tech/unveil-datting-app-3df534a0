@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,9 +11,10 @@ import { trackEvent, ANALYTICS } from "@/lib/analytics";
 import { getBlueprint, updateBlueprint, STYLE_OPTIONS } from "@/lib/blueprint.functions";
 import { ContactExchangeCountdown, ContactExchangeReadyCard } from "@/components/ContactExchangeCountdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Flame, Sparkles } from "lucide-react";
+import { ArrowLeft, Flame, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { InsightsPlusPaywall } from "@/components/InsightsPlusPaywall";
+import { getLastConversation } from "@/lib/last-conversation";
 
 export const Route = createFileRoute("/insights")({
   head: () => ({
