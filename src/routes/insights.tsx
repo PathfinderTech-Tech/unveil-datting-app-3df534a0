@@ -51,7 +51,8 @@ function InsightsPage() {
       <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-3xl font-semibold tracking-tight">Insights</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your relationship intelligence dashboard.</p>
+          <BackToMessagesButton />
+          <p className="mt-2 text-sm text-muted-foreground">Your relationship intelligence dashboard.</p>
         </header>
 
         <div className="mb-8">
@@ -72,6 +73,32 @@ function InsightsPage() {
         </Tabs>
       </main>
     </div>
+  );
+}
+
+/* ---------------- Back to Messages ---------------- */
+/**
+ * Persistent return-to-chat button rendered under the Insights title.
+ * Routes back to the most recently active conversation when known
+ * (set by chat.tsx on view), otherwise falls back to the inbox.
+ * Preserved on every tab because it lives on the page header — not
+ * inside any TabsContent — so it stays visible on Today, Readiness,
+ * Blueprint, and Connection without any per-tab duplication.
+ */
+function BackToMessagesButton() {
+  const [convId, setConvId] = useState<string | null>(null);
+  useEffect(() => { setConvId(getLastConversation()); }, []);
+  const linkProps = convId
+    ? ({ to: "/chat", search: { c: convId } } as const)
+    : ({ to: "/messages" } as const);
+  return (
+    <Link
+      {...(linkProps as any)}
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary"
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden />
+      Back to Messages
+    </Link>
   );
 }
 
