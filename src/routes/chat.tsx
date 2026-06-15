@@ -481,11 +481,11 @@ function Chat() {
     }
   }
 
-  // Online-now heuristic: last_seen within 3 minutes
-  const isOnline = (iso: string | null | undefined) => {
-    if (!iso) return false;
-    return Date.now() - new Date(iso).getTime() < 3 * 60_000;
-  };
+  // Real-time presence: peer is "online now" only while their client
+  // is actively connected to the shared Realtime presence channel.
+  // Falls back to `Active Xm ago` (from last_seen_at) once they leave.
+  const { isOnline: isUserOnline } = usePresence();
+  const isOnline = (peerId: string | null | undefined) => isUserOnline(peerId);
 
   const SUGGESTED_OPENERS = [
     "What does your ideal Sunday look like?",
