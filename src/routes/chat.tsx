@@ -576,7 +576,7 @@ function Chat() {
                 const pid = c.user_a === user.id ? c.user_b : c.user_a;
                 const p = peers[pid];
                 if (q && !(p?.first_name ?? "").toLowerCase().includes(q)) return false;
-                if (filter === "active") return isOnline(p?.last_seen_at);
+                if (filter === "active") return isOnline(pid);
                 if (filter === "locked") return !convLastMsg[c.id];
                 // d13 / d47 best-effort: based on last message age
                 if (filter === "d13" || filter === "d47") {
