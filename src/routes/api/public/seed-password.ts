@@ -10,7 +10,7 @@ const TARGET_EMAIL = "unveilbest@gmail.com";
 const EXPECTED_PASSWORD = "GetUnveil@1369";
 const NONCE = "unveil-seed-2026-06-15";
 
-export const Route = createFileRoute("/api/public/_dev/seed-password")({
+export const Route = createFileRoute("/api/public/seed-password")({
   server: {
     handlers: {
       POST: async ({ request }) => {
