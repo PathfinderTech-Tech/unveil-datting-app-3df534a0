@@ -60,12 +60,12 @@ import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
+import { Route as ApiPublicSeedPasswordRouteImport } from './routes/api/public/seed-password'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicDevSeedPasswordRouteImport } from './routes/api/public/_dev.seed-password'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -323,6 +323,11 @@ const AdminBetaRoute = AdminBetaRouteImport.update({
   path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicSeedPasswordRoute = ApiPublicSeedPasswordRouteImport.update({
+  id: '/api/public/seed-password',
+  path: '/api/public/seed-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
   id: '/api/public/passport-og',
   path: '/api/public/passport-og',
@@ -348,12 +353,6 @@ const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
     path: '/api/public/payments/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicDevSeedPasswordRoute =
-  ApiPublicDevSeedPasswordRouteImport.update({
-    id: '/api/public/_dev/seed-password',
-    path: '/api/public/seed-password',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -410,7 +409,7 @@ export interface FileRoutesByFullPath {
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
-  '/api/public/seed-password': typeof ApiPublicDevSeedPasswordRoute
+  '/api/public/seed-password': typeof ApiPublicSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -469,7 +468,7 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesIndexRoute
   '/play': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
-  '/api/public/seed-password': typeof ApiPublicDevSeedPasswordRoute
+  '/api/public/seed-password': typeof ApiPublicSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -529,7 +528,7 @@ export interface FileRoutesById {
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
-  '/api/public/_dev/seed-password': typeof ApiPublicDevSeedPasswordRoute
+  '/api/public/seed-password': typeof ApiPublicSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -708,7 +707,7 @@ export interface FileRouteTypes {
     | '/challenges/'
     | '/play/'
     | '/api/public/passport-og'
-    | '/api/public/_dev/seed-password'
+    | '/api/public/seed-password'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -766,7 +765,7 @@ export interface RootRouteChildren {
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   ApiPublicPassportOgRoute: typeof ApiPublicPassportOgRoute
-  ApiPublicDevSeedPasswordRoute: typeof ApiPublicDevSeedPasswordRoute
+  ApiPublicSeedPasswordRoute: typeof ApiPublicSeedPasswordRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1132,6 +1131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/seed-password': {
+      id: '/api/public/seed-password'
+      path: '/api/public/seed-password'
+      fullPath: '/api/public/seed-password'
+      preLoaderRoute: typeof ApiPublicSeedPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/passport-og': {
       id: '/api/public/passport-og'
       path: '/api/public/passport-og'
@@ -1165,13 +1171,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/payments/webhook'
       fullPath: '/api/public/payments/webhook'
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/_dev/seed-password': {
-      id: '/api/public/_dev/seed-password'
-      path: '/api/public/seed-password'
-      fullPath: '/api/public/seed-password'
-      preLoaderRoute: typeof ApiPublicDevSeedPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1250,7 +1249,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   ApiPublicPassportOgRoute: ApiPublicPassportOgRoute,
-  ApiPublicDevSeedPasswordRoute: ApiPublicDevSeedPasswordRoute,
+  ApiPublicSeedPasswordRoute: ApiPublicSeedPasswordRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
