@@ -373,25 +373,35 @@ function BlueprintTab() {
 /* ---------------- Connection (Contact Exchange Countdown) ---------------- */
 function ConnectionTab({ userId }: { userId: string }) {
   const [matches, setMatches] = useState<any[]>([]);
+  const [convByPeer, setConvByPeer] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("matches")
-        .select("id, user_id, matched_user_id, mutual_interest, created_at")
-        .eq("mutual_interest", true);
+      const [{ data }, { data: convs }] = await Promise.all([
+        supabase
+          .from("matches")
+          .select("id, user_id, matched_user_id, mutual_interest, created_at")
+          .eq("mutual_interest", true),
+        supabase.from("conversations").select("id, user_a, user_b"),
+      ]);
       const list = data ?? [];
       const peerIds = list.map((m: any) => (m.user_id === userId ? m.matched_user_id : m.user_id));
       const { data: profs } = peerIds.length
         ? await (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds })
         : { data: [] as any[] };
       const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const convMap: Record<string, string> = {};
+      for (const c of (convs ?? []) as any[]) {
+        const peer = c.user_a === userId ? c.user_b : c.user_a;
+        convMap[peer] = c.id;
+      }
       const enriched = list.map((m: any) => {
         const peerId = m.user_id === userId ? m.matched_user_id : m.user_id;
-        return { ...m, peer: profMap.get(peerId) };
+        return { ...m, peerId, peer: profMap.get(peerId) };
       });
       setMatches(enriched);
+      setConvByPeer(convMap);
       if (enriched.length && !selected) setSelected(enriched[0].id);
     })();
   }, [userId]);
@@ -405,6 +415,7 @@ function ConnectionTab({ userId }: { userId: string }) {
   }
 
   const active = matches.find((m) => m.id === selected);
+  const activeConvId = active ? convByPeer[active.peerId] : undefined;
   const day = active?.created_at
     ? Math.max(1, Math.min(7, Math.floor((Date.now() - new Date(active.created_at).getTime()) / 86_400_000) + 1))
     : 1;
@@ -412,22 +423,58 @@ function ConnectionTab({ userId }: { userId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {matches.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setSelected(m.id)}
-            className={`rounded-full border px-3 py-1.5 text-sm ${
-              selected === m.id ? "border-primary bg-primary/15 text-primary" : "border-border bg-background/60"
-            }`}
-          >
-            {m.peer?.first_name ?? "Match"}
-          </button>
-        ))}
+        {matches.map((m) => {
+          const convId = convByPeer[m.peerId];
+          const isSelected = selected === m.id;
+          return (
+            <div
+              key={m.id}
+              className={`flex items-center gap-1 rounded-full border ${
+                isSelected ? "border-primary bg-primary/15" : "border-border bg-background/60"
+              }`}
+            >
+              <button
+                onClick={() => setSelected(m.id)}
+                className={`rounded-full px-3 py-1.5 text-sm ${
+                  isSelected ? "text-primary font-medium" : "text-foreground"
+                }`}
+              >
+                {m.peer?.first_name ?? "Match"}
+              </button>
+              {convId && (
+                <Link
+                  to="/chat"
+                  search={{ c: convId }}
+                  aria-label={`Open chat with ${m.peer?.first_name ?? "match"}`}
+                  className="mr-1 inline-flex items-center gap-1 rounded-full bg-gradient-hero px-2.5 py-1 text-[11px] font-semibold text-primary-foreground shadow-glow"
+                >
+                  <MessageCircle className="h-3 w-3" aria-hidden />
+                  Open Chat
+                </Link>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {selected && (
         <div className="space-y-3">
           <div className="rounded-2xl border border-border bg-surface/40 p-4">
+            {active?.peer?.first_name && activeConvId && (
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-sm font-medium">
+                  Your journey with {active.peer.first_name}
+                </p>
+                <Link
+                  to="/chat"
+                  search={{ c: activeConvId }}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+                  Open Chat
+                </Link>
+              </div>
+            )}
             <ContactExchangeCountdown day={day} />
             <p className="mt-3 text-xs text-muted-foreground">
               Photos are visible from the moment you match — the veil lifts as soon as your conversation begins.
