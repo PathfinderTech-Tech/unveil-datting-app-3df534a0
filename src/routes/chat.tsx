@@ -649,8 +649,13 @@ function Chat() {
                       <p className="truncate text-xs text-muted-foreground">
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
-                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
-                        {online ? "Online now" : `Active ${timeAgo(p?.last_seen_at ?? null)}`}
+                      <span className={`shrink-0 inline-flex items-center gap-1 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
+                        {online ? (
+                          <>
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+                            Online now
+                          </>
+                        ) : p?.last_seen_at ? `Active ${timeAgo(p.last_seen_at)} ago` : ""}
                       </span>
                     </div>
                   </div>
