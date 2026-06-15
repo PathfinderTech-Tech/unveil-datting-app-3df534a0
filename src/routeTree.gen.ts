@@ -65,6 +65,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicDevSeedPasswordRouteImport } from './routes/api/public/_dev.seed-password'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -349,6 +350,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDevSeedPasswordRoute =
+  ApiPublicDevSeedPasswordRouteImport.update({
+    id: '/api/public/_dev/seed-password',
+    path: '/api/public/seed-password',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -403,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
+  '/api/public/seed-password': typeof ApiPublicDevSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -461,6 +469,7 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesIndexRoute
   '/play': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
+  '/api/public/seed-password': typeof ApiPublicDevSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -520,6 +529,7 @@ export interface FileRoutesById {
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
+  '/api/public/_dev/seed-password': typeof ApiPublicDevSeedPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/challenges/'
     | '/play/'
     | '/api/public/passport-og'
+    | '/api/public/seed-password'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -638,6 +649,7 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/play'
     | '/api/public/passport-og'
+    | '/api/public/seed-password'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -696,6 +708,7 @@ export interface FileRouteTypes {
     | '/challenges/'
     | '/play/'
     | '/api/public/passport-og'
+    | '/api/public/_dev/seed-password'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -753,6 +766,7 @@ export interface RootRouteChildren {
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   ApiPublicPassportOgRoute: typeof ApiPublicPassportOgRoute
+  ApiPublicDevSeedPasswordRoute: typeof ApiPublicDevSeedPasswordRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1153,6 +1167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/_dev/seed-password': {
+      id: '/api/public/_dev/seed-password'
+      path: '/api/public/seed-password'
+      fullPath: '/api/public/seed-password'
+      preLoaderRoute: typeof ApiPublicDevSeedPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1229,6 +1250,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   ApiPublicPassportOgRoute: ApiPublicPassportOgRoute,
+  ApiPublicDevSeedPasswordRoute: ApiPublicDevSeedPasswordRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
@@ -1237,13 +1259,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
