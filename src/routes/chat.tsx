@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
+import { usePresence } from "@/hooks/use-presence";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
@@ -480,11 +481,11 @@ function Chat() {
     }
   }
 
-  // Online-now heuristic: last_seen within 3 minutes
-  const isOnline = (iso: string | null | undefined) => {
-    if (!iso) return false;
-    return Date.now() - new Date(iso).getTime() < 3 * 60_000;
-  };
+  // Real-time presence: peer is "online now" only while their client
+  // is actively connected to the shared Realtime presence channel.
+  // Falls back to `Active Xm ago` (from last_seen_at) once they leave.
+  const { isOnline: isUserOnline } = usePresence();
+  const isOnline = (peerId: string | null | undefined) => isUserOnline(peerId);
 
   const SUGGESTED_OPENERS = [
     "What does your ideal Sunday look like?",
@@ -575,7 +576,7 @@ function Chat() {
                 const pid = c.user_a === user.id ? c.user_b : c.user_a;
                 const p = peers[pid];
                 if (q && !(p?.first_name ?? "").toLowerCase().includes(q)) return false;
-                if (filter === "active") return isOnline(p?.last_seen_at);
+                if (filter === "active") return isOnline(pid);
                 if (filter === "locked") return !convLastMsg[c.id];
                 // d13 / d47 best-effort: based on last message age
                 if (filter === "d13" || filter === "d47") {
@@ -597,7 +598,7 @@ function Chat() {
               const p = peers[pid];
               const pct = convCompat[c.id];
               const isActive = active?.id === c.id;
-              const online = isOnline(p?.last_seen_at);
+              const online = isOnline(pid);
               return (
                 <button
                   key={c.id}
@@ -648,8 +649,13 @@ function Chat() {
                       <p className="truncate text-xs text-muted-foreground">
                         {convLastMsg[c.id] ?? "Say hi"}
                       </p>
-                      <span className={`shrink-0 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
-                        {online ? "Online now" : `Active ${timeAgo(p?.last_seen_at ?? null)}`}
+                      <span className={`shrink-0 inline-flex items-center gap-1 text-[10px] ${online ? "font-medium text-emerald-400" : "text-muted-foreground"}`}>
+                        {online ? (
+                          <>
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+                            Online now
+                          </>
+                        ) : p?.last_seen_at ? `Active ${timeAgo(p.last_seen_at)} ago` : ""}
                       </span>
                     </div>
                   </div>
@@ -703,7 +709,7 @@ function Chat() {
                           />
                         </div>
                       </div>
-                      {isOnline(peer?.last_seen_at) && (
+                      {isOnline(peerId) && (
                         <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
                       )}
                     </div>
@@ -715,8 +721,11 @@ function Chat() {
                       
                     </div>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      {isOnline(peer?.last_seen_at) ? (
-                        <span className="text-emerald-400">Active now</span>
+                      {isOnline(peerId) ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+                          Online now
+                        </span>
                       ) : peer?.last_seen_at ? (
                         <span>Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}

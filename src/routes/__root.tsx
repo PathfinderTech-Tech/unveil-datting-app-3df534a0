@@ -14,6 +14,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ThemeTokenSwitcher } from "@/components/ThemeTokenSwitcher";
 import { CooldownGuard } from "@/components/CooldownGuard";
+import { PresenceProvider } from "@/hooks/use-presence";
 
 import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
@@ -158,17 +159,19 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CooldownGuard />
-      
-      <VeilBackdrop variant={variant} opacity={opacity} />
-      <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-16 lg:pb-0"}`}>
-        <div className="flex-1">
-          <Outlet />
+      <PresenceProvider>
+        <CooldownGuard />
+
+        <VeilBackdrop variant={variant} opacity={opacity} />
+        <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-16 lg:pb-0"}`}>
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          {!isChromeless && <SiteFooter />}
+          {!isChromeless && <MobileBottomNav />}
+          {import.meta.env.DEV && <ThemeTokenSwitcher />}
         </div>
-        {!isChromeless && <SiteFooter />}
-        {!isChromeless && <MobileBottomNav />}
-        {import.meta.env.DEV && <ThemeTokenSwitcher />}
-      </div>
+      </PresenceProvider>
     </QueryClientProvider>
   );
 }
