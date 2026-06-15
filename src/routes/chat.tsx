@@ -704,7 +704,7 @@ function Chat() {
                           />
                         </div>
                       </div>
-                      {isOnline(peer?.last_seen_at) && (
+                      {isOnline(peerId) && (
                         <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
                       )}
                     </div>
@@ -716,8 +716,11 @@ function Chat() {
                       
                     </div>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      {isOnline(peer?.last_seen_at) ? (
-                        <span className="text-emerald-400">Active now</span>
+                      {isOnline(peerId) ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+                          Online now
+                        </span>
                       ) : peer?.last_seen_at ? (
                         <span>Active {timeAgo(peer.last_seen_at)} ago</span>
                       ) : null}
