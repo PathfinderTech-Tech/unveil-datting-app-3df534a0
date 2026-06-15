@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useAuth } from "@/hooks/use-auth";
+import { usePresence } from "@/hooks/use-presence";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
