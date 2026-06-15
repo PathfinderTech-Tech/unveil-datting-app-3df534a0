@@ -598,7 +598,7 @@ function Chat() {
               const p = peers[pid];
               const pct = convCompat[c.id];
               const isActive = active?.id === c.id;
-              const online = isOnline(p?.last_seen_at);
+              const online = isOnline(pid);
               return (
                 <button
                   key={c.id}
