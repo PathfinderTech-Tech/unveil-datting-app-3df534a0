@@ -270,6 +270,23 @@ function Chat() {
 
   const peer = peerId ? peers[peerId] : null;
   const peerName = peer?.first_name ?? "Match";
+  const reveal = useMatchReveal(peerId);
+
+  // One-time "Veil Lifted" celebration when it flips in-session.
+  const veilCelebratedRef = useRef<string | null>(null);
+  const [veilJustLifted, setVeilJustLifted] = useState(false);
+  useEffect(() => {
+    if (!peerId || !reveal.veilLifted) return;
+    if (veilCelebratedRef.current === peerId) return;
+    // Only celebrate if the flip happened within the last 30s
+    const ts = reveal.veilLiftedAt ? new Date(reveal.veilLiftedAt).getTime() : 0;
+    if (ts && Date.now() - ts < 30_000) {
+      veilCelebratedRef.current = peerId;
+      setVeilJustLifted(true);
+    } else {
+      veilCelebratedRef.current = peerId;
+    }
+  }, [peerId, reveal.veilLifted, reveal.veilLiftedAt]);
 
   // Match info + compatibility for the active conversation
   useEffect(() => {
