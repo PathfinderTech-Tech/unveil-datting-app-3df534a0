@@ -29,6 +29,7 @@ import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
