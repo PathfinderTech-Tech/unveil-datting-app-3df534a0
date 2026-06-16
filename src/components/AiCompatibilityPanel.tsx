@@ -28,10 +28,11 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
     setError(null);
     try {
       const res = await fetchInsight({ data: { peerId, force } });
-      if ("error" in res) setError(res.error);
+      if ("error" in res) setError(aiErrorMessage(res.error));
       else setInsight(res.insight);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed");
+      console.error("[AiCompatibilityPanel] load failed", e);
+      setError(aiErrorMessage("AI_SERVICE_UNAVAILABLE"));
     } finally {
       setLoading(false);
     }
