@@ -180,7 +180,32 @@ function InsightsAiPage() {
                       {r.insight ? "Refresh" : "Analyze"}
                     </button>
                   </div>
-                  {r.error && <div className="mt-2 text-xs text-destructive">{r.error}</div>}
+                  {r.errorCode === "PREMIUM_REQUIRED" ? (
+                    <div className="mt-3 rounded-2xl border border-border bg-surface/40 p-4">
+                      <div className="text-sm font-semibold">Unveil AI Compatibility Insights</div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.
+                      </p>
+                      <ul className="mt-2 space-y-0.5 text-xs text-foreground/80">
+                        <li>• Best Overall Match</li>
+                        <li>• Best Romantic Match</li>
+                        <li>• Best Friendship Match</li>
+                        <li>• AI Date Suggestions</li>
+                        <li>• Relationship Journey Analysis</li>
+                        <li>• Communication Insights</li>
+                        <li>• Shared Values Analysis</li>
+                      </ul>
+                      <Link
+                        to="/premium"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-hero px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-glow"
+                      >
+                        <Crown className="h-3.5 w-3.5" /> Upgrade to Premium
+                      </Link>
+                    </div>
+                  ) : r.error ? (
+                    <div className="mt-2 text-xs text-destructive">{r.error}</div>
+                  ) : null}
+
                   {r.insight && (
                     <>
                       <p className="mt-3 text-sm text-foreground/90">"{r.insight.aiSummary}"</p>
