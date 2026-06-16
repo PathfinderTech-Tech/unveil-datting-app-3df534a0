@@ -603,25 +603,41 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 4: Voice prompts ---------- */}
+        {/* ---------- STEP 4: Voice Introduction ---------- */}
         {step === 4 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Let your voice tell part of your <span className="uo-accent">story</span>.</h1>
+              <h1 className="font-display text-4xl font-bold">
+                Your voice tells a story that <span className="uo-accent">photos never can</span>.
+              </h1>
               <p className="mt-2 text-muted-foreground">
-                Record 2–3 short voice prompts (up to 60 seconds each). Voice intros make profiles feel real
-                and lead to better matches and conversations. You can skip and add these later from your Passport.
+                Record two short voice prompts (up to 60s each). We'll use them to craft your written profile —
+                you can edit, regenerate, or skip anytime.
               </p>
             </div>
             {user && (
               <div className="grid gap-3">
-                {VOICE_ONBOARDING_PROMPTS.map((p) => (
-                  <VoiceRecorder key={p} userId={user.id} prompt={p} />
+                {VOICE_INTRO_PROMPTS.map((p, i) => (
+                  <div key={p.prompt}>
+                    <div className="mb-1 font-mono text-[10px] uppercase tracking-luxury text-primary">
+                      Prompt {i + 1} · {p.title}
+                    </div>
+                    <VoiceRecorder userId={user.id} prompt={p.prompt} />
+                  </div>
                 ))}
               </div>
             )}
+
+            <VoiceProfileGenerator
+              onApply={(p) => {
+                setBio(p.bio || "");
+                void persist({ ai_profile: p }, { bio: p.bio || null });
+                toast.success("AI profile applied — you can edit it in the next step.");
+              }}
+            />
+
             <div className="text-center text-[11px] text-muted-foreground">
-              You can re-record or add more prompts anytime from your Passport.
+              You can re-record or edit your generated profile anytime from your Passport.
             </div>
           </div>
         )}
