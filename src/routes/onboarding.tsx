@@ -800,8 +800,8 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 8: Profile preview ---------- */}
-        {step === 8 && (
+        {/* ---------- STEP 9: Profile preview ---------- */}
+        {step === 9 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">How your <span className="uo-accent">profile</span> looks.</h1>
