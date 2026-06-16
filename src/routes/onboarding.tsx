@@ -629,17 +629,8 @@ function Onboarding() {
                 ))}
               </div>
             )}
-
-            <VoiceProfileGenerator
-              onApply={(p) => {
-                setBio(p.bio || "");
-                void persist({ ai_profile: p }, { bio: p.bio || null });
-                toast.success("AI profile applied — you can edit it in the next step.");
-              }}
-            />
-
             <div className="text-center text-[11px] text-muted-foreground">
-              You can re-record or edit your generated profile anytime from your Passport.
+              You can re-record or add more voice prompts anytime from your Passport.
             </div>
           </div>
         )}
