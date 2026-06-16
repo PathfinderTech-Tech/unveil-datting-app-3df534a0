@@ -271,6 +271,15 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
         all,
       };
     } catch (e) {
-      return { error: e instanceof Error ? e.message : "Failed to load top matches" };
+      console.error("[ai-compatibility] top matches error", e);
+      return { error: "AI_SERVICE_UNAVAILABLE" };
     }
   });
+
+// User-facing copy for sanitized error codes returned by server functions.
+// Components MUST use this to render text — never display raw codes.
+export function aiErrorMessage(code: string): string {
+  if (code === "PREMIUM_REQUIRED") return "Upgrade to Premium to unlock AI Compatibility Insights.";
+  if (code === "NOT_MUTUAL") return "AI insights are available once you both match.";
+  return "We couldn’t generate insights right now. Please try again shortly.";
+}
