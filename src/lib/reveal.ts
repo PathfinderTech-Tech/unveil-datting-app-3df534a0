@@ -49,7 +49,7 @@ export function useMatchReveal(peerUserId: string | null | undefined) {
           "meaningful_interactions, voice_notes_user, voice_notes_peer, veil_lifted_at, active_day_count, shared_activity_count, date_unlocked_at, sponsor_preference"
         )
         .eq("user_id", user.id)
-        .eq("matched_user_id", peerUserId)
+        .eq("matched_user_id", peerUserId as string)
         .maybeSingle();
 
       if (!alive) return;
