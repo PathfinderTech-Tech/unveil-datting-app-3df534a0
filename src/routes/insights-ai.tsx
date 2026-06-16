@@ -90,34 +90,37 @@ function InsightsAiPage() {
     return (
       <div className="min-h-screen bg-background">
         <UnveilNav />
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-5xl px-6 py-10">
           <Link to="/matches" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back to matches
           </Link>
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8">
-            <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-hero opacity-25 blur-3xl" />
-            <div className="relative">
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">AI Compatibility Insights</h1>
-              <p className="mt-2 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
-              <p className="mt-3 max-w-xl text-muted-foreground">
-                Understand which connections may have the strongest potential for romance, friendship, and long-term compatibility.
-              </p>
-              <p className="mt-5 text-sm font-medium text-foreground">Unlock:</p>
-              <ul className="mt-2 space-y-1 text-sm text-foreground/90">
-                <li>• Best Romantic Match</li>
-                <li>• Best Friendship Match</li>
-                <li>• Best Overall Match</li>
-                <li>• AI Date Suggestions</li>
-                <li>• Relationship Journey Insights</li>
-                <li>• Premium AI Analysis</li>
-              </ul>
-              <p className="mt-5 text-sm text-muted-foreground">
-                Upgrade to Premium to unlock AI Compatibility Insights.
-              </p>
+
+          <HeroBlock />
+
+          {/* Locked top picks preview */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <LockedPick label="Best Overall Match" sub="Your top connection with the highest overall compatibility." icon={<Trophy className="h-5 w-5" />} />
+            <LockedPick label="Best Romantic Match" sub="Your strongest potential for romantic connection." icon={<Heart className="h-5 w-5" />} />
+            <LockedPick label="Best Friendship Match" sub="Your strongest potential for a meaningful friendship." icon={<Users className="h-5 w-5" />} />
+          </div>
+
+          {/* What's included */}
+          <div className="mt-6 rounded-3xl border border-border bg-card p-6">
+            <div className="text-center font-mono text-xs uppercase tracking-luxury text-accent">What's Included</div>
+            <ul className="mx-auto mt-5 grid max-w-xl gap-3 sm:grid-cols-2">
+              <IncludedRow icon={<Trophy className="h-4 w-4 text-accent" />} label="Best Overall Match" />
+              <IncludedRow icon={<Heart className="h-4 w-4 text-accent" />} label="Best Romantic Match" />
+              <IncludedRow icon={<Users className="h-4 w-4 text-accent" />} label="Best Friendship Match" />
+              <IncludedRow icon={<Calendar className="h-4 w-4 text-accent" />} label="AI Date Suggestions" />
+              <IncludedRow icon={<Activity className="h-4 w-4 text-accent" />} label="Relationship Journey" />
+              <IncludedRow icon={<Shield className="h-4 w-4 text-accent" />} label="Attachment Style Analysis" />
+              <IncludedRow icon={<MessageCircle className="h-4 w-4 text-accent" />} label="Communication Style Analysis" />
+              <IncludedRow icon={<Gem className="h-4 w-4 text-accent" />} label="Shared Values Analysis" />
+            </ul>
+            <div className="mt-6 flex justify-center">
               <Link
                 to="/premium"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow"
               >
                 <Crown className="h-4 w-4" /> Upgrade to Premium
               </Link>
@@ -132,21 +135,15 @@ function InsightsAiPage() {
     <div className="min-h-screen bg-background">
       <UnveilNav />
       <div className="mx-auto max-w-5xl px-6 py-10">
-        <div className="mb-8">
-          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-          <h1 className="mt-1 font-display text-4xl font-bold">AI Insights</h1>
-          <p className="mt-1 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Real-name compatibility analysis across your mutual matches — plus your daily readiness, blueprint, and 7-day connection journey. Insights auto-refresh every 24 hours.
-          </p>
-        </div>
+        <HeroBlock premium />
 
         {/* TOP PICKS */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
-          <TopPick label="Best Overall" icon={<Sparkles className="h-4 w-4" />} insight={top?.bestOverall ?? null} metric="overallCompatibility" />
-          <TopPick label="Best Romantic" icon={<Heart className="h-4 w-4" />} insight={top?.bestRomantic ?? null} metric="romanticPotential" />
-          <TopPick label="Best Friendship" icon={<Users className="h-4 w-4" />} insight={top?.bestFriendship ?? null} metric="friendshipPotential" />
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <TopPick label="Best Overall Match" sub="Your top connection with the highest overall compatibility." icon={<Trophy className="h-5 w-5" />} insight={top?.bestOverall ?? null} metric="overallCompatibility" />
+          <TopPick label="Best Romantic Match" sub="Your strongest potential for romantic connection." icon={<Heart className="h-5 w-5" />} insight={top?.bestRomantic ?? null} metric="romanticPotential" />
+          <TopPick label="Best Friendship Match" sub="Your strongest potential for a meaningful friendship." icon={<Users className="h-5 w-5" />} insight={top?.bestFriendship ?? null} metric="friendshipPotential" />
         </div>
+
 
         {/* MATCH LIST */}
         <div className="rounded-3xl border border-border bg-card p-4 sm:p-6">
