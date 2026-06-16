@@ -32,6 +32,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InsightsAiRouteImport } from './routes/insights-ai'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
@@ -179,6 +180,11 @@ const ManageSubscriptionRoute = ManageSubscriptionRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsAiRoute = InsightsAiRouteImport.update({
+  id: '/insights-ai',
+  path: '/insights-ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightsRoute = InsightsRouteImport.update({
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -424,6 +431,7 @@ export interface FileRoutesByTo {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -483,6 +491,7 @@ export interface FileRoutesById {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -601,6 +611,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -659,6 +670,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -718,6 +730,7 @@ export interface RootRouteChildren {
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   InsightsRoute: typeof InsightsRoute
+  InsightsAiRoute: typeof InsightsAiRoute
   LoginRoute: typeof LoginRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
   MatchesRoute: typeof MatchesRoute
@@ -920,6 +933,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights-ai': {
+      id: '/insights-ai'
+      path: '/insights-ai'
+      fullPath: '/insights-ai'
+      preLoaderRoute: typeof InsightsAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insights': {
@@ -1194,6 +1214,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   InsightsRoute: InsightsRoute,
+  InsightsAiRoute: InsightsAiRoute,
   LoginRoute: LoginRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
   MatchesRoute: MatchesRoute,
@@ -1237,13 +1258,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
