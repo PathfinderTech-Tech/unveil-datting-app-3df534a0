@@ -820,6 +820,36 @@ function Chat() {
                 )}
               </header>
 
+              {/* Reveal-journey progress strips */}
+              {peerId && <ConnectionProgress state={reveal} peerName={peerName} />}
+              {peerId && <DateReadinessProgress state={reveal} />}
+
+              {/* Veil Lifted celebration overlay */}
+              {veilJustLifted && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md"
+                  onClick={() => setVeilJustLifted(false)}
+                >
+                  <div className="mx-4 max-w-sm rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-glow">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero">
+                      <Sparkles className="h-8 w-8 text-primary-foreground" />
+                    </div>
+                    <h2 className="font-display text-2xl">Veil Lifted</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      You took the time to get to know each other first.
+                      The veil has now been removed.
+                    </p>
+                    <button
+                      onClick={() => setVeilJustLifted(false)}
+                      className="mt-5 rounded-full bg-gradient-hero px-6 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              )}
+
+
 
               {/* ============ MESSAGES ============ */}
               <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
