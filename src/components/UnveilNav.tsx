@@ -35,7 +35,6 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
     label: "Identity",
     items: [
       { to: "/passport", label: "Passport" },
-      { to: "/insights", label: "Insights" },
       { to: "/insights-ai", label: "AI Insights" },
       { to: "/challenges", label: "Challenges" },
     ],
