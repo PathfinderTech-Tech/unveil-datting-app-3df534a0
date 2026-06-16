@@ -172,6 +172,26 @@ function Onboarding() {
   const [discovery, setDiscovery] = useState<Partial<DiscoveryProfile>>({});
   const [spark, setSpark] = useState<Record<string, string>>({});
 
+  // Track how many voice intro prompts have been recorded (for button label on step 4)
+  const [voiceRecordedCount, setVoiceRecordedCount] = useState(0);
+  useEffect(() => {
+    if (step !== 4 || !user) return;
+    let alive = true;
+    const fetchCount = async () => {
+      const { data } = await supabase
+        .from("voice_prompts")
+        .select("prompt")
+        .eq("user_id", user.id)
+        .in("prompt", VOICE_INTRO_PROMPT_TEXTS);
+      if (!alive) return;
+      const unique = new Set((data ?? []).map((r) => r.prompt));
+      setVoiceRecordedCount(unique.size);
+    };
+    void fetchCount();
+    const id = window.setInterval(fetchCount, 2500);
+    return () => { alive = false; clearInterval(id); };
+  }, [step, user]);
+
   // Step 7
   // Paid verification removed — auto-skip step 7.
   const verifyChoice = "skip" as const;
