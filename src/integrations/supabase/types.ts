@@ -1002,58 +1002,85 @@ export type Database = {
       }
       matches: {
         Row: {
+          active_day_count: number
           chemistry_score: number | null
           compatibility_score: number | null
           connection_score: number | null
           created_at: string
+          date_unlocked_at: string | null
           id: string
           interaction_count: number | null
+          last_active_day: string | null
           matched_user_id: string
           matched_user_interested: boolean | null
+          meaningful_interactions: number
           mutual_interest: boolean | null
           passed: boolean
           saved: boolean
           share_matched_consent: boolean | null
           share_unlocked: boolean | null
           share_user_consent: boolean | null
+          shared_activity_count: number
+          sponsor_preference: string | null
           user_id: string
           user_interested: boolean | null
+          veil_lifted_at: string | null
+          voice_notes_peer: number
+          voice_notes_user: number
         }
         Insert: {
+          active_day_count?: number
           chemistry_score?: number | null
           compatibility_score?: number | null
           connection_score?: number | null
           created_at?: string
+          date_unlocked_at?: string | null
           id?: string
           interaction_count?: number | null
+          last_active_day?: string | null
           matched_user_id: string
           matched_user_interested?: boolean | null
+          meaningful_interactions?: number
           mutual_interest?: boolean | null
           passed?: boolean
           saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
           share_user_consent?: boolean | null
+          shared_activity_count?: number
+          sponsor_preference?: string | null
           user_id: string
           user_interested?: boolean | null
+          veil_lifted_at?: string | null
+          voice_notes_peer?: number
+          voice_notes_user?: number
         }
         Update: {
+          active_day_count?: number
           chemistry_score?: number | null
           compatibility_score?: number | null
           connection_score?: number | null
           created_at?: string
+          date_unlocked_at?: string | null
           id?: string
           interaction_count?: number | null
+          last_active_day?: string | null
           matched_user_id?: string
           matched_user_interested?: boolean | null
+          meaningful_interactions?: number
           mutual_interest?: boolean | null
           passed?: boolean
           saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
           share_user_consent?: boolean | null
+          shared_activity_count?: number
+          sponsor_preference?: string | null
           user_id?: string
           user_interested?: boolean | null
+          veil_lifted_at?: string | null
+          voice_notes_peer?: number
+          voice_notes_user?: number
         }
         Relationships: []
       }
@@ -2217,6 +2244,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      fn_is_meaningful_text: { Args: { _content: string }; Returns: boolean }
       get_effective_message_limit: { Args: { _uid: string }; Returns: number }
       get_message_quota: {
         Args: { _uid?: string }
@@ -2347,6 +2375,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reveal_recheck_pair: {
+        Args: { _a: string; _b: string }
+        Returns: undefined
+      }
       send_thought: {
         Args: { _content: string; _target: string }
         Returns: {
@@ -2354,6 +2386,10 @@ export type Database = {
           mutual: boolean
           thought_id: string
         }[]
+      }
+      set_sponsor_preference: {
+        Args: { _peer: string; _pref: string }
+        Returns: undefined
       }
       set_user_travel_mode: {
         Args: {

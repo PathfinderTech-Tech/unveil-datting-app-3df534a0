@@ -1,126 +1,79 @@
-# Stage 2 — Gift Journey System
+# Unveil Reveal Journey — Business Logic Update
 
-Additive feature. Does NOT touch auth, matching, messaging logic, voice notes, subscriptions, reveal, verification, AI Insights, or chat layout. Reuses existing `messages` table for in-chat delivery via a typed message row, so realtime/quotas/RLS all continue to work unchanged.
+This is a logic-only update. No redesigns; existing auth, payments, onboarding, messaging, voice, AI, verification, admin, and routing stay as they are. Only the reveal progression and a small status panel inside the chat thread change.
 
-## Goals
-1. A gift **catalog** (Rose, Coffee, Heart Note, Teddy Bear, Scented Candle, Love Letter, Spark…).
-2. **Send from inside the existing chat composer** via a small gift button (no replacement of text input or voice notes).
-3. Render gifts as a special **message bubble** in the conversation timeline.
-4. A **Gift Journey** progression (First Gift → Meaningful → Deep Connection) + streaks.
-5. **Premium gating**: free = 3 gifts / week + only "free-tier" gifts; premium = unlimited + all gifts.
-6. Dedicated `/gifts` page kept as collection / journey overview (sending happens primarily in chat).
+## Goals (per spec)
+
+- Match → veiled card with name/age/city/score/AI vibe tags + “You've matched” copy
+- Veil lifts automatically when BOTH:
+  1. ≥10 meaningful interactions in the conversation (combined text + voice), and
+  2. Each user has sent ≥1 voice note
+- After reveal: track 3 days of active conversation + ≥1 shared challenge/game → unlock Date Mode
+- Date Mode: AI date suggestions + sponsor preference toggle (preference only, no payments)
+
+“Meaningful” excludes: empty messages, emoji-only, repeated duplicates, very short spam.
 
 ## Data model (single migration)
 
-```text
-gift_catalog        (static, seeded)
-  slug PK, name, emoji, image_url, gem_cost int,
-  tier text ('free'|'premium'|'milestone'),
-  default_message text, sort int, active bool
+Add to `public.matches`:
+- `meaningful_interactions int not null default 0`
+- `voice_notes_user int not null default 0` (sent by `user_id`)
+- `voice_notes_peer int not null default 0` (sent by `matched_user_id`)
+- `veil_lifted_at timestamptz`
+- `active_day_count int not null default 0`
+- `last_active_day date`
+- `shared_activity_count int not null default 0`
+- `date_unlocked_at timestamptz`
+- `sponsor_preference text` — one of `sponsor|split|decide_together|null`
 
-gift_sends
-  id, sender_id, recipient_id, conversation_id,
-  gift_slug FK -> gift_catalog.slug,
-  note text (<=140 chars, contact-share trigger reused),
-  message_id FK -> messages.id (nullable),
-  created_at
+New SECURITY DEFINER triggers / functions (all on `public`, search_path locked):
 
-gift_journey  (one row per pair, ordered user_a<user_b)
-  user_a, user_b PK,
-  total_gifts int, last_gift_at, streak_days int,
-  stage text ('first_gift'|'meaningful'|'deep_connection')
+1. `fn_is_meaningful_message(content text, type text) returns boolean`
+   - voice → true; else trim+strip emoji+collapse whitespace → length ≥ 2 chars AND ≠ last meaningful content from same sender in same conversation.
+2. `trg_matches_progress_on_message` AFTER INSERT on `public.messages`
+   - Resolves both `matches` rows (user_a↔user_b) for the conversation.
+   - If meaningful: `meaningful_interactions += 1` on both rows.
+   - If voice: increment `voice_notes_user/peer` on the correct side of each row.
+   - Updates `last_active_day` / `active_day_count` (increment when date changes).
+   - If `meaningful_interactions >= 10` AND both voice counters ≥ 1 AND `veil_lifted_at IS NULL` → set `veil_lifted_at = now()` on both rows.
+   - If `veil_lifted_at` set AND `active_day_count >= 3` AND `shared_activity_count >= 1` AND `date_unlocked_at IS NULL` → set `date_unlocked_at = now()`.
+3. `trg_matches_shared_activity` AFTER INSERT on `public.challenge_results` / `public.game_results` / `public.puzzle_scores` — when both users in a match have a result for the same challenge/game/puzzle id, `shared_activity_count += 1` on both rows and re-check date unlock.
+4. `set_sponsor_preference(_peer uuid, _pref text)` — updates the caller's match row only.
 
-gift_weekly_usage  (rolling 7d counter for free tier)
-  user_id, week_start date, sent_count int  PK(user_id, week_start)
-```
+The existing `reveal_stage` / `share_unlocked` / contact-sharing journey is **left intact** — this update only governs the photo veil and date-readiness, not the separate 7-day contact exchange.
 
-RLS:
-- `gift_catalog`: SELECT to anon+authenticated.
-- `gift_sends`: SELECT where `auth.uid() in (sender_id, recipient_id)`. INSERT only via server fn (no direct client insert policy).
-- `gift_journey`: SELECT where uid in (user_a, user_b).
-- `gift_weekly_usage`: SELECT/own-row only.
+## Frontend (logic + minimal UI only)
 
-GRANTs included per project rules. service_role full access.
+- `src/lib/reveal.ts` (new): `useMatchReveal(peerUserId)` → `{ veilLifted, meaningful, voiceMe, voicePeer, activeDays, sharedActivities, dateUnlocked, sponsorPreference }`, polls/subscribes to the match row.
+- `src/components/HiddenMatchCard.tsx`: keep current card; show veiled photo until `veilLifted`. Add the AI vibe tags row (already available on profile) and the “Get to know each other…” copy.
+- `src/routes/chat.tsx`: insert a slim `ConnectionProgress` strip above the composer when `!veilLifted`:
+  - `Connection Progress N / 10`
+  - `Voice Notes: You ✓/—  Them ✓/—`
+  - “Keep talking to unlock the reveal.”
+  When veil flips to lifted in-session, fire a one-time “Veil Lifted” overlay (re-uses existing dialog primitives) with the spec copy.
+- After reveal, the strip switches to `Conversation Journey Day N/3` + `Challenge Progress N/1`. When `dateUnlocked` → render `DateReadinessPanel` (new, in `src/components/`) with existing AI date suggestion call + three radio chips (Sponsor / Split / Decide together) wired to `set_sponsor_preference`.
+- `src/components/ProfileAvatar.tsx` / discover/messages already accept `veiled` prop — pass `!veilLifted` from match data so list views align.
 
-## Server functions (`src/lib/gifts.functions.ts`)
-All use `requireSupabaseAuth`.
+No changes to onboarding, premium gates, payments, verification, or routing.
 
-- `listGiftCatalog()` → returns catalog + per-user lock state (tier vs entitlements, journey stage required).
-- `getGiftQuota()` → `{ used, limit, resetsAt, unlimited }` (free=3/week, premium=unlimited).
-- `sendGift({ recipientId, slug, note? })`:
-  1. Verify mutual match (reuse existing `matches` check used by chat).
-  2. Check entitlements + quota; raise typed errors `GIFT_QUOTA_EXHAUSTED`, `GIFT_LOCKED`, `NOT_MATCHED`.
-  3. Find/create `conversations` row (same logic as `chat.tsx`).
-  4. Insert into `messages` with `content` = serialized marker `[[gift:<slug>]] <note>` and a new column `kind='gift'` (added in migration; default `'text'` to preserve everything).
-  5. Insert `gift_sends`, upsert `gift_journey` (increment + recompute stage), increment `gift_weekly_usage`.
-- `getJourney({ peerId })` → stage, totals, streak, next milestone.
+## Sponsor preference
 
-Quota / matching / contact-share triggers are not modified — the gift note still flows through `enforce_contact_sharing`.
+Stored on the caller's `matches` row via the RPC above. No Stripe, no checkout, no entitlement changes. Premium-only UI: hide the panel when `!isPremium` (re-use `useEntitlements`).
 
-## UI
+## Backfill
 
-### 1. Chat composer (`src/routes/chat.tsx`)
-- Add a small `Gift` icon button between the existing AI Insights button and the Voice Note controls.
-- Opens `<GiftPickerSheet />` (bottom sheet on mobile, dialog on desktop).
-- After successful send the message arrives via existing realtime — no client-side timeline patching needed.
+One-time UPDATE in the migration: any match with `mutual_interest=true AND reveal_stage='stage_3'` (or already photo-revealed) → set `veil_lifted_at = now()` so existing matches don't regress.
 
-### 2. `<GiftPickerSheet />` (new)
-- Grid of gifts from `listGiftCatalog()`.
-- Unlocked → tap → optional short note (prefilled with `default_message`, e.g. "I enjoy talking to you.") → **Send Gift**.
-- Locked → disabled tile + "Continue building your connection to unlock this gift."
-- Quota exhausted free user → inline banner "Upgrade to Premium to send more meaningful gifts." + `[Upgrade to Premium]` → `/premium`.
-- Footer shows: `2 / 3 gifts this week` or `Unlimited (Premium)`.
+## Out of scope
 
-### 3. `<GiftMessageBubble />` (new)
-- Rendered inside the existing chat message list when `message.kind === 'gift'` (or content matches `[[gift:slug]]`).
-- Shows gift image/emoji, "Namy sent you Rose", optional note, soft glow card in the Unveil purple/magenta style.
-- Falls back gracefully if catalog row missing.
+- No design system changes, no new routes, no schema changes outside the columns above, no edits to `client.ts` / auto-generated files, no payment integration.
 
-### 4. `/gifts` page (`src/routes/gifts.tsx` — new)
-- Premium-feature hero matching the attached prototype.
-- Featured gifts grid (read-only, taps deep-link to a match picker → opens chat with picker preopened).
-- **Gift Journey** card: First Gift → Meaningful → Deep Connection, current stage highlighted.
-- **Streak** card (consecutive days a gift was sent/received).
-- **Unlock Rewards** teaser.
-- "Upgrade to Premium" CTA at bottom for free users.
-- Added to `UnveilNav` + `MobileBottomNav` as "Gifts" with a `Premium` chip.
+## Files touched
 
-## Premium gating summary
-| Tier | Catalog access | Weekly sends |
-|---|---|---|
-| Free | `tier='free'` gifts only | 3 / 7-day rolling |
-| Premium | all gifts including `milestone` | Unlimited |
-
-Existing reveal / message quota / subscription / RevenueCat flows untouched. Entitlement read via the existing `useEntitlements()` hook.
-
-## Files
-
-New:
-- `supabase/migrations/<ts>_gift_journey.sql`
-- `src/lib/gifts.functions.ts`
-- `src/components/GiftPickerSheet.tsx`
-- `src/components/GiftMessageBubble.tsx`
-- `src/components/GiftJourneyCard.tsx`
-- `src/routes/gifts.tsx`
-- `src/assets/gifts/*` (emoji-based, no binary deps; reuse lucide + emoji for v1)
-
-Edited (additive only):
-- `src/routes/chat.tsx` — add gift button + sheet mount + bubble renderer branch.
-- `src/components/UnveilNav.tsx`, `src/components/MobileBottomNav.tsx` — add Gifts item.
-
-## Regression checks (before declaring done)
-- Send text → works. Send voice note → works. AI Insights tab → works.
-- Existing messages still render (kind default 'text').
-- Message quota + contact-share triggers still fire on gift notes.
-- Premium paywall, subscription, reveal, verification unchanged.
-- Mobile chat layout unchanged aside from one extra 32px icon button.
-
-## Execution order
-1. Migration (catalog + seed + tables + RLS + GRANTs + `messages.kind` default 'text').
-2. `gifts.functions.ts`.
-3. `GiftPickerSheet` + `GiftMessageBubble`.
-4. Wire into `chat.tsx`.
-5. `/gifts` page + nav entries.
-6. Manual regression pass on chat, voice, AI Insights, premium paywall.
-
-Stage 3 is NOT started in this phase.
+- new migration (matches columns + triggers + RPC + grants)
+- `src/lib/reveal.ts` (new hook)
+- `src/components/HiddenMatchCard.tsx` (veil + vibe tags wiring)
+- `src/components/ConnectionProgress.tsx` (new, small)
+- `src/components/DateReadinessPanel.tsx` (new, small)
+- `src/routes/chat.tsx` (mount the two panels, fire Veil Lifted overlay)
+- `src/routes/match.$userId.tsx` (use `veilLifted` instead of `reveal_stage` for photo gating)

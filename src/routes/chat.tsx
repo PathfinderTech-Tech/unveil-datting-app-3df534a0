@@ -33,6 +33,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 import { GiftPickerSheet } from "@/components/GiftPickerSheet";
 import { GiftMessageBubble } from "@/components/GiftMessageBubble";
+import { ConnectionProgress, DateReadinessProgress } from "@/components/ConnectionProgress";
+import { DateReadinessPanel } from "@/components/DateReadinessPanel";
+import { useMatchReveal } from "@/lib/reveal";
 
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
@@ -267,6 +270,23 @@ function Chat() {
 
   const peer = peerId ? peers[peerId] : null;
   const peerName = peer?.first_name ?? "Match";
+  const reveal = useMatchReveal(peerId);
+
+  // One-time "Veil Lifted" celebration when it flips in-session.
+  const veilCelebratedRef = useRef<string | null>(null);
+  const [veilJustLifted, setVeilJustLifted] = useState(false);
+  useEffect(() => {
+    if (!peerId || !reveal.veilLifted) return;
+    if (veilCelebratedRef.current === peerId) return;
+    // Only celebrate if the flip happened within the last 30s
+    const ts = reveal.veilLiftedAt ? new Date(reveal.veilLiftedAt).getTime() : 0;
+    if (ts && Date.now() - ts < 30_000) {
+      veilCelebratedRef.current = peerId;
+      setVeilJustLifted(true);
+    } else {
+      veilCelebratedRef.current = peerId;
+    }
+  }, [peerId, reveal.veilLifted, reveal.veilLiftedAt]);
 
   // Match info + compatibility for the active conversation
   useEffect(() => {
@@ -721,7 +741,7 @@ function Chat() {
                             avatarUrl={peer?.avatar_url}
                             photoUrl={peer?.photo_url}
                             size={44}
-                            veiled={msgs.length === 0}
+                            veiled={!reveal.veilLifted}
                           />
                         </div>
                       </div>
@@ -799,6 +819,36 @@ function Chat() {
                   </button>
                 )}
               </header>
+
+              {/* Reveal-journey progress strips */}
+              {peerId && <ConnectionProgress state={reveal} peerName={peerName} />}
+              {peerId && <DateReadinessProgress state={reveal} />}
+
+              {/* Veil Lifted celebration overlay */}
+              {veilJustLifted && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md"
+                  onClick={() => setVeilJustLifted(false)}
+                >
+                  <div className="mx-4 max-w-sm rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-glow">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero">
+                      <Sparkles className="h-8 w-8 text-primary-foreground" />
+                    </div>
+                    <h2 className="font-display text-2xl">Veil Lifted</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      You took the time to get to know each other first.
+                      The veil has now been removed.
+                    </p>
+                    <button
+                      onClick={() => setVeilJustLifted(false)}
+                      className="mt-5 rounded-full bg-gradient-hero px-6 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              )}
+
 
 
               {/* ============ MESSAGES ============ */}
@@ -1243,9 +1293,12 @@ function Chat() {
                         )}
                       </TabsContent>
 
-                      <TabsContent value="reveal" className="mt-0">
+                      <TabsContent value="reveal" className="mt-0 space-y-3">
                         {peerId ? (
-                          <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                          <>
+                            <DateReadinessPanel peerUserId={peerId} peerName={peerName} state={reveal} />
+                            <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                          </>
                         ) : null}
                       </TabsContent>
                     </div>

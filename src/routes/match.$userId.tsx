@@ -13,6 +13,7 @@ import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 import { generateIcebreakers, type Icebreaker } from "@/lib/icebreakers.functions";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
+import { useMatchReveal } from "@/lib/reveal";
 
 
 export const Route = createFileRoute("/match/$userId")({
@@ -85,6 +86,8 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
 function MatchExperience() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
+  const reveal = useMatchReveal(userId);
+
 
   const [meId, setMeId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -278,7 +281,7 @@ function MatchExperience() {
               avatarUrl={profile.avatar_url ?? null}
               photoUrl={profile.photo_url ?? null}
               size={36}
-              veiled={msgs.length === 0}
+              veiled={!reveal.veilLifted}
             />
           </div>
           <button
