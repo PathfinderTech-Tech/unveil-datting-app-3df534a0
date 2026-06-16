@@ -523,6 +523,15 @@ function Chat() {
           onBlockToo={blockPeer}
         />
       )}
+      {peerId && (
+        <GiftPickerSheet
+          open={giftOpen}
+          onClose={() => setGiftOpen(false)}
+          peerId={peerId}
+          peerName={peerName}
+        />
+      )}
+
 
       <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
