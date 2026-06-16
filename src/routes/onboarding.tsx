@@ -99,10 +99,15 @@ const STEPS = [
   { id: 10, label: "Complete",             minutes: 0 },
 ] as const;
 
-const VOICE_ONBOARDING_PROMPTS = [
-  "A small ritual that makes my day feel like mine.",
-  "The last idea that kept me up — and why.",
-  "Something I could talk about for hours.",
+import {
+  generateProfileFromVoice,
+  VOICE_INTRO_PROMPT_ABOUT,
+  VOICE_INTRO_PROMPT_LOOKING,
+} from "@/lib/voice-profile.functions";
+
+const VOICE_INTRO_PROMPTS: { title: string; prompt: string }[] = [
+  { title: "Tell us about yourself", prompt: VOICE_INTRO_PROMPT_ABOUT },
+  { title: "Your ideal connection",  prompt: VOICE_INTRO_PROMPT_LOOKING },
 ];
 
 const TOTAL = STEPS.length;
@@ -598,25 +603,41 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 4: Voice prompts ---------- */}
+        {/* ---------- STEP 4: Voice Introduction ---------- */}
         {step === 4 && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-display text-4xl font-bold">Let your voice tell part of your <span className="uo-accent">story</span>.</h1>
+              <h1 className="font-display text-4xl font-bold">
+                Your voice tells a story that <span className="uo-accent">photos never can</span>.
+              </h1>
               <p className="mt-2 text-muted-foreground">
-                Record 2–3 short voice prompts (up to 60 seconds each). Voice intros make profiles feel real
-                and lead to better matches and conversations. You can skip and add these later from your Passport.
+                Record two short voice prompts (up to 60s each). We'll use them to craft your written profile —
+                you can edit, regenerate, or skip anytime.
               </p>
             </div>
             {user && (
               <div className="grid gap-3">
-                {VOICE_ONBOARDING_PROMPTS.map((p) => (
-                  <VoiceRecorder key={p} userId={user.id} prompt={p} />
+                {VOICE_INTRO_PROMPTS.map((p, i) => (
+                  <div key={p.prompt}>
+                    <div className="mb-1 font-mono text-[10px] uppercase tracking-luxury text-primary">
+                      Prompt {i + 1} · {p.title}
+                    </div>
+                    <VoiceRecorder userId={user.id} prompt={p.prompt} />
+                  </div>
                 ))}
               </div>
             )}
+
+            <VoiceProfileGenerator
+              onApply={(p) => {
+                setBio(p.bio || "");
+                void persist({ ai_profile: p }, { bio: p.bio || null });
+                toast.success("AI profile applied — you can edit it in the next step.");
+              }}
+            />
+
             <div className="text-center text-[11px] text-muted-foreground">
-              You can re-record or add more prompts anytime from your Passport.
+              You can re-record or edit your generated profile anytime from your Passport.
             </div>
           </div>
         )}
@@ -978,5 +999,129 @@ function ProfilePreview(props: {
         </div>
       </div>
     </div>
+  );
+}
+
+type GeneratedProfile = { bio: string; about_me: string; looking_for: string };
+
+function VoiceProfileGenerator({ onApply }: { onApply: (p: GeneratedProfile) => void }) {
+  const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<GeneratedProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await generateProfileFromVoice();
+      if ("error" in res) {
+        if (res.error === "MISSING_RECORDINGS") {
+          setError("Please record both prompts above first.");
+        } else {
+          setError("We couldn't generate your profile right now. Please try again shortly.");
+        }
+      } else {
+        setProfile(res.profile);
+      }
+    } catch {
+      setError("We couldn't generate your profile right now. Please try again shortly.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-3xl border border-primary/30 bg-gradient-deep p-5">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="font-mono text-[10px] uppercase tracking-luxury text-primary">AI-generated profile</span>
+      </div>
+      <p className="mt-2 text-sm text-foreground/85">
+        Let Unveil turn your voice answers into a short bio, About Me, and Looking For — you stay in full control.
+      </p>
+
+      {!profile && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={run}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+            {loading ? "Generating…" : "Generate profile with AI"}
+          </button>
+          <span className="text-[11px] text-muted-foreground">Optional — you can also write your bio manually.</span>
+        </div>
+      )}
+
+      {error && <div className="mt-2 text-xs text-destructive">{error}</div>}
+
+      {profile && (
+        <div className="mt-4 space-y-3">
+          <ProfileField
+            label={`Short bio (${profile.bio.length}/240)`}
+            value={profile.bio}
+            maxLength={240}
+            onChange={(v) => setProfile({ ...profile, bio: v })}
+          />
+          <ProfileField
+            label="About me"
+            value={profile.about_me}
+            maxLength={800}
+            onChange={(v) => setProfile({ ...profile, about_me: v })}
+            rows={4}
+          />
+          <ProfileField
+            label="Looking for"
+            value={profile.looking_for}
+            maxLength={600}
+            onChange={(v) => setProfile({ ...profile, looking_for: v })}
+            rows={3}
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onApply(profile)}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+            >
+              <Check className="h-4 w-4" /> Accept & use this
+            </button>
+            <button
+              type="button"
+              onClick={run}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-foreground/30 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} Regenerate
+            </button>
+            <button
+              type="button"
+              onClick={() => setProfile(null)}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted-foreground hover:border-foreground/30"
+            >
+              <X className="h-4 w-4" /> Discard
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProfileField({
+  label, value, onChange, maxLength, rows = 2,
+}: { label: string; value: string; onChange: (v: string) => void; maxLength: number; rows?: number }) {
+  return (
+    <label className="block">
+      <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <textarea
+        value={value}
+        rows={rows}
+        maxLength={maxLength}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${inputCls} resize-y`}
+      />
+    </label>
   );
 }
