@@ -741,7 +741,7 @@ function Chat() {
                             avatarUrl={peer?.avatar_url}
                             photoUrl={peer?.photo_url}
                             size={44}
-                            veiled={msgs.length === 0}
+                            veiled={!reveal.veilLifted}
                           />
                         </div>
                       </div>
