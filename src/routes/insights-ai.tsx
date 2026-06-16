@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getCompatibilityInsight, getTopAiMatches, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
 
-export const Route = createFileRoute("/_authenticated/insights-ai")({
+export const Route = createFileRoute("/insights-ai")({
   head: () => ({
     meta: [
       { title: "AI Insights — UNVEIL" },

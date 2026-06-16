@@ -32,6 +32,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InsightsAiRouteImport } from './routes/insights-ai'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
@@ -60,7 +61,6 @@ import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
-import { Route as AuthenticatedInsightsAiRouteImport } from './routes/_authenticated/insights-ai'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -180,6 +180,11 @@ const ManageSubscriptionRoute = ManageSubscriptionRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsAiRoute = InsightsAiRouteImport.update({
+  id: '/insights-ai',
+  path: '/insights-ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightsRoute = InsightsRouteImport.update({
@@ -323,11 +328,6 @@ const AdminBetaRoute = AdminBetaRouteImport.update({
   path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
-const AuthenticatedInsightsAiRoute = AuthenticatedInsightsAiRouteImport.update({
-  id: '/_authenticated/insights-ai',
-  path: '/insights-ai',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
   id: '/api/public/passport-og',
   path: '/api/public/passport-og',
@@ -372,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -395,7 +396,6 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
-  '/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -431,6 +431,7 @@ export interface FileRoutesByTo {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -454,7 +455,6 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
-  '/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -491,6 +491,7 @@ export interface FileRoutesById {
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/insights': typeof InsightsRoute
+  '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
@@ -514,7 +515,6 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
-  '/_authenticated/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -552,6 +552,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -575,7 +576,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
-    | '/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -611,6 +611,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -634,7 +635,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
-    | '/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -670,6 +670,7 @@ export interface FileRouteTypes {
     | '/game'
     | '/games'
     | '/insights'
+    | '/insights-ai'
     | '/login'
     | '/manage-subscription'
     | '/matches'
@@ -693,7 +694,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
-    | '/_authenticated/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -730,6 +730,7 @@ export interface RootRouteChildren {
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   InsightsRoute: typeof InsightsRoute
+  InsightsAiRoute: typeof InsightsAiRoute
   LoginRoute: typeof LoginRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
   MatchesRoute: typeof MatchesRoute
@@ -753,7 +754,6 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
-  AuthenticatedInsightsAiRoute: typeof AuthenticatedInsightsAiRoute
   ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
@@ -933,6 +933,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights-ai': {
+      id: '/insights-ai'
+      path: '/insights-ai'
+      fullPath: '/insights-ai'
+      preLoaderRoute: typeof InsightsAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insights': {
@@ -1131,13 +1138,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_authenticated/insights-ai': {
-      id: '/_authenticated/insights-ai'
-      path: '/insights-ai'
-      fullPath: '/insights-ai'
-      preLoaderRoute: typeof AuthenticatedInsightsAiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/passport-og': {
       id: '/api/public/passport-og'
       path: '/api/public/passport-og'
@@ -1214,6 +1214,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   InsightsRoute: InsightsRoute,
+  InsightsAiRoute: InsightsAiRoute,
   LoginRoute: LoginRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
   MatchesRoute: MatchesRoute,
@@ -1237,7 +1238,6 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
-  AuthenticatedInsightsAiRoute: AuthenticatedInsightsAiRoute,
   ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
@@ -1258,3 +1258,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
