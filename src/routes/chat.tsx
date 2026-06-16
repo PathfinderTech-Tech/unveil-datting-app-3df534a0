@@ -1045,7 +1045,7 @@ function Chat() {
                               to="/insights-ai"
                               className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
                             >
-                              View Full AI Insights →
+                              View AI Compatibility Insights →
                             </Link>
                           </>
                         ) : (
