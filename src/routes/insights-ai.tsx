@@ -133,9 +133,10 @@ function InsightsAiPage() {
       <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-          <h1 className="mt-1 font-display text-4xl font-bold">Your AI compatibility hub</h1>
+          <h1 className="mt-1 font-display text-4xl font-bold">AI Insights</h1>
+          <p className="mt-1 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Real-name compatibility analysis across your mutual matches. Insights auto-refresh every 24 hours, or tap Refresh anytime.
+            Real-name compatibility analysis across your mutual matches — plus your daily readiness, blueprint, and 7-day connection journey. Insights auto-refresh every 24 hours.
           </p>
         </div>
 
