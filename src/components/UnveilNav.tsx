@@ -38,9 +38,11 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
     items: [
       { to: "/passport", label: "Passport" },
       { to: "/insights-ai", label: "AI Insights" },
+      { to: "/gifts", label: "Gifts" },
       { to: "/challenges", label: "Challenges" },
     ],
   },
+
   {
     label: "Account",
     items: [
