@@ -281,7 +281,7 @@ function MatchExperience() {
               avatarUrl={profile.avatar_url ?? null}
               photoUrl={profile.photo_url ?? null}
               size={36}
-              veiled={msgs.length === 0}
+              veiled={!reveal.veilLifted}
             />
           </div>
           <button
