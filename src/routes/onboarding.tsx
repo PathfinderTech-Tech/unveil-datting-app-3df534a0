@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import "@/styles/unveil-onboarding.css";
 import { LocationPicker } from "@/components/LocationPicker";
 import { COUNTRY_BY_CODE, codeForName } from "@/lib/countries";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 
 
@@ -86,16 +87,23 @@ const SPARK_PROMPTS = [
 ];
 
 const STEPS = [
-  { id: 1, label: "Welcome",              minutes: 1 },
-  { id: 2, label: "Identity Basics",      minutes: 2 },
-  { id: 3, label: "Profile Photo Studio", minutes: 2 },
-  { id: 4, label: "Profile Essentials",   minutes: 3 },
-  { id: 5, label: "Compatibility",        minutes: 3 },
-  { id: 6, label: "Personality & Spark",  minutes: 3 },
-  { id: 7, label: "Safety Basics",        minutes: 1 },
-  { id: 8, label: "Profile Preview",      minutes: 1 },
-  { id: 9, label: "Complete",             minutes: 0 },
+  { id: 1,  label: "Welcome",              minutes: 1 },
+  { id: 2,  label: "Identity Basics",      minutes: 2 },
+  { id: 3,  label: "Profile Photo Studio", minutes: 2 },
+  { id: 4,  label: "Voice Prompts",        minutes: 2 },
+  { id: 5,  label: "Profile Essentials",   minutes: 3 },
+  { id: 6,  label: "Compatibility",        minutes: 3 },
+  { id: 7,  label: "Personality & Spark",  minutes: 3 },
+  { id: 8,  label: "Safety Basics",        minutes: 1 },
+  { id: 9,  label: "Profile Preview",      minutes: 1 },
+  { id: 10, label: "Complete",             minutes: 0 },
 ] as const;
+
+const VOICE_ONBOARDING_PROMPTS = [
+  "A small ritual that makes my day feel like mine.",
+  "The last idea that kept me up — and why.",
+  "Something I could talk about for hours.",
+];
 
 const TOTAL = STEPS.length;
 
@@ -289,7 +297,7 @@ function Onboarding() {
         interested_in: interestedIn,
         intention: intent, relationship_intent: intent,
       });
-    } else if (step === 4) {
+    } else if (step === 5) {
       await persist({}, {
         bio: bio || null,
         interests: interests as unknown as string[],
@@ -297,7 +305,8 @@ function Onboarding() {
     } else if (step === 3) {
       const discovery_mode = appearance === "real" ? "photo" : "avatar";
       await persist({}, { discovery_mode });
-    } else if (step === 5 || step === 6 || step === 7 || step === 1) {
+    } else {
+      // Steps 1, 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
       await persist();
     }
     setStep((s) => Math.min(TOTAL, s + 1));
@@ -380,11 +389,12 @@ function Onboarding() {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
       case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
       case 3: return !!photoUrl;
-      case 4: return bio.trim().length >= 20 && interests.length >= 3;
-      case 5: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
-      case 6: return allDiscoveryAnswered;
-      case 7: return true;
+      case 4: return true; // Voice prompts — skippable
+      case 5: return bio.trim().length >= 20 && interests.length >= 3;
+      case 6: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
+      case 7: return allDiscoveryAnswered;
       case 8: return true;
+      case 9: return true;
       default: return true;
     }
   }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
@@ -588,8 +598,31 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 4: Profile essentials ---------- */}
+        {/* ---------- STEP 4: Voice prompts ---------- */}
         {step === 4 && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="font-display text-4xl font-bold">Let your voice tell part of your <span className="uo-accent">story</span>.</h1>
+              <p className="mt-2 text-muted-foreground">
+                Record 2–3 short voice prompts (up to 60 seconds each). Voice intros make profiles feel real
+                and lead to better matches and conversations. You can skip and add these later from your Passport.
+              </p>
+            </div>
+            {user && (
+              <div className="grid gap-3">
+                {VOICE_ONBOARDING_PROMPTS.map((p) => (
+                  <VoiceRecorder key={p} userId={user.id} prompt={p} />
+                ))}
+              </div>
+            )}
+            <div className="text-center text-[11px] text-muted-foreground">
+              You can re-record or add more prompts anytime from your Passport.
+            </div>
+          </div>
+        )}
+
+        {/* ---------- STEP 5: Profile essentials ---------- */}
+        {step === 5 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Make your profile <span className="uo-accent">yours</span>.</h1>
@@ -656,8 +689,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 5: Compatibility ---------- */}
-        {step === 5 && (
+        {/* ---------- STEP 6: Compatibility ---------- */}
+        {step === 6 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">What matters in a <span className="uo-accent">match</span>?</h1>
@@ -697,8 +730,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 6: Personality & Spark ---------- */}
-        {step === 6 && (
+        {/* ---------- STEP 7: Personality & Spark ---------- */}
+        {step === 7 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Personality & <span className="uo-accent">Spark</span>.</h1>
@@ -738,8 +771,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 7: Safety & Verification ---------- */}
-        {step === 7 && (
+        {/* ---------- STEP 8: Safety & Verification ---------- */}
+        {step === 8 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Safety <span className="uo-accent">basics</span>.</h1>
@@ -767,8 +800,8 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 8: Profile preview ---------- */}
-        {step === 8 && (
+        {/* ---------- STEP 9: Profile preview ---------- */}
+        {step === 9 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">How your <span className="uo-accent">profile</span> looks.</h1>
@@ -787,8 +820,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 9: Completion ---------- */}
-        {step === 9 && (
+        {/* ---------- STEP 10: Completion ---------- */}
+        {step === 10 && (
           <div className="space-y-6 text-center">
             <div className="uo-complete-stage">
               <div className="uo-logo-spin" aria-hidden />
@@ -841,7 +874,7 @@ function Onboarding() {
         )}
 
         {/* ---------- Navigation ---------- */}
-        {step !== 9 && (
+        {step !== 10 && (
           <div className="mt-10 flex items-center justify-between gap-3">
             <button onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30">
@@ -849,7 +882,7 @@ function Onboarding() {
             </button>
             <button onClick={goNext} disabled={!canNext || saving}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40">
-              {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : step === 8 ? <>Confirm & Continue <Check className="h-4 w-4" /></> : <>Continue <ArrowRight className="h-4 w-4" /></>}
+              {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : step === 9 ? <>Confirm & Continue <Check className="h-4 w-4" /></> : step === 4 ? <>Skip for now <ArrowRight className="h-4 w-4" /></> : <>Continue <ArrowRight className="h-4 w-4" /></>}
             </button>
           </div>
         )}
@@ -871,10 +904,11 @@ function computeResumeStep(s: {
   if (!(s.agree18 && s.agreeTerms && s.agreePrivacy && s.agreeCommunity)) return 1;
   if (!(s.name.length > 1 && s.gender && s.country && s.interestedIn && s.intent && /\S+@\S+\.\S+/.test(s.email))) return 2;
   if (!s.photoUrl) return 3;
-  if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 4;
-  if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 5;
-  if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 6;
-  return 8;
+  // Step 4 (voice prompts) is skippable — don't gate resume on it.
+  if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 5;
+  if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 6;
+  if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 7;
+  return 9;
 }
 
 const inputCls =
