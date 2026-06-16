@@ -137,7 +137,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
             <span>Last updated: {timeAgo(insight.computedAt)}</span>
-            <Link to="/insights-ai" className="underline">Open AI hub →</Link>
+            <Link to="/insights-ai" className="underline">View AI Compatibility Insights →</Link>
           </div>
         </>
       )}
