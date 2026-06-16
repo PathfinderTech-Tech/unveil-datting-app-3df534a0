@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Users, AlertTriangle, Mail, Crown, ShieldCheck, CreditCard, Check, X, Loader2 } from "lucide-react";
+import { Users, AlertTriangle, Mail, Crown, ShieldCheck, CreditCard, Check, X, Loader2, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { AdminTrustPanel } from "@/components/AdminTrustPanel";
+import { sendTestPush } from "@/lib/push.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — UNVEIL" }] }),
@@ -148,7 +150,10 @@ function Admin() {
           <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Verified badges" value={stats.verifiedBadges} />
         </div>
 
+        <PushTestCard />
+
         <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
+
           {(["waitlist", "verifications", "trust", "payments", "reports", "feedback"] as Tab[]).map((t) => (
             <button
               key={t}
@@ -406,6 +411,75 @@ function DocThumb({ title, url }: { title: string; url: string | null }) {
 function Empty({ label }: { label: string }) {
   return <p className="p-6 text-sm text-muted-foreground">{label}</p>;
 }
+
+function PushTestCard() {
+  const send = useServerFn(sendTestPush);
+  const [busy, setBusy] = useState(false);
+  const [last, setLast] = useState<null | {
+    ok: boolean;
+    configured: boolean;
+    sent: number;
+    failed: number;
+    message: string;
+    env?: string;
+    results: Array<{ token: string; status: number; body: string }>;
+  }>(null);
+
+  async function run() {
+    setBusy(true);
+    try {
+      const res = await send();
+      setLast(res);
+      if (res.ok) toast.success(res.message);
+      else toast.error(res.message);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Push test failed";
+      setLast({ ok: false, configured: false, sent: 0, failed: 0, message: msg, results: [] });
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg">APNs Push Test</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sends a test notification to every iOS device token registered for your admin account.
+            Requires APNS_KEY_P8, APNS_KEY_ID, APNS_TEAM_ID, APNS_BUNDLE_ID secrets.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={run}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+          {busy ? "Sending…" : "Send test push"}
+        </button>
+      </div>
+      {last && (
+        <div className="mt-4 rounded-xl border border-border bg-surface-2 p-3 text-xs">
+          <p className={last.ok ? "text-emerald-400" : "text-amber-400"}>{last.message}</p>
+          {last.env && <p className="mt-1 text-muted-foreground">env: {last.env} · sent: {last.sent} · failed: {last.failed}</p>}
+          {last.results.length > 0 && (
+            <ul className="mt-2 space-y-1 text-muted-foreground">
+              {last.results.map((r, i) => (
+                <li key={i}>
+                  <span className="font-mono">{r.token}</span> → {r.status} {r.body && `· ${r.body}`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function Gate({ message, cta, to }: { message: string; cta: string; to: string }) {
   return (
