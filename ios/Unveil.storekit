@@ -3,7 +3,7 @@
   "nonRenewingSubscriptions" : [],
   "products" : [
     {
-      "displayPrice" : "4.99",
+      "displayPrice" : "1.99",
       "familyShareable" : false,
       "internalID" : "PASS24H0001",
       "localizations" : [
@@ -18,7 +18,7 @@
       "type" : "Consumable"
     },
     {
-      "displayPrice" : "12.99",
+      "displayPrice" : "9.99",
       "familyShareable" : false,
       "internalID" : "PASS2W0001",
       "localizations" : [
@@ -69,7 +69,7 @@
         {
           "adHocOffers" : [],
           "codeOffers" : [],
-          "displayPrice" : "14.99",
+          "displayPrice" : "15.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "PREMM00001",
@@ -90,7 +90,7 @@
         {
           "adHocOffers" : [],
           "codeOffers" : [],
-          "displayPrice" : "34.99",
+          "displayPrice" : "39.99",
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "PREMQ00001",
@@ -111,7 +111,7 @@
         {
           "adHocOffers" : [],
           "codeOffers" : [],
-          "displayPrice" : "99.99",
+          "displayPrice" : "149.99",
           "familyShareable" : false,
           "groupNumber" : 3,
           "internalID" : "PREMA00001",
