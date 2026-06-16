@@ -249,31 +249,21 @@ export const sendGift = createServerFn({ method: "POST" })
     });
 
     if (!premium) {
-      await supabaseAdmin
-        .from("gift_weekly_usage")
-        .upsert(
-          { user_id: userId, week_start: wk, sent_count: 1, updated_at: nowIso },
-          { onConflict: "user_id,week_start", ignoreDuplicates: false }
-        );
-      // increment if existed
-      await supabaseAdmin.rpc("noop"); // best-effort no-op; real increment below
       const { data: cur } = await supabaseAdmin
         .from("gift_weekly_usage")
         .select("sent_count")
         .eq("user_id", userId)
         .eq("week_start", wk)
         .maybeSingle();
-      if (cur && (cur.sent_count ?? 0) < 2) {
-        // upsert above set count=1 only on insert; if it already existed, bump it explicitly
-      }
-      if (cur) {
-        await supabaseAdmin
-          .from("gift_weekly_usage")
-          .update({ sent_count: (cur.sent_count ?? 0) + (cur.sent_count === 1 ? 0 : 1), updated_at: nowIso })
-          .eq("user_id", userId)
-          .eq("week_start", wk);
-      }
+      const nextCount = (cur?.sent_count ?? 0) + 1;
+      await supabaseAdmin
+        .from("gift_weekly_usage")
+        .upsert(
+          { user_id: userId, week_start: wk, sent_count: nextCount, updated_at: nowIso },
+          { onConflict: "user_id,week_start" }
+        );
     }
+
 
     // Journey upsert
     const [u1, u2] = userId < peerId ? [userId, peerId] : [peerId, userId];
