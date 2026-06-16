@@ -280,7 +280,7 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
 // Components MUST use this to render text — never display raw codes.
 export function aiErrorMessage(code: string): string {
   if (code === "PREMIUM_REQUIRED") {
-    return "Unveil AI Compatibility Insights. Upgrade to Premium to discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.";
+    return "Upgrade to Premium to unlock AI Compatibility Insights — discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.";
   }
   if (code === "NOT_MUTUAL") return "AI insights are available once you both match.";
   return "We couldn’t generate insights right now. Please try again shortly.";
