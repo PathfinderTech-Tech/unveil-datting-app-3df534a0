@@ -839,6 +839,12 @@ function Chat() {
                                 mine={mine}
                               />
                             </div>
+                          ) : m.message_type === "gift" || m.content.startsWith("[[gift:") ? (
+                            <GiftMessageBubble
+                              content={m.content}
+                              mine={mine}
+                              senderName={mine ? "You" : peerName}
+                            />
                           ) : (
                             <div
                               title={ts}
@@ -851,6 +857,7 @@ function Chat() {
                               {m.content}
                             </div>
                           )}
+
                           <button
                             onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
                             className="opacity-0 transition-opacity group-hover:opacity-100"
