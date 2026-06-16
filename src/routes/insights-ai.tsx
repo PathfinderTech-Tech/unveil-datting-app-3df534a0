@@ -21,7 +21,7 @@ export const Route = createFileRoute("/insights-ai")({
   component: InsightsAiPage,
 });
 
-type MatchRow = { peerId: string; name: string; insight?: CompatibilityInsight; loading?: boolean; error?: string };
+type MatchRow = { peerId: string; name: string; insight?: CompatibilityInsight; loading?: boolean; error?: string; errorCode?: string };
 
 function InsightsAiPage() {
   const { user } = useAuth();
