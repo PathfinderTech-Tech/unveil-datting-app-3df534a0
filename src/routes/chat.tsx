@@ -920,6 +920,16 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPanelTab("ai"); setPanelOpen(true); }}
+                    disabled={!peerId}
+                    title="AI Insights"
+                    aria-label="AI Insights"
+                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/20 to-accent/20 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-primary backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
+                  >
+                    AI
+                  </button>
                   {mustVerify ? (
                     <button
                       type="button"
