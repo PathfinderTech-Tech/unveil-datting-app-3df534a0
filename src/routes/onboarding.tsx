@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import "@/styles/unveil-onboarding.css";
 import { LocationPicker } from "@/components/LocationPicker";
 import { COUNTRY_BY_CODE, codeForName } from "@/lib/countries";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 
 
