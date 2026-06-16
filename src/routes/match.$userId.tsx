@@ -551,6 +551,12 @@ function MatchExperience() {
                   {profile.bio && (
                     <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
                   )}
+                </div>
+              )}
+
+              {/* ── AI INSIGHTS TAB ── */}
+              {sheetTab === "ai" && (
+                <div className="space-y-4">
                   <AiCompatibilityPanel peerId={userId} />
                 </div>
               )}
