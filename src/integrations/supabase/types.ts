@@ -68,6 +68,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_compatibility_insights: {
+        Row: {
+          computed_at: string
+          created_at: string
+          id: string
+          inputs_signature: string | null
+          match_user_id: string
+          model: string
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          created_at?: string
+          id?: string
+          inputs_signature?: string | null
+          match_user_id: string
+          model?: string
+          payload: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          created_at?: string
+          id?: string
+          inputs_signature?: string | null
+          match_user_id?: string
+          model?: string
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
