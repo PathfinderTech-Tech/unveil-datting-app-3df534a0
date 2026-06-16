@@ -4,7 +4,7 @@ import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
-import logoAsset from "@/assets/unveil-logo-v2.png.asset.json";
+import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
 
 const homeShareImage = logoAsset.url.startsWith("http") ? logoAsset.url : `https://unveil.best${logoAsset.url}`;
 

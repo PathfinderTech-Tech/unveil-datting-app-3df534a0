@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoAsset from "@/assets/unveil-logo-transparent.png.asset.json";
+import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
 
 export function LogoMark({
   size = 36,
