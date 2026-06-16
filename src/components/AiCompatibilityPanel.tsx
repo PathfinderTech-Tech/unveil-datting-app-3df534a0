@@ -105,11 +105,13 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
             <Lock className="h-3 w-3 text-accent" /> Stage: {insight.relationshipStage}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <Score label="Romantic Potential" value={insight.romanticPotential} />
+            <Score label="Friendship Potential" value={insight.friendshipPotential} />
+            <Score label="Communication Match" value={insight.communicationScore} />
+            <Score label="Shared Values" value={insight.sharedInterestsScore} />
+            <Score label="Growth Potential" value={insight.longTermPotential} />
             <Score label="Overall" value={insight.overallCompatibility} />
-            <Score label="Romantic" value={insight.romanticPotential} />
-            <Score label="Friendship" value={insight.friendshipPotential} />
-            <Score label="Comm." value={insight.communicationScore} />
           </div>
 
           <p className="mt-4 text-sm leading-relaxed text-foreground/90">"{insight.aiSummary}"</p>
