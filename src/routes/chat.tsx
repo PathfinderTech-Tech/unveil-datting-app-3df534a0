@@ -995,14 +995,30 @@ function Chat() {
                     </SheetTitle>
                   </SheetHeader>
                   <Tabs value={panelTab} onValueChange={(v) => setPanelTab(v as typeof panelTab)} className="flex h-[calc(100%-65px)] flex-col">
-                    <TabsList className="mx-5 mt-3 grid grid-cols-4 bg-surface/60">
+                    <TabsList className="mx-5 mt-3 grid grid-cols-5 bg-surface/60">
                       <TabsTrigger value="insights" className="text-[11px]">Insights</TabsTrigger>
+                      <TabsTrigger value="ai" className="text-[11px]">✨ AI</TabsTrigger>
                       <TabsTrigger value="discovery" className="text-[11px]">Discovery</TabsTrigger>
-                      <TabsTrigger value="icebreakers" className="text-[11px]">Icebreakers</TabsTrigger>
+                      <TabsTrigger value="icebreakers" className="text-[11px]">Ice</TabsTrigger>
                       <TabsTrigger value="reveal" className="text-[11px]">Exchange</TabsTrigger>
                     </TabsList>
 
                     <div className="flex-1 overflow-y-auto px-5 py-4">
+                      <TabsContent value="ai" className="mt-0 space-y-3">
+                        {peerId ? (
+                          <>
+                            <AiCompatibilityPanel peerId={peerId} />
+                            <Link
+                              to="/insights-ai"
+                              className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
+                            >
+                              View Full AI Insights →
+                            </Link>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Select a conversation to view AI insights.</p>
+                        )}
+                      </TabsContent>
                       <TabsContent value="insights" className="mt-0 space-y-3">
                         {/* Compatibility card */}
                         <button
