@@ -99,7 +99,7 @@ function MatchExperience() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [discoveryOpen, setDiscoveryOpen] = useState(false);
-  const [sheetTab, setSheetTab] = useState<"compat" | "discovery" | "icebreakers" | "reveal">("compat");
+  const [sheetTab, setSheetTab] = useState<"compat" | "ai" | "discovery" | "icebreakers" | "reveal">("compat");
   const [icebreakers, setIcebreakers] = useState<Icebreaker[] | null>(null);
   const [icebreakersLoading, setIcebreakersLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
