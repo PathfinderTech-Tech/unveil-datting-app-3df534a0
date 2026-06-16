@@ -145,6 +145,16 @@ function InsightsAiPage() {
           <TopPick label="Best Friendship Match" sub="Your strongest potential for a meaningful friendship." icon={<Users className="h-5 w-5" />} insight={top?.bestFriendship ?? null} metric="friendshipPotential" />
         </div>
 
+        {top?.bestRomantic && top?.bestFriendship && top.bestRomantic.matchName !== top.bestFriendship.matchName && (
+          <div className="mt-4 rounded-3xl border border-border bg-card p-5">
+            <div className="font-mono text-xs uppercase tracking-luxury text-accent">Comparative insight</div>
+            <p className="mt-2 text-sm text-foreground/90">
+              Based on your interactions, <strong>{top.bestRomantic.matchName}</strong> appears more likely to become a strong romantic connection, while <strong>{top.bestFriendship.matchName}</strong> shows stronger friendship compatibility.
+            </p>
+          </div>
+        )}
+
+
 
         {/* MATCH LIST */}
         <div className="rounded-3xl border border-border bg-card p-4 sm:p-6">
