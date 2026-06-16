@@ -904,10 +904,11 @@ function computeResumeStep(s: {
   if (!(s.agree18 && s.agreeTerms && s.agreePrivacy && s.agreeCommunity)) return 1;
   if (!(s.name.length > 1 && s.gender && s.country && s.interestedIn && s.intent && /\S+@\S+\.\S+/.test(s.email))) return 2;
   if (!s.photoUrl) return 3;
-  if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 4;
-  if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 5;
-  if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 6;
-  return 8;
+  // Step 4 (voice prompts) is skippable — don't gate resume on it.
+  if (!(s.bio.trim().length >= 20 && s.interests.length >= 3)) return 5;
+  if (!COMPAT_QUESTIONS.every((q) => q.optional || !!s.compat[q.key as CompatKey])) return 6;
+  if (!DISCOVERY_QUESTIONS.every((q) => s.discovery[q.key])) return 7;
+  return 9;
 }
 
 const inputCls =
