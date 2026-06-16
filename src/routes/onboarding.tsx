@@ -389,11 +389,12 @@ function Onboarding() {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
       case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
       case 3: return !!photoUrl;
-      case 4: return bio.trim().length >= 20 && interests.length >= 3;
-      case 5: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
-      case 6: return allDiscoveryAnswered;
-      case 7: return true;
+      case 4: return true; // Voice prompts — skippable
+      case 5: return bio.trim().length >= 20 && interests.length >= 3;
+      case 6: return COMPAT_QUESTIONS.every((q) => q.optional || !!compat[q.key as CompatKey]);
+      case 7: return allDiscoveryAnswered;
       case 8: return true;
+      case 9: return true;
       default: return true;
     }
   }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
