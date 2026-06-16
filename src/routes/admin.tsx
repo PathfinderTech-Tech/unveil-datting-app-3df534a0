@@ -150,7 +150,10 @@ function Admin() {
           <Stat icon={<ShieldCheck className="h-4 w-4" />} label="Verified badges" value={stats.verifiedBadges} />
         </div>
 
+        <PushTestCard />
+
         <div className="mt-8 flex flex-wrap gap-2 border-b border-border overflow-x-auto">
+
           {(["waitlist", "verifications", "trust", "payments", "reports", "feedback"] as Tab[]).map((t) => (
             <button
               key={t}
