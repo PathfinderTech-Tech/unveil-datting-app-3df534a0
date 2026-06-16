@@ -69,14 +69,15 @@ function InsightsAiPage() {
       const res = await fetchInsight({ data: { peerId, force } });
       setRows((rs) => rs.map((r) => {
         if (r.peerId !== peerId) return r;
-        if ("error" in res) return { ...r, loading: false, error: res.error };
+        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error) };
         return { ...r, loading: false, insight: res.insight };
       }));
       // Refresh top picks
       const t = await fetchTop({ data: {} } as any);
       if ("ok" in t) setTop({ bestOverall: t.bestOverall, bestRomantic: t.bestRomantic, bestFriendship: t.bestFriendship });
     } catch (e) {
-      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: e instanceof Error ? e.message : "Failed" } : r));
+      console.error("[insights-ai] generateFor failed", e);
+      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE") } : r));
     }
   }
 
