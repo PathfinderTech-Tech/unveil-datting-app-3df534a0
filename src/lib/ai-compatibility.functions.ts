@@ -249,7 +249,7 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
         .eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle();
       const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
         (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "AI Compatibility Insights are a Premium feature." };
+      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
 
       // Read cached insights only — never auto-fan-out AI calls to many matches.
       const { data: rows } = await supabase
