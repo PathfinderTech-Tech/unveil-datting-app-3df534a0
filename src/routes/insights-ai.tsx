@@ -14,7 +14,7 @@ import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
     meta: [
-      { title: "AI Insights — UNVEIL" },
+      { title: "Unveil AI Compatibility Insights — UNVEIL" },
       { name: "description", content: "Premium AI compatibility analysis, relationship journey progress, and date ideas across your matches." },
     ],
   }),
@@ -144,6 +144,16 @@ function InsightsAiPage() {
           <TopPick label="Best Romantic Match" sub="Your strongest potential for romantic connection." icon={<Heart className="h-5 w-5" />} insight={top?.bestRomantic ?? null} metric="romanticPotential" />
           <TopPick label="Best Friendship Match" sub="Your strongest potential for a meaningful friendship." icon={<Users className="h-5 w-5" />} insight={top?.bestFriendship ?? null} metric="friendshipPotential" />
         </div>
+
+        {top?.bestRomantic && top?.bestFriendship && top.bestRomantic.matchName !== top.bestFriendship.matchName && (
+          <div className="mt-4 rounded-3xl border border-border bg-card p-5">
+            <div className="font-mono text-xs uppercase tracking-luxury text-accent">Comparative insight</div>
+            <p className="mt-2 text-sm text-foreground/90">
+              Based on your interactions, <strong>{top.bestRomantic.matchName}</strong> appears more likely to become a strong romantic connection, while <strong>{top.bestFriendship.matchName}</strong> shows stronger friendship compatibility.
+            </p>
+          </div>
+        )}
+
 
 
         {/* MATCH LIST */}
@@ -278,7 +288,7 @@ function HeroBlock({ premium = false }: { premium?: boolean }) {
       <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
       <div className="relative grid items-center gap-6 sm:grid-cols-[1fr_auto]">
         <div>
-          <div className="font-mono text-xs uppercase tracking-luxury text-accent">AI Insights · Premium</div>
+          <div className="font-mono text-xs uppercase tracking-luxury text-accent">Unveil AI Compatibility Insights · Premium</div>
           <h1 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
             Your Relationship<br />
             <span className="text-gradient-hero">Intelligence Hub</span>

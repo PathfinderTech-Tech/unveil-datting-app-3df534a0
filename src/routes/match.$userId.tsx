@@ -478,7 +478,7 @@ function MatchExperience() {
             <div className="flex items-center gap-1 overflow-x-auto px-3 pb-2 pt-3">
               {([
                 { id: "compat", label: "Insights" },
-                { id: "ai", label: "✨ AI Insights" },
+                { id: "ai", label: "✨ AI Compatibility Insights" },
                 { id: "discovery", label: `Day ${day} Discovery` },
                 { id: "icebreakers", label: "Icebreakers" },
                 { id: "reveal", label: "Contact Exchange" },

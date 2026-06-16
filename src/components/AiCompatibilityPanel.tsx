@@ -62,10 +62,10 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insight
+            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insights
           </div>
           <h3 className="mt-1 font-display text-xl font-bold">
-            {insight ? insight.compatibilityLabel : loading ? "Analyzing…" : "Compatibility"}
+            {insight ? insight.compatibilityLabel : loading ? "Analyzing…" : "AI Compatibility Insights"}
           </h3>
         </div>
         <button
@@ -105,11 +105,13 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
             <Lock className="h-3 w-3 text-accent" /> Stage: {insight.relationshipStage}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <Score label="Romantic Potential" value={insight.romanticPotential} />
+            <Score label="Friendship Potential" value={insight.friendshipPotential} />
+            <Score label="Communication Match" value={insight.communicationScore} />
+            <Score label="Shared Values" value={insight.sharedInterestsScore} />
+            <Score label="Growth Potential" value={insight.longTermPotential} />
             <Score label="Overall" value={insight.overallCompatibility} />
-            <Score label="Romantic" value={insight.romanticPotential} />
-            <Score label="Friendship" value={insight.friendshipPotential} />
-            <Score label="Comm." value={insight.communicationScore} />
           </div>
 
           <p className="mt-4 text-sm leading-relaxed text-foreground/90">"{insight.aiSummary}"</p>
@@ -135,7 +137,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
             <span>Last updated: {timeAgo(insight.computedAt)}</span>
-            <Link to="/insights-ai" className="underline">Open AI hub →</Link>
+            <Link to="/insights-ai" className="underline">View AI Compatibility Insights →</Link>
           </div>
         </>
       )}
@@ -165,7 +167,7 @@ function PremiumUpsellCard() {
           <li>• Shared Values Analysis</li>
         </ul>
         <p className="mt-3 text-sm text-muted-foreground">
-          Upgrade to Premium to unlock Unveil AI Compatibility Insights.
+          Upgrade to Premium to unlock AI Compatibility Insights.
         </p>
         <Link
           to="/premium"
@@ -181,7 +183,7 @@ function PremiumUpsellCard() {
 function Score({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-border bg-surface/40 p-3 text-center">
-      <div className="font-display text-2xl font-bold">{value}</div>
+      <div className="font-display text-2xl font-bold">{value}%</div>
       <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
