@@ -689,8 +689,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 5: Compatibility ---------- */}
-        {step === 5 && (
+        {/* ---------- STEP 6: Compatibility ---------- */}
+        {step === 6 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">What matters in a <span className="uo-accent">match</span>?</h1>
