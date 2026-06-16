@@ -12,6 +12,7 @@ import { MessagePaywallModal } from "@/components/MessagePaywallModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 import { generateIcebreakers, type Icebreaker } from "@/lib/icebreakers.functions";
+import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 
 
 export const Route = createFileRoute("/match/$userId")({
@@ -549,6 +550,7 @@ function MatchExperience() {
                   {profile.bio && (
                     <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
                   )}
+                  <AiCompatibilityPanel peerId={userId} />
                 </div>
               )}
 
