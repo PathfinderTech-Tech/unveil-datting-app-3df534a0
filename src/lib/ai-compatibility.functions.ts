@@ -191,7 +191,7 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         .maybeSingle();
       const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
         (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "AI Compatibility Insights are a Premium feature." };
+      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
 
       if (!data.force) {
         const { data: cached } = await supabase
