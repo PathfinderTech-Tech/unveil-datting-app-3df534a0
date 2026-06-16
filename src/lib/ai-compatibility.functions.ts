@@ -166,7 +166,7 @@ Use the real name "${themName}" — never "User A", "Match A", "your match". Pro
 
   const raw = await callGateway(system, contextBlock);
   const parsed = parseInsight(raw, themName);
-  if (!parsed) throw new Error("AI returned unparseable response — please refresh.");
+  if (!parsed) throw new Error("AI_SERVICE_UNAVAILABLE");
   if (parsed.dateIdeas.length < 1) parsed.dateIdeas = [{ title: "Coffee Date", reason: "A calm first IRL step that fits an early connection." }];
 
   return { ...parsed, computedAt: new Date().toISOString() };
