@@ -15,9 +15,11 @@ export type GenerateVoiceProfileResponse =
 
 // The two onboarding prompts. Must match VOICE_INTRO_PROMPTS in onboarding.tsx.
 export const VOICE_INTRO_PROMPT_ABOUT =
-  "What is something great about you, what are you most proud of, and what is one thing you would like to improve in your life?";
+  "What is something great about you, and what are you most proud of?";
 export const VOICE_INTRO_PROMPT_LOOKING =
   "What kind of person would you like to meet, and what type of friendship, relationship, or connection are you hoping to build?";
+export const VOICE_INTRO_PROMPT_IMPROVE =
+  "What is one thing you would like to improve in your life, and why?";
 
 function detectFormat(path: string): "webm" | "mp4" | "ogg" | "wav" | "mp3" {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
