@@ -97,9 +97,22 @@ function InsightsAiPage() {
             <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-hero opacity-25 blur-3xl" />
             <div className="relative">
               <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Deeper compatibility, on demand.</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">AI Compatibility Insights</h1>
+              <p className="mt-2 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
               <p className="mt-3 max-w-xl text-muted-foreground">
-                See romantic, friendship and long-term potential across your matches — with personalised date ideas and next-step suggestions, refreshed as your conversations grow.
+                Understand which connections may have the strongest potential for romance, friendship, and long-term compatibility.
+              </p>
+              <p className="mt-5 text-sm font-medium text-foreground">Unlock:</p>
+              <ul className="mt-2 space-y-1 text-sm text-foreground/90">
+                <li>• Best Romantic Match</li>
+                <li>• Best Friendship Match</li>
+                <li>• Best Overall Match</li>
+                <li>• AI Date Suggestions</li>
+                <li>• Relationship Journey Insights</li>
+                <li>• Premium AI Analysis</li>
+              </ul>
+              <p className="mt-5 text-sm text-muted-foreground">
+                Upgrade to Premium to unlock AI Compatibility Insights.
               </p>
               <Link
                 to="/premium"
