@@ -598,8 +598,31 @@ function Onboarding() {
         )}
 
 
-        {/* ---------- STEP 4: Profile essentials ---------- */}
+        {/* ---------- STEP 4: Voice prompts ---------- */}
         {step === 4 && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="font-display text-4xl font-bold">Let your voice tell part of your <span className="uo-accent">story</span>.</h1>
+              <p className="mt-2 text-muted-foreground">
+                Record 2–3 short voice prompts (up to 60 seconds each). Voice intros make profiles feel real
+                and lead to better matches and conversations. You can skip and add these later from your Passport.
+              </p>
+            </div>
+            {user && (
+              <div className="grid gap-3">
+                {VOICE_ONBOARDING_PROMPTS.map((p) => (
+                  <VoiceRecorder key={p} userId={user.id} prompt={p} />
+                ))}
+              </div>
+            )}
+            <div className="text-center text-[11px] text-muted-foreground">
+              You can re-record or add more prompts anytime from your Passport.
+            </div>
+          </div>
+        )}
+
+        {/* ---------- STEP 5: Profile essentials ---------- */}
+        {step === 5 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Make your profile <span className="uo-accent">yours</span>.</h1>
