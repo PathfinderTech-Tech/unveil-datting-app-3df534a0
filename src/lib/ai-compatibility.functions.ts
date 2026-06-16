@@ -109,7 +109,7 @@ async function computeInsight(args: {
     .eq("mutual_interest", true)
     .limit(1)
     .maybeSingle();
-  if (!matchRow) throw new Error("Only mutual matches can be analyzed.");
+  if (!matchRow) throw new Error("NOT_MUTUAL");
 
   const [me, them, compat, recentMsgs, mineAns, theirAns] = await Promise.all([
     supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio,values_top").eq("id", userId).maybeSingle(),
