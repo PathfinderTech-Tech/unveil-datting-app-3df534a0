@@ -8,8 +8,9 @@ import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
   Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
   Lock as LockIcon, ChevronUp, ChevronRight, Search,
-  Heart as HeartIcon, Calendar, MessageSquare, Phone,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone, Gift as GiftIcon,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
