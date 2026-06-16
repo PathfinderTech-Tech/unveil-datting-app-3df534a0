@@ -297,7 +297,7 @@ function Onboarding() {
         interested_in: interestedIn,
         intention: intent, relationship_intent: intent,
       });
-    } else if (step === 4) {
+    } else if (step === 5) {
       await persist({}, {
         bio: bio || null,
         interests: interests as unknown as string[],
@@ -305,7 +305,8 @@ function Onboarding() {
     } else if (step === 3) {
       const discovery_mode = appearance === "real" ? "photo" : "avatar";
       await persist({}, { discovery_mode });
-    } else if (step === 5 || step === 6 || step === 7 || step === 1) {
+    } else {
+      // Steps 1, 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
       await persist();
     }
     setStep((s) => Math.min(TOTAL, s + 1));
