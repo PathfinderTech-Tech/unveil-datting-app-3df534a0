@@ -86,16 +86,23 @@ const SPARK_PROMPTS = [
 ];
 
 const STEPS = [
-  { id: 1, label: "Welcome",              minutes: 1 },
-  { id: 2, label: "Identity Basics",      minutes: 2 },
-  { id: 3, label: "Profile Photo Studio", minutes: 2 },
-  { id: 4, label: "Profile Essentials",   minutes: 3 },
-  { id: 5, label: "Compatibility",        minutes: 3 },
-  { id: 6, label: "Personality & Spark",  minutes: 3 },
-  { id: 7, label: "Safety Basics",        minutes: 1 },
-  { id: 8, label: "Profile Preview",      minutes: 1 },
-  { id: 9, label: "Complete",             minutes: 0 },
+  { id: 1,  label: "Welcome",              minutes: 1 },
+  { id: 2,  label: "Identity Basics",      minutes: 2 },
+  { id: 3,  label: "Profile Photo Studio", minutes: 2 },
+  { id: 4,  label: "Voice Prompts",        minutes: 2 },
+  { id: 5,  label: "Profile Essentials",   minutes: 3 },
+  { id: 6,  label: "Compatibility",        minutes: 3 },
+  { id: 7,  label: "Personality & Spark",  minutes: 3 },
+  { id: 8,  label: "Safety Basics",        minutes: 1 },
+  { id: 9,  label: "Profile Preview",      minutes: 1 },
+  { id: 10, label: "Complete",             minutes: 0 },
 ] as const;
+
+const VOICE_ONBOARDING_PROMPTS = [
+  "A small ritual that makes my day feel like mine.",
+  "The last idea that kept me up — and why.",
+  "Something I could talk about for hours.",
+];
 
 const TOTAL = STEPS.length;
 
