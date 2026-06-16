@@ -28,9 +28,11 @@ async function callGateway(systemPrompt: string, userPrompt: string): Promise<st
       temperature: 0.9,
     }),
   });
-  if (res.status === 429) throw new Error("Rate limit — try again in a moment.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in workspace settings.");
-  if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
+  if (!res.ok) {
+    let detail = ""; try { detail = await res.text(); } catch { /* noop */ }
+    console.error("[icebreakers] gateway failure", { status: res.status, detail: detail.slice(0, 500) });
+    throw new Error("We couldn’t generate suggestions right now. Please try again shortly.");
+  }
   const j = await res.json();
   return j.choices?.[0]?.message?.content ?? "[]";
 }

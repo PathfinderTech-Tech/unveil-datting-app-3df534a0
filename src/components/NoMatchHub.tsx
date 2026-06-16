@@ -8,13 +8,13 @@ import { Sparkles, Flame, Brain, Target } from "lucide-react";
 export function NoMatchHub({ title = "No matches yet — keep building" }: { title?: string }) {
   const cards = [
     {
-      to: "/insights",
+      to: "/insights-ai",
       icon: Sparkles,
       title: "Today's compatibility",
       desc: "Answer 4 prompts to sharpen your readiness score.",
     },
     {
-      to: "/insights",
+      to: "/insights-ai",
       icon: Brain,
       title: "Personality blueprint",
       desc: "Define your communication, attachment, conflict, leadership and relationship styles.",

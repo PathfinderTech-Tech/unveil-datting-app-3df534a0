@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, RefreshCw, Crown, Lock } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { getCompatibilityInsight, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import { getCompatibilityInsight, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
 import { useEntitlements } from "@/hooks/use-entitlements";
 
 function timeAgo(iso: string): string {
@@ -28,10 +28,11 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
     setError(null);
     try {
       const res = await fetchInsight({ data: { peerId, force } });
-      if ("error" in res) setError(res.error);
+      if ("error" in res) setError(aiErrorMessage(res.error));
       else setInsight(res.insight);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed");
+      console.error("[AiCompatibilityPanel] load failed", e);
+      setError(aiErrorMessage("AI_SERVICE_UNAVAILABLE"));
     } finally {
       setLoading(false);
     }
@@ -50,11 +51,22 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-hero opacity-20 blur-3xl" />
         <div className="relative">
           <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insight
+            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insights
           </div>
-          <h3 className="font-display text-xl font-bold">Unlock deeper compatibility analysis</h3>
+          <h3 className="font-display text-xl font-bold">Your Relationship Intelligence Hub</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            See your romantic, friendship and long-term potential, plus AI-curated date ideas tailored to this match.
+            Understand which connections may have the strongest potential for romance, friendship, and long-term compatibility.
+          </p>
+          <ul className="mt-3 space-y-1 text-sm text-foreground/90">
+            <li>• Best Romantic Match</li>
+            <li>• Best Friendship Match</li>
+            <li>• Best Overall Match</li>
+            <li>• AI Date Suggestions</li>
+            <li>• Relationship Journey Insights</li>
+            <li>• Premium AI Analysis</li>
+          </ul>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Upgrade to Premium to unlock AI Compatibility Insights.
           </p>
           <Link
             to="/premium"

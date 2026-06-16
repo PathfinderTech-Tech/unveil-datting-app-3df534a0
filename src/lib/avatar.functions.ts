@@ -114,9 +114,8 @@ export const generateAvatar = createServerFn({ method: "POST" })
         });
         if (!res.ok) {
           const errText = await res.text().catch(() => "");
-          if (res.status === 429) throw new Error("Rate limited — try again in a moment.");
-          if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace settings.");
-          throw new Error(`Generation failed (${res.status}) ${errText.slice(0, 160)}`);
+          console.error("[avatar] gateway failure", { status: res.status, detail: errText.slice(0, 500) });
+          throw new Error("We couldn’t generate your avatar right now. Please try again shortly.");
         }
         const json = (await res.json()) as {
           choices?: Array<{

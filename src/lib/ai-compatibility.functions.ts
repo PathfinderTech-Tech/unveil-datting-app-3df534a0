@@ -46,9 +46,15 @@ async function callGateway(systemPrompt: string, userPrompt: string): Promise<st
       response_format: { type: "json_object" },
     }),
   });
-  if (res.status === 429) throw new Error("AI is busy — please try again in a moment.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in workspace settings.");
-  if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
+  if (!res.ok) {
+    // Log technical detail internally; never surface to users.
+    let detail = "";
+    try { detail = await res.text(); } catch { /* noop */ }
+    console.error("[ai-compatibility] gateway failure", { status: res.status, detail: detail.slice(0, 500) });
+    // Single sanitized, user-safe message for every upstream failure
+    // (rate limit, billing, model, workspace, network, parse, etc.)
+    throw new Error("AI_SERVICE_UNAVAILABLE");
+  }
   const j = await res.json();
   return j.choices?.[0]?.message?.content ?? "{}";
 }
@@ -103,7 +109,7 @@ async function computeInsight(args: {
     .eq("mutual_interest", true)
     .limit(1)
     .maybeSingle();
-  if (!matchRow) throw new Error("Only mutual matches can be analyzed.");
+  if (!matchRow) throw new Error("NOT_MUTUAL");
 
   const [me, them, compat, recentMsgs, mineAns, theirAns] = await Promise.all([
     supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio,values_top").eq("id", userId).maybeSingle(),
@@ -160,7 +166,7 @@ Use the real name "${themName}" — never "User A", "Match A", "your match". Pro
 
   const raw = await callGateway(system, contextBlock);
   const parsed = parseInsight(raw, themName);
-  if (!parsed) throw new Error("AI returned unparseable response — please refresh.");
+  if (!parsed) throw new Error("AI_SERVICE_UNAVAILABLE");
   if (parsed.dateIdeas.length < 1) parsed.dateIdeas = [{ title: "Coffee Date", reason: "A calm first IRL step that fits an early connection." }];
 
   return { ...parsed, computedAt: new Date().toISOString() };
@@ -185,7 +191,7 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         .maybeSingle();
       const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
         (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "AI Compatibility Insights are a Premium feature." };
+      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
 
       if (!data.force) {
         const { data: cached } = await supabase
@@ -222,7 +228,10 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
 
       return { ok: true, cached: false, insight };
     } catch (e) {
-      return { error: e instanceof Error ? e.message : "Failed to generate insight" };
+      const msg = e instanceof Error ? e.message : String(e);
+      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" ? msg : "AI_SERVICE_UNAVAILABLE";
+      if (safe === "AI_SERVICE_UNAVAILABLE") console.error("[ai-compatibility] insight error", msg);
+      return { error: safe };
     }
   });
 
@@ -240,7 +249,7 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
         .eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle();
       const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
         (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "AI Compatibility Insights are a Premium feature." };
+      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
 
       // Read cached insights only — never auto-fan-out AI calls to many matches.
       const { data: rows } = await supabase
@@ -262,6 +271,15 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
         all,
       };
     } catch (e) {
-      return { error: e instanceof Error ? e.message : "Failed to load top matches" };
+      console.error("[ai-compatibility] top matches error", e);
+      return { error: "AI_SERVICE_UNAVAILABLE" };
     }
   });
+
+// User-facing copy for sanitized error codes returned by server functions.
+// Components MUST use this to render text — never display raw codes.
+export function aiErrorMessage(code: string): string {
+  if (code === "PREMIUM_REQUIRED") return "Upgrade to Premium to unlock AI Compatibility Insights.";
+  if (code === "NOT_MUTUAL") return "AI insights are available once you both match.";
+  return "We couldn’t generate insights right now. Please try again shortly.";
+}

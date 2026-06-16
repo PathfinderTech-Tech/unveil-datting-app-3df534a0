@@ -6,7 +6,9 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { getCompatibilityInsight, getTopAiMatches, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import { getCompatibilityInsight, getTopAiMatches, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+
+import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
@@ -67,14 +69,15 @@ function InsightsAiPage() {
       const res = await fetchInsight({ data: { peerId, force } });
       setRows((rs) => rs.map((r) => {
         if (r.peerId !== peerId) return r;
-        if ("error" in res) return { ...r, loading: false, error: res.error };
+        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error) };
         return { ...r, loading: false, insight: res.insight };
       }));
       // Refresh top picks
       const t = await fetchTop({ data: {} } as any);
       if ("ok" in t) setTop({ bestOverall: t.bestOverall, bestRomantic: t.bestRomantic, bestFriendship: t.bestFriendship });
     } catch (e) {
-      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: e instanceof Error ? e.message : "Failed" } : r));
+      console.error("[insights-ai] generateFor failed", e);
+      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE") } : r));
     }
   }
 
@@ -94,9 +97,22 @@ function InsightsAiPage() {
             <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-hero opacity-25 blur-3xl" />
             <div className="relative">
               <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-              <h1 className="mt-2 font-display text-4xl font-bold">Deeper compatibility, on demand.</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold">AI Compatibility Insights</h1>
+              <p className="mt-2 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
               <p className="mt-3 max-w-xl text-muted-foreground">
-                See romantic, friendship and long-term potential across your matches — with personalised date ideas and next-step suggestions, refreshed as your conversations grow.
+                Understand which connections may have the strongest potential for romance, friendship, and long-term compatibility.
+              </p>
+              <p className="mt-5 text-sm font-medium text-foreground">Unlock:</p>
+              <ul className="mt-2 space-y-1 text-sm text-foreground/90">
+                <li>• Best Romantic Match</li>
+                <li>• Best Friendship Match</li>
+                <li>• Best Overall Match</li>
+                <li>• AI Date Suggestions</li>
+                <li>• Relationship Journey Insights</li>
+                <li>• Premium AI Analysis</li>
+              </ul>
+              <p className="mt-5 text-sm text-muted-foreground">
+                Upgrade to Premium to unlock AI Compatibility Insights.
               </p>
               <Link
                 to="/premium"
@@ -117,9 +133,10 @@ function InsightsAiPage() {
       <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">AI Insights · Premium</div>
-          <h1 className="mt-1 font-display text-4xl font-bold">Your AI compatibility hub</h1>
+          <h1 className="mt-1 font-display text-4xl font-bold">AI Insights</h1>
+          <p className="mt-1 text-sm italic text-accent">Your Relationship Intelligence Hub</p>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Real-name compatibility analysis across your mutual matches. Insights auto-refresh every 24 hours, or tap Refresh anytime.
+            Real-name compatibility analysis across your mutual matches — plus your daily readiness, blueprint, and 7-day connection journey. Insights auto-refresh every 24 hours.
           </p>
         </div>
 
@@ -185,6 +202,14 @@ function InsightsAiPage() {
             </div>
           )}
         </div>
+
+        {/* MERGED RELATIONSHIP INTELLIGENCE — Today / Readiness / Blueprint / Connection */}
+        {user && (
+          <div className="mt-10">
+            <h2 className="mb-4 font-display text-lg font-bold">Relationship intelligence</h2>
+            <InsightsHubTabs userId={user.id} />
+          </div>
+        )}
       </div>
     </div>
   );

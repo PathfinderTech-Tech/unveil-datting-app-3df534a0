@@ -106,7 +106,7 @@ export function HomeDashboard({ user }: { user: User }) {
         title: "Unlock deeper Passport Insights",
         body: "See attachment style, communication analysis, and growth areas.",
         cta: "Explore Insights+",
-        to: "/insights",
+        to: "/insights-ai",
       } as const;
     }
     if (newMatches > 0) {
