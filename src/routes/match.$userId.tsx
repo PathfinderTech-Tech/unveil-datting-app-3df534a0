@@ -86,6 +86,8 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
 function MatchExperience() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
+  const reveal = useMatchReveal(userId);
+
 
   const [meId, setMeId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
