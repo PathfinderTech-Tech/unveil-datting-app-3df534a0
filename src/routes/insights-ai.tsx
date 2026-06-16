@@ -65,12 +65,12 @@ function InsightsAiPage() {
   }, [entitlements.premium, fetchTop]);
 
   async function generateFor(peerId: string, force = false) {
-    setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined } : r));
+    setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined, errorCode: undefined } : r));
     try {
       const res = await fetchInsight({ data: { peerId, force } });
       setRows((rs) => rs.map((r) => {
         if (r.peerId !== peerId) return r;
-        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error) };
+        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error), errorCode: res.error };
         return { ...r, loading: false, insight: res.insight };
       }));
       // Refresh top picks
@@ -78,9 +78,10 @@ function InsightsAiPage() {
       if ("ok" in t) setTop({ bestOverall: t.bestOverall, bestRomantic: t.bestRomantic, bestFriendship: t.bestFriendship });
     } catch (e) {
       console.error("[insights-ai] generateFor failed", e);
-      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE") } : r));
+      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE"), errorCode: "AI_SERVICE_UNAVAILABLE" } : r));
     }
   }
+
 
   if (entLoading) {
     return <div className="min-h-screen bg-background"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
