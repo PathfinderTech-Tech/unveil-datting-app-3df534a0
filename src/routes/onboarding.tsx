@@ -874,7 +874,7 @@ function Onboarding() {
         )}
 
         {/* ---------- Navigation ---------- */}
-        {step !== 9 && (
+        {step !== 10 && (
           <div className="mt-10 flex items-center justify-between gap-3">
             <button onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30">
@@ -882,7 +882,7 @@ function Onboarding() {
             </button>
             <button onClick={goNext} disabled={!canNext || saving}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40">
-              {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : step === 8 ? <>Confirm & Continue <Check className="h-4 w-4" /></> : <>Continue <ArrowRight className="h-4 w-4" /></>}
+              {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : step === 9 ? <>Confirm & Continue <Check className="h-4 w-4" /></> : step === 4 ? <>Skip for now <ArrowRight className="h-4 w-4" /></> : <>Continue <ArrowRight className="h-4 w-4" /></>}
             </button>
           </div>
         )}
