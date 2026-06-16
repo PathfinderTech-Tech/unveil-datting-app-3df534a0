@@ -23,7 +23,8 @@ export function DateReadinessPanel({
   peerName?: string | null;
   state: RevealState;
 }) {
-  const { isPremium } = useEntitlements();
+  const { entitlements } = useEntitlements();
+  const isPremium = entitlements.premium;
   const [pref, setPref] = useState(state.sponsorPreference);
   const [busy, setBusy] = useState(false);
 
