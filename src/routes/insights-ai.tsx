@@ -202,6 +202,14 @@ function InsightsAiPage() {
             </div>
           )}
         </div>
+
+        {/* MERGED RELATIONSHIP INTELLIGENCE — Today / Readiness / Blueprint / Connection */}
+        {user && (
+          <div className="mt-10">
+            <h2 className="mb-4 font-display text-lg font-bold">Relationship intelligence</h2>
+            <InsightsHubTabs userId={user.id} />
+          </div>
+        )}
       </div>
     </div>
   );
