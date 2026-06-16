@@ -1049,7 +1049,7 @@ function Chat() {
                             </Link>
                           </>
                         ) : (
-                          <p className="text-sm text-muted-foreground">Select a conversation to view AI insights.</p>
+                          <p className="text-sm text-muted-foreground">Select a conversation to view AI Compatibility Insights.</p>
                         )}
                       </TabsContent>
                       <TabsContent value="insights" className="mt-0 space-y-3">
