@@ -217,21 +217,96 @@ function Chip({ children }: { children: React.ReactNode }) {
   return <span className="rounded-full border border-border bg-background/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{children}</span>;
 }
 
-function TopPick({ label, icon, insight, metric }: { label: string; icon: React.ReactNode; insight: CompatibilityInsight | null; metric: keyof CompatibilityInsight }) {
+function TopPick({ label, sub, icon, insight, metric }: { label: string; sub: string; icon: React.ReactNode; insight: CompatibilityInsight | null; metric: keyof CompatibilityInsight }) {
   return (
-    <div className="rounded-3xl border border-border bg-card p-5">
-      <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-        {icon} {label}
+    <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-accent shadow-glow">
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-base font-semibold">{label}</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+        </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
       </div>
       {insight ? (
-        <>
-          <div className="mt-2 font-display text-2xl font-bold">{insight.matchName}</div>
-          <div className="mt-1 font-display text-4xl font-bold text-gradient-hero">{insight[metric] as number}%</div>
-          <p className="mt-2 line-clamp-3 text-xs text-muted-foreground">{insight.aiSummary}</p>
-        </>
+        <div className="mt-4 flex items-end justify-between gap-3">
+          <div>
+            <div className="font-display text-xl font-bold">{insight.matchName}</div>
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{insight.aiSummary}</p>
+          </div>
+          <div className="font-display text-3xl font-bold text-gradient-hero">{insight[metric] as number}%</div>
+        </div>
       ) : (
-        <p className="mt-2 text-xs text-muted-foreground">Analyze a few matches below to see your top pick.</p>
+        <p className="mt-3 text-xs text-muted-foreground">Analyze a few matches below to see your top pick.</p>
       )}
     </div>
   );
 }
+
+function HeroBlock({ premium = false }: { premium?: boolean }) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-10">
+      <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-hero opacity-30 blur-3xl" />
+      <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+      <div className="relative grid items-center gap-6 sm:grid-cols-[1fr_auto]">
+        <div>
+          <div className="font-mono text-xs uppercase tracking-luxury text-accent">AI Insights · Premium</div>
+          <h1 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
+            Your Relationship<br />
+            <span className="text-gradient-hero">Intelligence Hub</span>
+            <Sparkles className="ml-2 inline h-6 w-6 text-accent" />
+          </h1>
+          <p className="mt-3 max-w-md text-sm text-muted-foreground">
+            Advanced AI compatibility insights to help you discover deeper connections that truly matter.
+          </p>
+          {!premium && (
+            <Link
+              to="/premium"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow"
+            >
+              <Crown className="h-4 w-4" /> Upgrade to Premium
+            </Link>
+          )}
+        </div>
+        <div className="relative mx-auto h-44 w-44 sm:h-56 sm:w-56">
+          <div className="absolute inset-4 rounded-full bg-gradient-hero opacity-40 blur-2xl" />
+          <img src={robotMascot} alt="AI Insights mascot" width={512} height={512} className="relative h-full w-full object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.55)]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LockedPick({ label, sub, icon }: { label: string; sub: string; icon: React.ReactNode }) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-5">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-accent">
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-base font-semibold">{label}</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+        </div>
+        <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+      </div>
+      <div className="mt-4 flex items-center gap-2">
+        <div className="h-8 w-8 rounded-full bg-surface-2 blur-[2px]" />
+        <div className="h-8 w-8 -ml-3 rounded-full bg-surface-2 blur-[2px]" />
+        <div className="h-8 w-8 -ml-3 rounded-full bg-surface-2 blur-[2px]" />
+      </div>
+    </div>
+  );
+}
+
+function IncludedRow({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <li className="flex items-center gap-3 rounded-2xl border border-border bg-surface/40 px-3 py-2.5 text-sm">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">{icon}</span>
+      <span>{label}</span>
+    </li>
+  );
+}
+
