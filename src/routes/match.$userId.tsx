@@ -13,6 +13,7 @@ import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 import { generateIcebreakers, type Icebreaker } from "@/lib/icebreakers.functions";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
+import { useMatchReveal } from "@/lib/reveal";
 
 
 export const Route = createFileRoute("/match/$userId")({
