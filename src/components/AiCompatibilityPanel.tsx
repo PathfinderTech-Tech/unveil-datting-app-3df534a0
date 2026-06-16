@@ -167,7 +167,7 @@ function PremiumUpsellCard() {
           <li>• Shared Values Analysis</li>
         </ul>
         <p className="mt-3 text-sm text-muted-foreground">
-          Upgrade to Premium to unlock Unveil AI Compatibility Insights.
+          Upgrade to Premium to unlock AI Compatibility Insights.
         </p>
         <Link
           to="/premium"
