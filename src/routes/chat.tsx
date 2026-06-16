@@ -31,6 +31,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
+import { GiftPickerSheet } from "@/components/GiftPickerSheet";
+import { GiftMessageBubble } from "@/components/GiftMessageBubble";
+
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
