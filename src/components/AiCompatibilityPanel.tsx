@@ -62,10 +62,10 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insight
+            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insights
           </div>
           <h3 className="mt-1 font-display text-xl font-bold">
-            {insight ? insight.compatibilityLabel : loading ? "Analyzing…" : "Compatibility"}
+            {insight ? insight.compatibilityLabel : loading ? "Analyzing…" : "AI Compatibility Insights"}
           </h3>
         </div>
         <button
