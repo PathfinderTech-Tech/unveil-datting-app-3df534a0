@@ -730,8 +730,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 6: Personality & Spark ---------- */}
-        {step === 6 && (
+        {/* ---------- STEP 7: Personality & Spark ---------- */}
+        {step === 7 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Personality & <span className="uo-accent">Spark</span>.</h1>
