@@ -100,15 +100,17 @@ const STEPS = [
 ] as const;
 
 import {
-  generateProfileFromVoice,
   VOICE_INTRO_PROMPT_ABOUT,
   VOICE_INTRO_PROMPT_LOOKING,
+  VOICE_INTRO_PROMPT_IMPROVE,
 } from "@/lib/voice-profile.functions";
 
 const VOICE_INTRO_PROMPTS: { title: string; prompt: string }[] = [
   { title: "Tell us about yourself", prompt: VOICE_INTRO_PROMPT_ABOUT },
   { title: "Your ideal connection",  prompt: VOICE_INTRO_PROMPT_LOOKING },
+  { title: "One thing you'd like to improve", prompt: VOICE_INTRO_PROMPT_IMPROVE },
 ];
+const VOICE_INTRO_PROMPT_TEXTS = VOICE_INTRO_PROMPTS.map((p) => p.prompt);
 
 const TOTAL = STEPS.length;
 
