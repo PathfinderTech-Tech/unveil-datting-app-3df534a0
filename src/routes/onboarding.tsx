@@ -820,8 +820,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 9: Completion ---------- */}
-        {step === 9 && (
+        {/* ---------- STEP 10: Completion ---------- */}
+        {step === 10 && (
           <div className="space-y-6 text-center">
             <div className="uo-complete-stage">
               <div className="uo-logo-spin" aria-hidden />
