@@ -183,7 +183,7 @@ function PremiumUpsellCard() {
 function Score({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-border bg-surface/40 p-3 text-center">
-      <div className="font-display text-2xl font-bold">{value}</div>
+      <div className="font-display text-2xl font-bold">{value}%</div>
       <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
