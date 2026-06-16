@@ -228,7 +228,10 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
 
       return { ok: true, cached: false, insight };
     } catch (e) {
-      return { error: e instanceof Error ? e.message : "Failed to generate insight" };
+      const msg = e instanceof Error ? e.message : String(e);
+      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" ? msg : "AI_SERVICE_UNAVAILABLE";
+      if (safe === "AI_SERVICE_UNAVAILABLE") console.error("[ai-compatibility] insight error", msg);
+      return { error: safe };
     }
   });
 
