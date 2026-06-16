@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, RefreshCw, Crown, Lock } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { getCompatibilityInsight, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import { getCompatibilityInsight, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
 import { useEntitlements } from "@/hooks/use-entitlements";
 
 function timeAgo(iso: string): string {
