@@ -19,6 +19,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
   const [insight, setInsight] = useState<CompatibilityInsight | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const isPremium = entitlements.premium;
 
@@ -26,12 +27,18 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
     if (!isPremium) return;
     setLoading(true);
     setError(null);
+    setErrorCode(null);
     try {
       const res = await fetchInsight({ data: { peerId, force } });
-      if ("error" in res) setError(aiErrorMessage(res.error));
-      else setInsight(res.insight);
+      if ("error" in res) {
+        setErrorCode(res.error);
+        setError(aiErrorMessage(res.error));
+      } else {
+        setInsight(res.insight);
+      }
     } catch (e) {
       console.error("[AiCompatibilityPanel] load failed", e);
+      setErrorCode("AI_SERVICE_UNAVAILABLE");
       setError(aiErrorMessage("AI_SERVICE_UNAVAILABLE"));
     } finally {
       setLoading(false);
@@ -45,38 +52,9 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
 
   if (entLoading) return null;
 
-  if (!isPremium) {
-    return (
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6">
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-hero opacity-20 blur-3xl" />
-        <div className="relative">
-          <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insights
-          </div>
-          <h3 className="font-display text-xl font-bold">Your Relationship Intelligence Hub</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Understand which connections may have the strongest potential for romance, friendship, and long-term compatibility.
-          </p>
-          <ul className="mt-3 space-y-1 text-sm text-foreground/90">
-            <li>• Best Romantic Match</li>
-            <li>• Best Friendship Match</li>
-            <li>• Best Overall Match</li>
-            <li>• AI Date Suggestions</li>
-            <li>• Relationship Journey Insights</li>
-            <li>• Premium AI Analysis</li>
-          </ul>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Upgrade to Premium to unlock AI Compatibility Insights.
-          </p>
-          <Link
-            to="/premium"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-sm font-medium text-primary-foreground shadow-glow"
-          >
-            <Crown className="h-4 w-4" /> Upgrade to Premium
-          </Link>
-        </div>
-      </div>
-    );
+  // Non-premium users (or premium-required errors) always see the upgrade experience
+  if (!isPremium || errorCode === "PREMIUM_REQUIRED") {
+    return <PremiumUpsellCard />;
   }
 
   return (
@@ -100,8 +78,15 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
         </button>
       </div>
 
-      {error && (
+      {/* Only show technical error messages for genuine system failures */}
+      {error && errorCode === "AI_SERVICE_UNAVAILABLE" && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
+          {error}
+        </div>
+      )}
+
+      {error && errorCode === "NOT_MUTUAL" && (
+        <div className="rounded-xl border border-border bg-surface/40 p-3 text-sm text-muted-foreground">
           {error}
         </div>
       )}
@@ -158,6 +143,41 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
   );
 }
 
+function PremiumUpsellCard() {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6">
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-hero opacity-20 blur-3xl" />
+      <div className="relative">
+        <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+          <Sparkles className="h-3 w-3 text-accent" /> AI Compatibility Insights
+        </div>
+        <h3 className="font-display text-xl font-bold">Unveil AI Compatibility Insights</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.
+        </p>
+        <ul className="mt-3 space-y-1 text-sm text-foreground/90">
+          <li>• Best Overall Match</li>
+          <li>• Best Romantic Match</li>
+          <li>• Best Friendship Match</li>
+          <li>• AI Date Suggestions</li>
+          <li>• Relationship Journey Analysis</li>
+          <li>• Communication Insights</li>
+          <li>• Shared Values Analysis</li>
+        </ul>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Upgrade to Premium to unlock Unveil AI Compatibility Insights.
+        </p>
+        <Link
+          to="/premium"
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+        >
+          <Crown className="h-4 w-4" /> Upgrade to Premium
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function Score({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-border bg-surface/40 p-3 text-center">
@@ -166,3 +186,4 @@ function Score({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+

@@ -21,7 +21,7 @@ export const Route = createFileRoute("/insights-ai")({
   component: InsightsAiPage,
 });
 
-type MatchRow = { peerId: string; name: string; insight?: CompatibilityInsight; loading?: boolean; error?: string };
+type MatchRow = { peerId: string; name: string; insight?: CompatibilityInsight; loading?: boolean; error?: string; errorCode?: string };
 
 function InsightsAiPage() {
   const { user } = useAuth();
@@ -65,12 +65,12 @@ function InsightsAiPage() {
   }, [entitlements.premium, fetchTop]);
 
   async function generateFor(peerId: string, force = false) {
-    setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined } : r));
+    setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined, errorCode: undefined } : r));
     try {
       const res = await fetchInsight({ data: { peerId, force } });
       setRows((rs) => rs.map((r) => {
         if (r.peerId !== peerId) return r;
-        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error) };
+        if ("error" in res) return { ...r, loading: false, error: aiErrorMessage(res.error), errorCode: res.error };
         return { ...r, loading: false, insight: res.insight };
       }));
       // Refresh top picks
@@ -78,9 +78,10 @@ function InsightsAiPage() {
       if ("ok" in t) setTop({ bestOverall: t.bestOverall, bestRomantic: t.bestRomantic, bestFriendship: t.bestFriendship });
     } catch (e) {
       console.error("[insights-ai] generateFor failed", e);
-      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE") } : r));
+      setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE"), errorCode: "AI_SERVICE_UNAVAILABLE" } : r));
     }
   }
+
 
   if (entLoading) {
     return <div className="min-h-screen bg-background"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
@@ -179,7 +180,32 @@ function InsightsAiPage() {
                       {r.insight ? "Refresh" : "Analyze"}
                     </button>
                   </div>
-                  {r.error && <div className="mt-2 text-xs text-destructive">{r.error}</div>}
+                  {r.errorCode === "PREMIUM_REQUIRED" ? (
+                    <div className="mt-3 rounded-2xl border border-border bg-surface/40 p-4">
+                      <div className="text-sm font-semibold">Unveil AI Compatibility Insights</div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.
+                      </p>
+                      <ul className="mt-2 space-y-0.5 text-xs text-foreground/80">
+                        <li>• Best Overall Match</li>
+                        <li>• Best Romantic Match</li>
+                        <li>• Best Friendship Match</li>
+                        <li>• AI Date Suggestions</li>
+                        <li>• Relationship Journey Analysis</li>
+                        <li>• Communication Insights</li>
+                        <li>• Shared Values Analysis</li>
+                      </ul>
+                      <Link
+                        to="/premium"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-hero px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-glow"
+                      >
+                        <Crown className="h-3.5 w-3.5" /> Upgrade to Premium
+                      </Link>
+                    </div>
+                  ) : r.error ? (
+                    <div className="mt-2 text-xs text-destructive">{r.error}</div>
+                  ) : null}
+
                   {r.insight && (
                     <>
                       <p className="mt-3 text-sm text-foreground/90">"{r.insight.aiSummary}"</p>
