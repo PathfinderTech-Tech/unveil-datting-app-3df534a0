@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Heart, Users, Crown, RefreshCw, ArrowLeft } from "lucide-react";
+import { Sparkles, Heart, Users, Crown, RefreshCw, ArrowLeft, Trophy, ChevronRight, Lock, Calendar, Activity, Shield, MessageCircle, Gem } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getCompatibilityInsight, getTopAiMatches, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import robotMascot from "@/assets/ai-insights-robot.png";
 
 import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 
