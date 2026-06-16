@@ -60,6 +60,7 @@ import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
+import { Route as AuthenticatedInsightsAiRouteImport } from './routes/_authenticated/insights-ai'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -322,6 +323,11 @@ const AdminBetaRoute = AdminBetaRouteImport.update({
   path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
+const AuthenticatedInsightsAiRoute = AuthenticatedInsightsAiRouteImport.update({
+  id: '/_authenticated/insights-ai',
+  path: '/insights-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
   id: '/api/public/passport-og',
   path: '/api/public/passport-og',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -447,6 +454,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -506,6 +514,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/_authenticated/insights-ai': typeof AuthenticatedInsightsAiRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -566,6 +575,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/_authenticated/insights-ai'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -741,6 +753,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  AuthenticatedInsightsAiRoute: typeof AuthenticatedInsightsAiRoute
   ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
@@ -1118,6 +1131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_authenticated/insights-ai': {
+      id: '/_authenticated/insights-ai'
+      path: '/insights-ai'
+      fullPath: '/insights-ai'
+      preLoaderRoute: typeof AuthenticatedInsightsAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/passport-og': {
       id: '/api/public/passport-og'
       path: '/api/public/passport-og'
@@ -1217,6 +1237,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  AuthenticatedInsightsAiRoute: AuthenticatedInsightsAiRoute,
   ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
