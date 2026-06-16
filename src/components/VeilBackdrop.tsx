@@ -1,4 +1,6 @@
-// import logoAsset from "@/assets/unveil-logo-transparent.png.asset.json";
+// VeilBackdrop — site-wide ambient watermark using the transparent UNVEIL logo.
+// Renders a fixed, very low-opacity logo behind all content with a radial
+// veil-pattern halo. Pointer-events disabled so it never interferes with UI.
 import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
 
 type Variant = "center" | "corner" | "edge";
