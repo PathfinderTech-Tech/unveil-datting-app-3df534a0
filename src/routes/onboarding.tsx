@@ -771,8 +771,8 @@ function Onboarding() {
           </div>
         )}
 
-        {/* ---------- STEP 7: Safety & Verification ---------- */}
-        {step === 7 && (
+        {/* ---------- STEP 8: Safety & Verification ---------- */}
+        {step === 8 && (
           <div className="space-y-6">
             <div>
               <h1 className="font-display text-4xl font-bold">Safety <span className="uo-accent">basics</span>.</h1>
