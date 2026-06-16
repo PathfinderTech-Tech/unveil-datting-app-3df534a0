@@ -8,8 +8,9 @@ import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
   Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
   Lock as LockIcon, ChevronUp, ChevronRight, Search,
-  Heart as HeartIcon, Calendar, MessageSquare, Phone,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone, Gift as GiftIcon,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
@@ -30,6 +31,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
+import { GiftPickerSheet } from "@/components/GiftPickerSheet";
+import { GiftMessageBubble } from "@/components/GiftMessageBubble";
+
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -134,6 +138,8 @@ function Chat() {
   // (legacy collapsible state replaced by unified panel below)
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
+  const [giftOpen, setGiftOpen] = useState(false);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
   const isMobile = useIsMobile();
@@ -517,6 +523,15 @@ function Chat() {
           onBlockToo={blockPeer}
         />
       )}
+      {peerId && (
+        <GiftPickerSheet
+          open={giftOpen}
+          onClose={() => setGiftOpen(false)}
+          peerId={peerId}
+          peerName={peerName}
+        />
+      )}
+
 
       <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
@@ -833,6 +848,12 @@ function Chat() {
                                 mine={mine}
                               />
                             </div>
+                          ) : m.message_type === "gift" || m.content.startsWith("[[gift:") ? (
+                            <GiftMessageBubble
+                              content={m.content}
+                              mine={mine}
+                              senderName={mine ? "You" : peerName}
+                            />
                           ) : (
                             <div
                               title={ts}
@@ -845,6 +866,7 @@ function Chat() {
                               {m.content}
                             </div>
                           )}
+
                           <button
                             onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
                             className="opacity-0 transition-opacity group-hover:opacity-100"
@@ -930,6 +952,17 @@ function Chat() {
                   >
                     AI
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setGiftOpen(true)}
+                    disabled={!peerId}
+                    title="Send a gift"
+                    aria-label="Send a gift"
+                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/15 to-accent/15 p-2.5 backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
+                  >
+                    <GiftIcon className="h-4 w-4 text-primary" />
+                  </button>
+
                   {mustVerify ? (
                     <button
                       type="button"

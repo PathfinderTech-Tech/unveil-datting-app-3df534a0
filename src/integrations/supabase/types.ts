@@ -705,6 +705,148 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_catalog: {
+        Row: {
+          active: boolean
+          created_at: string
+          default_message: string
+          emoji: string
+          gem_cost: number
+          name: string
+          slug: string
+          sort_order: number
+          tier: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          default_message?: string
+          emoji: string
+          gem_cost?: number
+          name: string
+          slug: string
+          sort_order?: number
+          tier?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          default_message?: string
+          emoji?: string
+          gem_cost?: number
+          name?: string
+          slug?: string
+          sort_order?: number
+          tier?: string
+        }
+        Relationships: []
+      }
+      gift_journey: {
+        Row: {
+          last_gift_at: string | null
+          stage: string
+          streak_days: number
+          total_gifts: number
+          updated_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          last_gift_at?: string | null
+          stage?: string
+          streak_days?: number
+          total_gifts?: number
+          updated_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          last_gift_at?: string | null
+          stage?: string
+          streak_days?: number
+          total_gifts?: number
+          updated_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      gift_sends: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          gift_slug: string
+          id: string
+          message_id: string | null
+          note: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          gift_slug: string
+          id?: string
+          message_id?: string | null
+          note?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          gift_slug?: string
+          id?: string
+          message_id?: string | null
+          note?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_sends_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_sends_gift_slug_fkey"
+            columns: ["gift_slug"]
+            isOneToOne: false
+            referencedRelation: "gift_catalog"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "gift_sends_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_weekly_usage: {
+        Row: {
+          sent_count: number
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          sent_count?: number
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          sent_count?: number
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       guided_date_progress: {
         Row: {
           completed_at: string

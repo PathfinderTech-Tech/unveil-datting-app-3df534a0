@@ -16,10 +16,12 @@ const PRIMARY = [
   { to: "/challenges", label: "Challenges" },
   { to: "/matches", label: "Matches" },
   { to: "/messages", label: "Messages" },
+  { to: "/gifts", label: "Gifts" },
   { to: "/profile", label: "Profile" },
   { to: "/passport", label: "Passport" },
   { to: "/settings", label: "Settings" },
 ] as const;
+
 
 // Sectioned mobile drawer — Core / Identity / Account / Legal.
 const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
@@ -36,9 +38,11 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
     items: [
       { to: "/passport", label: "Passport" },
       { to: "/insights-ai", label: "AI Insights" },
+      { to: "/gifts", label: "Gifts" },
       { to: "/challenges", label: "Challenges" },
     ],
   },
+
   {
     label: "Account",
     items: [
