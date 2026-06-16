@@ -99,10 +99,15 @@ const STEPS = [
   { id: 10, label: "Complete",             minutes: 0 },
 ] as const;
 
-const VOICE_ONBOARDING_PROMPTS = [
-  "A small ritual that makes my day feel like mine.",
-  "The last idea that kept me up — and why.",
-  "Something I could talk about for hours.",
+import {
+  generateProfileFromVoice,
+  VOICE_INTRO_PROMPT_ABOUT,
+  VOICE_INTRO_PROMPT_LOOKING,
+} from "@/lib/voice-profile.functions";
+
+const VOICE_INTRO_PROMPTS: { title: string; prompt: string }[] = [
+  { title: "Tell us about yourself", prompt: VOICE_INTRO_PROMPT_ABOUT },
+  { title: "Your ideal connection",  prompt: VOICE_INTRO_PROMPT_LOOKING },
 ];
 
 const TOTAL = STEPS.length;
