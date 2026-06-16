@@ -1293,9 +1293,12 @@ function Chat() {
                         )}
                       </TabsContent>
 
-                      <TabsContent value="reveal" className="mt-0">
+                      <TabsContent value="reveal" className="mt-0 space-y-3">
                         {peerId ? (
-                          <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                          <>
+                            <DateReadinessPanel peerUserId={peerId} peerName={peerName} state={reveal} />
+                            <ContactRevealPanel peerUserId={peerId} peerName={peerName} />
+                          </>
                         ) : null}
                       </TabsContent>
                     </div>
