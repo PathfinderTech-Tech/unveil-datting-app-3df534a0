@@ -34,6 +34,7 @@ import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscrip
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InsightsAiRouteImport } from './routes/insights-ai'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as GiftsRouteImport } from './routes/gifts'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
@@ -190,6 +191,11 @@ const InsightsAiRoute = InsightsAiRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiftsRoute = GiftsRouteImport.update({
+  id: '/gifts',
+  path: '/gifts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesRoute = GamesRouteImport.update({
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
   '/games': typeof GamesRoute
+  '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
   '/login': typeof LoginRoute
@@ -551,6 +560,7 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/gifts'
     | '/insights'
     | '/insights-ai'
     | '/login'
@@ -610,6 +620,7 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/gifts'
     | '/insights'
     | '/insights-ai'
     | '/login'
@@ -669,6 +680,7 @@ export interface FileRouteTypes {
     | '/discover-summary'
     | '/game'
     | '/games'
+    | '/gifts'
     | '/insights'
     | '/insights-ai'
     | '/login'
@@ -729,6 +741,7 @@ export interface RootRouteChildren {
   DiscoverSummaryRoute: typeof DiscoverSummaryRoute
   GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
+  GiftsRoute: typeof GiftsRoute
   InsightsRoute: typeof InsightsRoute
   InsightsAiRoute: typeof InsightsAiRoute
   LoginRoute: typeof LoginRoute
@@ -947,6 +960,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gifts': {
+      id: '/gifts'
+      path: '/gifts'
+      fullPath: '/gifts'
+      preLoaderRoute: typeof GiftsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games': {
@@ -1213,6 +1233,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverSummaryRoute: DiscoverSummaryRoute,
   GameRoute: GameRoute,
   GamesRoute: GamesRoute,
+  GiftsRoute: GiftsRoute,
   InsightsRoute: InsightsRoute,
   InsightsAiRoute: InsightsAiRoute,
   LoginRoute: LoginRoute,
