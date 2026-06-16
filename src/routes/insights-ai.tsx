@@ -14,7 +14,7 @@ import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
     meta: [
-      { title: "AI Insights — UNVEIL" },
+      { title: "Unveil AI Compatibility Insights — UNVEIL" },
       { name: "description", content: "Premium AI compatibility analysis, relationship journey progress, and date ideas across your matches." },
     ],
   }),
