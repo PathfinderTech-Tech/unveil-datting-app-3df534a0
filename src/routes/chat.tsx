@@ -29,6 +29,7 @@ import { ReportUserDialog, blockUser } from "@/components/ReportUserDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 
 const ICE_CATEGORIES: { id: IcebreakerCategory; label: string }[] = [
   { id: "fun", label: "Fun" },
@@ -132,7 +133,7 @@ function Chat() {
   const [ideasLoading, setIdeasLoading] = useState(false);
   // (legacy collapsible state replaced by unified panel below)
   const [panelOpen, setPanelOpen] = useState(false);
-  const [panelTab, setPanelTab] = useState<"insights" | "discovery" | "icebreakers" | "reveal">("insights");
+  const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
   const isMobile = useIsMobile();
@@ -919,6 +920,16 @@ function Chat() {
                   >
                     <Sparkles className="h-4 w-4 text-accent" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPanelTab("ai"); setPanelOpen(true); }}
+                    disabled={!peerId}
+                    title="AI Insights"
+                    aria-label="AI Insights"
+                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/20 to-accent/20 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-primary backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
+                  >
+                    AI
+                  </button>
                   {mustVerify ? (
                     <button
                       type="button"
@@ -984,14 +995,30 @@ function Chat() {
                     </SheetTitle>
                   </SheetHeader>
                   <Tabs value={panelTab} onValueChange={(v) => setPanelTab(v as typeof panelTab)} className="flex h-[calc(100%-65px)] flex-col">
-                    <TabsList className="mx-5 mt-3 grid grid-cols-4 bg-surface/60">
+                    <TabsList className="mx-5 mt-3 grid grid-cols-5 bg-surface/60">
                       <TabsTrigger value="insights" className="text-[11px]">Insights</TabsTrigger>
+                      <TabsTrigger value="ai" className="text-[11px]">✨ AI</TabsTrigger>
                       <TabsTrigger value="discovery" className="text-[11px]">Discovery</TabsTrigger>
-                      <TabsTrigger value="icebreakers" className="text-[11px]">Icebreakers</TabsTrigger>
+                      <TabsTrigger value="icebreakers" className="text-[11px]">Ice</TabsTrigger>
                       <TabsTrigger value="reveal" className="text-[11px]">Exchange</TabsTrigger>
                     </TabsList>
 
                     <div className="flex-1 overflow-y-auto px-5 py-4">
+                      <TabsContent value="ai" className="mt-0 space-y-3">
+                        {peerId ? (
+                          <>
+                            <AiCompatibilityPanel peerId={peerId} />
+                            <Link
+                              to="/insights-ai"
+                              className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
+                            >
+                              View Full AI Insights →
+                            </Link>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Select a conversation to view AI insights.</p>
+                        )}
+                      </TabsContent>
                       <TabsContent value="insights" className="mt-0 space-y-3">
                         {/* Compatibility card */}
                         <button
