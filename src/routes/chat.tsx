@@ -943,6 +943,17 @@ function Chat() {
                   >
                     AI
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setGiftOpen(true)}
+                    disabled={!peerId}
+                    title="Send a gift"
+                    aria-label="Send a gift"
+                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/15 to-accent/15 p-2.5 backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
+                  >
+                    <GiftIcon className="h-4 w-4 text-primary" />
+                  </button>
+
                   {mustVerify ? (
                     <button
                       type="button"
