@@ -1,106 +1,126 @@
-# TestFlight Readiness Plan
+# Stage 2 — Gift Journey System
 
-Scope is large — I'll deliver in 6 sequential stages, each independently testable. Frontend-only where possible; backend changes use existing tables where they exist.
+Additive feature. Does NOT touch auth, matching, messaging logic, voice notes, subscriptions, reveal, verification, AI Insights, or chat layout. Reuses existing `messages` table for in-chat delivery via a typed message row, so realtime/quotas/RLS all continue to work unchanged.
 
-## Stage 1 — Legal & Policy Pages (no deps, fastest win)
+## Goals
+1. A gift **catalog** (Rose, Coffee, Heart Note, Teddy Bear, Scented Candle, Love Letter, Spark…).
+2. **Send from inside the existing chat composer** via a small gift button (no replacement of text input or voice notes).
+3. Render gifts as a special **message bubble** in the conversation timeline.
+4. A **Gift Journey** progression (First Gift → Meaningful → Deep Connection) + streaks.
+5. **Premium gating**: free = 3 gifts / week + only "free-tier" gifts; premium = unlimited + all gifts.
+6. Dedicated `/gifts` page kept as collection / journey overview (sending happens primarily in chat).
 
-**New routes** (public, no auth):
-- `src/routes/privacy.tsx` — Privacy Policy
-- `src/routes/terms.tsx` — Terms of Service
-- `src/routes/guidelines.tsx` — Community Guidelines
+## Data model (single migration)
 
-Production-ready drafts tailored to Unveil / PathfinderTech, Inc. / support@unveil.best, covering:
-- **Privacy**: profile data, photos, voice notes, selfie + identity verification, location/travel/trust data, messaging, subscriptions, GDPR, CCPA, retention, deletion, user rights
-- **Terms**: 18+ requirement, prohibited conduct (fake accounts, harassment, scams, impersonation), subscription terms, refunds, suspension/termination, IP, liability cap
-- **Guidelines**: respect, no harassment/hate/scams/solicitation/underage/nudity/violence; reporting + enforcement
+```text
+gift_catalog        (static, seeded)
+  slug PK, name, emoji, image_url, gem_cost int,
+  tier text ('free'|'premium'|'milestone'),
+  default_message text, sort int, active bool
 
-**Links added to**: login, signup, settings, membership, footer.
+gift_sends
+  id, sender_id, recipient_id, conversation_id,
+  gift_slug FK -> gift_catalog.slug,
+  note text (<=140 chars, contact-share trigger reused),
+  message_id FK -> messages.id (nullable),
+  created_at
 
-## Stage 2 — Report & Block User
+gift_journey  (one row per pair, ordered user_a<user_b)
+  user_a, user_b PK,
+  total_gifts int, last_gift_at, streak_days int,
+  stage text ('first_gift'|'meaningful'|'deep_connection')
 
-Use existing `reports` and `blocks` tables (already in schema).
-
-- `src/components/ReportUserDialog.tsx` — categories: Fake profile, Harassment, Scam, Inappropriate content, Underage user, Other (+ free-text)
-- `src/components/BlockUserButton.tsx` — immediate block via `blocks` insert
-- Wire into `src/routes/profile.$id.tsx` (or equivalent profile view) and `src/routes/messages/$id.tsx` (chat header overflow menu)
-- After block: remove conversation visibility, prevent new messages (RLS already enforces; add client-side guard + toast)
-- After report: confirmation toast, optional auto-block prompt
-
-## Stage 3 — Account Deletion (in-app, Apple-compliant)
-
-Existing `account_deletions` and `account_deletion_attempts` tables present.
-
-- `src/routes/settings/delete-account.tsx` — multi-step: warning → reason (optional) → password reconfirm → final confirm
-- Server fn `requestAccountDeletion` (`src/lib/account-deletion.functions.ts`): inserts `account_deletions` row with 30-day grace, signs user out
-- Wire button into `src/routes/settings.tsx` under a "Danger Zone" section
-- Apple compliance copy: "Your account and all associated data will be permanently deleted within 30 days. This action cannot be undone."
-
-## Stage 4 — Apple Reviewer Mode
-
-- Hardcoded reviewer email constant `APPLE_REVIEWER_EMAIL = "apple-review@unveil.best"` in `src/lib/reviewer-mode.ts`
-- `useIsReviewer()` hook reads current session email
-- Bypass behaviors when reviewer:
-  - Auto-grant premium entitlements (client-side flag, server-side check via email allowlist in a small RPC `is_reviewer_account`)
-  - Skip selfie/photo gating (still SHOW the flow, just don't block)
-  - Always populate at least 3 fake matches in discovery if none exist
-- `<ReviewerBadge />` rendered in topbar when reviewer is logged in
-- Migration: seed reviewer user via auth admin (manual step in App Store Connect Review Notes; I'll add the seeding script comment)
-
-## Stage 5 — Capacitor Wrapper + RevenueCat IAP
-
-This is the largest piece. Web Stripe flow stays untouched.
-
-### Capacitor setup
-```bash
-bun add @capacitor/core @capacitor/cli @capacitor/ios
-bun add @revenuecat/purchases-capacitor
+gift_weekly_usage  (rolling 7d counter for free tier)
+  user_id, week_start date, sent_count int  PK(user_id, week_start)
 ```
-- `capacitor.config.ts` with bundleId `best.unveil.app`, appName `Unveil`, webDir `dist`
-- iOS build target docs in `IOS_BUILD.md`
 
-### Unified entitlement layer
-- `src/lib/platform.ts` — `isNative()`, `isIOS()`
-- `src/lib/purchases.ts` — unified API: `getOfferings()`, `purchase(productId)`, `restorePurchases()`, `getEntitlements()`
-  - On iOS: routes to RevenueCat SDK
-  - On web: routes to existing Stripe flow
-- `src/hooks/useEntitlements.ts` — returns `{ unlimited_messaging, premium_access, active_pass }`
+RLS:
+- `gift_catalog`: SELECT to anon+authenticated.
+- `gift_sends`: SELECT where `auth.uid() in (sender_id, recipient_id)`. INSERT only via server fn (no direct client insert policy).
+- `gift_journey`: SELECT where uid in (user_a, user_b).
+- `gift_weekly_usage`: SELECT/own-row only.
 
-### Products (configured in App Store Connect + RevenueCat dashboard — instructions in `IOS_BUILD.md`)
-| Product ID | Type | RC Entitlement |
+GRANTs included per project rules. service_role full access.
+
+## Server functions (`src/lib/gifts.functions.ts`)
+All use `requireSupabaseAuth`.
+
+- `listGiftCatalog()` → returns catalog + per-user lock state (tier vs entitlements, journey stage required).
+- `getGiftQuota()` → `{ used, limit, resetsAt, unlimited }` (free=3/week, premium=unlimited).
+- `sendGift({ recipientId, slug, note? })`:
+  1. Verify mutual match (reuse existing `matches` check used by chat).
+  2. Check entitlements + quota; raise typed errors `GIFT_QUOTA_EXHAUSTED`, `GIFT_LOCKED`, `NOT_MATCHED`.
+  3. Find/create `conversations` row (same logic as `chat.tsx`).
+  4. Insert into `messages` with `content` = serialized marker `[[gift:<slug>]] <note>` and a new column `kind='gift'` (added in migration; default `'text'` to preserve everything).
+  5. Insert `gift_sends`, upsert `gift_journey` (increment + recompute stage), increment `gift_weekly_usage`.
+- `getJourney({ peerId })` → stage, totals, streak, next milestone.
+
+Quota / matching / contact-share triggers are not modified — the gift note still flows through `enforce_contact_sharing`.
+
+## UI
+
+### 1. Chat composer (`src/routes/chat.tsx`)
+- Add a small `Gift` icon button between the existing AI Insights button and the Voice Note controls.
+- Opens `<GiftPickerSheet />` (bottom sheet on mobile, dialog on desktop).
+- After successful send the message arrives via existing realtime — no client-side timeline patching needed.
+
+### 2. `<GiftPickerSheet />` (new)
+- Grid of gifts from `listGiftCatalog()`.
+- Unlocked → tap → optional short note (prefilled with `default_message`, e.g. "I enjoy talking to you.") → **Send Gift**.
+- Locked → disabled tile + "Continue building your connection to unlock this gift."
+- Quota exhausted free user → inline banner "Upgrade to Premium to send more meaningful gifts." + `[Upgrade to Premium]` → `/premium`.
+- Footer shows: `2 / 3 gifts this week` or `Unlimited (Premium)`.
+
+### 3. `<GiftMessageBubble />` (new)
+- Rendered inside the existing chat message list when `message.kind === 'gift'` (or content matches `[[gift:slug]]`).
+- Shows gift image/emoji, "Namy sent you Rose", optional note, soft glow card in the Unveil purple/magenta style.
+- Falls back gracefully if catalog row missing.
+
+### 4. `/gifts` page (`src/routes/gifts.tsx` — new)
+- Premium-feature hero matching the attached prototype.
+- Featured gifts grid (read-only, taps deep-link to a match picker → opens chat with picker preopened).
+- **Gift Journey** card: First Gift → Meaningful → Deep Connection, current stage highlighted.
+- **Streak** card (consecutive days a gift was sent/received).
+- **Unlock Rewards** teaser.
+- "Upgrade to Premium" CTA at bottom for free users.
+- Added to `UnveilNav` + `MobileBottomNav` as "Gifts" with a `Premium` chip.
+
+## Premium gating summary
+| Tier | Catalog access | Weekly sends |
 |---|---|---|
-| `pass_24h` | Consumable | `active_pass` (24h) |
-| `pass_2w` | Non-renewing subscription | `active_pass` (14d) |
-| `premium_monthly` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
-| `premium_quarterly` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
-| `premium_annual` | Auto-renewing subscription | `premium_access` + `unlimited_messaging` |
+| Free | `tier='free'` gifts only | 3 / 7-day rolling |
+| Premium | all gifts including `milestone` | Unlimited |
 
-### UI changes
-- `src/routes/membership.tsx` — platform-aware pricing cards; "Restore Purchases" button
-- `src/routes/settings.tsx` — "Restore Purchases" link (iOS only)
-- `src/routes/subscription.tsx` (new) — manage subscription, show current entitlement, "Manage in App Store" link (iOS) / "Manage billing" (web)
+Existing reveal / message quota / subscription / RevenueCat flows untouched. Entitlement read via the existing `useEntitlements()` hook.
 
-### Secrets
-- `REVENUECAT_IOS_PUBLIC_API_KEY` — added via secrets flow when user is ready
-- Webhook endpoint `src/routes/api/public/revenuecat/webhook.ts` to sync RC events to `subscriptions` table (uses RC webhook auth header)
+## Files
 
-## Stage 6 — TestFlight Build Checklist
+New:
+- `supabase/migrations/<ts>_gift_journey.sql`
+- `src/lib/gifts.functions.ts`
+- `src/components/GiftPickerSheet.tsx`
+- `src/components/GiftMessageBubble.tsx`
+- `src/components/GiftJourneyCard.tsx`
+- `src/routes/gifts.tsx`
+- `src/assets/gifts/*` (emoji-based, no binary deps; reuse lucide + emoji for v1)
 
-`TESTFLIGHT_CHECKLIST.md` covering:
-- App Store Connect: bundle ID, version, build number, age rating (17+), category (Lifestyle / Social Networking), encryption export compliance
-- Required screenshots (6.7", 6.5", 5.5" iPhone)
-- Privacy nutrition labels mapped to actual data collection
-- App Privacy Policy URL: `https://unveil.best/privacy`
-- Sign in with Apple required (already supported in Lovable Cloud)
-- Reviewer credentials in App Store Connect Review Notes
-- IAP product status: "Ready to Submit"
-- Capacitor build commands: `bun run build && npx cap sync ios && npx cap open ios`
-- Xcode steps: signing team, push capability, ATS exception list (none needed)
+Edited (additive only):
+- `src/routes/chat.tsx` — add gift button + sheet mount + bubble renderer branch.
+- `src/components/UnveilNav.tsx`, `src/components/MobileBottomNav.tsx` — add Gifts item.
+
+## Regression checks (before declaring done)
+- Send text → works. Send voice note → works. AI Insights tab → works.
+- Existing messages still render (kind default 'text').
+- Message quota + contact-share triggers still fire on gift notes.
+- Premium paywall, subscription, reveal, verification unchanged.
+- Mobile chat layout unchanged aside from one extra 32px icon button.
 
 ## Execution order
+1. Migration (catalog + seed + tables + RLS + GRANTs + `messages.kind` default 'text').
+2. `gifts.functions.ts`.
+3. `GiftPickerSheet` + `GiftMessageBubble`.
+4. Wire into `chat.tsx`.
+5. `/gifts` page + nav entries.
+6. Manual regression pass on chat, voice, AI Insights, premium paywall.
 
-I'll execute Stages 1 → 4 in this conversation (frontend + small migrations only, no native build deps). Stages 5 and 6 will come after — Stage 5 will pause to request the RevenueCat API key.
-
-## Out of scope (explicitly frozen)
-- New product features, matching algorithm changes, new AI flows
-- No changes to existing Stripe web checkout
-- No changes to messaging/auth/RLS beyond report/block enforcement that already exists
+Stage 3 is NOT started in this phase.
