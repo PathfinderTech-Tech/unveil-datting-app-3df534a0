@@ -99,7 +99,7 @@ function MatchExperience() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [discoveryOpen, setDiscoveryOpen] = useState(false);
-  const [sheetTab, setSheetTab] = useState<"compat" | "discovery" | "icebreakers" | "reveal">("compat");
+  const [sheetTab, setSheetTab] = useState<"compat" | "ai" | "discovery" | "icebreakers" | "reveal">("compat");
   const [icebreakers, setIcebreakers] = useState<Icebreaker[] | null>(null);
   const [icebreakersLoading, setIcebreakersLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -477,7 +477,8 @@ function MatchExperience() {
             {/* Tab strip */}
             <div className="flex items-center gap-1 overflow-x-auto px-3 pb-2 pt-3">
               {([
-                { id: "compat", label: "Compatibility" },
+                { id: "compat", label: "Insights" },
+                { id: "ai", label: "✨ AI Insights" },
                 { id: "discovery", label: `Day ${day} Discovery` },
                 { id: "icebreakers", label: "Icebreakers" },
                 { id: "reveal", label: "Contact Exchange" },
@@ -550,6 +551,12 @@ function MatchExperience() {
                   {profile.bio && (
                     <p className="rounded-2xl border border-border bg-surface/50 p-3 text-sm italic text-foreground/85">"{profile.bio}"</p>
                   )}
+                </div>
+              )}
+
+              {/* ── AI INSIGHTS TAB ── */}
+              {sheetTab === "ai" && (
+                <div className="space-y-4">
                   <AiCompatibilityPanel peerId={userId} />
                 </div>
               )}
