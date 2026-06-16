@@ -6,7 +6,9 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { getCompatibilityInsight, getTopAiMatches, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import { getCompatibilityInsight, getTopAiMatches, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
