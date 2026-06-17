@@ -272,21 +272,29 @@ function Chat() {
   const peerName = peer?.first_name ?? "Match";
   const reveal = useMatchReveal(peerId);
 
-  // One-time "Veil Lifted" celebration when it flips in-session.
+  // One-time "Veil Lifted" celebration — persisted across sessions so the
+  // receiving user always sees it once, even if they were offline when it flipped.
   const veilCelebratedRef = useRef<string | null>(null);
   const [veilJustLifted, setVeilJustLifted] = useState(false);
   useEffect(() => {
-    if (!peerId || !reveal.veilLifted) return;
+    if (!peerId || !reveal.veilLifted || !user?.id) return;
     if (veilCelebratedRef.current === peerId) return;
-    // Only celebrate if the flip happened within the last 30s
-    const ts = reveal.veilLiftedAt ? new Date(reveal.veilLiftedAt).getTime() : 0;
-    if (ts && Date.now() - ts < 30_000) {
-      veilCelebratedRef.current = peerId;
-      setVeilJustLifted(true);
-    } else {
-      veilCelebratedRef.current = peerId;
-    }
-  }, [peerId, reveal.veilLifted, reveal.veilLiftedAt]);
+    const storageKey = `unveil:veil-celebrated:${user.id}:${peerId}`;
+    try {
+      if (typeof window !== "undefined" && window.localStorage.getItem(storageKey)) {
+        veilCelebratedRef.current = peerId;
+        return;
+      }
+    } catch { /* localStorage may be unavailable */ }
+    veilCelebratedRef.current = peerId;
+    setVeilJustLifted(true);
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(storageKey, String(Date.now()));
+      }
+    } catch { /* ignore */ }
+  }, [peerId, reveal.veilLifted, reveal.veilLiftedAt, user?.id]);
+
 
   // Match info + compatibility for the active conversation
   useEffect(() => {
