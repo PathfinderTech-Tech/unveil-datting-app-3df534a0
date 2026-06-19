@@ -859,14 +859,15 @@ function Chat() {
                           ) : (
                             <div
                               title={ts}
-                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
+                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed transition-transform animate-fade-in ${
                                 mine
-                                  ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
-                                  : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
+                                  ? "rounded-[22px] rounded-br-md bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_6px_24px_-8px_oklch(0.61_0.22_304/0.55)]"
+                                  : "rounded-[22px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.15_0.05_298/0.7)] text-foreground backdrop-blur-xl shadow-[0_4px_18px_-8px_oklch(0_0_0/0.45)]"
                               }`}
                             >
                               {m.content}
                             </div>
+
                           )}
 
                           <button
