@@ -27,20 +27,20 @@ export function GiftMessageBubble({
     return <div className="text-sm">{content}</div>;
   }
   return (
-    <div className="max-w-[78%] overflow-hidden rounded-[22px] border border-primary/40 bg-gradient-to-br from-primary/15 via-surface/80 to-accent/15 p-4 shadow-glow backdrop-blur-xl">
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/30 to-accent/30 text-2xl shadow-glow">
+    <div className="max-w-[78%] overflow-hidden rounded-[20px] border border-[oklch(0.56_0.22_286/0.22)] bg-[oklch(0.13_0.05_298/0.55)] p-3 backdrop-blur-xl">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[oklch(0.58_0.16_328)] to-[oklch(0.50_0.16_286)] text-xl shadow-[inset_0_1px_0_oklch(1_0_0/0.08)]">
           {meta.emoji}
         </div>
         <div className="min-w-0">
-          <div className="text-[10px] font-mono uppercase tracking-luxury text-muted-foreground">
+          <div className="text-[9.5px] font-mono uppercase tracking-[0.16em] text-foreground/55">
             {mine ? "You sent" : `${senderName} sent you`}
           </div>
-          <div className="font-display text-base font-semibold">{meta.name}</div>
+          <div className="font-display text-[14px] font-semibold leading-tight">{meta.name}</div>
         </div>
       </div>
       {parsed.note && (
-        <p className="mt-3 text-sm italic leading-relaxed text-foreground/90">
+        <p className="mt-2 text-[13px] italic leading-snug text-foreground/85">
           “{parsed.note}”
         </p>
       )}
