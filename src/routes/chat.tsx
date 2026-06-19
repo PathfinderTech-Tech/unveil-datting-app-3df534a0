@@ -728,112 +728,53 @@ function Chat() {
             </div>
           ) : (
             <>
-              {/* ============ COMPACT HEADER ============ */}
-              <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
-                <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
-                  <button
-                    onClick={() => {
+              {/* ============ LUXURY HEADER ============ */}
+              {peerId && (
+                <div className="relative">
+                  <ConversationHeaderLuxe
+                    peerId={peerId}
+                    peerName={peerName}
+                    peerAvatarUrl={peer?.avatar_url}
+                    peerPhotoUrl={peer?.photo_url}
+                    peerDiscoveryMode={peer?.discovery_mode}
+                    verified={!!peer?.verified}
+                    isOnline={isOnline(peerId)}
+                    veilLifted={reveal.veilLifted}
+                    compatibility={overallScore}
+                    messagesRemaining={quota.unlimited ? 99 : quota.remaining}
+                    onBack={() => {
                       setActive(null);
                       navigate({ to: "/chat", search: {}, replace: true });
                     }}
-                    className="rounded-full p-1.5 hover:bg-surface lg:hidden"
-                    aria-label="Back"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  {peerId && (
-                    <div className="relative shrink-0">
-                      <div className="rounded-full bg-gradient-to-br from-primary/40 to-accent/30 p-[2px] shadow-glow">
-                        <div className="rounded-full bg-card p-[2px]">
-                          <ProfileAvatar
-                            userId={peerId}
-                            name={peerName}
-                            discoveryMode={peer?.discovery_mode}
-                            avatarUrl={peer?.avatar_url}
-                            photoUrl={peer?.photo_url}
-                            size={44}
-                            veiled={!reveal.veilLifted}
-                          />
-                        </div>
-                      </div>
-                      {isOnline(peerId) && (
-                        <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
-                      )}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate text-[15px] font-semibold tracking-tight">{peerName}</span>
-                      {peer?.verified ? <VerifiedBadge size="xs" /> : null}
-                      
-                    </div>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      {isOnline(peerId) ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
-                          Online now
-                        </span>
-                      ) : peer?.last_seen_at ? (
-                        <span>Active {timeAgo(peer.last_seen_at)} ago</span>
-                      ) : null}
-                      {typingPeer && <span className="italic text-primary">· typing…</span>}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
-                    className="hidden shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/20 sm:inline-flex"
-                    aria-label="Insights"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" /> Insights
-                  </button>
-                  <button
-                    onClick={() => setShowMenu((v) => !v)}
-                    className="rounded-full p-2 hover:bg-surface"
-                    aria-label="More"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
+                    onReport={openReport}
+                    onMenu={() => setShowMenu((v) => !v)}
+                  />
                   {showMenu && (
-                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
-                      <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
-                      <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
-                      <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
+                    <div className="absolute right-4 top-[88px] z-30 w-44 overflow-hidden rounded-2xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.11_0.04_298/0.95)] shadow-[0_20px_60px_-15px_oklch(0_0_0/0.6)] backdrop-blur-2xl">
+                      <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><Flag className="h-4 w-4" /> Report</button>
+                      <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><Ban className="h-4 w-4" /> Block</button>
+                      <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><UserX className="h-4 w-4" /> Unmatch</button>
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* Slim compatibility + day-progress strip */}
-                {(overallScore != null || dayN) && (
-                  <button
-                    onClick={() => { setPanelTab(overallScore != null ? "insights" : "discovery"); setPanelOpen(true); }}
-                    className="flex w-full items-center gap-3 border-t border-border/30 px-4 py-2 text-left transition-colors hover:bg-surface/40 sm:px-5"
-                  >
-                    {overallScore != null && (
-                      <span className="font-mono text-[11px] font-semibold text-primary">
-                        {overallScore}% <span className="font-normal text-muted-foreground">compatible</span>
-                      </span>
-                    )}
-                    {dayN && (
-                      <>
-                        <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Day {dayN}/7</span>
-                        <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-surface/80">
-                          <div
-                            className="h-full rounded-full bg-gradient-hero"
-                            style={{ width: `${(dayN / 7) * 100}%` }}
-                          />
-                        </div>
-                        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                          <LockIcon className="mr-0.5 inline h-2.5 w-2.5" />{7 - dayN}d
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </header>
+              {/* ============ REVEAL PROGRESS CARD ============ */}
+              {peerId && !reveal.loading && (
+                <RevealProgressCard
+                  messagesExchanged={reveal.meaningful}
+                  messagesRequired={10}
+                  voiceNoteSent={reveal.voiceMe > 0}
+                  voiceNoteRequired
+                  remainingInteractions={Math.max(0, 10 - reveal.meaningful)}
+                  veilLifted={reveal.veilLifted}
+                />
+              )}
 
-              {/* Reveal-journey progress strips */}
-              {peerId && <ConnectionProgress state={reveal} peerName={peerName} />}
-              {peerId && <DateReadinessProgress state={reveal} />}
+              {typingPeer && (
+                <p className="px-5 -mt-1 mb-1 text-[11px] italic text-[oklch(0.78_0.12_328)]">{peerName} is typing…</p>
+              )}
+
 
               {/* Veil Lifted celebration overlay */}
               {veilJustLifted && (
