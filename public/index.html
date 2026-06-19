@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#09070d" />
+    <title>UNVEIL</title>
+
+    <!-- Warm the TLS + HTTP/3 connection to production BEFORE the redirect lands. -->
+    <link rel="preconnect" href="https://unveil.best" crossorigin />
+    <link rel="preconnect" href="https://www.unveil.best" crossorigin />
+    <link rel="dns-prefetch" href="https://unveil.best" />
+    <link rel="dns-prefetch" href="https://odisvcroittzdmulhlyh.supabase.co" />
+    <link rel="preconnect" href="https://odisvcroittzdmulhlyh.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #09070d;
+        color: #f5f3ff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(139, 92, 246, 0.15) 0%,
+          #09070d 60%
+        );
+      }
+      #splash h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0.4em;
+        margin: 0;
+        opacity: 0.92;
+      }
+      #splash .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #8b5cf6;
+        animation: pulse 1.2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.25; transform: scale(0.85); }
+        50% { opacity: 1; transform: scale(1.15); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash" role="status" aria-label="Loading UNVEIL">
+      <h1>UNVEIL</h1>
+      <div class="dot"></div>
+    </div>
+
+    <script>
+      // Single hard navigation at app launch. After this, TanStack Router
+      // handles in-app <Link> clicks as client-side SPA transitions — no
+      // more per-tap redirects through this shell.
+      (function () {
+        var target = "https://unveil.best/";
+
+        // Best-effort: warm the document HTML so the redirect feels instant.
+        try {
+          fetch(target, { mode: "no-cors", credentials: "include" }).catch(function () {});
+        } catch (_) {}
+
+        // Replace so back-button never returns to this shell.
+        window.location.replace(target);
+      })();
+    </script>
+  </body>
+</html>
