@@ -36,7 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 import { GiftPickerSheet } from "@/components/GiftPickerSheet";
 import { GiftMessageBubble } from "@/components/GiftMessageBubble";
-import { ConnectionProgress, DateReadinessProgress } from "@/components/ConnectionProgress";
+// ConnectionProgress / DateReadinessProgress removed — replaced by RevealProgressCard
 import { DateReadinessPanel } from "@/components/DateReadinessPanel";
 import { useMatchReveal } from "@/lib/reveal";
 
