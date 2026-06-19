@@ -10,10 +10,7 @@ type Props = {
 };
 
 /**
- * Flagship Reveal Progress Card — sits directly below the conversation header.
- *
- * Visual language: deep-glass card with purple→magenta→gold gradient progress
- * bar, three vertical stat columns, and a "more to reveal" badge.
+ * Compact reveal progress card — restrained glow, mobile-first.
  */
 export function RevealProgressCard({
   messagesExchanged,
@@ -27,83 +24,53 @@ export function RevealProgressCard({
 
   if (veilLifted) {
     return (
-      <div className="mx-3 mt-3 mb-2 overflow-hidden rounded-3xl border border-[oklch(0.80_0.14_68/0.35)] bg-gradient-to-br from-[oklch(0.18_0.08_300/0.85)] via-[oklch(0.20_0.10_330/0.75)] to-[oklch(0.20_0.10_60/0.55)] p-4 backdrop-blur-2xl shadow-[0_10px_40px_-12px_oklch(0.65_0.20_328/0.45)]">
-        <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[oklch(0.80_0.14_68)] to-[oklch(0.65_0.20_328)] shadow-[0_0_24px_oklch(0.80_0.14_68/0.6)]">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold tracking-tight text-foreground">Veil lifted</p>
-            <p className="mt-0.5 text-[12px] text-foreground/65">You've earned the full picture of each other.</p>
-          </div>
+      <div className="mx-3 mt-2 mb-1.5 flex items-center gap-2.5 rounded-2xl border border-[oklch(0.80_0.14_68/0.25)] bg-[oklch(0.16_0.06_320/0.5)] px-3 py-2 backdrop-blur-xl">
+        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[oklch(0.80_0.14_68)] to-[oklch(0.65_0.20_328)]">
+          <Sparkles className="h-4 w-4 text-white" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold leading-tight text-foreground">Veil lifted</p>
+          <p className="truncate text-[11px] leading-tight text-foreground/60">You've earned the full picture.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative mx-3 mt-3 mb-2 overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.13_0.05_298/0.72)] p-4 backdrop-blur-2xl shadow-[0_10px_40px_-12px_oklch(0.56_0.22_286/0.35)]">
-      {/* Ambient nebula glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-px rounded-3xl opacity-60"
-        style={{
-          background:
-            "radial-gradient(60% 80% at 0% 0%, oklch(0.61 0.22 304 / 0.18), transparent 60%), radial-gradient(50% 70% at 100% 100%, oklch(0.80 0.14 68 / 0.12), transparent 60%)",
-        }}
-      />
-
-      <div className="relative flex items-start gap-3">
-        {/* Heart-lock icon */}
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[oklch(0.65_0.20_328/0.4)] bg-gradient-to-br from-[oklch(0.61_0.22_304/0.35)] to-[oklch(0.65_0.20_328/0.25)] shadow-[inset_0_1px_0_oklch(1_0_0/0.08),0_0_24px_oklch(0.65_0.20_328/0.35)]">
-          <Sparkles className="h-5 w-5 text-[oklch(0.85_0.10_328)]" />
+    <div className="mx-3 mt-2 mb-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.13_0.05_298/0.5)] px-3 py-2 backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-[oklch(0.78_0.12_328)]" />
+          <h3 className="truncate text-[12.5px] font-semibold tracking-tight text-foreground">Reveal progress</h3>
         </div>
+        <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-[0.14em] text-foreground/55">
+          {remainingInteractions > 0 ? `${remainingInteractions} to go` : "Ready"}
+        </span>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-[14px] font-semibold tracking-tight text-foreground">Reveal Progress</h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
-              {remainingInteractions > 0 ? `${remainingInteractions} more to reveal` : "Ready to reveal"}
-            </span>
-          </div>
+      {/* Progress bar */}
+      <div className="relative mt-1.5 h-1 overflow-hidden rounded-full bg-[oklch(0.18_0.05_298/0.6)]">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
+          style={{
+            width: `${Math.max(6, progress)}%`,
+            background:
+              "linear-gradient(90deg, oklch(0.56 0.22 286), oklch(0.65 0.20 328), oklch(0.80 0.14 68))",
+          }}
+        />
+      </div>
 
-          <p className="mt-0.5 text-[12px] text-foreground/70">
-            <span className="font-semibold text-foreground">{messagesExchanged} of {messagesRequired}</span>{" "}
-            messages exchanged
-          </p>
-
-          {/* Progress bar — purple→pink→gold */}
-          <div className="relative mt-2.5 h-1.5 overflow-hidden rounded-full bg-[oklch(0.18_0.05_298/0.7)]">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
-              style={{
-                width: `${Math.max(6, progress)}%`,
-                background:
-                  "linear-gradient(90deg, oklch(0.56 0.22 286), oklch(0.65 0.20 328), oklch(0.80 0.14 68))",
-                boxShadow: "0 0 12px oklch(0.65 0.20 328 / 0.55)",
-              }}
-            />
-          </div>
-
-          {/* Mini-stats row */}
-          <div className="mt-3 flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-[11px] text-foreground/65">
-              <Mic className={`h-3.5 w-3.5 ${voiceNoteSent ? "text-[oklch(0.80_0.14_68)]" : "text-foreground/55"}`} />
-              <span>
-                {voiceNoteRequired && !voiceNoteSent
-                  ? "1 voice note required"
-                  : voiceNoteSent
-                  ? "Voice note delivered"
-                  : "Voice note optional"}
-              </span>
-            </div>
-            <span className="text-foreground/25">·</span>
-            <div className="flex items-center gap-1.5 text-[11px] text-foreground/65">
-              <Gift className="h-3.5 w-3.5 text-[oklch(0.65_0.20_328)]" />
-              <span>Gifts deepen the reveal</span>
-            </div>
-          </div>
-        </div>
+      <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-foreground/60">
+        <span className="font-medium text-foreground/75">{messagesExchanged}/{messagesRequired} msgs</span>
+        <span className="text-foreground/25">·</span>
+        <span className="flex items-center gap-1">
+          <Mic className={`h-3 w-3 ${voiceNoteSent ? "text-[oklch(0.80_0.14_68)]" : "text-foreground/50"}`} />
+          {voiceNoteRequired && !voiceNoteSent ? "voice needed" : voiceNoteSent ? "voice sent" : "voice optional"}
+        </span>
+        <span className="text-foreground/25">·</span>
+        <span className="flex items-center gap-1">
+          <Gift className="h-3 w-3 text-[oklch(0.65_0.20_328)]" /> gifts deepen
+        </span>
       </div>
     </div>
   );
