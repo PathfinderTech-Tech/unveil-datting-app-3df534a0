@@ -922,97 +922,119 @@ function Chat() {
 
 
               {showContactWarning && (
-                <div className="shrink-0 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
+                <div className="mx-3 mb-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
                   Contact sharing unlocks after Day 7 + both verified (or Premium).
                 </div>
               )}
 
-              {/* ============ COMPOSER ============ */}
+              {/* ============ QUICK ACTION BAR ============ */}
+              <QuickActionBar
+                disabled={!peerId}
+                voiceBadge={false}
+                giftBadge={false}
+                aiBadge={overallScore != null && overallScore >= 80}
+                dateBadge={reveal.veilLifted}
+                onVoice={() => {
+                  if (mustVerify) { setVerifyOpen(true); return; }
+                  // Hidden mic in QuickActionBar focuses the underlying VoiceMessageRecorder mic
+                  document.getElementById("unveil-voice-mic")?.click();
+                }}
+                onGift={() => setGiftOpen(true)}
+                onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
+                onDate={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+              />
+
+              {/* ============ LUXURY COMPOSER ============ */}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="relative z-20 shrink-0 border-t border-border/50 bg-card/90 p-3 backdrop-blur-2xl sm:p-3.5"
+                className="relative z-20 shrink-0 px-3 pb-3 pt-1 sm:px-4"
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
-                <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
+                <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
                   <button
                     type="button"
                     onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
                     disabled={!peerId}
-                    title="AI Icebreakers"
-                    aria-label="AI Icebreakers"
-                    className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
+                    aria-label="Icebreakers"
+                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
                   >
-                    <Sparkles className="h-4 w-4 text-accent" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setPanelTab("ai"); setPanelOpen(true); }}
-                    disabled={!peerId}
-                    title="AI Compatibility Insights"
-                    aria-label="AI Compatibility Insights"
-                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/20 to-accent/20 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-primary backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
-                  >
-                    AI
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGiftOpen(true)}
-                    disabled={!peerId}
-                    title="Send a gift"
-                    aria-label="Send a gift"
-                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/15 to-accent/15 p-2.5 backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
-                  >
-                    <GiftIcon className="h-4 w-4 text-primary" />
+                    <Plus className="h-4 w-4" />
                   </button>
 
-                  {mustVerify ? (
+                  {/* Voice recorder kept in DOM (hidden behind action bar mic button id) */}
+                  <span id="unveil-voice-mic" className="hidden">
+                    {!mustVerify && (
+                      <VoiceMessageRecorder
+                        conversationId={active.id}
+                        senderId={user.id}
+                        maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                        onSent={() => {
+                          refreshQuota();
+                          if (!verified) {
+                            setSentCount((n) => {
+                              const next = n + 1;
+                              if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+                              return next;
+                            });
+                          }
+                        }}
+                        onQuotaExhausted={() => setPaywallOpen(true)}
+                        disabled={!quota.unlimited && quota.remaining <= 0}
+                      />
+                    )}
+                  </span>
+
+                  {mustVerify && (
                     <button
                       type="button"
                       onClick={() => setVerifyOpen(true)}
                       aria-label="Verify to continue"
-                      className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                      className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.18_0.07_298)] text-foreground/60"
                     >
-                      <LockIcon className="h-4 w-4 text-muted-foreground" />
+                      <LockIcon className="h-4 w-4" />
                     </button>
-                  ) : (
-                    <VoiceMessageRecorder
-                      conversationId={active.id}
-                      senderId={user.id}
-                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                      onSent={() => {
-                        refreshQuota();
-                        if (!verified) {
-                          setSentCount((n) => {
-                            const next = n + 1;
-                            if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
-                            return next;
-                          });
-                        }
-                      }}
-                      onQuotaExhausted={() => setPaywallOpen(true)}
-                      disabled={!quota.unlimited && quota.remaining <= 0}
-                    />
                   )}
+
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
-                    placeholder={`Message ${peerName}…`}
+                    placeholder="Type a message…"
                     aria-label={`Message ${peerName}`}
-                    className="min-w-0 flex-1 rounded-full border border-border/60 bg-surface/80 px-4 py-3 text-[15px] text-foreground outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-surface focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] sm:px-5"
+                    className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] text-foreground outline-none placeholder:text-foreground/40"
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => setPickerFor((v) => (v === "composer" ? null : "composer"))}
+                    aria-label="Emoji"
+                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full text-foreground/60 transition-colors hover:text-foreground"
+                  >
+                    <Smile className="h-4 w-4" />
+                  </button>
+
                   <button
                     type="submit"
                     disabled={!draft.trim()}
-                    className="shrink-0 rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     aria-label="Send"
+                    className="shrink-0 grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_6px_20px_-6px_oklch(0.61_0.22_304/0.7)] transition-transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
                   >
                     <Send className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                  Phone numbers, emails, and social handles are hidden until you both choose to share.
+                {pickerFor === "composer" && (
+                  <div className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.85)] p-2 backdrop-blur-xl">
+                    {QUICK_EMOJI.map((e) => (
+                      <button key={e} type="button"
+                        onClick={() => { setDraft((d) => d + e); setPickerFor(null); }}
+                        className="rounded-full px-2 py-1 text-lg hover:bg-[oklch(0.18_0.07_298/0.8)]">{e}</button>
+                    ))}
+                  </div>
+                )}
+                <p className="mt-2 text-center text-[10px] text-foreground/40">
+                  Phone numbers, emails and socials stay hidden until you both choose to share.
                 </p>
               </form>
+
 
               {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / EXCHANGE SHEET ============ */}
               <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
