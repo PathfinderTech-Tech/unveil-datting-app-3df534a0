@@ -6,10 +6,13 @@ import { usePresence } from "@/hooks/use-presence";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
-  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
-  Lock as LockIcon, ChevronUp, ChevronRight, Search,
-  Heart as HeartIcon, Calendar, MessageSquare, Phone, Gift as GiftIcon,
+  Check, CheckCheck, Sparkles, RefreshCw,
+  Lock as LockIcon, ChevronRight, Search, Plus,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone,
 } from "lucide-react";
+import { ConversationHeaderLuxe } from "@/components/chat/ConversationHeaderLuxe";
+import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
+import { QuickActionBar } from "@/components/chat/QuickActionBar";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
