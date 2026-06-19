@@ -1,79 +1,127 @@
-# Unveil Reveal Journey — Business Logic Update
+# Sequencing: Redesign → TestFlight → Option A
 
-This is a logic-only update. No redesigns; existing auth, payments, onboarding, messaging, voice, AI, verification, admin, and routing stay as they are. Only the reveal progression and a small status panel inside the chat thread change.
+## Why this order
 
-## Goals (per spec)
+The conversation page redesign is **pure frontend work** with zero infrastructure risk and the highest visible impact for App Store reviewers. Option A is an architectural change (parallel SPA build, CORS on Worker, auth migration off cookies for iOS, full re-QA) — it needs its own focused session to avoid interleaving infra and UI changes.
 
-- Match → veiled card with name/age/city/score/AI vibe tags + “You've matched” copy
-- Veil lifts automatically when BOTH:
-  1. ≥10 meaningful interactions in the conversation (combined text + voice), and
-  2. Each user has sent ≥1 voice note
-- After reveal: track 3 days of active conversation + ≥1 shared challenge/game → unlock Date Mode
-- Date Mode: AI date suggestions + sponsor preference toggle (preference only, no payments)
+Option B (already shipped) handles TestFlight performance acceptably: one redirect at launch, then TanStack Router takes over with client-side SPA navigation. Network-bound loader fetches remain, but the redesigned UI will mask perceived latency with skeleton states and optimistic motion.
 
-“Meaningful” excludes: empty messages, emoji-only, repeated duplicates, very short spam.
+---
 
-## Data model (single migration)
+## Phase 1 — Conversation page redesign (this session)
 
-Add to `public.matches`:
-- `meaningful_interactions int not null default 0`
-- `voice_notes_user int not null default 0` (sent by `user_id`)
-- `voice_notes_peer int not null default 0` (sent by `matched_user_id`)
-- `veil_lifted_at timestamptz`
-- `active_day_count int not null default 0`
-- `last_active_day date`
-- `shared_activity_count int not null default 0`
-- `date_unlocked_at timestamptz`
-- `sponsor_preference text` — one of `sponsor|split|decide_together|null`
+Single target file: `src/routes/chat.tsx` (chat list/inbox stays; per-conversation view is the flagship surface to rebuild).
 
-New SECURITY DEFINER triggers / functions (all on `public`, search_path locked):
+Verify which route owns the conversation view, then rebuild it as a luxury dark-themed flagship screen matching the attached reference. Backend, hooks, Supabase calls, realtime channels, voice/gift/AI/reveal logic — all preserved verbatim. Only presentation changes.
 
-1. `fn_is_meaningful_message(content text, type text) returns boolean`
-   - voice → true; else trim+strip emoji+collapse whitespace → length ≥ 2 chars AND ≠ last meaningful content from same sender in same conversation.
-2. `trg_matches_progress_on_message` AFTER INSERT on `public.messages`
-   - Resolves both `matches` rows (user_a↔user_b) for the conversation.
-   - If meaningful: `meaningful_interactions += 1` on both rows.
-   - If voice: increment `voice_notes_user/peer` on the correct side of each row.
-   - Updates `last_active_day` / `active_day_count` (increment when date changes).
-   - If `meaningful_interactions >= 10` AND both voice counters ≥ 1 AND `veil_lifted_at IS NULL` → set `veil_lifted_at = now()` on both rows.
-   - If `veil_lifted_at` set AND `active_day_count >= 3` AND `shared_activity_count >= 1` AND `date_unlocked_at IS NULL` → set `date_unlocked_at = now()`.
-3. `trg_matches_shared_activity` AFTER INSERT on `public.challenge_results` / `public.game_results` / `public.puzzle_scores` — when both users in a match have a result for the same challenge/game/puzzle id, `shared_activity_count += 1` on both rows and re-check date unlock.
-4. `set_sponsor_preference(_peer uuid, _pref text)` — updates the caller's match row only.
+### Components to build
 
-The existing `reveal_stage` / `share_unlocked` / contact-sharing journey is **left intact** — this update only governs the photo veil and date-readiness, not the separate 7-day contact exchange.
+```text
+src/components/chat/
+├── ConversationHeader.tsx       — veiled avatar, name, verified badge,
+│                                   online dot, 3-stat row (Compatibility/
+│                                   Messages left/Verified)
+├── RevealProgressCard.tsx       — large glass card: progress bar,
+│                                   message counter, voice-note requirement,
+│                                   countdown to reveal
+├── MessageBubble.tsx             — incoming/outgoing variants, rounded
+│                                   bubbles, timestamps, read receipts (✓✓),
+│                                   long-press reaction tray, reactions chip
+├── VoiceNoteCard.tsx             — play button, animated waveform bars,
+│                                   duration, playback speed toggle, status
+├── AiInsightCard.tsx             — inline AI insight with nebula gradient
+│                                   background, theme tags, expandable detail,
+│                                   dismiss
+├── GiftMessageCard.tsx           — rewrite of existing GiftMessageBubble:
+│                                   collectible-looking premium card with
+│                                   shimmer, name accent color, View Gift CTA
+├── DateIdeasCard.tsx             — post-reveal: AI date suggestion cards,
+│                                   "generate more" tap
+├── QuickActionBar.tsx            — floating row above composer: Voice Note,
+│                                   Send Gift, AI Insights, Date Ideas
+│                                   (large gradient icons, notification dots)
+└── MessageComposer.tsx           — glass composer: +attach, textarea,
+                                    emoji, gradient send button
+```
 
-## Frontend (logic + minimal UI only)
+### Design tokens (added to `src/styles.css`)
 
-- `src/lib/reveal.ts` (new): `useMatchReveal(peerUserId)` → `{ veilLifted, meaningful, voiceMe, voicePeer, activeDays, sharedActivities, dateUnlocked, sponsorPreference }`, polls/subscribes to the match row.
-- `src/components/HiddenMatchCard.tsx`: keep current card; show veiled photo until `veilLifted`. Add the AI vibe tags row (already available on profile) and the “Get to know each other…” copy.
-- `src/routes/chat.tsx`: insert a slim `ConnectionProgress` strip above the composer when `!veilLifted`:
-  - `Connection Progress N / 10`
-  - `Voice Notes: You ✓/—  Them ✓/—`
-  - “Keep talking to unlock the reveal.”
-  When veil flips to lifted in-session, fire a one-time “Veil Lifted” overlay (re-uses existing dialog primitives) with the spec copy.
-- After reveal, the strip switches to `Conversation Journey Day N/3` + `Challenge Progress N/1`. When `dateUnlocked` → render `DateReadinessPanel` (new, in `src/components/`) with existing AI date suggestion call + three radio chips (Sponsor / Split / Decide together) wired to `set_sponsor_preference`.
-- `src/components/ProfileAvatar.tsx` / discover/messages already accept `veiled` prop — pass `!veilLifted` from match data so list views align.
+- `--chat-bg`: deep midnight (`oklch(0.12 0.04 290)`)
+- `--bubble-incoming` / `--bubble-outgoing` with gradient stops
+- `--reveal-progress-gradient`: purple → pink → gold
+- `--ai-insight-nebula`: radial nebula gradient
+- `--gift-shimmer`: animated gold sweep
+- Glass surface tokens with proper Tailwind v4 backdrop-blur usage
 
-No changes to onboarding, premium gates, payments, verification, or routing.
+### Animations
 
-## Sponsor preference
+Lightweight, 60fps, GPU-only (transform/opacity):
+- Reveal progress bar: spring fill on update
+- New message arrival: bubble scale-in + fade
+- AI insight appearance: fade-in + subtle shimmer pulse
+- Gift card: shimmer sweep on first render
+- Quick action tap: scale-down feedback
 
-Stored on the caller's `matches` row via the RPC above. No Stripe, no checkout, no entitlement changes. Premium-only UI: hide the panel when `!isPremium` (re-use `useEntitlements`).
+### What is NOT changed
 
-## Backfill
+- `src/hooks/use-*` chat data hooks
+- Supabase queries, realtime channels (`chat-<conversationId>`, `inbox-<userId>`)
+- Voice recording/upload pipeline
+- AI insight generation server functions
+- Gift sending flow / payments
+- Reveal countdown logic, message quota, verification gating
+- Premium paywall triggers
 
-One-time UPDATE in the migration: any match with `mutual_interest=true AND reveal_stage='stage_3'` (or already photo-revealed) → set `veil_lifted_at = now()` so existing matches don't regress.
+### Validation
 
-## Out of scope
+1. Build passes
+2. Visual screenshot at iPhone viewport (390x844) of chat route
+3. Confirm header, reveal card, bubbles, voice, AI insight, gift, quick actions, composer all present and styled
+4. No console errors
 
-- No design system changes, no new routes, no schema changes outside the columns above, no edits to `client.ts` / auto-generated files, no payment integration.
+---
 
-## Files touched
+## Phase 2 — TestFlight (your Mac, after Phase 1 ships)
 
-- new migration (matches columns + triggers + RPC + grants)
-- `src/lib/reveal.ts` (new hook)
-- `src/components/HiddenMatchCard.tsx` (veil + vibe tags wiring)
-- `src/components/ConnectionProgress.tsx` (new, small)
-- `src/components/DateReadinessPanel.tsx` (new, small)
-- `src/routes/chat.tsx` (mount the two panels, fire Veil Lifted overlay)
-- `src/routes/match.$userId.tsx` (use `veilLifted` instead of `reveal_stage` for photo gating)
+```bash
+git pull && bun install && bun run build
+npx cap sync ios && npx cap open ios
+# Archive → Upload to App Store Connect → TestFlight
+```
+
+Your testers experience the new conversation screen running on the Option B shell. This is enough wow factor for review.
+
+---
+
+## Phase 3 — Option A in dedicated session (next chat)
+
+Scope (committed, do NOT execute alongside Phase 1):
+
+1. Add `vite.config.capacitor.ts`:
+   - Strip `@cloudflare/vite-plugin` and TanStack Start SSR mode
+   - Set `build.outDir: 'dist-capacitor'`, `build.ssr: false`
+   - Emit static SPA with single `index.html` entry
+2. Add `bun run build:capacitor` script
+3. Create `src/lib/server-origin.client.ts` — fetch wrapper that prefixes `https://unveil.best` to `/_serverFn/*` calls when `isNative() === true`
+4. Patch the auth client (`src/integrations/supabase/client.ts`) to use header-based session (no cookies) when running inside Capacitor — required because cross-origin cookies from `capacitor://localhost` to `unveil.best` are blocked
+5. Add CORS handler to a wrapper around `src/server.ts` to accept `capacitor://localhost` origin with `Access-Control-Allow-Credentials` and explicit allowed headers
+6. Update `capacitor.config.ts`: `webDir: 'dist-capacitor'`
+7. Delete `public/index.html` (no longer needed)
+8. Full QA matrix:
+   - [ ] Apple Sign-In on device
+   - [ ] Google Sign-In on device
+   - [ ] Session persists across app relaunch
+   - [ ] RevenueCat StoreKit purchase
+   - [ ] Push notification token registers
+   - [ ] Photo upload to Supabase Storage
+   - [ ] Realtime chat message delivery
+   - [ ] Deep links from email open correct route
+
+---
+
+## Decision needed from you
+
+**Approve this sequencing?** Reply:
+- **"yes"** → I execute Phase 1 (conversation redesign) immediately
+- **"do Option A first anyway"** → I do Option A first, redesign waits
+- **"do both now"** → I do both in this session but it will be a long single response and harder to bisect if something breaks

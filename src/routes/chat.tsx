@@ -6,10 +6,13 @@ import { usePresence } from "@/hooks/use-presence";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Send, Smile, MoreVertical, Flag, Ban, UserX,
-  Check, CheckCheck, Sparkles, RefreshCw, ChevronLeft,
-  Lock as LockIcon, ChevronUp, ChevronRight, Search,
-  Heart as HeartIcon, Calendar, MessageSquare, Phone, Gift as GiftIcon,
+  Check, CheckCheck, Sparkles, RefreshCw,
+  Lock as LockIcon, ChevronRight, Search, Plus,
+  Heart as HeartIcon, Calendar, MessageSquare, Phone,
 } from "lucide-react";
+import { ConversationHeaderLuxe } from "@/components/chat/ConversationHeaderLuxe";
+import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
+import { QuickActionBar } from "@/components/chat/QuickActionBar";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -33,7 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
 import { GiftPickerSheet } from "@/components/GiftPickerSheet";
 import { GiftMessageBubble } from "@/components/GiftMessageBubble";
-import { ConnectionProgress, DateReadinessProgress } from "@/components/ConnectionProgress";
+// ConnectionProgress / DateReadinessProgress removed — replaced by RevealProgressCard
 import { DateReadinessPanel } from "@/components/DateReadinessPanel";
 import { useMatchReveal } from "@/lib/reveal";
 
@@ -725,112 +728,53 @@ function Chat() {
             </div>
           ) : (
             <>
-              {/* ============ COMPACT HEADER ============ */}
-              <header className="relative shrink-0 border-b border-border/40 bg-gradient-to-b from-card/90 to-card/60 backdrop-blur-2xl">
-                <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
-                  <button
-                    onClick={() => {
+              {/* ============ LUXURY HEADER ============ */}
+              {peerId && (
+                <div className="relative">
+                  <ConversationHeaderLuxe
+                    peerId={peerId}
+                    peerName={peerName}
+                    peerAvatarUrl={peer?.avatar_url}
+                    peerPhotoUrl={peer?.photo_url}
+                    peerDiscoveryMode={peer?.discovery_mode}
+                    verified={!!peer?.verified}
+                    isOnline={isOnline(peerId)}
+                    veilLifted={reveal.veilLifted}
+                    compatibility={overallScore}
+                    messagesRemaining={quota.unlimited ? 99 : quota.remaining}
+                    onBack={() => {
                       setActive(null);
                       navigate({ to: "/chat", search: {}, replace: true });
                     }}
-                    className="rounded-full p-1.5 hover:bg-surface lg:hidden"
-                    aria-label="Back"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  {peerId && (
-                    <div className="relative shrink-0">
-                      <div className="rounded-full bg-gradient-to-br from-primary/40 to-accent/30 p-[2px] shadow-glow">
-                        <div className="rounded-full bg-card p-[2px]">
-                          <ProfileAvatar
-                            userId={peerId}
-                            name={peerName}
-                            discoveryMode={peer?.discovery_mode}
-                            avatarUrl={peer?.avatar_url}
-                            photoUrl={peer?.photo_url}
-                            size={44}
-                            veiled={!reveal.veilLifted}
-                          />
-                        </div>
-                      </div>
-                      {isOnline(peerId) && (
-                        <span className="absolute -bottom-0.5 right-0 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_2px_hsl(var(--card))]" />
-                      )}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate text-[15px] font-semibold tracking-tight">{peerName}</span>
-                      {peer?.verified ? <VerifiedBadge size="xs" /> : null}
-                      
-                    </div>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      {isOnline(peerId) ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
-                          Online now
-                        </span>
-                      ) : peer?.last_seen_at ? (
-                        <span>Active {timeAgo(peer.last_seen_at)} ago</span>
-                      ) : null}
-                      {typingPeer && <span className="italic text-primary">· typing…</span>}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
-                    className="hidden shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/20 sm:inline-flex"
-                    aria-label="Insights"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" /> Insights
-                  </button>
-                  <button
-                    onClick={() => setShowMenu((v) => !v)}
-                    className="rounded-full p-2 hover:bg-surface"
-                    aria-label="More"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
+                    onReport={openReport}
+                    onMenu={() => setShowMenu((v) => !v)}
+                  />
                   {showMenu && (
-                    <div className="absolute right-4 top-16 z-20 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-glow">
-                      <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Flag className="h-4 w-4" /> Report</button>
-                      <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><Ban className="h-4 w-4" /> Block</button>
-                      <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-surface"><UserX className="h-4 w-4" /> Unmatch</button>
+                    <div className="absolute right-4 top-[88px] z-30 w-44 overflow-hidden rounded-2xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.11_0.04_298/0.95)] shadow-[0_20px_60px_-15px_oklch(0_0_0/0.6)] backdrop-blur-2xl">
+                      <button onClick={openReport} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><Flag className="h-4 w-4" /> Report</button>
+                      <button onClick={blockPeer} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><Ban className="h-4 w-4" /> Block</button>
+                      <button onClick={unmatch} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-[oklch(0.18_0.07_298/0.6)]"><UserX className="h-4 w-4" /> Unmatch</button>
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* Slim compatibility + day-progress strip */}
-                {(overallScore != null || dayN) && (
-                  <button
-                    onClick={() => { setPanelTab(overallScore != null ? "insights" : "discovery"); setPanelOpen(true); }}
-                    className="flex w-full items-center gap-3 border-t border-border/30 px-4 py-2 text-left transition-colors hover:bg-surface/40 sm:px-5"
-                  >
-                    {overallScore != null && (
-                      <span className="font-mono text-[11px] font-semibold text-primary">
-                        {overallScore}% <span className="font-normal text-muted-foreground">compatible</span>
-                      </span>
-                    )}
-                    {dayN && (
-                      <>
-                        <span className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Day {dayN}/7</span>
-                        <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-surface/80">
-                          <div
-                            className="h-full rounded-full bg-gradient-hero"
-                            style={{ width: `${(dayN / 7) * 100}%` }}
-                          />
-                        </div>
-                        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                          <LockIcon className="mr-0.5 inline h-2.5 w-2.5" />{7 - dayN}d
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </header>
+              {/* ============ REVEAL PROGRESS CARD ============ */}
+              {peerId && !reveal.loading && (
+                <RevealProgressCard
+                  messagesExchanged={reveal.meaningful}
+                  messagesRequired={10}
+                  voiceNoteSent={reveal.voiceMe > 0}
+                  voiceNoteRequired
+                  remainingInteractions={Math.max(0, 10 - reveal.meaningful)}
+                  veilLifted={reveal.veilLifted}
+                />
+              )}
 
-              {/* Reveal-journey progress strips */}
-              {peerId && <ConnectionProgress state={reveal} peerName={peerName} />}
-              {peerId && <DateReadinessProgress state={reveal} />}
+              {typingPeer && (
+                <p className="px-5 -mt-1 mb-1 text-[11px] italic text-[oklch(0.78_0.12_328)]">{peerName} is typing…</p>
+              )}
+
 
               {/* Veil Lifted celebration overlay */}
               {veilJustLifted && (
@@ -915,14 +859,15 @@ function Chat() {
                           ) : (
                             <div
                               title={ts}
-                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed shadow-[0_2px_12px_-4px_rgba(0,0,0,0.25)] transition-transform ${
+                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed transition-transform animate-fade-in ${
                                 mine
-                                  ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground"
-                                  : "rounded-[20px] rounded-bl-md border border-border/50 bg-surface/70 text-foreground backdrop-blur-xl"
+                                  ? "rounded-[22px] rounded-br-md bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_6px_24px_-8px_oklch(0.61_0.22_304/0.55)]"
+                                  : "rounded-[22px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.15_0.05_298/0.7)] text-foreground backdrop-blur-xl shadow-[0_4px_18px_-8px_oklch(0_0_0/0.45)]"
                               }`}
                             >
                               {m.content}
                             </div>
+
                           )}
 
                           <button
@@ -978,97 +923,119 @@ function Chat() {
 
 
               {showContactWarning && (
-                <div className="shrink-0 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
+                <div className="mx-3 mb-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[11px] text-amber-200">
                   Contact sharing unlocks after Day 7 + both verified (or Premium).
                 </div>
               )}
 
-              {/* ============ COMPOSER ============ */}
+              {/* ============ QUICK ACTION BAR ============ */}
+              <QuickActionBar
+                disabled={!peerId}
+                voiceBadge={false}
+                giftBadge={false}
+                aiBadge={overallScore != null && overallScore >= 80}
+                dateBadge={reveal.veilLifted}
+                onVoice={() => {
+                  if (mustVerify) { setVerifyOpen(true); return; }
+                  // Hidden mic in QuickActionBar focuses the underlying VoiceMessageRecorder mic
+                  document.getElementById("unveil-voice-mic")?.click();
+                }}
+                onGift={() => setGiftOpen(true)}
+                onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
+                onDate={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+              />
+
+              {/* ============ LUXURY COMPOSER ============ */}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="relative z-20 shrink-0 border-t border-border/50 bg-card/90 p-3 backdrop-blur-2xl sm:p-3.5"
+                className="relative z-20 shrink-0 px-3 pb-3 pt-1 sm:px-4"
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
-                <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
+                <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
                   <button
                     type="button"
                     onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
                     disabled={!peerId}
-                    title="AI Icebreakers"
-                    aria-label="AI Icebreakers"
-                    className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary disabled:opacity-50"
+                    aria-label="Icebreakers"
+                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
                   >
-                    <Sparkles className="h-4 w-4 text-accent" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setPanelTab("ai"); setPanelOpen(true); }}
-                    disabled={!peerId}
-                    title="AI Compatibility Insights"
-                    aria-label="AI Compatibility Insights"
-                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/20 to-accent/20 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-primary backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
-                  >
-                    AI
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGiftOpen(true)}
-                    disabled={!peerId}
-                    title="Send a gift"
-                    aria-label="Send a gift"
-                    className="shrink-0 rounded-full border border-primary/40 bg-gradient-to-br from-primary/15 to-accent/15 p-2.5 backdrop-blur-xl transition-all hover:border-primary hover:shadow-glow disabled:opacity-50"
-                  >
-                    <GiftIcon className="h-4 w-4 text-primary" />
+                    <Plus className="h-4 w-4" />
                   </button>
 
-                  {mustVerify ? (
+                  {/* Voice recorder kept in DOM (hidden behind action bar mic button id) */}
+                  <span id="unveil-voice-mic" className="hidden">
+                    {!mustVerify && (
+                      <VoiceMessageRecorder
+                        conversationId={active.id}
+                        senderId={user.id}
+                        maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
+                        onSent={() => {
+                          refreshQuota();
+                          if (!verified) {
+                            setSentCount((n) => {
+                              const next = n + 1;
+                              if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
+                              return next;
+                            });
+                          }
+                        }}
+                        onQuotaExhausted={() => setPaywallOpen(true)}
+                        disabled={!quota.unlimited && quota.remaining <= 0}
+                      />
+                    )}
+                  </span>
+
+                  {mustVerify && (
                     <button
                       type="button"
                       onClick={() => setVerifyOpen(true)}
                       aria-label="Verify to continue"
-                      className="shrink-0 rounded-full border border-border/60 bg-surface/70 p-2.5 backdrop-blur-xl transition-colors hover:border-primary"
+                      className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.18_0.07_298)] text-foreground/60"
                     >
-                      <LockIcon className="h-4 w-4 text-muted-foreground" />
+                      <LockIcon className="h-4 w-4" />
                     </button>
-                  ) : (
-                    <VoiceMessageRecorder
-                      conversationId={active.id}
-                      senderId={user.id}
-                      maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
-                      onSent={() => {
-                        refreshQuota();
-                        if (!verified) {
-                          setSentCount((n) => {
-                            const next = n + 1;
-                            if (next >= VERIFY_THRESHOLD) setVerifyOpen(true);
-                            return next;
-                          });
-                        }
-                      }}
-                      onQuotaExhausted={() => setPaywallOpen(true)}
-                      disabled={!quota.unlimited && quota.remaining <= 0}
-                    />
                   )}
+
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
-                    placeholder={`Message ${peerName}…`}
+                    placeholder="Type a message…"
                     aria-label={`Message ${peerName}`}
-                    className="min-w-0 flex-1 rounded-full border border-border/60 bg-surface/80 px-4 py-3 text-[15px] text-foreground outline-none backdrop-blur-xl transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-surface focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] sm:px-5"
+                    className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] text-foreground outline-none placeholder:text-foreground/40"
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => setPickerFor((v) => (v === "composer" ? null : "composer"))}
+                    aria-label="Emoji"
+                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full text-foreground/60 transition-colors hover:text-foreground"
+                  >
+                    <Smile className="h-4 w-4" />
+                  </button>
+
                   <button
                     type="submit"
                     disabled={!draft.trim()}
-                    className="shrink-0 rounded-full bg-gradient-hero p-3 text-primary-foreground shadow-glow transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     aria-label="Send"
+                    className="shrink-0 grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_6px_20px_-6px_oklch(0.61_0.22_304/0.7)] transition-transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
                   >
                     <Send className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                  Phone numbers, emails, and social handles are hidden until you both choose to share.
+                {pickerFor === "composer" && (
+                  <div className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.85)] p-2 backdrop-blur-xl">
+                    {QUICK_EMOJI.map((e) => (
+                      <button key={e} type="button"
+                        onClick={() => { setDraft((d) => d + e); setPickerFor(null); }}
+                        className="rounded-full px-2 py-1 text-lg hover:bg-[oklch(0.18_0.07_298/0.8)]">{e}</button>
+                    ))}
+                  </div>
+                )}
+                <p className="mt-2 text-center text-[10px] text-foreground/40">
+                  Phone numbers, emails and socials stay hidden until you both choose to share.
                 </p>
               </form>
+
 
               {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / EXCHANGE SHEET ============ */}
               <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
@@ -1314,14 +1281,8 @@ function Chat() {
                 </SheetContent>
               </Sheet>
 
-              {/* Floating Insights handle (mobile) */}
-              <button
-                onClick={() => { setPanelTab("insights"); setPanelOpen(true); }}
-                className="absolute bottom-[88px] right-4 z-10 flex items-center gap-1.5 rounded-full border border-primary/40 bg-card/90 px-3 py-1.5 text-[11px] font-medium text-primary shadow-glow backdrop-blur-xl sm:hidden"
-                aria-label="Open insights"
-              >
-                <ChevronUp className="h-3.5 w-3.5" /> Insights
-              </button>
+              {/* Floating Insights handle removed — Insights now live in QuickActionBar */}
+
             </>
           )}
         </section>
