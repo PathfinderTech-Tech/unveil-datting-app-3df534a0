@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { ARCHETYPES, useProfile } from "@/lib/synapse-store";
 import { Avatar } from "@/components/Avatar";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -27,6 +28,7 @@ function Results() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
         <div className="p-12 text-center text-muted-foreground">Composing your signature…</div>
       </div>
     );
@@ -41,6 +43,7 @@ function Results() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your signature</div>

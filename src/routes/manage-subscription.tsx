@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { createPortalSession } from "@/lib/payments.functions";
@@ -74,6 +75,7 @@ function Manage() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <section className="mx-auto max-w-4xl px-4 py-10 md:px-5 md:py-16">
         <div>
           <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Account</p>

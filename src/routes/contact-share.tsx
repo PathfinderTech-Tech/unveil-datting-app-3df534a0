@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { giveShareConsent, saveMyContact, loadMyContact, loadPartnerContact } from "@/lib/social-api";
@@ -32,6 +33,7 @@ function ContactShare() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <div className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-6">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Contact Sharing</div>

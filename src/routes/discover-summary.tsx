@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { supabase } from "@/integrations/supabase/client";
 import {
   personalitySummary, communicationSummary, compatibilityHeadline,
@@ -36,6 +37,7 @@ function Summary() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
         <div className="mx-auto max-w-md p-12 text-center">
           <h1 className="font-display text-3xl font-bold">No profile yet.</h1>
           <p className="mt-2 text-muted-foreground">Complete Discover Yourself first.</p>
@@ -56,6 +58,7 @@ function Summary() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">
           <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your Compatibility Profile</div>

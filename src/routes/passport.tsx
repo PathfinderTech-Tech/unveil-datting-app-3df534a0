@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { BADGES, useProfile } from "@/lib/synapse-store";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -48,6 +49,7 @@ function Passport() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
         <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
       </div>
     );
@@ -56,6 +58,7 @@ function Passport() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
 
       <div className="mx-auto max-w-4xl px-6 py-12 space-y-8">
         <header>
