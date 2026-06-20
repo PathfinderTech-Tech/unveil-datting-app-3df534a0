@@ -27,10 +27,11 @@ export type VoiceMessageRecorderHandle = {
 type Phase = "idle" | "recording" | "preview" | "uploading";
 
 export const VoiceMessageRecorder = forwardRef<VoiceMessageRecorderHandle, Props>(function VoiceMessageRecorder(
-  { conversationId, senderId, maxSeconds = 60, onSent, onQuotaExhausted, disabled, hideIdleButton },
+  { conversationId, senderId, maxSeconds = 60, onSent, onQuotaExhausted, disabled, hideIdleButton, onPhaseChange },
   ref,
 ) {
-  const [phase, setPhase] = useState<Phase>("idle");
+  const [phase, setPhaseState] = useState<Phase>("idle");
+  const setPhase = (p: Phase) => { setPhaseState(p); onPhaseChange?.(p); };
   const [seconds, setSeconds] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
