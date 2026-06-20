@@ -844,7 +844,7 @@ function Chat() {
                       <div key={m.id} className={`group flex flex-col ${mine ? "items-end" : "items-start"} ${grouped ? "mt-0.5" : "mt-2.5"}`}>
                         <div className="relative flex items-end gap-1.5">
                           {m.message_type === "voice" && m.media_url ? (
-                            <div className="max-w-[78%]">
+                            <div className="max-w-[70%]">
                               <VoiceMessageBubble
                                 mediaPath={m.media_url}
                                 duration={m.duration_seconds ?? null}
@@ -860,10 +860,10 @@ function Chat() {
                           ) : (
                             <div
                               title={ts}
-                              className={`max-w-[78%] px-4 py-2.5 text-[15px] leading-relaxed transition-transform animate-fade-in ${
+                              className={`max-w-[70%] px-3.5 py-2 text-[13.5px] leading-snug transition-transform animate-fade-in ${
                                 mine
-                                  ? "rounded-[22px] rounded-br-md bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_6px_24px_-8px_oklch(0.61_0.22_304/0.55)]"
-                                  : "rounded-[22px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.15_0.05_298/0.7)] text-foreground backdrop-blur-xl shadow-[0_4px_18px_-8px_oklch(0_0_0/0.45)]"
+                                  ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_4px_18px_-10px_oklch(0.61_0.22_304/0.5)]"
+                                  : "rounded-[20px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.14)] bg-[oklch(0.15_0.05_298/0.55)] text-foreground backdrop-blur-xl"
                               }`}
                             >
                               {m.content}
