@@ -25,7 +25,7 @@ import { ContactRevealPanel } from "@/components/ContactRevealPanel";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
-import { VoiceMessageRecorder } from "@/components/VoiceMessageRecorder";
+import { VoiceMessageRecorder, type VoiceMessageRecorderHandle } from "@/components/VoiceMessageRecorder";
 import { VoiceMessageBubble } from "@/components/VoiceMessageBubble";
 import { loadCompatibility, bandLabel } from "@/lib/matching-api";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
@@ -151,6 +151,7 @@ function Chat() {
   const isMobile = useIsMobile();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const voiceRecorderRef = useRef<VoiceMessageRecorderHandle | null>(null);
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const { verified } = useVerification();
@@ -935,8 +936,8 @@ function Chat() {
                 dateBadge={reveal.veilLifted}
                 onVoice={() => {
                   if (mustVerify) { setVerifyOpen(true); return; }
-                  // Hidden mic in QuickActionBar focuses the underlying VoiceMessageRecorder mic
-                  document.getElementById("unveil-voice-mic")?.click();
+                  // Call start() synchronously to preserve user-gesture for getUserMedia
+                  void voiceRecorderRef.current?.start();
                 }}
                 onGift={() => setGiftOpen(true)}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
@@ -960,10 +961,12 @@ function Chat() {
                     <Plus className="h-4 w-4" />
                   </button>
 
-                  {/* Voice recorder kept in DOM (hidden behind action bar mic button id) */}
-                  <span id="unveil-voice-mic" className="hidden">
-                    {!mustVerify && (
+                  {/* Voice recorder — idle button hidden; recording/preview UI shows inline */}
+                  {!mustVerify && (
+                    <div className="flex min-w-0 flex-1 items-center">
                       <VoiceMessageRecorder
+                        ref={voiceRecorderRef}
+                        hideIdleButton
                         conversationId={active.id}
                         senderId={user.id}
                         maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
@@ -980,8 +983,8 @@ function Chat() {
                         onQuotaExhausted={() => setPaywallOpen(true)}
                         disabled={!quota.unlimited && quota.remaining <= 0}
                       />
-                    )}
-                  </span>
+                    </div>
+                  )}
 
                   {mustVerify && (
                     <button
