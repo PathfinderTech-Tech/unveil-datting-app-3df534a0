@@ -156,7 +156,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
 
 function PremiumUpsellCard() {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.22)] bg-[oklch(0.13_0.05_298/0.55)] p-5 backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.16)] bg-[oklch(0.13_0.05_298/0.4)] p-5 backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-30 blur-3xl"
