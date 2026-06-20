@@ -152,6 +152,8 @@ function Chat() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const voiceRecorderRef = useRef<VoiceMessageRecorderHandle | null>(null);
+  const [voicePhase, setVoicePhase] = useState<"idle" | "recording" | "preview" | "uploading">("idle");
+  const voiceActive = voicePhase !== "idle";
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const { verified } = useVerification();
@@ -950,23 +952,15 @@ function Chat() {
                 className="relative z-20 shrink-0 px-3 pb-3 pt-1 sm:px-4"
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
-                <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
-                  <button
-                    type="button"
-                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
-                    disabled={!peerId}
-                    aria-label="Icebreakers"
-                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-
-                  {/* Voice recorder — idle button hidden; recording/preview UI shows inline */}
-                  {!mustVerify && (
-                    <div className="flex min-w-0 flex-1 items-center">
+                {/* Voice recorder occupies its own dedicated row when active —
+                    replaces the text composer to avoid any overlap. */}
+                {!mustVerify && (
+                  <div className={voiceActive ? "block" : "hidden"}>
+                    <div className="flex min-w-0 items-center">
                       <VoiceMessageRecorder
                         ref={voiceRecorderRef}
                         hideIdleButton
+                        onPhaseChange={setVoicePhase}
                         conversationId={active.id}
                         senderId={user.id}
                         maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
@@ -984,7 +978,20 @@ function Chat() {
                         disabled={!quota.unlimited && quota.remaining <= 0}
                       />
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {!voiceActive && (
+                  <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
+                  <button
+                    type="button"
+                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                    disabled={!peerId}
+                    aria-label="Icebreakers"
+                    className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
 
                   {mustVerify && (
                     <button
@@ -1025,8 +1032,9 @@ function Chat() {
                   >
                     <Send className="h-4 w-4" />
                   </button>
-                </div>
-                {pickerFor === "composer" && (
+                  </div>
+                )}
+                {!voiceActive && pickerFor === "composer" && (
                   <div className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.85)] p-2 backdrop-blur-xl">
                     {QUICK_EMOJI.map((e) => (
                       <button key={e} type="button"
@@ -1035,10 +1043,13 @@ function Chat() {
                     ))}
                   </div>
                 )}
-                <p className="mt-2 text-center text-[10px] text-foreground/40">
-                  Phone numbers, emails and socials stay hidden until you both choose to share.
-                </p>
+                {!voiceActive && (
+                  <p className="mt-2 text-center text-[10px] text-foreground/40">
+                    Phone numbers, emails and socials stay hidden until you both choose to share.
+                  </p>
+                )}
               </form>
+
 
 
               {/* ============ UNIFIED INSIGHTS / DISCOVERY / ICEBREAKERS / EXCHANGE SHEET ============ */}
