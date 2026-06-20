@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Mic, Square, Loader2, Play, Pause, Trash2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,18 +14,20 @@ type Props = {
   onQuotaExhausted?: () => void;
   /** Premium / quota-aware: if false, do not allow recording. */
   disabled?: boolean;
+  /** When true, the idle mic button is not rendered (parent triggers start() via ref). */
+  hideIdleButton?: boolean;
+};
+
+export type VoiceMessageRecorderHandle = {
+  start: () => Promise<void>;
 };
 
 type Phase = "idle" | "recording" | "preview" | "uploading";
 
-export function VoiceMessageRecorder({
-  conversationId,
-  senderId,
-  maxSeconds = 60,
-  onSent,
-  onQuotaExhausted,
-  disabled,
-}: Props) {
+export const VoiceMessageRecorder = forwardRef<VoiceMessageRecorderHandle, Props>(function VoiceMessageRecorder(
+  { conversationId, senderId, maxSeconds = 60, onSent, onQuotaExhausted, disabled, hideIdleButton },
+  ref,
+) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [seconds, setSeconds] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function VoiceMessageRecorder({
 
   async function start() {
     if (disabled) return;
+    if (phase !== "idle") return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       toast.error("Voice notes aren't supported in this browser.");
       return;
@@ -85,6 +88,8 @@ export function VoiceMessageRecorder({
       }
     }
   }
+
+  useImperativeHandle(ref, () => ({ start }), [disabled, phase, maxSeconds]);
 
   async function stop() {
     tickRef.current && clearInterval(tickRef.current);
@@ -146,7 +151,6 @@ export function VoiceMessageRecorder({
         duration_seconds: rec.duration,
       } as never);
       if (msgErr) {
-        // Roll back the upload best-effort
         await supabase.storage.from("voice-messages").remove([path]);
         if (msgErr.message?.includes("DAILY_MESSAGE_LIMIT_REACHED")) {
           onQuotaExhausted?.();
@@ -175,8 +179,8 @@ export function VoiceMessageRecorder({
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
   const ss = String(seconds % 60).padStart(2, "0");
 
-  // --- UI ---
   if (phase === "idle") {
+    if (hideIdleButton) return null;
     return (
       <button
         type="button"
@@ -193,7 +197,7 @@ export function VoiceMessageRecorder({
 
   if (phase === "recording") {
     return (
-      <div className="order-last flex w-full min-w-0 basis-full items-center gap-3 rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2 sm:order-none sm:w-auto sm:basis-auto sm:flex-1">
+      <div className="flex w-full min-w-0 items-center gap-3 rounded-full border border-destructive/40 bg-destructive/10 px-4 py-2">
         <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-destructive" />
         <span className="font-mono text-sm text-foreground">{mm}:{ss}</span>
         <span className="text-xs text-muted-foreground">/ {String(Math.floor(maxSeconds/60)).padStart(2,"0")}:{String(maxSeconds%60).padStart(2,"0")}</span>
@@ -216,9 +220,8 @@ export function VoiceMessageRecorder({
     );
   }
 
-  // preview / uploading
   return (
-    <div className="order-last flex w-full min-w-0 basis-full items-center gap-3 rounded-full border border-primary/40 bg-primary/10 px-3 py-2 sm:order-none sm:w-auto sm:basis-auto sm:flex-1">
+    <div className="flex w-full min-w-0 items-center gap-3 rounded-full border border-primary/40 bg-primary/10 px-3 py-2">
       <button
         type="button"
         onClick={togglePlay}
@@ -250,4 +253,4 @@ export function VoiceMessageRecorder({
       </button>
     </div>
   );
-}
+});
