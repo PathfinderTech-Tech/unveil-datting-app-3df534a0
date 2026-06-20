@@ -569,7 +569,6 @@ function Chat() {
         <aside
           className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col min-h-0 h-full border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
         >
-        >
           <div className="border-b border-border/40 px-5 pt-3 pb-3">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
