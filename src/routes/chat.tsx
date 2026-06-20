@@ -961,10 +961,12 @@ function Chat() {
                     <Plus className="h-4 w-4" />
                   </button>
 
-                  {/* Voice recorder kept in DOM (hidden behind action bar mic button id) */}
-                  <span id="unveil-voice-mic" className="hidden">
-                    {!mustVerify && (
+                  {/* Voice recorder — idle button hidden; recording/preview UI shows inline */}
+                  {!mustVerify && (
+                    <div className="flex min-w-0 flex-1 items-center">
                       <VoiceMessageRecorder
+                        ref={voiceRecorderRef}
+                        hideIdleButton
                         conversationId={active.id}
                         senderId={user.id}
                         maxSeconds={quota.dailyLimit >= 35 ? 120 : 60}
@@ -981,8 +983,8 @@ function Chat() {
                         onQuotaExhausted={() => setPaywallOpen(true)}
                         disabled={!quota.unlimited && quota.remaining <= 0}
                       />
-                    )}
-                  </span>
+                    </div>
+                  )}
 
                   {mustVerify && (
                     <button
