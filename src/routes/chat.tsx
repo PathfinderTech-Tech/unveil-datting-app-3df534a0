@@ -942,6 +942,7 @@ function Chat() {
                   void voiceRecorderRef.current?.start();
                 }}
                 onGift={() => setGiftOpen(true)}
+                onChallenges={() => { window.location.href = "/challenges"; }}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
                 onDate={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
               />
