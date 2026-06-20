@@ -152,6 +152,8 @@ function Chat() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const voiceRecorderRef = useRef<VoiceMessageRecorderHandle | null>(null);
+  const [voicePhase, setVoicePhase] = useState<"idle" | "recording" | "preview" | "uploading">("idle");
+  const voiceActive = voicePhase !== "idle";
   const { quota, refresh: refreshQuota } = useMessageQuota();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const { verified } = useVerification();
