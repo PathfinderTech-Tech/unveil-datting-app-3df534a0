@@ -142,6 +142,17 @@ export function UnveilNav() {
                 </div>
                 <div className="flex flex-col gap-2">
                   {section.items.map((l) => {
+                    if ("action" in l) {
+                      return (
+                        <button
+                          key={l.action}
+                          onClick={() => { setOpen(false); supabase.auth.signOut(); }}
+                          className="rounded-xl px-3 py-2 text-left text-[15px] text-foreground/90 transition-colors hover:bg-surface"
+                        >
+                          {l.label}
+                        </button>
+                      );
+                    }
                     const active = location.pathname === l.to;
                     return (
                       <Link
@@ -159,16 +170,7 @@ export function UnveilNav() {
                 </div>
               </div>
             ))}
-            {user ? (
-              <div className="mt-4 border-t border-border pt-4">
-                <button
-                  onClick={() => { setOpen(false); supabase.auth.signOut(); }}
-                  className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-center text-sm font-medium hover:bg-surface"
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : (
+            {!user ? (
               <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
                 <Link to="/login" onClick={() => setOpen(false)} className="rounded-xl border border-border px-3 py-2 text-center text-sm">Log in</Link>
                 <Link to="/signup" onClick={() => setOpen(false)} className="rounded-xl bg-gradient-hero px-3 py-2 text-center text-sm text-primary-foreground">Sign up</Link>
