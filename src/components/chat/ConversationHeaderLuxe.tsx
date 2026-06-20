@@ -67,11 +67,14 @@ export function ConversationHeaderLuxe({
           )}
         </div>
 
-        {/* Name + subtitle */}
-        <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <h1 className="truncate font-display text-[17px] font-semibold leading-tight tracking-tight text-foreground">{peerName}</h1>
-            {verified && <VerifiedBadge size="xs" />}
+            {verified && (
+              <span className="relative inline-flex items-center justify-center rounded-full bg-[#39FF14] p-[3px] shadow-[0_0_8px_2px_rgba(57,255,20,0.85),0_0_16px_4px_rgba(57,255,20,0.45)] animate-pulse">
+                <ShieldCheck className="h-3 w-3 text-[#0a0a0a]" strokeWidth={3} />
+              </span>
+            )}
           </div>
           <p className="mt-0.5 truncate text-[11.5px] leading-tight text-[oklch(0.78_0.10_328)]">
             {veilLifted ? "Reveal complete" : "Veiled · keep talking to reveal"}

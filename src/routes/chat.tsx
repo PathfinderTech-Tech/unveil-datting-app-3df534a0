@@ -758,7 +758,7 @@ function Chat() {
               )}
 
               {/* ============ REVEAL PROGRESS CARD ============ */}
-              {peerId && !reveal.loading && (
+              {peerId && !reveal.loading && !reveal.veilLifted && (
                 <RevealProgressCard
                   messagesExchanged={reveal.meaningful}
                   messagesRequired={10}
