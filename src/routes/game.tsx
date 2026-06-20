@@ -76,6 +76,7 @@ function GamePage() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <div className="mx-auto max-w-3xl px-6 py-12">
         {round === "intro" && <Intro onStart={() => setRound("wyr")} />}
         {round === "wyr" && <WouldYouRather onDone={(v) => finishRound("wyr", v)} />}

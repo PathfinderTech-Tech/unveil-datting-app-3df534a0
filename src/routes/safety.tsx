@@ -30,6 +30,7 @@ function Safety() {
   return (
     <div className="min-h-screen">
       <UnveilNav />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
       <section className="mx-auto max-w-4xl px-6 py-16">
         <Shield className="mb-4 h-10 w-10 text-accent" />
         <h1 className="font-display text-5xl font-light">Your safety is sacred.</h1>
