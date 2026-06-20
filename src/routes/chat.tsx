@@ -716,7 +716,6 @@ function Chat() {
         <section
           className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col min-h-0 h-full bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
         >
-        >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/10 backdrop-blur-xl">
