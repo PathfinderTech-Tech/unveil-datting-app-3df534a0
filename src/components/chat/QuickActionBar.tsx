@@ -42,7 +42,7 @@ export function QuickActionBar({
   ];
 
   return (
-    <div className="mx-3 mb-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.14)] bg-[oklch(0.13_0.05_298/0.4)] px-1.5 py-1.5 backdrop-blur-xl">
+    <div className="mx-3 mb-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.1)] bg-[oklch(0.13_0.05_298/0.3)] px-1.5 py-1 backdrop-blur-xl">
       <div className="grid grid-cols-4 gap-0.5">
         {actions.map((a) => (
           <button
@@ -50,15 +50,15 @@ export function QuickActionBar({
             type="button"
             onClick={a.onClick}
             disabled={a.disabled}
-            className="group relative flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition-all hover:bg-[oklch(0.18_0.07_298/0.45)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="group relative flex flex-col items-center gap-0.5 rounded-xl px-1 py-1 transition-all hover:bg-[oklch(0.18_0.07_298/0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <span className={`relative grid h-9 w-9 place-items-center rounded-xl ${tileBg(a.id)} shadow-[inset_0_1px_0_oklch(1_0_0/0.08)]`}>
+            <span className={`relative grid h-8 w-8 place-items-center rounded-xl ${tileBg(a.id)} shadow-[inset_0_1px_0_oklch(1_0_0/0.07)]`}>
               {iconFor(a.id)}
               {a.badge && (
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[oklch(0.80_0.14_68)] ring-2 ring-[oklch(0.13_0.05_298)]" />
               )}
             </span>
-            <span className="text-[10px] font-medium tracking-tight text-foreground/75">{a.label}</span>
+            <span className="text-[9.5px] font-medium tracking-tight text-foreground/70">{a.label}</span>
           </button>
         ))}
       </div>
