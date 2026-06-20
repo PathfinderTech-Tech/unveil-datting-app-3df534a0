@@ -99,22 +99,25 @@ export function ConversationHeaderLuxe({
         </div>
       </div>
 
-      {/* Slim 3-stat strip */}
-      <div className="mt-2 grid grid-cols-3 gap-1.5 rounded-2xl border border-[oklch(0.56_0.22_286/0.1)] bg-[oklch(0.13_0.05_298/0.4)] px-1 py-1.5">
+      {/* Slim 3-stat strip — equal columns, softer borders */}
+      <div className="mt-2 grid grid-cols-3 gap-2 rounded-2xl border border-[oklch(0.56_0.22_286/0.08)] bg-[oklch(0.13_0.05_298/0.3)] px-2 py-1.5">
         <Stat
           icon={<Sparkles className="h-3 w-3 text-[oklch(0.61_0.22_304)]" />}
           value={compatibility != null ? `${compatibility}%` : "—"}
           label="Match"
         />
-        <div className="border-x border-[oklch(0.56_0.22_286/0.1)]">
-          <Stat
-            icon={<MessageCircle className="h-3 w-3 text-[oklch(0.65_0.20_328)]" />}
-            value={String(messagesRemaining)}
-            label="Left today"
-          />
-        </div>
         <Stat
-          icon={<ShieldCheck className="h-3 w-3 text-[oklch(0.80_0.14_68)]" />}
+          icon={<MessageCircle className="h-3 w-3 text-[oklch(0.65_0.20_328)]" />}
+          value={String(messagesRemaining)}
+          label="Left today"
+        />
+        <Stat
+          icon={
+            <ShieldCheck
+              className={`h-3 w-3 ${verified ? "text-[#39FF14] drop-shadow-[0_0_4px_rgba(57,255,20,0.7)]" : "text-foreground/35"}`}
+              strokeWidth={verified ? 2.5 : 2}
+            />
+          }
           value={verified ? "Verified" : "Pending"}
           label="ID"
         />
@@ -128,9 +131,9 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
     <div className="flex flex-col items-center px-1 text-center">
       <div className="flex items-center gap-1">
         {icon}
-        <span className="text-[12.5px] font-semibold tracking-tight text-foreground">{value}</span>
+        <span className="text-[11.5px] font-semibold tracking-tight text-foreground">{value}</span>
       </div>
-      <span className="text-[9.5px] font-medium tracking-tight text-foreground/55">{label}</span>
+      <span className="text-[9px] font-medium tracking-tight text-foreground/50">{label}</span>
     </div>
   );
 }
