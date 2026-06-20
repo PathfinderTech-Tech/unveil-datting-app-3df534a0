@@ -532,7 +532,7 @@ function Chat() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-[100dvh] flex-col bg-background overflow-hidden">
       <UnveilNav />
       <MessagePaywallModal
         open={paywallOpen}
@@ -564,11 +564,10 @@ function Chat() {
       )}
 
 
-      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 min-h-0 gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
         {/* ============ SIDEBAR / MATCH LIST ============ */}
         <aside
-          className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100dvh - 72px)" }}
+          className={`${active ? "hidden" : "flex"} lg:flex w-full lg:w-[360px] shrink-0 flex-col min-h-0 h-full border-r border-border/50 bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
         >
           <div className="border-b border-border/40 px-5 pt-3 pb-3">
             <div className="relative">
@@ -715,8 +714,7 @@ function Chat() {
 
         {/* ============ CHAT PANEL ============ */}
         <section
-          className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
-          style={{ height: "calc(100dvh - 72px)" }}
+          className={`${active ? "flex" : "hidden"} lg:flex relative min-w-0 flex-1 flex-col min-h-0 h-full bg-card/30 backdrop-blur-2xl lg:rounded-3xl lg:border lg:border-border/60 lg:bg-card/50 lg:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]`}
         >
           {!active ? (
             <div className="m-auto p-12 text-center text-muted-foreground">
@@ -999,6 +997,9 @@ function Chat() {
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
+                    onFocus={() => {
+                      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 250);
+                    }}
                     placeholder="Type a message…"
                     aria-label={`Message ${peerName}`}
                     className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] text-foreground outline-none placeholder:text-foreground/40"

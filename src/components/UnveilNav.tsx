@@ -68,7 +68,7 @@ export function UnveilNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 glass-strong">
+    <header className="sticky top-0 z-50 glass-strong" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6">
         <Link to="/" className="flex items-center gap-2 sm:gap-3">
           <LogoMark size={24} className="sm:hidden" />
