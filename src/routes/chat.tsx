@@ -936,8 +936,8 @@ function Chat() {
                 dateBadge={reveal.veilLifted}
                 onVoice={() => {
                   if (mustVerify) { setVerifyOpen(true); return; }
-                  // Hidden mic in QuickActionBar focuses the underlying VoiceMessageRecorder mic
-                  document.getElementById("unveil-voice-mic")?.click();
+                  // Call start() synchronously to preserve user-gesture for getUserMedia
+                  void voiceRecorderRef.current?.start();
                 }}
                 onGift={() => setGiftOpen(true)}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
