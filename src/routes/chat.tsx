@@ -935,7 +935,7 @@ function Chat() {
                 voiceBadge={false}
                 giftBadge={false}
                 aiBadge={overallScore != null && overallScore >= 80}
-                dateBadge={reveal.veilLifted}
+                dateBadge={false}
                 onVoice={() => {
                   if (mustVerify) { setVerifyOpen(true); return; }
                   // Call start() synchronously to preserve user-gesture for getUserMedia
