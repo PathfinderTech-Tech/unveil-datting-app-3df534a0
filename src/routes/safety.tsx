@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { MailActions } from "@/components/MailActions";
 import { Shield, Phone, MapPin, EyeOff, Flag, Mail, AlertTriangle } from "lucide-react";
 

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { MailActions } from "@/components/MailActions";
 import { supabase } from "@/integrations/supabase/client";
 import {

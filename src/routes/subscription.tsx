@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles, ShieldCheck, Clock, Crown, ExternalLink } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { useAuth } from "@/hooks/use-auth";

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { createPortalSession } from "@/lib/payments.functions";

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { BADGES, useProfile } from "@/lib/synapse-store";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";

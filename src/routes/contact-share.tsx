@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { SafetyReminder } from "@/components/SafetyReminder";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
 import { giveShareConsent, saveMyContact, loadMyContact, loadPartnerContact } from "@/lib/social-api";

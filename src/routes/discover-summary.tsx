@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { PageBackButton } from "@/components/PageBackButton";
 import { supabase } from "@/integrations/supabase/client";
 import {
   personalitySummary, communicationSummary, compatibilityHeadline,
