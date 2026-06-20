@@ -18,6 +18,7 @@ import { PresenceProvider } from "@/hooks/use-presence";
 
 import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
+import { GlobalBackButton } from "@/components/GlobalBackButton";
 import { useRouterState } from "@tanstack/react-router";
 
 
@@ -165,6 +166,7 @@ function RootComponent() {
         <CooldownGuard />
 
         <VeilBackdrop variant={variant} opacity={opacity} />
+        {!isChromeless && <GlobalBackButton />}
         <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0"}`}>
           <div className="flex-1">
             <Outlet />
