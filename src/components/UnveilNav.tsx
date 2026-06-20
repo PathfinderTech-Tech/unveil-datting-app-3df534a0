@@ -23,7 +23,10 @@ const PRIMARY = [
 
 
 // Sectioned mobile drawer — Core / Identity / Account / Legal.
-const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
+const SECTIONS: {
+  label: string;
+  items: ({ to: string; label: string } | { action: "signout"; label: string })[];
+}[] = [
   {
     label: "Core",
     items: [
@@ -48,7 +51,7 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
       { to: "/premium", label: "Membership" },
       { to: "/settings", label: "Settings" },
       { to: "/contact-share", label: "Share & Invite" },
-      { action: "signout" as const, label: "Sign out" },
+      { action: "signout", label: "Sign out" },
     ],
   },
   {
