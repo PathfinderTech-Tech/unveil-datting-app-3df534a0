@@ -16,6 +16,8 @@ type Props = {
   disabled?: boolean;
   /** When true, the idle mic button is not rendered (parent triggers start() via ref). */
   hideIdleButton?: boolean;
+  /** Notify parent of phase transitions (so it can hide the composer while recording). */
+  onPhaseChange?: (phase: "idle" | "recording" | "preview" | "uploading") => void;
 };
 
 export type VoiceMessageRecorderHandle = {
