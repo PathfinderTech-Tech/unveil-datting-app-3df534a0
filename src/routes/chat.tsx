@@ -997,6 +997,9 @@ function Chat() {
                   <input
                     value={draft}
                     onChange={(e) => onDraftChange(e.target.value)}
+                    onFocus={() => {
+                      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 250);
+                    }}
                     placeholder="Type a message…"
                     aria-label={`Message ${peerName}`}
                     className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] text-foreground outline-none placeholder:text-foreground/40"
