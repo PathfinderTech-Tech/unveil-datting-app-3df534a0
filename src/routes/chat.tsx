@@ -532,7 +532,7 @@ function Chat() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-[100dvh] flex-col bg-background overflow-hidden">
       <UnveilNav />
       <MessagePaywallModal
         open={paywallOpen}
