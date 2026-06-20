@@ -414,7 +414,7 @@ function Matches() {
             </h1>
             <div className="mt-2"><MatchesTrustBadge /></div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Photos are visible from Day 1. The 7-Day Contact Exchange Journey unlocks phone, email, and social sharing — not photos.
+              Photos and full profiles unlock after 10 messages + 1 voice note from each side. Contact sharing comes later in the journey.
             </p>
           </div>
           <div className="flex gap-1 rounded-full border border-border bg-card p-1">
@@ -617,7 +617,7 @@ function MatchSheet({ match, you, peerMeta, onClose, onLike, onThought }: { matc
   const chem = chemistryFor(match.name + match.city);
   const matchPercent = Math.max(60, 100 - Math.abs(you.composite - match.composite) * 4);
 
-  // Photos and identity are visible from Day 1 — the journey reward is Contact Sharing.
+  // Photos and full profiles unlock only after 10 messages + 1 voice note from each side; contact sharing is the later journey reward.
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-md md:items-center" onClick={onClose}>
       <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-glow" onClick={(e) => e.stopPropagation()}>

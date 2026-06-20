@@ -79,7 +79,7 @@ function Home() {
             Voice before appearance. <span className="text-gradient-aura italic">Connection before contact details.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Photos start softly veiled. The veil lifts the moment a real conversation begins. Phone, email, and social handles unlock only after seven days of meaningful exchange.
+            Photos and full profiles unlock only after both members exchange at least 10 messages and one voice note. Real conversation comes before full visibility — and contact sharing comes later still.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">

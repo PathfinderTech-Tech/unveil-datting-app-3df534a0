@@ -402,7 +402,7 @@ function ConnectionTab({ userId }: { userId: string }) {
             )}
             <ContactExchangeCountdown day={day} />
             <p className="mt-3 text-xs text-muted-foreground">
-              Photos are visible from the moment you match — the veil lifts as soon as your conversation begins.
+              Photos and full profiles unlock after 10 messages + 1 voice note from each side. Real conversation comes before full visibility.
               The 7-day countdown only unlocks the option to exchange phone, email, or social handles.
             </p>
           </div>

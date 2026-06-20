@@ -5,7 +5,7 @@ import { LogoMark, LogoWordmark } from "./LogoHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavBadges } from "@/hooks/use-nav-badges";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Settings as SettingsIcon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ReviewerBadge } from "./ReviewerBadge";
 
 // Desktop primary navigation. Authenticated journey: Discover → Compatibility →
@@ -19,7 +19,6 @@ const PRIMARY = [
   { to: "/gifts", label: "Gifts" },
   { to: "/profile", label: "Profile" },
   { to: "/passport", label: "Passport" },
-  { to: "/settings", label: "Settings" },
 ] as const;
 
 
@@ -48,7 +47,6 @@ const SECTIONS: { label: string; items: { to: string; label: string }[] }[] = [
     items: [
       { to: "/premium", label: "Membership" },
       { to: "/contact-share", label: "Share & Invite" },
-      { to: "/settings", label: "Settings" },
     ],
   },
   {
@@ -108,14 +106,6 @@ export function UnveilNav() {
           <ReviewerBadge className="hidden sm:inline-flex" />
           {user ? (
             <>
-              <Link
-                to="/settings"
-                aria-label="Settings"
-                title="Settings"
-                className="hidden rounded-full border border-border bg-surface/60 p-2 hover:bg-surface lg:inline-flex"
-              >
-                <SettingsIcon className="h-4 w-4" />
-              </Link>
               <button
                 onClick={() => supabase.auth.signOut()}
                 className="hidden rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-medium hover:bg-surface lg:inline-flex"

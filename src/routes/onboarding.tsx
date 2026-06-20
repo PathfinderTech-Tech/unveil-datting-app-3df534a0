@@ -568,7 +568,7 @@ function Onboarding() {
             <div>
               <h1 className="font-display text-4xl font-bold">Profile <span className="uo-accent">Photo Studio</span></h1>
               <p className="mt-2 text-muted-foreground">
-                Take a selfie or upload a photo. Real profile photo shows from Day 1 — no AI avatars.
+                Take a selfie or upload a photo. Your real photo and full profile unlock only after you and a match exchange at least 10 messages and one voice note — real conversation comes before full visibility.
               </p>
             </div>
 
