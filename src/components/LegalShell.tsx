@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { UnveilNav } from "./UnveilNav";
+import { PageBackButton } from "./PageBackButton";
 
 export function LegalShell({
   title,
@@ -14,6 +15,7 @@ export function LegalShell({
     <div className="min-h-screen">
       <UnveilNav />
       <article className="mx-auto max-w-3xl px-6 py-16">
+        <PageBackButton fallback="/settings" className="mb-6" />
         <h1 className="font-display text-4xl font-light md:text-5xl">{title}</h1>
         {updated && (
           <p className="mt-2 text-sm text-muted-foreground">Last updated: {updated}</p>
