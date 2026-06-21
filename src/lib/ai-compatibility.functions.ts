@@ -1,9 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { callOpenAI, checkAiRateLimit, AI_MODEL_DEFAULT, OpenAIError, type AiFeature } from "./openai.server";
 
-// Configurable model — single source of truth for Phase 1.
-// Swap here to upgrade later (e.g. google/gemini-2.5-pro).
-const AI_MODEL = process.env.AI_INSIGHTS_MODEL || "google/gemini-3-flash-preview";
 const CACHE_TTL_HOURS = 24;
 
 export type CompatibilityInsight = {
@@ -13,11 +11,11 @@ export type CompatibilityInsight = {
   longTermPotential: number;
   communicationScore: number;
   sharedInterestsScore: number;
-  compatibilityLabel: string;            // "Strong Match", "Promising Match", etc.
-  relationshipStage: string;             // e.g. "Early Spark", "Growing Connection"
-  aiSummary: string;                     // 1–2 sentence insight using real name
-  suggestedNextStep: string;             // 1 sentence action
-  dateIdeas: { title: string; reason: string }[]; // 3 ideas
+  compatibilityLabel: string;
+  relationshipStage: string;
+  aiSummary: string;
+  suggestedNextStep: string;
+  dateIdeas: { title: string; reason: string }[];
   matchName: string;
   computedAt: string;
 };
@@ -26,37 +24,22 @@ export type InsightResponse =
   | { ok: true; insight: CompatibilityInsight; cached: boolean }
   | { error: string };
 
-async function callGateway(systemPrompt: string, userPrompt: string): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
+async function callAI(userId: string, feature: AiFeature, system: string, user: string): Promise<string> {
+  try {
+    return await callOpenAI({
+      userId,
+      feature,
+      jsonMode: true,
       temperature: 0.7,
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) {
-    // Log technical detail internally; never surface to users.
-    let detail = "";
-    try { detail = await res.text(); } catch { /* noop */ }
-    console.error("[ai-compatibility] gateway failure", { status: res.status, detail: detail.slice(0, 500) });
-    // Single sanitized, user-safe message for every upstream failure
-    // (rate limit, billing, model, workspace, network, parse, etc.)
-    throw new Error("AI_SERVICE_UNAVAILABLE");
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    });
+  } catch (e) {
+    if (e instanceof OpenAIError) throw new Error("AI_SERVICE_UNAVAILABLE");
+    throw e;
   }
-  const j = await res.json();
-  return j.choices?.[0]?.message?.content ?? "{}";
 }
 
 function clamp(n: unknown, def = 50): number {
@@ -164,7 +147,7 @@ Return STRICT JSON only — no prose, no markdown fences. Schema:
 }
 Use the real name "${themName}" — never "User A", "Match A", "your match". Provide exactly 3 dateIdeas chosen to fit their actual interests and personalities (examples: Coffee Date, Art Gallery, Museum, Jazz Night, Cooking Class, Park Walk, Bookstore Date, Hiking Trail, Pottery Class, Sunset Picnic).`;
 
-  const raw = await callGateway(system, contextBlock);
+  const raw = await callAI(userId, "ai_compatibility_insights", system, contextBlock);
   const parsed = parseInsight(raw, themName);
   if (!parsed) throw new Error("AI_SERVICE_UNAVAILABLE");
   if (parsed.dateIdeas.length < 1) parsed.dateIdeas = [{ title: "Coffee Date", reason: "A calm first IRL step that fits an early connection." }];
@@ -181,17 +164,11 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<InsightResponse> => {
     const { supabase, userId } = context;
     try {
-      // Premium gate — server-authoritative
-      const { data: sub } = await supabase
-        .from("subscriptions")
-        .select("status, current_period_end")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
-        (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
+      // Tier + daily-limit gate (server-authoritative; uses ai_rate_limits)
+      const gate = await checkAiRateLimit(supabase, userId, "ai_compatibility_insights");
+      if (!gate.allowed) {
+        return { error: gate.error === "DAILY_LIMIT_REACHED" ? "DAILY_LIMIT_REACHED" : "PREMIUM_REQUIRED" };
+      }
 
       if (!data.force) {
         const { data: cached } = await supabase
@@ -214,7 +191,7 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         user_id: userId,
         match_user_id: data.peerId,
         payload: insight,
-        model: AI_MODEL,
+        model: AI_MODEL_DEFAULT,
         computed_at: insight.computedAt,
       }, { onConflict: "user_id,match_user_id" });
 
@@ -222,14 +199,15 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         await supabase.from("analytics_events").insert({
           event: "ai_compatibility_generated",
           user_id: userId,
-          properties: { peerId: data.peerId, model: AI_MODEL, refresh: !!data.force },
+          properties: { peerId: data.peerId, model: AI_MODEL_DEFAULT, refresh: !!data.force },
         });
       } catch { /* noop */ }
 
       return { ok: true, cached: false, insight };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" ? msg : "AI_SERVICE_UNAVAILABLE";
+      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" || msg === "DAILY_LIMIT_REACHED"
+        ? msg : "AI_SERVICE_UNAVAILABLE";
       if (safe === "AI_SERVICE_UNAVAILABLE") console.error("[ai-compatibility] insight error", msg);
       return { error: safe };
     }
@@ -281,6 +259,9 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
 export function aiErrorMessage(code: string): string {
   if (code === "PREMIUM_REQUIRED") {
     return "Upgrade to Premium to unlock AI Compatibility Insights — discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.";
+  }
+  if (code === "DAILY_LIMIT_REACHED") {
+    return "You’ve reached today’s AI Insights limit. It’ll reset in 24 hours — or upgrade for a higher daily allowance.";
   }
   if (code === "NOT_MUTUAL") return "AI insights are available once you both match.";
   return "We couldn’t generate insights right now. Please try again shortly.";

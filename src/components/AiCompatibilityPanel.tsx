@@ -99,6 +99,12 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
           </div>
         )}
 
+        {error && errorCode === "DAILY_LIMIT_REACHED" && (
+          <div className="rounded-xl border border-[oklch(0.80_0.14_68/0.35)] bg-[oklch(0.80_0.14_68/0.08)] p-3 text-[13px] text-foreground/80">
+            {error}
+          </div>
+        )}
+
         {!insight && loading && (
           <div className="space-y-2">
             <div className="h-3.5 w-3/4 animate-pulse rounded bg-[oklch(0.18_0.05_298/0.7)]" />
