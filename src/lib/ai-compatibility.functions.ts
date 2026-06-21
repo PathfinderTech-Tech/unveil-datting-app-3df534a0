@@ -147,7 +147,7 @@ Return STRICT JSON only — no prose, no markdown fences. Schema:
 }
 Use the real name "${themName}" — never "User A", "Match A", "your match". Provide exactly 3 dateIdeas chosen to fit their actual interests and personalities (examples: Coffee Date, Art Gallery, Museum, Jazz Night, Cooking Class, Park Walk, Bookstore Date, Hiking Trail, Pottery Class, Sunset Picnic).`;
 
-  const raw = await callGateway(system, contextBlock);
+  const raw = await callAI(userId, "ai_compatibility_insights", system, contextBlock);
   const parsed = parseInsight(raw, themName);
   if (!parsed) throw new Error("AI_SERVICE_UNAVAILABLE");
   if (parsed.dateIdeas.length < 1) parsed.dateIdeas = [{ title: "Coffee Date", reason: "A calm first IRL step that fits an early connection." }];
@@ -164,17 +164,11 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<InsightResponse> => {
     const { supabase, userId } = context;
     try {
-      // Premium gate — server-authoritative
-      const { data: sub } = await supabase
-        .from("subscriptions")
-        .select("status, current_period_end")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const isPremium = !!sub && ["active", "trialing"].includes(sub.status ?? "") &&
-        (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-      if (!isPremium) return { error: "PREMIUM_REQUIRED" };
+      // Tier + daily-limit gate (server-authoritative; uses ai_rate_limits)
+      const gate = await checkAiRateLimit(supabase, userId, "ai_compatibility_insights");
+      if (!gate.allowed) {
+        return { error: gate.error === "DAILY_LIMIT_REACHED" ? "DAILY_LIMIT_REACHED" : "PREMIUM_REQUIRED" };
+      }
 
       if (!data.force) {
         const { data: cached } = await supabase
