@@ -1,9 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { callOpenAI, checkAiRateLimit, AI_MODEL_DEFAULT, OpenAIError, type AiFeature } from "./openai.server";
 
-// Configurable model — single source of truth for Phase 1.
-// Swap here to upgrade later (e.g. google/gemini-2.5-pro).
-const AI_MODEL = process.env.AI_INSIGHTS_MODEL || "google/gemini-3-flash-preview";
 const CACHE_TTL_HOURS = 24;
 
 export type CompatibilityInsight = {
@@ -13,11 +11,11 @@ export type CompatibilityInsight = {
   longTermPotential: number;
   communicationScore: number;
   sharedInterestsScore: number;
-  compatibilityLabel: string;            // "Strong Match", "Promising Match", etc.
-  relationshipStage: string;             // e.g. "Early Spark", "Growing Connection"
-  aiSummary: string;                     // 1–2 sentence insight using real name
-  suggestedNextStep: string;             // 1 sentence action
-  dateIdeas: { title: string; reason: string }[]; // 3 ideas
+  compatibilityLabel: string;
+  relationshipStage: string;
+  aiSummary: string;
+  suggestedNextStep: string;
+  dateIdeas: { title: string; reason: string }[];
   matchName: string;
   computedAt: string;
 };
@@ -26,37 +24,22 @@ export type InsightResponse =
   | { ok: true; insight: CompatibilityInsight; cached: boolean }
   | { error: string };
 
-async function callGateway(systemPrompt: string, userPrompt: string): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
+async function callAI(userId: string, feature: AiFeature, system: string, user: string): Promise<string> {
+  try {
+    return await callOpenAI({
+      userId,
+      feature,
+      jsonMode: true,
       temperature: 0.7,
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) {
-    // Log technical detail internally; never surface to users.
-    let detail = "";
-    try { detail = await res.text(); } catch { /* noop */ }
-    console.error("[ai-compatibility] gateway failure", { status: res.status, detail: detail.slice(0, 500) });
-    // Single sanitized, user-safe message for every upstream failure
-    // (rate limit, billing, model, workspace, network, parse, etc.)
-    throw new Error("AI_SERVICE_UNAVAILABLE");
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    });
+  } catch (e) {
+    if (e instanceof OpenAIError) throw new Error("AI_SERVICE_UNAVAILABLE");
+    throw e;
   }
-  const j = await res.json();
-  return j.choices?.[0]?.message?.content ?? "{}";
 }
 
 function clamp(n: unknown, def = 50): number {
