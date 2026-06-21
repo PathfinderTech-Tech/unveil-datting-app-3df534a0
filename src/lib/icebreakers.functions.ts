@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { callOpenAI, checkAiRateLimit, OpenAIError, type AiFeature } from "./openai.server";
 
 export type IcebreakerCategory =
   | "fun" | "deep" | "romantic" | "career" | "travel" | "family"
@@ -9,32 +10,23 @@ export type Icebreaker = { text: string; kind: IcebreakerCategory };
 
 const USER_CATEGORIES: IcebreakerCategory[] = ["fun", "deep", "romantic", "career", "travel", "family"];
 
-async function callGateway(systemPrompt: string, userPrompt: string): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+async function callAI(userId: string, feature: AiFeature, systemPrompt: string, userPrompt: string): Promise<string> {
+  try {
+    return await callOpenAI({
+      userId,
+      feature,
+      temperature: 0.9,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.9,
-    }),
-  });
-  if (!res.ok) {
-    let detail = ""; try { detail = await res.text(); } catch { /* noop */ }
-    console.error("[icebreakers] gateway failure", { status: res.status, detail: detail.slice(0, 500) });
-    throw new Error("We couldn’t generate suggestions right now. Please try again shortly.");
+    });
+  } catch (e) {
+    if (e instanceof OpenAIError) {
+      throw new Error("We couldn’t generate suggestions right now. Please try again shortly.");
+    }
+    throw e;
   }
-  const j = await res.json();
-  return j.choices?.[0]?.message?.content ?? "[]";
 }
 
 function parseIcebreakers(raw: string, fallbackKind: IcebreakerCategory): Icebreaker[] {
