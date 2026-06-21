@@ -104,6 +104,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_rate_limits: {
+        Row: {
+          daily_limit: number
+          feature_name: string
+          id: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          daily_limit: number
+          feature_name: string
+          id?: string
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          daily_limit?: number
+          feature_name?: string
+          id?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_usage_log: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          feature_name: string
+          id: string
+          model: string | null
+          success: boolean
+          token_estimate: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          feature_name: string
+          id?: string
+          model?: string | null
+          success?: boolean
+          token_estimate?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          feature_name?: string
+          id?: string
+          model?: string | null
+          success?: boolean
+          token_estimate?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -2142,6 +2199,16 @@ export type Database = {
         }[]
       }
       can_share_contacts: { Args: { _a: string; _b: string }; Returns: boolean }
+      check_ai_rate_limit: {
+        Args: { _feature: string; _uid: string }
+        Returns: {
+          allowed: boolean
+          daily_limit: number
+          remaining: number
+          tier: string
+          used: number
+        }[]
+      }
       check_email_cooldown: { Args: { _email: string }; Returns: string }
       check_puzzle: {
         Args: { _id: string; _pick: string }
@@ -2245,6 +2312,7 @@ export type Database = {
         Returns: number
       }
       fn_is_meaningful_text: { Args: { _content: string }; Returns: boolean }
+      get_ai_tier: { Args: { _uid: string }; Returns: string }
       get_effective_message_limit: { Args: { _uid: string }; Returns: number }
       get_message_quota: {
         Args: { _uid?: string }
