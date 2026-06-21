@@ -191,7 +191,7 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         user_id: userId,
         match_user_id: data.peerId,
         payload: insight,
-        model: AI_MODEL,
+        model: AI_MODEL_DEFAULT,
         computed_at: insight.computedAt,
       }, { onConflict: "user_id,match_user_id" });
 
@@ -199,14 +199,15 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
         await supabase.from("analytics_events").insert({
           event: "ai_compatibility_generated",
           user_id: userId,
-          properties: { peerId: data.peerId, model: AI_MODEL, refresh: !!data.force },
+          properties: { peerId: data.peerId, model: AI_MODEL_DEFAULT, refresh: !!data.force },
         });
       } catch { /* noop */ }
 
       return { ok: true, cached: false, insight };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" ? msg : "AI_SERVICE_UNAVAILABLE";
+      const safe = msg === "NOT_MUTUAL" || msg === "PREMIUM_REQUIRED" || msg === "DAILY_LIMIT_REACHED"
+        ? msg : "AI_SERVICE_UNAVAILABLE";
       if (safe === "AI_SERVICE_UNAVAILABLE") console.error("[ai-compatibility] insight error", msg);
       return { error: safe };
     }
@@ -258,6 +259,9 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
 export function aiErrorMessage(code: string): string {
   if (code === "PREMIUM_REQUIRED") {
     return "Upgrade to Premium to unlock AI Compatibility Insights — discover which connections may have the strongest potential for romance, friendship, meaningful conversation, and long-term compatibility.";
+  }
+  if (code === "DAILY_LIMIT_REACHED") {
+    return "You’ve reached today’s AI Insights limit. It’ll reset in 24 hours — or upgrade for a higher daily allowance.";
   }
   if (code === "NOT_MUTUAL") return "AI insights are available once you both match.";
   return "We couldn’t generate insights right now. Please try again shortly.";
