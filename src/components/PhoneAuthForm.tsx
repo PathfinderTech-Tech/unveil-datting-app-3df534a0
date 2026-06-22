@@ -51,7 +51,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
       return;
     }
     setStep("verify");
-    setInfo(`We sent a 6-digit code to ${e164}. It expires in 10 minutes.`);
+    setInfo(`We sent a 6-digit code to ${e164} via ${channel === "whatsapp" ? "WhatsApp" : "SMS"}. It expires in 10 minutes.`);
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
