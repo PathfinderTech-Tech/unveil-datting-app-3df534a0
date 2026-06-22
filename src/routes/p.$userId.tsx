@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { loadPublicPassport, type PublicPassport } from "@/lib/public-passport.functions";
 
 export const Route = createFileRoute("/p/$userId")({
@@ -6,6 +6,22 @@ export const Route = createFileRoute("/p/$userId")({
     const passport = await loadPublicPassport({ data: { userId: params.userId } });
     return { passport };
   },
+  errorComponent: () => {
+    const router = useRouter();
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <h1 className="text-xl font-semibold">This Passport couldn't be loaded</h1>
+        <p className="text-muted-foreground">Please try again in a moment.</p>
+        <button onClick={() => router.invalidate()} className="underline">Retry</button>
+      </div>
+    );
+  },
+  notFoundComponent: () => (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <h1 className="text-xl font-semibold">Passport not found</h1>
+      <p className="text-muted-foreground">This UNVEIL Passport isn't available.</p>
+    </div>
+  ),
   head: ({ loaderData, params }) => {
     const p = loaderData?.passport as PublicPassport | null | undefined;
     const url = `https://unveil.best/p/${params.userId}`;
