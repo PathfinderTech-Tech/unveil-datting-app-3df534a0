@@ -51,11 +51,3 @@ export function OrDivider({ label = "or" }: { label?: string }) {
   );
 }
 
-function _unused() {
-  return (
-    <div>
-      <div />
-      <div />
-    </div>
-  );
-}
