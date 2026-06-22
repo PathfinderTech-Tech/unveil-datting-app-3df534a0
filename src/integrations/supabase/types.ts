@@ -1341,6 +1341,8 @@ export type Database = {
           onboarding_complete: boolean | null
           open_to_international: boolean
           personality_axes: Json
+          phone_number: string | null
+          phone_verified_at: string | null
           photo_url: string | null
           preferred_language: string | null
           premium_until: string | null
@@ -1363,6 +1365,7 @@ export type Database = {
           updated_at: string
           verified: boolean | null
           verified_country_code: string | null
+          verified_phone: string | null
         }
         Insert: {
           account_restricted?: boolean
@@ -1414,6 +1417,8 @@ export type Database = {
           onboarding_complete?: boolean | null
           open_to_international?: boolean
           personality_axes?: Json
+          phone_number?: string | null
+          phone_verified_at?: string | null
           photo_url?: string | null
           preferred_language?: string | null
           premium_until?: string | null
@@ -1436,6 +1441,7 @@ export type Database = {
           updated_at?: string
           verified?: boolean | null
           verified_country_code?: string | null
+          verified_phone?: string | null
         }
         Update: {
           account_restricted?: boolean
@@ -1487,6 +1493,8 @@ export type Database = {
           onboarding_complete?: boolean | null
           open_to_international?: boolean
           personality_axes?: Json
+          phone_number?: string | null
+          phone_verified_at?: string | null
           photo_url?: string | null
           preferred_language?: string | null
           premium_until?: string | null
@@ -1509,6 +1517,7 @@ export type Database = {
           updated_at?: string
           verified?: boolean | null
           verified_country_code?: string | null
+          verified_phone?: string | null
         }
         Relationships: []
       }

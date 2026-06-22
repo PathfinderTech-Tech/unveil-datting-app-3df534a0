@@ -39,9 +39,15 @@ export function OAuthButtons({ mode = "signin" }: { mode?: "signin" | "signup" }
         {label} with Apple
       </button>
       {err && <p className="text-center text-xs text-destructive">{err}</p>}
-      <div className="my-2 flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> or email <span className="h-px flex-1 bg-border" />
-      </div>
     </div>
   );
 }
+
+export function OrDivider({ label = "or" }: { label?: string }) {
+  return (
+    <div className="my-3 flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+      <span className="h-px flex-1 bg-border" /> {label} <span className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+

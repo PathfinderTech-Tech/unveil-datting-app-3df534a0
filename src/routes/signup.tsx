@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
-import { OAuthButtons } from "@/components/OAuthButtons";
+import { OAuthButtons, OrDivider } from "@/components/OAuthButtons";
+import { PhoneAuthForm } from "@/components/PhoneAuthForm";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 
@@ -61,15 +62,21 @@ function Signup() {
 
 
         <div className="mt-6">
-          <OAuthButtons mode="signup" />
+          <PhoneAuthForm mode="signup" />
         </div>
+
+        <OrDivider label="or continue with" />
+
+        <OAuthButtons mode="signup" />
+
+        <OrDivider label="email" />
 
         <form onSubmit={submit} className="space-y-3">
           <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary" />
           <PasswordInput required minLength={8} placeholder="Password (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} />
           {err && <p className="text-xs text-destructive">{err}</p>}
-          <button disabled={loading} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero px-6 py-3 font-medium text-primary-foreground shadow-glow disabled:opacity-50">
-            {loading ? "Creating…" : <>Begin <ArrowRight className="h-4 w-4" /></>}
+          <button disabled={loading} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface px-6 py-3 font-medium text-foreground disabled:opacity-50">
+            {loading ? "Creating…" : <>Sign up with Email <ArrowRight className="h-4 w-4" /></>}
           </button>
         </form>
         <p className="mt-5 text-center text-xs text-muted-foreground">
