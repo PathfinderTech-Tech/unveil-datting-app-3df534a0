@@ -36,10 +36,37 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
     const digits = sanitizeLocal(local);
     if (digits.length < 6) { setErr("Enter a valid phone number"); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
+
+    let usedChannel: Channel = channel;
+    let { error } = await supabase.auth.signInWithOtp({
       phone: e164,
-      options: { channel },
+      options: { channel: usedChannel },
     });
+
+    // Auto-fallback: if WhatsApp delivery isn't available for this number,
+    // silently retry over SMS so the user still receives a code.
+    if (error && usedChannel === "whatsapp") {
+      const m = (error.message || "").toLowerCase();
+      const whatsappUnavailable =
+        m.includes("whatsapp") ||
+        m.includes("channel") ||
+        m.includes("not supported") ||
+        m.includes("unavailable") ||
+        m.includes("invalid 'to'") ||
+        m.includes("60200") || // Twilio: invalid parameter for channel
+        m.includes("63003") || // Twilio: channel could not find To address
+        m.includes("63007") || // Twilio: no WhatsApp sender
+        m.includes("63016");   // Twilio: failed to send freeform WhatsApp
+      if (whatsappUnavailable) {
+        usedChannel = "sms";
+        const retry = await supabase.auth.signInWithOtp({
+          phone: e164,
+          options: { channel: "sms" },
+        });
+        error = retry.error;
+      }
+    }
+
     setLoading(false);
     if (error) {
       const msg = error.message || "";
@@ -51,7 +78,12 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
       return;
     }
     setStep("verify");
-    setInfo(`We sent a 6-digit code to ${e164} via ${channel === "whatsapp" ? "WhatsApp" : "SMS"}. It expires in 10 minutes.`);
+    const channelLabel = usedChannel === "whatsapp" ? "WhatsApp" : "SMS";
+    const fallbackNote =
+      channel === "whatsapp" && usedChannel === "sms"
+        ? " (WhatsApp wasn't available for this number, so we sent SMS instead.)"
+        : "";
+    setInfo(`We sent a 6-digit code to ${e164} via ${channelLabel}.${fallbackNote} It expires in 10 minutes.`);
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
