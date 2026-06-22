@@ -11,7 +11,7 @@ export const Route = createFileRoute("/premium")({
       {
         name: "description",
         content:
-          "UNVEIL is free to use. Premium gives you unlimited messages, instant contact sharing, and deeper insights.",
+          "UNVEIL Premium gives you unlimited messages, instant contact sharing, and deeper insights. Free plan available.",
       },
     ],
   }),
@@ -57,75 +57,113 @@ function Membership() {
           <h1 className="mt-4 font-display text-4xl font-light leading-tight md:text-6xl">
             Choose how you want to <span className="text-gradient-aura italic">discover</span>.
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-            UNVEIL is free to use. Premium unlocks unlimited daily messages, instant contact sharing, and a deeper experience.
+          <p className="mx-auto mt-5 max-w-2xl text-base text-foreground/80 md:text-lg">
+            Unlock unlimited daily messages, instant contact sharing, and a deeper experience. Free plan available.
           </p>
         </div>
 
-        {/* Free + Premium summary */}
-        <div className="mt-12 grid gap-5 lg:grid-cols-2">
-          <PlanCard
-            icon={<Heart className="h-5 w-5" />}
-            iconBg="bg-surface-2 text-accent"
-            title="Free"
-            price="$0"
-            cadence="/ forever"
-            blurb="Everything you need to meet, connect, and start meaningful conversations."
-            features={FREE_FEATURES}
-            cta={
-              <Link
-                to="/signup"
-                className="mt-8 inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-3 text-sm font-medium hover:bg-surface-2"
-              >
-                Continue Free
-              </Link>
-            }
-          />
-
-          <div className="relative flex flex-col overflow-hidden rounded-3xl border border-primary bg-card p-7 shadow-glow md:p-9">
-            <VeilBackdrop variant="corner" opacity={0.09} />
-            <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-aura text-primary-foreground">
-              <Sparkles className="h-5 w-5" />
+        {/* 1. Two-Week Pass */}
+        <div className="mt-12">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col justify-between rounded-3xl border-2 border-primary/60 bg-primary/10 p-6 shadow-glow md:p-7">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/25 text-primary">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-luxury text-foreground/70">Most popular pass</div>
+                  <h3 className="mt-1 font-display text-2xl font-medium text-foreground">2-Week Unlimited Pass</h3>
+                  <p className="mt-1.5 max-w-md text-sm text-foreground/80">
+                    Unlimited messaging for a full 14 days. Perfect for diving deep without a subscription.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <div className="font-display text-3xl font-semibold text-foreground">$9.99</div>
+                  <div className="text-[11px] font-medium uppercase tracking-luxury text-foreground/70">One-time purchase</div>
+                </div>
+                <Link
+                  to="/checkout"
+                  search={{ product: "message_pass_2w" } as any}
+                  className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
+                >
+                  Get 2-Week Pass
+                </Link>
+              </div>
             </div>
-            <div className="font-display text-2xl font-light">UNVEIL Premium</div>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              For users who want unlimited daily messages, immediate contact sharing, and a deeper experience.
-            </p>
-            <ul className="mt-6 flex-1 space-y-2.5 text-sm">
-              {PREMIUM_FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
-                  <span className="text-foreground/85">{f}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-xs italic text-foreground/80">
-              Cancel anytime from your account. Tax calculated at checkout.
-            </p>
+
+            {/* 2. 24h Pass */}
+            <div className="flex flex-col justify-between rounded-3xl border border-accent/50 bg-accent/10 p-6 md:p-7">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/25 text-accent">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl font-medium text-foreground">24-Hour Unlimited Pass</h3>
+                  <p className="mt-1.5 max-w-md text-sm text-foreground/80">
+                    Unlimited messaging for the next 24 hours. Try the full experience risk-free.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <div className="font-display text-3xl font-semibold text-foreground">$1.99</div>
+                  <div className="text-[11px] font-medium uppercase tracking-luxury text-foreground/70">One-time purchase</div>
+                </div>
+                <Link
+                  to="/checkout"
+                  search={{ product: "message_pass" } as any}
+                  className="inline-flex items-center justify-center rounded-full border-2 border-accent bg-accent/20 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/30"
+                >
+                  Get 24-Hour Pass
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Three premium price tiers */}
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {/* Premium feature summary */}
+        <div className="mt-12 relative flex flex-col overflow-hidden rounded-3xl border-2 border-primary bg-card p-7 shadow-glow md:p-9">
+          <VeilBackdrop variant="corner" opacity={0.09} />
+          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-aura text-primary-foreground">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div className="font-display text-3xl font-medium text-foreground">UNVEIL Premium</div>
+          <p className="mt-2 max-w-2xl text-base text-foreground/85">
+            For users who want unlimited daily messages, immediate contact sharing, and a deeper experience.
+          </p>
+          <ul className="mt-6 grid gap-2.5 text-[15px] md:grid-cols-2">
+            {PREMIUM_FEATURES.map((f) => (
+              <li key={f} className="flex items-start gap-2">
+                <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent" />
+                <span className="font-medium text-foreground/95">{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* 3-5. Premium subscription tiers */}
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
           {PLANS.map((p) => (
             <div
               key={p.key}
-              className={`relative flex flex-col rounded-3xl border ${p.featured ? "border-primary shadow-glow" : "border-border"} bg-card p-6`}
+              className={`relative flex flex-col rounded-3xl border-2 ${p.featured ? "border-primary bg-primary/5 shadow-glow" : "border-border bg-card"} p-6`}
             >
               {p.featured && (
-                <div className="absolute -top-3 left-6 rounded-full bg-gradient-hero px-3 py-1 font-mono text-[10px] uppercase tracking-luxury text-primary-foreground shadow-glow">
+                <div className="absolute -top-3 left-6 rounded-full bg-gradient-hero px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-luxury text-primary-foreground shadow-glow">
                   Most chosen
                 </div>
               )}
-              <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">{p.label}</div>
+              <div className="font-mono text-[11px] font-semibold uppercase tracking-luxury text-foreground/80">{p.label}</div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="font-display text-4xl">{p.price}</span>
-                <span className="text-sm text-muted-foreground">{p.cadence}</span>
+                <span className="font-display text-4xl font-semibold text-foreground">{p.price}</span>
+                <span className="text-sm font-medium text-foreground/75">{p.cadence}</span>
               </div>
-              {p.sub && <div className="mt-1 text-xs text-muted-foreground">{p.sub}</div>}
+              {p.sub && <div className="mt-1 text-sm font-medium text-foreground/75">{p.sub}</div>}
               <button
                 onClick={() => goPremium(p.key)}
-                className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium ${p.featured ? "bg-gradient-hero text-primary-foreground shadow-glow" : "border border-border bg-surface hover:bg-surface-2"}`}
+                className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold ${p.featured ? "bg-gradient-hero text-primary-foreground shadow-glow" : "border-2 border-border bg-surface text-foreground hover:bg-surface-2"}`}
               >
                 Choose {p.label}
               </button>
@@ -133,131 +171,77 @@ function Membership() {
           ))}
         </div>
 
-        {/* Passes section */}
+        {/* 6. Free plan — at the bottom */}
         <div className="mt-12">
           <div className="text-center">
-            <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Try unlimited — no commitment</p>
-            <h2 className="mt-3 font-display text-2xl font-light">One-time Passes</h2>
-            <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-              Not ready for a subscription? Unlock unlimited messaging with a single purchase. No renewal, no commitment.
-            </p>
+            <p className="font-mono text-xs uppercase tracking-luxury text-muted-foreground">Or start free</p>
+            <h2 className="mt-3 font-display text-2xl font-light">Free Plan</h2>
           </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {/* 24h Pass */}
-            <div className="flex flex-col justify-between rounded-3xl border border-accent/40 bg-accent/5 p-6 md:p-7">
+          <div className="mt-6 rounded-3xl border border-border bg-card p-7 md:p-9">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
-                  <Zap className="h-5 w-5" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-2 text-accent">
+                  <Heart className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl font-light">24-Hour Unlimited Pass</h3>
-                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                    Unlimited messaging for the next 24 hours. Works for free and premium users.
-                  </p>
+                  <div className="font-display text-2xl font-medium text-foreground">Free</div>
+                  <div className="mt-1 flex items-baseline gap-1">
+                    <span className="font-display text-3xl font-semibold text-foreground">$0</span>
+                    <span className="text-sm font-medium text-foreground/75">/ forever</span>
+                  </div>
                 </div>
               </div>
-              <div className="mt-6 flex items-center justify-between">
-                <div>
-                  <div className="font-display text-2xl">$1.99</div>
-                  <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">One-time purchase</div>
-                </div>
-                <Link
-                  to="/checkout"
-                  search={{ product: "message_pass" } as any}
-                  className="inline-flex items-center justify-center rounded-full border border-accent bg-accent/15 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20"
-                >
-                  Get Pass
-                </Link>
-              </div>
+              <Link
+                to="/signup"
+                className="inline-flex items-center justify-center rounded-full border-2 border-border bg-surface px-6 py-3 text-sm font-semibold text-foreground hover:bg-surface-2"
+              >
+                Continue Free
+              </Link>
             </div>
-
-            {/* 2-Week Pass */}
-            <div className="flex flex-col justify-between rounded-3xl border border-primary/40 bg-primary/5 p-6 md:p-7">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                  <Clock className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl font-light">2-Week Unlimited Pass</h3>
-                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                    Unlimited messaging for a full 14 days. Perfect for diving deep without a subscription.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-6 flex items-center justify-between">
-                <div>
-                  <div className="font-display text-2xl">$9.99</div>
-                  <div className="text-[10px] uppercase tracking-luxury text-muted-foreground">One-time purchase</div>
-                </div>
-                <Link
-                  to="/checkout"
-                  search={{ product: "message_pass_2w" } as any}
-                  className="inline-flex items-center justify-center rounded-full border border-primary bg-primary/15 px-5 py-2.5 text-sm font-medium text-primary hover:bg-primary/20"
-                >
-                  Get Pass
-                </Link>
-              </div>
-            </div>
+            <ul className="mt-5 grid gap-2 md:grid-cols-2">
+              {FREE_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+                  <span className="font-medium text-foreground/90">{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-luxury text-foreground/80">
               <Shield className="h-3.5 w-3.5 text-accent" /> No traps
             </div>
-            <p className="mt-2 text-sm text-foreground/85">
+            <p className="mt-2 text-sm font-medium text-foreground/90">
               Cancel your membership anytime — no forced commitments, no confusing plans.
             </p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-luxury text-foreground/80">
               <Shield className="h-3.5 w-3.5 text-accent" /> Refunds
             </div>
-            <p className="mt-2 text-sm text-foreground/85">
+            <p className="mt-2 text-sm font-medium text-foreground/90">
               Membership purchases are non-refundable except where required by law.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-center">
+        <p className="mt-8 text-center text-xs italic text-foreground/75">
+          Cancel anytime from your account. Tax calculated at checkout.
+        </p>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-center">
           <Link
             to="/manage-subscription"
-            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            className="text-sm font-medium text-foreground/80 underline-offset-4 hover:text-foreground hover:underline"
           >
             Manage subscription
           </Link>
           <RestorePurchasesButton />
         </div>
       </section>
-    </div>
-  );
-}
-
-function PlanCard({
-  icon, iconBg, title, price, cadence, blurb, features, cta,
-}: {
-  icon: React.ReactNode; iconBg: string; title: string; price: string; cadence: string; blurb: string; features: string[]; cta: React.ReactNode;
-}) {
-  return (
-    <div className="relative flex flex-col rounded-3xl border border-border bg-card p-7 md:p-9">
-      <div className={`mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl ${iconBg}`}>{icon}</div>
-      <div className="font-display text-2xl font-light">{title}</div>
-      <div className="mt-2 flex items-baseline gap-1">
-        <span className="font-display text-5xl">{price}</span>
-        <span className="text-sm text-muted-foreground">{cadence}</span>
-      </div>
-      <p className="mt-3 max-w-md text-sm text-muted-foreground">{blurb}</p>
-      <ul className="mt-6 flex-1 space-y-2.5 text-sm">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
-            <span className="text-foreground/85">{f}</span>
-          </li>
-        ))}
-      </ul>
-      {cta}
     </div>
   );
 }

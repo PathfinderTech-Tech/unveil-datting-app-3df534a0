@@ -18,11 +18,11 @@ export const Route = createFileRoute("/games")({
 
 type GameId = "wyr" | "flags" | "ttl" | "island" | "memory";
 const GAMES: { id: GameId; title: string; tagline: string; icon: any; hue: string }[] = [
+  { id: "memory", title: "Solo Memory Match", tagline: "Earn chemistry points.", icon: Brain, hue: "from-violet-500/30 to-indigo-500/10" },
   { id: "wyr", title: "Would You Rather", tagline: "Rapid-fire taste check.", icon: Sparkles, hue: "from-fuchsia-500/30 to-purple-500/10" },
   { id: "flags", title: "Red Flag / Green Flag", tagline: "Spot the vibe in five seconds.", icon: Flag, hue: "from-rose-500/30 to-amber-500/10" },
   { id: "ttl", title: "Two Truths & a Lie", tagline: "Classic. Always works.", icon: HeartHandshake, hue: "from-cyan-500/30 to-blue-500/10" },
   { id: "island", title: "Desert Island", tagline: "5 items. 1 luxury. 1 person.", icon: Palmtree, hue: "from-emerald-500/30 to-teal-500/10" },
-  { id: "memory", title: "Memory Match", tagline: "Earn chemistry points.", icon: Brain, hue: "from-violet-500/30 to-indigo-500/10" },
 ];
 
 function GamesGallery() {
