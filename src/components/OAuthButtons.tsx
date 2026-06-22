@@ -1,4 +1,5 @@
 import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
 export function OAuthButtons({ mode = "signin" }: { mode?: "signin" | "signup" }) {
@@ -7,6 +8,19 @@ export function OAuthButtons({ mode = "signin" }: { mode?: "signin" | "signup" }
 
   const signIn = async (provider: "google" | "apple") => {
     setBusy(provider); setErr("");
+    if (provider === "apple") {
+      // Native Supabase Apple provider — Apple posts to
+      // https://<project>.supabase.co/auth/v1/callback (no `~`, accepted by Apple).
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: { redirectTo: `${window.location.origin}/matches` },
+      });
+      if (error) {
+        setErr(error.message ?? "Sign-in failed");
+        setBusy(null);
+      }
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: `${window.location.origin}/matches`,
     });
