@@ -80,7 +80,9 @@ export async function callOpenAI(opts: OpenAIOptions): Promise<string> {
   }
 
   const body: Record<string, unknown> = { model, messages: opts.messages };
-  if (opts.temperature !== undefined) body.temperature = opts.temperature;
+  // GPT-5 family are reasoning models — they only accept the default temperature (1).
+  const supportsTemperature = !/^gpt-5/i.test(model);
+  if (opts.temperature !== undefined && supportsTemperature) body.temperature = opts.temperature;
   if (opts.jsonMode) body.response_format = { type: "json_object" };
 
   const url = viaLovable
