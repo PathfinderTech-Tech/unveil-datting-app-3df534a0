@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
-import { OAuthButtons } from "@/components/OAuthButtons";
+import { OAuthButtons, OrDivider } from "@/components/OAuthButtons";
+import { PhoneAuthForm } from "@/components/PhoneAuthForm";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 
