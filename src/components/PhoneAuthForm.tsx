@@ -88,7 +88,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
       setErr(result.error || "Invalid or expired code");
       return;
     }
-    setTokenEmail(result.email);
+    void result.email;
     // Exchange the magiclink token_hash for a real Supabase session.
     const { data, error } = await supabase.auth.verifyOtp({
       token_hash: result.tokenHash,
