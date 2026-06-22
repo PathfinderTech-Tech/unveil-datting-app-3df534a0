@@ -12,12 +12,15 @@ function sanitizeLocal(input: string) {
   return digits.replace(/^0+/, "");
 }
 
+type Channel = "sms" | "whatsapp";
+
 export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const navigate = useNavigate();
   const [country, setCountry] = useState<PhoneCountry>(DEFAULT_PHONE_COUNTRY);
   const [local, setLocal] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<Step>("enter");
+  const [channel, setChannel] = useState<Channel>("sms");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
