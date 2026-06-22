@@ -18,11 +18,14 @@ type Channel = "sms" | "whatsapp";
 
 export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const navigate = useNavigate();
+  const sendOtpFn = useServerFn(sendPhoneOtp);
+  const verifyOtpFn = useServerFn(verifyPhoneOtp);
   const [country, setCountry] = useState<PhoneCountry>(DEFAULT_PHONE_COUNTRY);
   const [local, setLocal] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<Step>("enter");
   const [channel, setChannel] = useState<Channel>("sms");
+  const [tokenEmail, setTokenEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
@@ -40,43 +43,29 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
     setLoading(true);
 
     let usedChannel: Channel = channel;
-    let { error } = await supabase.auth.signInWithOtp({
-      phone: e164,
-      options: { channel: usedChannel },
-    });
+    let result = await sendOtpFn({ data: { phone: e164, channel: usedChannel } });
 
-    // Auto-fallback: if WhatsApp delivery isn't available for this number,
-    // silently retry over SMS so the user still receives a code.
-    if (error && usedChannel === "whatsapp") {
-      const m = (error.message || "").toLowerCase();
+    // Auto-fallback WhatsApp → SMS if Twilio rejects the WhatsApp channel.
+    if (!result.ok && usedChannel === "whatsapp") {
+      const m = (result.error || "").toLowerCase();
+      const code = (result as any).code;
       const whatsappUnavailable =
         m.includes("whatsapp") ||
         m.includes("channel") ||
         m.includes("not supported") ||
         m.includes("unavailable") ||
         m.includes("invalid 'to'") ||
-        m.includes("60200") || // Twilio: invalid parameter for channel
-        m.includes("63003") || // Twilio: channel could not find To address
-        m.includes("63007") || // Twilio: no WhatsApp sender
-        m.includes("63016");   // Twilio: failed to send freeform WhatsApp
+        code === 60200 || code === 60200 ||
+        code === 63003 || code === 63007 || code === 63016;
       if (whatsappUnavailable) {
         usedChannel = "sms";
-        const retry = await supabase.auth.signInWithOtp({
-          phone: e164,
-          options: { channel: "sms" },
-        });
-        error = retry.error;
+        result = await sendOtpFn({ data: { phone: e164, channel: "sms" } });
       }
     }
 
     setLoading(false);
-    if (error) {
-      const msg = error.message || "";
-      if (msg.toLowerCase().includes("sms provider") || msg.toLowerCase().includes("provider not configured")) {
-        setErr("SMS sending isn't configured yet. We'll send your code as soon as the provider is live.");
-      } else {
-        setErr(msg || "Could not send the verification code.");
-      }
+    if (!result.ok) {
+      setErr(result.error || "Could not send the verification code.");
       return;
     }
     setStep("verify");
@@ -91,20 +80,26 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
-    if (!/^\d{6}$/.test(otp)) { setErr("Enter the 6-digit code"); return; }
+    if (!/^\d{4,8}$/.test(otp)) { setErr("Enter the code"); return; }
     setLoading(true);
+    const result = await verifyOtpFn({ data: { phone: e164, code: otp } });
+    if (!result.ok) {
+      setLoading(false);
+      setErr(result.error || "Invalid or expired code");
+      return;
+    }
+    setTokenEmail(result.email);
+    // Exchange the magiclink token_hash for a real Supabase session.
     const { data, error } = await supabase.auth.verifyOtp({
-      phone: e164,
-      token: otp,
-      type: "sms",
+      token_hash: result.tokenHash,
+      type: "magiclink",
     });
     if (error || !data.user) {
       setLoading(false);
-      setErr(error?.message ?? "Invalid or expired code");
+      setErr(error?.message ?? "Could not start session");
       return;
     }
-    // Persist phone metadata on the profile. Phone fields are not in the
-    // profiles_guard_update lock-list, so this is a normal authenticated update.
+    // Persist phone metadata on the profile (best-effort).
     try {
       await supabase.from("profiles").update({
         phone_number: e164,
@@ -116,7 +111,6 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
       // Non-blocking; user is signed in.
     }
     setLoading(false);
-    // If the profile already exists with onboarding_complete, go to matches; else onboarding.
     const { data: prof } = await supabase
       .from("profiles")
       .select("onboarding_complete")
