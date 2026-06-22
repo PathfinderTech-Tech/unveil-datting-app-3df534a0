@@ -12,12 +12,15 @@ function sanitizeLocal(input: string) {
   return digits.replace(/^0+/, "");
 }
 
+type Channel = "sms" | "whatsapp";
+
 export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const navigate = useNavigate();
   const [country, setCountry] = useState<PhoneCountry>(DEFAULT_PHONE_COUNTRY);
   const [local, setLocal] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<Step>("enter");
+  const [channel, setChannel] = useState<Channel>("sms");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
@@ -35,7 +38,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       phone: e164,
-      options: { channel: "sms" },
+      options: { channel },
     });
     setLoading(false);
     if (error) {
@@ -48,7 +51,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
       return;
     }
     setStep("verify");
-    setInfo(`We sent a 6-digit code to ${e164}. It expires in 10 minutes.`);
+    setInfo(`We sent a 6-digit code to ${e164} via ${channel === "whatsapp" ? "WhatsApp" : "SMS"}. It expires in 10 minutes.`);
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
@@ -159,6 +162,22 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
           onChange={(e) => setLocal(e.target.value)}
           className="flex-1 rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary"
         />
+      </div>
+      <div className="flex gap-2">
+        {(["sms", "whatsapp"] as Channel[]).map((c) => (
+          <button
+            type="button"
+            key={c}
+            onClick={() => setChannel(c)}
+            className={`flex-1 rounded-xl border px-3 py-2 text-xs font-medium transition ${
+              channel === c
+                ? "border-primary bg-primary/10 text-foreground"
+                : "border-border bg-surface text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {c === "sms" ? "SMS" : "WhatsApp"}
+          </button>
+        ))}
       </div>
       {err && <p className="text-xs text-destructive">{err}</p>}
       <button
