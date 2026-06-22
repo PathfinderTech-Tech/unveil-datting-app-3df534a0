@@ -832,7 +832,7 @@ function Chat() {
                     </div>
                   </div>
                 )}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {msgs.map((m, idx) => {
                     const mine = m.sender_id === user.id;
                     const mReactions = reactions.filter((r) => r.message_id === m.id);
@@ -860,10 +860,10 @@ function Chat() {
                           ) : (
                             <div
                               title={ts}
-                              className={`max-w-[70%] px-3.5 py-2 text-[13.5px] leading-snug transition-transform animate-fade-in ${
+                              className={`max-w-[75%] px-4 py-2.5 text-[15px] font-normal leading-relaxed transition-transform animate-fade-in ${
                                 mine
                                   ? "rounded-[20px] rounded-br-md bg-gradient-to-br from-[oklch(0.56_0.22_286)] via-[oklch(0.61_0.22_304)] to-[oklch(0.65_0.20_328)] text-white shadow-[0_4px_18px_-10px_oklch(0.61_0.22_304/0.5)]"
-                                  : "rounded-[20px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.14)] bg-[oklch(0.15_0.05_298/0.55)] text-foreground backdrop-blur-xl"
+                                  : "rounded-[20px] rounded-bl-md border border-[oklch(0.56_0.22_286/0.28)] bg-[oklch(0.18_0.05_298/0.92)] text-foreground shadow-[0_2px_10px_-6px_oklch(0_0_0/0.5)]"
                               }`}
                             >
                               {m.content}
@@ -873,7 +873,7 @@ function Chat() {
 
                           <button
                             onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
-                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                            className="opacity-60 transition-opacity hover:opacity-100 group-hover:opacity-100"
                             aria-label="React"
                           >
                             <Smile className="h-4 w-4 text-muted-foreground" />
@@ -896,12 +896,17 @@ function Chat() {
                           </div>
                         )}
                         {mine && (
-                          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-foreground/70">
                             <span>{ts}</span>
                             <span>·</span>
                             {seenByPeer ? <><CheckCheck className="h-3 w-3 text-primary" /> Seen</>
                               : m.delivered_at ? <><CheckCheck className="h-3 w-3" /> Delivered</>
                               : <><Check className="h-3 w-3" /> Sent</>}
+                          </div>
+                        )}
+                        {!mine && (
+                          <div className="mt-1 text-[11px] font-medium text-foreground/60">
+                            <span>{ts}</span>
                           </div>
                         )}
                       </div>
