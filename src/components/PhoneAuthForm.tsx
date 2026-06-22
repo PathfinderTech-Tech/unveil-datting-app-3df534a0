@@ -38,7 +38,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       phone: e164,
-      options: { channel: "sms" },
+      options: { channel },
     });
     setLoading(false);
     if (error) {
