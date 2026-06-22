@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
 import { OAuthButtons, OrDivider } from "@/components/OAuthButtons";
 import { PhoneAuthForm } from "@/components/PhoneAuthForm";
-import { useState as _useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { getEmailCooldown, cooldownMessage, logDeletionAttempt } from "@/lib/cooldown";
 import { PasswordInput } from "@/components/ui/password-input";
