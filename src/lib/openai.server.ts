@@ -4,7 +4,18 @@
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const AI_MODEL_DEFAULT = process.env.OPENAI_MODEL || "gpt-5-mini";
+// Provider switch — set AI_PROVIDER=lovable to route through Lovable AI Gateway
+// (Gemini, no OpenAI billing required). Defaults to OpenAI when key is present,
+// auto-falls-back to Lovable when OPENAI_API_KEY is missing.
+const AI_PROVIDER = (process.env.AI_PROVIDER || "").toLowerCase();
+function useLovable(): boolean {
+  if (AI_PROVIDER === "lovable") return true;
+  if (AI_PROVIDER === "openai") return false;
+  return !process.env.OPENAI_API_KEY && !!process.env.LOVABLE_API_KEY;
+}
+export const AI_MODEL_DEFAULT = useLovable()
+  ? (process.env.LOVABLE_MODEL || "google/gemini-2.5-flash")
+  : (process.env.OPENAI_MODEL || "gpt-5-mini");
 
 export type AiFeature =
   | "ai_compatibility_insights"
@@ -60,23 +71,25 @@ async function logUsage(args: {
  * Always logs to ai_usage_log (success or failure). Throws OpenAIError on failure.
  */
 export async function callOpenAI(opts: OpenAIOptions): Promise<string> {
-  const key = process.env.OPENAI_API_KEY;
+  const viaLovable = useLovable();
+  const key = viaLovable ? process.env.LOVABLE_API_KEY : process.env.OPENAI_API_KEY;
   const model = opts.model || AI_MODEL_DEFAULT;
   if (!key) {
     await logUsage({ userId: opts.userId, feature: opts.feature, tokens: 0, success: false, errorCode: "MISSING_KEY", model });
-    throw new OpenAIError("AI_SERVICE_UNAVAILABLE", 500, "Missing OPENAI_API_KEY");
+    throw new OpenAIError("AI_SERVICE_UNAVAILABLE", 500, viaLovable ? "Missing LOVABLE_API_KEY" : "Missing OPENAI_API_KEY");
   }
 
-  const body: Record<string, unknown> = {
-    model,
-    messages: opts.messages,
-  };
+  const body: Record<string, unknown> = { model, messages: opts.messages };
   if (opts.temperature !== undefined) body.temperature = opts.temperature;
   if (opts.jsonMode) body.response_format = { type: "json_object" };
 
+  const url = viaLovable
+    ? "https://ai.gateway.lovable.dev/v1/chat/completions"
+    : "https://api.openai.com/v1/chat/completions";
+
   let res: Response;
   try {
-    res = await fetch("https://api.openai.com/v1/chat/completions", {
+    res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
