@@ -25,7 +25,7 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<Step>("enter");
   const [channel, setChannel] = useState<Channel>("sms");
-  const [tokenEmail, setTokenEmail] = useState<string | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
