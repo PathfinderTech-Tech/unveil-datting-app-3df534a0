@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
@@ -29,6 +30,18 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // First-time visitors (no auth, no welcome seen) → /welcome
+  useEffect(() => {
+    if (loading || user) return;
+    try {
+      if (!localStorage.getItem("unveil:welcome:seen")) {
+        navigate({ to: "/welcome", replace: true });
+      }
+    } catch {}
+  }, [user, loading, navigate]);
+
   if (user && !loading) {
     return (
       <div className="min-h-screen">

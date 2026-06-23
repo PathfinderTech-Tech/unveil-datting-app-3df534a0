@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
@@ -68,6 +69,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -403,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -463,6 +470,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -524,6 +532,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -586,6 +595,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -646,6 +656,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -706,6 +717,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/verify'
+    | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
     | '/checkout/return'
@@ -767,6 +779,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  WelcomeRoute: typeof WelcomeRoute
   ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
@@ -787,6 +800,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify': {
       id: '/verify'
       path: '/verify'
@@ -1259,6 +1279,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  WelcomeRoute: WelcomeRoute,
   ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
