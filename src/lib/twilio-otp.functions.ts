@@ -63,6 +63,17 @@ export const sendPhoneOtp = createServerFn({ method: "POST" })
       body,
     });
     const json: any = await res.json().catch(() => ({}));
+    console.log("[twilio-otp] sendPhoneOtp", {
+      phone: data.phone,
+      channel: data.channel,
+      httpStatus: res.status,
+      verificationSid: json?.sid,
+      verifyServiceSid: verifySid,
+      verifyStatus: json?.status,
+      errorCode: res.ok ? undefined : json?.code,
+      errorMessage: res.ok ? undefined : json?.message,
+      payload: json,
+    });
     if (!res.ok) {
       const msg = json?.message || `Twilio Verify error (${res.status})`;
       const code = json?.code;
@@ -99,6 +110,17 @@ export const verifyPhoneOtp = createServerFn({ method: "POST" })
       body: new URLSearchParams({ To: data.phone, Code: data.code }),
     });
     const checkJson: any = await checkRes.json().catch(() => ({}));
+    console.log("[twilio-otp] verifyPhoneOtp", {
+      phone: data.phone,
+      channel: checkJson?.channel,
+      httpStatus: checkRes.status,
+      verificationSid: checkJson?.sid,
+      verifyServiceSid: verifySid,
+      verifyStatus: checkJson?.status,
+      errorCode: checkRes.ok ? undefined : checkJson?.code,
+      errorMessage: checkRes.ok ? undefined : checkJson?.message,
+      payload: checkJson,
+    });
     if (!checkRes.ok) {
       return {
         ok: false as const,
