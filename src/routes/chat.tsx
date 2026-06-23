@@ -278,28 +278,53 @@ function Chat() {
   const peerName = peer?.first_name ?? "Match";
   const reveal = useMatchReveal(peerId);
 
-  // One-time "Veil Lifted" celebration — persisted across sessions so the
-  // receiving user always sees it once, even if they were offline when it flipped.
+  // One-time "Veil Lifted" celebration — persisted server-side per match row
+  // (matches.reveal_celebration_seen_at) so it survives logout, device swap,
+  // and app reinstall. localStorage is used as a fast guard to avoid
+  // re-triggering within the same session.
   const veilCelebratedRef = useRef<string | null>(null);
   const [veilJustLifted, setVeilJustLifted] = useState(false);
   useEffect(() => {
     if (!peerId || !reveal.veilLifted || !user?.id) return;
     if (veilCelebratedRef.current === peerId) return;
+    veilCelebratedRef.current = peerId;
+
     const storageKey = `unveil:veil-celebrated:${user.id}:${peerId}`;
-    try {
-      if (typeof window !== "undefined" && window.localStorage.getItem(storageKey)) {
-        veilCelebratedRef.current = peerId;
+    let cancelled = false;
+
+    (async () => {
+      // Fast path: already celebrated in this browser.
+      try {
+        if (typeof window !== "undefined" && window.localStorage.getItem(storageKey)) {
+          return;
+        }
+      } catch { /* ignore */ }
+
+      // Authoritative check: did we already mark this match as celebrated?
+      const { data: row } = await supabase
+        .from("matches")
+        .select("reveal_celebration_seen_at")
+        .eq("user_id", user.id)
+        .eq("matched_user_id", peerId)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (row?.reveal_celebration_seen_at) {
+        try { window.localStorage.setItem(storageKey, String(Date.parse(row.reveal_celebration_seen_at) || Date.now())); } catch { /* ignore */ }
         return;
       }
-    } catch { /* localStorage may be unavailable */ }
-    veilCelebratedRef.current = peerId;
-    setVeilJustLifted(true);
-    try {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(storageKey, String(Date.now()));
-      }
-    } catch { /* ignore */ }
-  }, [peerId, reveal.veilLifted, reveal.veilLiftedAt, user?.id]);
+
+      // First time seeing the reveal for this match — show the popup once
+      // and persist the flag server-side so it never shows again.
+      setVeilJustLifted(true);
+      try { window.localStorage.setItem(storageKey, String(Date.now())); } catch { /* ignore */ }
+      await (supabase as any).rpc("mark_reveal_celebration_seen", { _peer: peerId });
+    })();
+
+    return () => { cancelled = true; };
+  }, [peerId, reveal.veilLifted, user?.id]);
+
 
 
   // Match info + compatibility for the active conversation

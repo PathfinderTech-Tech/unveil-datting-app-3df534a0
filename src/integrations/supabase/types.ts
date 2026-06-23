@@ -1073,6 +1073,7 @@ export type Database = {
           meaningful_interactions: number
           mutual_interest: boolean | null
           passed: boolean
+          reveal_celebration_seen_at: string | null
           saved: boolean
           share_matched_consent: boolean | null
           share_unlocked: boolean | null
@@ -1100,6 +1101,7 @@ export type Database = {
           meaningful_interactions?: number
           mutual_interest?: boolean | null
           passed?: boolean
+          reveal_celebration_seen_at?: string | null
           saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
@@ -1127,6 +1129,7 @@ export type Database = {
           meaningful_interactions?: number
           mutual_interest?: boolean | null
           passed?: boolean
+          reveal_celebration_seen_at?: string | null
           saved?: boolean
           share_matched_consent?: boolean | null
           share_unlocked?: boolean | null
@@ -2431,6 +2434,10 @@ export type Database = {
       }
       log_deletion_attempt: {
         Args: { _email: string; _outcome: string; _provider: string }
+        Returns: undefined
+      }
+      mark_reveal_celebration_seen: {
+        Args: { _peer: string }
         Returns: undefined
       }
       move_to_dlq: {
