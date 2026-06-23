@@ -58,6 +58,7 @@
 			</array>
 		</dict>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>UNVEIL uses your camera to add profile photos and record video voice intros.</string>
