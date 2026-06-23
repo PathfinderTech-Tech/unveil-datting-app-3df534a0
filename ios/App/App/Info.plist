@@ -47,7 +47,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>ITSAppUsesNonExemptEncryption</key>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>best.unveil.app.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>best.unveil.app</string>
+			</array>
+		</dict>
+	</array>
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>UNVEIL uses your camera to add profile photos and record video voice intros.</string>
