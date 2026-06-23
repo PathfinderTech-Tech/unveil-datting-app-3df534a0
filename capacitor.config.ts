@@ -14,7 +14,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "best.unveil.app",
   appName: "Unveil",
-  webDir: "dist",
+  webDir: "dist/client",
   ios: {
     contentInset: "always",
     backgroundColor: "#09070d",
