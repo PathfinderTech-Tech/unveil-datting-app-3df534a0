@@ -63,6 +63,17 @@ export const sendPhoneOtp = createServerFn({ method: "POST" })
       body,
     });
     const json: any = await res.json().catch(() => ({}));
+    console.log("[twilio-otp] sendPhoneOtp", {
+      phone: data.phone,
+      channel: data.channel,
+      httpStatus: res.status,
+      verificationSid: json?.sid,
+      verifyServiceSid: verifySid,
+      verifyStatus: json?.status,
+      errorCode: res.ok ? undefined : json?.code,
+      errorMessage: res.ok ? undefined : json?.message,
+      payload: json,
+    });
     if (!res.ok) {
       const msg = json?.message || `Twilio Verify error (${res.status})`;
       const code = json?.code;
