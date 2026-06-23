@@ -204,8 +204,9 @@ export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
           value={country.code}
           onChange={(e) => {
             const c = ALL_PHONE_COUNTRIES.find((x) => x.code === e.target.value);
-            if (c) setCountry(c);
+            if (c) { setCountry(c); setUserPickedCountry(true); }
           }}
+
           className="w-[42%] rounded-xl border border-border bg-surface px-2 py-3 text-sm outline-none focus:border-primary"
         >
           {ALL_PHONE_COUNTRIES.map((c) => (
