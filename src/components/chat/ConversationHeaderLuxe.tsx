@@ -125,15 +125,3 @@ export function ConversationHeaderLuxe({
   );
 }
 
-function _Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
-  return (
-    <div className="flex flex-col items-center px-1 text-center">
-      <div className="flex items-center gap-1">
-        {icon}
-        <span className="text-[11.5px] font-semibold tracking-tight text-foreground">{value}</span>
-      </div>
-      <span className="text-[9px] font-medium tracking-tight text-foreground/50">{label}</span>
-    </div>
-  );
-}
-
