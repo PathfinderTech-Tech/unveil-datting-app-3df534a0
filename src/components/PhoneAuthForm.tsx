@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,13 +14,47 @@ function sanitizeLocal(input: string) {
   return digits.replace(/^0+/, "");
 }
 
+/**
+ * Best-effort detection of the user's country/region from browser locale
+ * (e.g. "en-US" → "US", "fr-FR" → "FR"). Falls back to US (+1) if nothing
+ * usable is found. Never throws — phone login must remain usable offline.
+ */
+function detectUserCountry(): PhoneCountry {
+  if (typeof navigator === "undefined") return DEFAULT_PHONE_COUNTRY;
+  const candidates: string[] = [];
+  try {
+    const region = (Intl.DateTimeFormat().resolvedOptions() as any).locale as string | undefined;
+    if (region) candidates.push(region);
+  } catch { /* ignore */ }
+  if (navigator.language) candidates.push(navigator.language);
+  if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
+
+  for (const loc of candidates) {
+    const m = /[-_]([A-Z]{2})\b/i.exec(loc);
+    if (!m) continue;
+    const code = m[1].toUpperCase();
+    const hit = ALL_PHONE_COUNTRIES.find((c) => c.code === code);
+    if (hit) return hit;
+  }
+  return ALL_PHONE_COUNTRIES.find((c) => c.code === "US") ?? DEFAULT_PHONE_COUNTRY;
+}
+
 type Channel = "sms" | "whatsapp";
 
 export function PhoneAuthForm({ mode }: { mode: "signin" | "signup" }) {
   const navigate = useNavigate();
   const sendOtpFn = useServerFn(sendPhoneOtp);
   const verifyOtpFn = useServerFn(verifyPhoneOtp);
-  const [country, setCountry] = useState<PhoneCountry>(DEFAULT_PHONE_COUNTRY);
+  // Default to US (+1); upgrade to detected locale on mount (client-only).
+  const [country, setCountry] = useState<PhoneCountry>(
+    () => ALL_PHONE_COUNTRIES.find((c) => c.code === "US") ?? DEFAULT_PHONE_COUNTRY,
+  );
+  const [userPickedCountry, setUserPickedCountry] = useState(false);
+  useEffect(() => {
+    if (userPickedCountry) return;
+    setCountry(detectUserCountry());
+  }, [userPickedCountry]);
+
   const [local, setLocal] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<Step>("enter");
