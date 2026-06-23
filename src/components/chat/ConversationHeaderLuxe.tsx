@@ -37,11 +37,11 @@ export function ConversationHeaderLuxe({
   onMenu,
 }: Props) {
   return (
-    <header className="relative shrink-0 border-b border-[oklch(0.56_0.22_286/0.12)] bg-[oklch(0.10_0.035_298/0.78)] px-3 pb-2.5 pt-2 backdrop-blur-xl sm:px-4">
-      <div className="flex items-center gap-2.5">
+    <header className="relative shrink-0 border-b border-[oklch(0.56_0.22_286/0.12)] bg-[oklch(0.10_0.035_298/0.78)] px-3 pb-1.5 pt-1.5 backdrop-blur-xl sm:px-4">
+      <div className="flex items-center gap-2">
         <button
           onClick={onBack}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.6)] text-foreground/80 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.6)] text-foreground/80 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
           aria-label="Back"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -49,84 +49,83 @@ export function ConversationHeaderLuxe({
 
         {/* Compact veiled avatar */}
         <div className="relative shrink-0">
-          <div className="relative h-12 w-12 rounded-full bg-gradient-to-br from-[oklch(0.65_0.20_328)] via-[oklch(0.61_0.22_304)] to-[oklch(0.56_0.22_286)] p-[1.5px] shadow-[0_0_14px_oklch(0.61_0.22_304/0.28)]">
-            <div className="h-full w-full rounded-full bg-[oklch(0.075_0.018_295)] p-[1.5px]">
+          <div className="relative h-9 w-9 rounded-full bg-gradient-to-br from-[oklch(0.65_0.20_328)] via-[oklch(0.61_0.22_304)] to-[oklch(0.56_0.22_286)] p-[1.5px] shadow-[0_0_10px_oklch(0.61_0.22_304/0.25)]">
+            <div className="h-full w-full rounded-full bg-[oklch(0.075_0.018_295)] p-[1px]">
               <ProfileAvatar
                 userId={peerId}
                 name={peerName}
                 discoveryMode={peerDiscoveryMode}
                 avatarUrl={peerAvatarUrl}
                 photoUrl={peerPhotoUrl}
-                size={42}
+                size={32}
                 veiled={!veilLifted}
               />
             </div>
           </div>
           {isOnline && (
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[oklch(0.10_0.035_298)]" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-[oklch(0.10_0.035_298)]" />
           )}
         </div>
 
-          <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1.5">
-            <h1 className="truncate font-display text-[17px] font-semibold leading-tight tracking-tight text-foreground">{peerName}</h1>
+            <h1 className="truncate font-display text-[14px] font-semibold leading-tight tracking-tight text-foreground">{peerName}</h1>
             {verified && (
-              <span className="relative inline-flex items-center justify-center rounded-full bg-[#39FF14] p-[3px] shadow-[0_0_8px_2px_rgba(57,255,20,0.85),0_0_16px_4px_rgba(57,255,20,0.45)] animate-pulse">
-                <ShieldCheck className="h-3 w-3 text-[#0a0a0a]" strokeWidth={3} />
+              <span className="relative inline-flex items-center justify-center rounded-full bg-[#39FF14] p-[2px] shadow-[0_0_6px_1.5px_rgba(57,255,20,0.7)]">
+                <ShieldCheck className="h-2.5 w-2.5 text-[#0a0a0a]" strokeWidth={3} />
+              </span>
+            )}
+            {veilLifted && (
+              <span className="ml-0.5 truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[oklch(0.78_0.10_328)]">
+                · Reveal complete
               </span>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[11.5px] leading-tight text-[oklch(0.78_0.10_328)]">
-            {veilLifted ? "Reveal complete" : "Veiled · keep talking to reveal"}
-          </p>
+          {/* Inline mini-stats: Match · Left · ID — replaces the separate strip */}
+          <div className="mt-0.5 flex items-center gap-2 text-[10.5px] leading-tight text-foreground/70">
+            <span className="inline-flex items-center gap-0.5">
+              <Sparkles className="h-2.5 w-2.5 text-[oklch(0.61_0.22_304)]" />
+              <span className="font-semibold text-foreground">{compatibility != null ? `${compatibility}%` : "—"}</span>
+            </span>
+            <span className="text-foreground/25">·</span>
+            <span className="inline-flex items-center gap-0.5">
+              <MessageCircle className="h-2.5 w-2.5 text-[oklch(0.65_0.20_328)]" />
+              <span className="font-semibold text-foreground">{messagesRemaining}</span>
+              <span className="text-foreground/50">left</span>
+            </span>
+            <span className="text-foreground/25">·</span>
+            <span className="inline-flex items-center gap-0.5">
+              <ShieldCheck
+                className={`h-2.5 w-2.5 ${verified ? "text-[#39FF14]" : "text-foreground/35"}`}
+                strokeWidth={verified ? 2.5 : 2}
+              />
+              <span className={verified ? "text-foreground" : "text-foreground/50"}>{verified ? "ID" : "ID?"}</span>
+            </span>
+          </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5">
           <button
             onClick={onReport}
             aria-label="Report"
-            className="grid h-9 w-9 place-items-center rounded-full border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.13_0.05_298/0.5)] text-foreground/70 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
+            className="grid h-8 w-8 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
           >
             <Flag className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onMenu}
             aria-label="More"
-            className="grid h-9 w-9 place-items-center rounded-full border border-[oklch(0.56_0.22_286/0.18)] bg-[oklch(0.13_0.05_298/0.5)] text-foreground/70 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
+            className="grid h-8 w-8 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-[oklch(0.18_0.07_298/0.7)] active:scale-95"
           >
             <MoreVertical className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
-
-      {/* Slim 3-stat strip — equal columns, softer borders */}
-      <div className="mt-2 grid grid-cols-3 gap-2 rounded-2xl border border-[oklch(0.56_0.22_286/0.08)] bg-[oklch(0.13_0.05_298/0.3)] px-2 py-1.5">
-        <Stat
-          icon={<Sparkles className="h-3 w-3 text-[oklch(0.61_0.22_304)]" />}
-          value={compatibility != null ? `${compatibility}%` : "—"}
-          label="Match"
-        />
-        <Stat
-          icon={<MessageCircle className="h-3 w-3 text-[oklch(0.65_0.20_328)]" />}
-          value={String(messagesRemaining)}
-          label="Left today"
-        />
-        <Stat
-          icon={
-            <ShieldCheck
-              className={`h-3 w-3 ${verified ? "text-[#39FF14] drop-shadow-[0_0_4px_rgba(57,255,20,0.7)]" : "text-foreground/35"}`}
-              strokeWidth={verified ? 2.5 : 2}
-            />
-          }
-          value={verified ? "Verified" : "Pending"}
-          label="ID"
-        />
-      </div>
     </header>
   );
 }
 
-function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+function _Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
     <div className="flex flex-col items-center px-1 text-center">
       <div className="flex items-center gap-1">
@@ -137,3 +136,4 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
     </div>
   );
 }
+
