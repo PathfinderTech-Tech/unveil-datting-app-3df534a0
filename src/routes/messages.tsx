@@ -7,7 +7,7 @@ import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
 
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useMyLocationTrust, LocationTrustBadge } from "@/components/LocationTrustBadge";
 
