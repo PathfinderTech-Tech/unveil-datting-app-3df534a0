@@ -197,17 +197,6 @@ function MessagesPage() {
   });
   const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
 
-  if (checking || loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <UnveilNav />
-        <div className="p-8 text-muted-foreground">Loading…</div>
-      </div>
-    );
-  }
-
-
-  return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <UnveilNav />
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
