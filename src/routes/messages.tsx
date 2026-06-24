@@ -238,17 +238,7 @@ function MessagesPage() {
           />
         </div>
 
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">No conversations yet.</p>
-            <Link
-              to="/discover"
-              className="mt-3 inline-block text-xs text-muted-foreground/80 underline-offset-4 hover:text-primary hover:underline"
-            >
-              Discover people to start new conversations
-            </Link>
-          </div>
-        ) : (
+        {filtered.length > 0 && (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
             {filtered.map((r) => {
               const isThought = r.id.startsWith("thought:");
