@@ -37,7 +37,7 @@ type Row = {
 };
 
 function MessagesPage() {
-  const { checking } = useRequireOnboarding();
+  useRequireOnboarding();
   const { user, loading } = useAuth();
   
 
@@ -197,16 +197,6 @@ function MessagesPage() {
   });
   const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
 
-  if (checking || loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <UnveilNav />
-        <div className="p-8 text-muted-foreground">Loading…</div>
-      </div>
-    );
-  }
-
-
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <UnveilNav />
@@ -248,17 +238,7 @@ function MessagesPage() {
           />
         </div>
 
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">No conversations yet.</p>
-            <Link
-              to="/discover"
-              className="mt-3 inline-block text-xs text-muted-foreground/80 underline-offset-4 hover:text-primary hover:underline"
-            >
-              Discover people to start new conversations
-            </Link>
-          </div>
-        ) : (
+        {filtered.length > 0 && (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
             {filtered.map((r) => {
               const isThought = r.id.startsWith("thought:");
