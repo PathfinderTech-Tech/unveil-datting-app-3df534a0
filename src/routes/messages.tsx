@@ -37,7 +37,7 @@ type Row = {
 };
 
 function MessagesPage() {
-  const { checking } = useRequireOnboarding();
+  useRequireOnboarding();
   const { user, loading } = useAuth();
   
 
