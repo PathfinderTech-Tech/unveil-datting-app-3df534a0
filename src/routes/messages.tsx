@@ -249,17 +249,13 @@ function MessagesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface/40 p-10 text-center">
-            <MessageCircle className="mx-auto h-10 w-10 text-muted-foreground" aria-hidden />
-            <h2 className="mt-4 text-lg font-medium">No conversations yet</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              When you and someone you like both show interest, you can start a conversation here.
-            </p>
+          <div className="py-16 text-center">
+            <p className="text-sm text-muted-foreground">No conversations yet.</p>
             <Link
               to="/discover"
-              className="mt-6 inline-flex items-center rounded-full bg-gradient-hero px-5 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+              className="mt-3 inline-block text-xs text-muted-foreground/80 underline-offset-4 hover:text-primary hover:underline"
             >
-              Discover people
+              Discover people to start new conversations
             </Link>
           </div>
         ) : (
