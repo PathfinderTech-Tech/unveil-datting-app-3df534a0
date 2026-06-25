@@ -34,6 +34,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AiCompatibilityPanel } from "@/components/AiCompatibilityPanel";
+import { useEntitlements } from "@/hooks/use-entitlements";
 import { GiftPickerSheet } from "@/components/GiftPickerSheet";
 import { GiftMessageBubble } from "@/components/GiftMessageBubble";
 // ConnectionProgress / DateReadinessProgress removed — replaced by RevealProgressCard
