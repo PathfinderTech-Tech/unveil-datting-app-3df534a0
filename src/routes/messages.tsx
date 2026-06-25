@@ -238,6 +238,13 @@ function MessagesPage() {
           />
         </div>
 
+        {!loading && rows.length === 0 && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">No conversations yet</p>
+            <p className="mt-1 text-xs text-muted-foreground/80">Start matching to begin conversations.</p>
+          </div>
+        )}
+
         {filtered.length > 0 && (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
             {filtered.map((r) => {
