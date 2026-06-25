@@ -122,6 +122,7 @@ function daysSince(iso: string): number {
 
 function Chat() {
   const { user, loading } = useAuth();
+  const { entitlements } = useEntitlements();
   const navigate = useNavigate();
   const { c: wantId } = Route.useSearch();
   const [convs, setConvs] = useState<Conv[]>([]);
