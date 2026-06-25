@@ -1114,12 +1114,21 @@ function Chat() {
                         {peerId ? (
                           <>
                             <AiCompatibilityPanel peerId={peerId} />
-                            <Link
-                              to="/insights-ai"
-                              className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
-                            >
-                              View AI Compatibility Insights →
-                            </Link>
+                            {entitlements.premium ? (
+                              <Link
+                                to="/manage-subscription"
+                                className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm text-muted-foreground hover:border-primary/40"
+                              >
+                                Premium active · Manage plan →
+                              </Link>
+                            ) : (
+                              <Link
+                                to="/premium"
+                                className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
+                              >
+                                Upgrade for More AI Insights →
+                              </Link>
+                            )}
                           </>
                         ) : (
                           <p className="text-sm text-muted-foreground">Select a conversation to view AI Compatibility Insights.</p>
