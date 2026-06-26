@@ -542,9 +542,12 @@ function Onboarding() {
                   }}
                 />
               </div>
-              <div className="md:col-span-2">
-                <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
-              </div>
+              {!isPhoneUser && (
+                <div className="md:col-span-2">
+                  <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
+                </div>
+              )}
+
               <div className="md:col-span-2">
                 <Field label="Relationship intention *">
                   <div className="grid gap-2 md:grid-cols-2">
