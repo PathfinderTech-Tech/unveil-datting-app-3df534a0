@@ -4,6 +4,7 @@ import { Sparkles, RefreshCw, Crown, Lock } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getCompatibilityInsight, aiErrorMessage, type CompatibilityInsight } from "@/lib/ai-compatibility.functions";
 import { useEntitlements } from "@/hooks/use-entitlements";
+import { AiQuotaStatus } from "@/components/AiQuotaStatus";
 
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -52,13 +53,22 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
 
   if (entLoading) return null;
 
-  // Non-premium users (or premium-required errors) always see the upgrade experience
+  // Non-premium users (or premium-required errors) always see the upgrade experience.
+  // Include the live quota badge so the user can verify their current allowance
+  // (e.g. "0 of 0 today on Free") before upgrading.
   if (!isPremium || errorCode === "PREMIUM_REQUIRED") {
-    return <PremiumUpsellCard />;
+    return (
+      <div className="space-y-2">
+        <AiQuotaStatus />
+        <PremiumUpsellCard />
+      </div>
+    );
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.16)] bg-[oklch(0.13_0.05_298/0.4)] p-5 backdrop-blur-xl">
+    <div className="space-y-2">
+      <AiQuotaStatus />
+      <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.16)] bg-[oklch(0.13_0.05_298/0.4)] p-5 backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
@@ -155,6 +165,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );
