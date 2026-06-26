@@ -119,6 +119,8 @@ type Answers = Record<string, unknown>;
 function Onboarding() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const isPhoneUser = !!(user && (user.phone || (user.email ?? "").endsWith("@phone.unveil.local")));
+
 
   const [step, setStep] = useState(1);
   const [hydrated, setHydrated] = useState(false);
@@ -232,7 +234,7 @@ function Onboarding() {
       if (prof?.interested_in) setInterestedIn(prof.interested_in);
       const intentVal = prof?.relationship_intent || prof?.intention;
       if (intentVal) setIntent(intentVal);
-      if (user.email) setEmail(user.email);
+      if (user.email && !user.email.endsWith("@phone.unveil.local")) setEmail(user.email);
       if (prof?.bio) setBio(prof.bio);
       if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
       const sel = prof?.profile_photo_url || prof?.photo_url;
@@ -269,7 +271,7 @@ function Onboarding() {
         country: prof?.country ?? "",
         interestedIn: prof?.interested_in ?? "",
         intent: (prof?.relationship_intent || prof?.intention) ?? "",
-        email: user.email ?? "",
+        email: isPhoneUser ? "phone@ok" : (user.email ?? ""),
         photoUrl: sel ?? null,
         bio: prof?.bio ?? "",
         interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
@@ -414,7 +416,7 @@ function Onboarding() {
   const canNext = useMemo(() => {
     switch (step) {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
-      case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
+      case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && (isPhoneUser || /\S+@\S+\.\S+/.test(email));
       case 3: return !!photoUrl;
       case 4: return true; // Voice prompts — skippable
       case 5: return bio.trim().length >= 20 && interests.length >= 3;
@@ -424,7 +426,7 @@ function Onboarding() {
       case 9: return true;
       default: return true;
     }
-  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
+  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, isPhoneUser, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
 
   // ---------- Render ----------
   if (authLoading || (user && !hydrated)) {
@@ -540,9 +542,12 @@ function Onboarding() {
                   }}
                 />
               </div>
-              <div className="md:col-span-2">
-                <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
-              </div>
+              {!isPhoneUser && (
+                <div className="md:col-span-2">
+                  <Field label="Email *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className={inputCls} /></Field>
+                </div>
+              )}
+
               <div className="md:col-span-2">
                 <Field label="Relationship intention *">
                   <div className="grid gap-2 md:grid-cols-2">
