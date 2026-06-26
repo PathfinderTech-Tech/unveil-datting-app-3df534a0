@@ -271,7 +271,7 @@ function Onboarding() {
         country: prof?.country ?? "",
         interestedIn: prof?.interested_in ?? "",
         intent: (prof?.relationship_intent || prof?.intention) ?? "",
-        email: user.email ?? "",
+        email: isPhoneUser ? "phone@ok" : (user.email ?? ""),
         photoUrl: sel ?? null,
         bio: prof?.bio ?? "",
         interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
