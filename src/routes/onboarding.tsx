@@ -119,6 +119,8 @@ type Answers = Record<string, unknown>;
 function Onboarding() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const isPhoneUser = !!(user && (user.phone || (user.email ?? "").endsWith("@phone.unveil.local")));
+
 
   const [step, setStep] = useState(1);
   const [hydrated, setHydrated] = useState(false);
