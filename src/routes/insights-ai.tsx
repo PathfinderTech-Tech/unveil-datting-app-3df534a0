@@ -10,6 +10,7 @@ import { getCompatibilityInsight, getTopAiMatches, aiErrorMessage, type Compatib
 import robotMascot from "@/assets/ai-insights-robot.png";
 
 import { InsightsHubTabs } from "@/components/InsightsHubTabs";
+import { AiQuotaStatus } from "@/components/AiQuotaStatus";
 
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
@@ -98,6 +99,9 @@ function InsightsAiPage() {
 
           <HeroBlock />
 
+          <div className="mt-4"><AiQuotaStatus /></div>
+
+
           {/* Locked top picks preview */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <LockedPick label="Best Overall Match" sub="Your top connection with the highest overall compatibility." icon={<Trophy className="h-5 w-5" />} />
@@ -137,6 +141,10 @@ function InsightsAiPage() {
       <UnveilNav />
       <div className="mx-auto max-w-5xl px-6 py-10">
         <HeroBlock premium />
+
+        <div className="mt-4"><AiQuotaStatus /></div>
+
+
 
         {/* TOP PICKS */}
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
