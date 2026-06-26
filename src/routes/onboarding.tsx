@@ -416,7 +416,7 @@ function Onboarding() {
   const canNext = useMemo(() => {
     switch (step) {
       case 1: return agree18 && agreeTerms && agreePrivacy && agreeCommunity;
-      case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && /\S+@\S+\.\S+/.test(email);
+      case 2: return name.length > 1 && !!gender && !!country && !!interestedIn && !!intent && (isPhoneUser || /\S+@\S+\.\S+/.test(email));
       case 3: return !!photoUrl;
       case 4: return true; // Voice prompts — skippable
       case 5: return bio.trim().length >= 20 && interests.length >= 3;
