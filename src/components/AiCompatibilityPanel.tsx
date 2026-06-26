@@ -166,6 +166,7 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
           </>
         )}
       </div>
+      </div>
     </div>
   );
 }
