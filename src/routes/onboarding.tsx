@@ -426,7 +426,7 @@ function Onboarding() {
       case 9: return true;
       default: return true;
     }
-  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
+  }, [step, agree18, agreeTerms, agreePrivacy, agreeCommunity, name, gender, country, interestedIn, intent, email, isPhoneUser, photoUrl, bio, interests, compat, allDiscoveryAnswered]);
 
   // ---------- Render ----------
   if (authLoading || (user && !hydrated)) {
