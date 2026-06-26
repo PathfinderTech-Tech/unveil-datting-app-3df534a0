@@ -66,7 +66,9 @@ export function AiCompatibilityPanel({ peerId }: { peerId: string }) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.16)] bg-[oklch(0.13_0.05_298/0.4)] p-5 backdrop-blur-xl">
+    <div className="space-y-2">
+      <AiQuotaStatus />
+      <div className="relative overflow-hidden rounded-3xl border border-[oklch(0.56_0.22_286/0.16)] bg-[oklch(0.13_0.05_298/0.4)] p-5 backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
