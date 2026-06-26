@@ -234,7 +234,7 @@ function Onboarding() {
       if (prof?.interested_in) setInterestedIn(prof.interested_in);
       const intentVal = prof?.relationship_intent || prof?.intention;
       if (intentVal) setIntent(intentVal);
-      if (user.email) setEmail(user.email);
+      if (user.email && !user.email.endsWith("@phone.unveil.local")) setEmail(user.email);
       if (prof?.bio) setBio(prof.bio);
       if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
       const sel = prof?.profile_photo_url || prof?.photo_url;
