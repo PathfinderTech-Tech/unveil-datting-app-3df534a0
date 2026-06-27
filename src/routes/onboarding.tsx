@@ -286,11 +286,15 @@ function Onboarding() {
   }, [user, authLoading, navigate]);
 
   // ---------- Per-step save ----------
-  async function persist(extra: Partial<Answers> = {}, profileUpdate: Record<string, unknown> = {}) {
+  async function persist(extra: Partial<Answers> = {}, profileUpdate: Record<string, unknown> = {}): Promise<boolean> {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setSaving(false); return; }
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !user) {
+        console.error("[onboarding] no auth user", userErr);
+        toast.error("Your session expired. Please sign in again.");
+        return false;
+      }
       const answers: Answers = {
         agree18, agreeTerms, agreePrivacy, agreeCommunity,
         appearance, avatarStyle,
@@ -299,26 +303,41 @@ function Onboarding() {
         verifyChoice,
         ...extra,
       };
-      await supabase.from("onboarding_answers").upsert(
+      const { error: ansErr } = await supabase.from("onboarding_answers").upsert(
         { user_id: user.id, answers: answers as never },
         { onConflict: "user_id" },
       );
-      if (Object.keys(profileUpdate).length > 0) {
-        await supabase.from("profiles").update(profileUpdate as never).eq("id", user.id);
+      if (ansErr) {
+        console.error("[onboarding] onboarding_answers upsert failed", ansErr);
+        toast.error(`Could not save: ${ansErr.message}`);
+        return false;
       }
-
+      if (Object.keys(profileUpdate).length > 0) {
+        const { error: profErr } = await supabase
+          .from("profiles")
+          .update(profileUpdate as never)
+          .eq("id", user.id);
+        if (profErr) {
+          console.error("[onboarding] profiles update failed", profErr, profileUpdate);
+          toast.error(`Could not save profile: ${profErr.message}`);
+          return false;
+        }
+      }
       setSavedAt(Date.now());
+      return true;
     } catch (e) {
-      console.warn("[onboarding] save failed", e);
+      console.error("[onboarding] save failed", e);
+      toast.error(e instanceof Error ? e.message : "Save failed. Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
   }
 
   async function goNext() {
-    // Save based on the step we're leaving
+    let ok = true;
     if (step === 2) {
-      await persist({}, {
+      ok = await persist({}, {
         first_name: name, age, gender, country,
         country_code: countryCode,
         continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
@@ -327,17 +346,18 @@ function Onboarding() {
         intention: intent, relationship_intent: intent,
       });
     } else if (step === 5) {
-      await persist({}, {
+      ok = await persist({}, {
         bio: bio || null,
         interests: interests as unknown as string[],
       });
     } else if (step === 3) {
       const discovery_mode = appearance === "real" ? "photo" : "avatar";
-      await persist({}, { discovery_mode });
+      ok = await persist({}, { discovery_mode });
     } else {
       // Steps 1, 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
-      await persist();
+      ok = await persist();
     }
+    if (!ok) return; // stay on this step so the user can retry instead of being silently bounced later
     setStep((s) => Math.min(TOTAL, s + 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
