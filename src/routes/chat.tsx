@@ -594,6 +594,13 @@ function Chat() {
           peerName={peerName}
         />
       )}
+      <AttachmentSheet
+        open={attachOpen}
+        onClose={() => setAttachOpen(false)}
+        onGift={() => setGiftOpen(true)}
+      />
+
+
 
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 min-h-0 gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
