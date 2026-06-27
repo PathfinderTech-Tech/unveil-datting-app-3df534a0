@@ -366,31 +366,52 @@ function Onboarding() {
     if (saving) return;
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const lang = (typeof navigator !== "undefined" ? navigator.language?.slice(0, 2) : "en") || "en";
-        const summary = allDiscoveryAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
-        await supabase.from("profiles").update({
-          first_name: name, age, gender, country,
-          country_code: countryCode,
-          continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
-          state_region: stateRegion || null, city: city || null,
-          interested_in: interestedIn,
-          intention: intent, relationship_intent: intent,
-          preferred_language: lang,
-          avatar_style: avatarStyle,
-          discovery_mode: (appearance === "real" ? "photo" : "avatar"),
-          curiosity_level: character.curiosity,
-          emotional_rhythm: character as unknown as Record<string, number>,
-          bio: bio || summary || null,
-          interests: interests as unknown as string[],
-          onboarding_complete: true,
-        }).eq("id", user.id);
-        await persist();
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !user) {
+        toast.error("Your session expired. Please sign in again.");
+        console.error("[onboarding] finish: no auth user", userErr);
+        setSaving(false);
+        return;
+      }
+      const lang = (typeof navigator !== "undefined" ? navigator.language?.slice(0, 2) : "en") || "en";
+      const summary = allDiscoveryAnswered ? discoverySummary(discovery as DiscoveryProfile) : "";
+      const finalUpdate = {
+        first_name: name, age, gender, country,
+        country_code: countryCode,
+        continent_code: countryCode ? (COUNTRY_BY_CODE[countryCode]?.continent ?? null) : null,
+        state_region: stateRegion || null, city: city || null,
+        interested_in: interestedIn,
+        intention: intent, relationship_intent: intent,
+        preferred_language: lang,
+        avatar_style: avatarStyle,
+        discovery_mode: (appearance === "real" ? "photo" : "avatar"),
+        curiosity_level: character.curiosity,
+        emotional_rhythm: character as unknown as Record<string, number>,
+        bio: bio || summary || null,
+        interests: interests as unknown as string[],
+        onboarding_complete: true,
+      };
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update(finalUpdate as never)
+        .eq("id", user.id);
+      if (profErr) {
+        console.error("[onboarding] finish profile update failed", profErr, finalUpdate);
+        toast.error(`Could not complete profile: ${profErr.message}`);
+        setSaving(false);
+        return;
+      }
+      await persist();
+      try {
         const { track } = await import("@/lib/analytics");
         await track("profile_completed", { intent, country, appearance });
-      }
-    } catch (e) { console.warn("[unveil] finish save skipped", e); }
+      } catch { /* analytics is best-effort */ }
+    } catch (e) {
+      console.error("[onboarding] finish failed", e);
+      toast.error(e instanceof Error ? e.message : "Could not finish onboarding. Please try again.");
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     if (redirect === "discover") navigate({ to: "/matches" });
     else if (redirect === "hidden") navigate({ to: "/matches" });
