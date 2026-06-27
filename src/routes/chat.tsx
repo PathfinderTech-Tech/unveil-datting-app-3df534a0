@@ -13,6 +13,7 @@ import {
 import { ConversationHeaderLuxe } from "@/components/chat/ConversationHeaderLuxe";
 import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
 import { QuickActionBar } from "@/components/chat/QuickActionBar";
+import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
