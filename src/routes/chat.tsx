@@ -1020,9 +1020,9 @@ function Chat() {
                   <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
                   <button
                     type="button"
-                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                    onClick={() => setAttachOpen(true)}
                     disabled={!peerId}
-                    aria-label="Icebreakers"
+                    aria-label="Attach"
                     className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
                   >
                     <Plus className="h-4 w-4" />
