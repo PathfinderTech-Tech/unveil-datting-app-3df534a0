@@ -18,6 +18,7 @@ const PRODUCT = [
   { to: "/matches", label: "Matches" },
   { to: "/premium", label: "Membership" },
   { to: "/passport", label: "Passport" },
+  { to: "/settings", label: "Settings" },
 ] as const;
 
 export function SiteFooter() {
