@@ -13,6 +13,7 @@ import {
 import { ConversationHeaderLuxe } from "@/components/chat/ConversationHeaderLuxe";
 import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
 import { QuickActionBar } from "@/components/chat/QuickActionBar";
+import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -147,6 +148,7 @@ function Chat() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
   const [giftOpen, setGiftOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
@@ -592,6 +594,13 @@ function Chat() {
           peerName={peerName}
         />
       )}
+      <AttachmentSheet
+        open={attachOpen}
+        onClose={() => setAttachOpen(false)}
+        onGift={() => setGiftOpen(true)}
+      />
+
+
 
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 min-h-0 gap-0 px-0 lg:gap-5 lg:px-6 lg:py-4">
@@ -1018,9 +1027,9 @@ function Chat() {
                   <div className="flex min-w-0 items-center gap-2 rounded-full border border-[oklch(0.56_0.22_286/0.2)] bg-[oklch(0.13_0.05_298/0.75)] p-1.5 backdrop-blur-2xl shadow-[0_10px_30px_-15px_oklch(0_0_0/0.55)]">
                   <button
                     type="button"
-                    onClick={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                    onClick={() => setAttachOpen(true)}
                     disabled={!peerId}
-                    aria-label="Icebreakers"
+                    aria-label="Attach"
                     className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.18_0.07_298)] to-[oklch(0.22_0.09_298)] text-foreground/80 transition-colors hover:text-foreground disabled:opacity-50"
                   >
                     <Plus className="h-4 w-4" />
