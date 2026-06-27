@@ -148,6 +148,7 @@ function Chat() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
   const [giftOpen, setGiftOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
