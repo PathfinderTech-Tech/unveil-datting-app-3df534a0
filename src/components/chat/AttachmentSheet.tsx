@@ -52,14 +52,14 @@ export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrar
       label: "Location",
       icon: MapPin,
       tint: "from-[oklch(0.55_0.16_160)] to-[oklch(0.50_0.15_140)]",
-      onClick: () => toast("Share Location coming soon"),
+      onClick: wrap(onLocation),
     },
     {
       id: "audio",
       label: "Audio",
       icon: Mic,
       tint: "from-[oklch(0.55_0.18_300)] to-[oklch(0.50_0.18_330)]",
-      onClick: () => toast("Audio file coming soon"),
+      onClick: wrap(onAudio),
     },
     {
       id: "gift",
