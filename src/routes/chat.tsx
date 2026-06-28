@@ -768,6 +768,8 @@ function Chat() {
         onCamera={() => cameraInputRef.current?.click()}
         onPhotoLibrary={() => photoInputRef.current?.click()}
         onFile={() => fileInputRef.current?.click()}
+        onLocation={requestLocation}
+        onAudio={() => audioInputRef.current?.click()}
       />
       <JournalSheet
         open={journalOpen}
@@ -799,6 +801,86 @@ function Chat() {
         className="hidden"
         onChange={(e) => { void handleAttachFiles(e.target.files, "file"); e.target.value = ""; }}
       />
+      <input
+        ref={audioInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={(e) => { handlePickAudio(e.target.files); e.target.value = ""; }}
+      />
+
+      {/* Location loading toast-style indicator */}
+      {locationLoading && (
+        <div className="fixed left-1/2 top-20 z-[90] -translate-x-1/2 rounded-full border border-[oklch(0.56_0.22_286/0.3)] bg-[oklch(0.10_0.04_298/0.92)] px-4 py-2 text-xs text-foreground backdrop-blur-xl">
+          Getting your location…
+        </div>
+      )}
+
+      {/* Location preview modal */}
+      {locationPreview && (
+        <div className="fixed inset-0 z-[85] grid place-items-center p-4" role="dialog" aria-modal="true">
+          <button type="button" aria-label="Close" onClick={() => setLocationPreview(null)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm rounded-3xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.10_0.04_298/0.95)] p-5 shadow-2xl backdrop-blur-2xl">
+            <h3 className="font-display text-lg text-foreground">Share your location?</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Only this person will see it. They can open it in Maps.
+            </p>
+            <div className="mt-4">
+              <LocationMessageBubble
+                content={`${locationPreview.lat.toFixed(6)},${locationPreview.lng.toFixed(6)}|My current location`}
+                mine
+              />
+            </div>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setLocationPreview(null)}
+                className="flex-1 rounded-full border border-[oklch(0.56_0.22_286/0.25)] bg-transparent px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-[oklch(0.18_0.07_298/0.5)]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendLocationMessage()}
+                className="flex-1 rounded-full bg-gradient-to-r from-[oklch(0.55_0.18_286)] to-[oklch(0.55_0.18_330)] px-4 py-2.5 text-sm font-semibold text-white shadow-lg active:scale-95"
+              >
+                Send Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audio preview modal */}
+      {audioPreview && (
+        <div className="fixed inset-0 z-[85] grid place-items-center p-4" role="dialog" aria-modal="true">
+          <button type="button" aria-label="Close" onClick={closeAudioPreview} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm rounded-3xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.10_0.04_298/0.95)] p-5 shadow-2xl backdrop-blur-2xl">
+            <h3 className="font-display text-lg text-foreground">Send audio?</h3>
+            <p className="mt-1 truncate text-xs text-muted-foreground">{audioPreview.file.name}</p>
+            <audio controls src={audioPreview.url} className="mt-4 w-full" preload="metadata" />
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={closeAudioPreview}
+                disabled={uploadingAttach}
+                className="flex-1 rounded-full border border-[oklch(0.56_0.22_286/0.25)] bg-transparent px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-[oklch(0.18_0.07_298/0.5)] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendAudioMessage()}
+                disabled={uploadingAttach}
+                className="flex-1 rounded-full bg-gradient-to-r from-[oklch(0.55_0.18_286)] to-[oklch(0.55_0.18_330)] px-4 py-2.5 text-sm font-semibold text-white shadow-lg active:scale-95 disabled:opacity-60"
+              >
+                {uploadingAttach ? "Sending…" : "Send Audio"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
 
 
