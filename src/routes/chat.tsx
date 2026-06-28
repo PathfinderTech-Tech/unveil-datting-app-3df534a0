@@ -15,7 +15,7 @@ import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
 import { QuickActionBar } from "@/components/chat/QuickActionBar";
 import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
 import { JournalSheet } from "@/components/chat/JournalSheet";
-import { ImageAttachmentBubble, FileAttachmentBubble } from "@/components/chat/AttachmentMessage";
+import { ImageAttachmentBubble, FileAttachmentBubble, LocationMessageBubble, AudioMessageBubble } from "@/components/chat/AttachmentMessage";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -156,6 +156,10 @@ function Chat() {
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const [locationPreview, setLocationPreview] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [audioPreview, setAudioPreview] = useState<{ file: File; url: string } | null>(null);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
@@ -510,6 +514,111 @@ function Chat() {
     }
   };
 
+  const requestLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error("Location is not supported on this device.");
+      return;
+    }
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocationLoading(false);
+        setLocationPreview({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => {
+        setLocationLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Location permission denied. Enable it in your device settings to share your location.");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          toast.error("Couldn't determine your location. Try again outdoors or with Wi-Fi on.");
+        } else if (err.code === err.TIMEOUT) {
+          toast.error("Location request timed out. Please try again.");
+        } else {
+          toast.error("Couldn't get your location.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  };
+
+  const sendLocationMessage = async () => {
+    if (!locationPreview || !active || !user) return;
+    if (mustVerify) { setLocationPreview(null); setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { setLocationPreview(null); setPaywallOpen(true); return; }
+    const { lat, lng } = locationPreview;
+    const content = `${lat.toFixed(6)},${lng.toFixed(6)}|My current location`;
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: active.id,
+      sender_id: user.id,
+      content,
+      message_type: "location",
+    } as never);
+    if (error) {
+      if (error.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+        setLocationPreview(null);
+        setPaywallOpen(true);
+        await refreshQuota();
+        return;
+      }
+      toast.error(error.message || "Couldn't share location");
+      return;
+    }
+    setLocationPreview(null);
+    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+    refreshQuota();
+  };
+
+  const handlePickAudio = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (file.size > MAX_ATTACH_BYTES) {
+      toast.error(`"${file.name}" is too large (max 20MB)`);
+      return;
+    }
+    setAudioPreview({ file, url: URL.createObjectURL(file) });
+  };
+
+  const sendAudioMessage = async () => {
+    if (!audioPreview || !active || !user) return;
+    if (mustVerify) { closeAudioPreview(); setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { closeAudioPreview(); setPaywallOpen(true); return; }
+    const file = audioPreview.file;
+    setUploadingAttach(true);
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${active.id}/${user.id}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("chat-attachments")
+        .upload(path, file, { contentType: file.type || "audio/mpeg", upsert: false });
+      if (upErr) { toast.error(upErr.message || "Failed to upload audio"); return; }
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: active.id,
+        sender_id: user.id,
+        content: file.name,
+        message_type: "audio",
+        media_url: path,
+        media_type: file.type || "audio/mpeg",
+      } as never);
+      if (msgErr) {
+        await supabase.storage.from("chat-attachments").remove([path]);
+        if (msgErr.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) { setPaywallOpen(true); await refreshQuota(); return; }
+        toast.error(msgErr.message || "Failed to send audio");
+        return;
+      }
+      await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+      refreshQuota();
+      closeAudioPreview();
+    } finally {
+      setUploadingAttach(false);
+    }
+  };
+
+  const closeAudioPreview = () => {
+    if (audioPreview?.url) URL.revokeObjectURL(audioPreview.url);
+    setAudioPreview(null);
+  };
+
+
 
   const onDraftChange = (v: string) => {
     setDraft(v);
@@ -659,6 +768,8 @@ function Chat() {
         onCamera={() => cameraInputRef.current?.click()}
         onPhotoLibrary={() => photoInputRef.current?.click()}
         onFile={() => fileInputRef.current?.click()}
+        onLocation={requestLocation}
+        onAudio={() => audioInputRef.current?.click()}
       />
       <JournalSheet
         open={journalOpen}
@@ -690,6 +801,86 @@ function Chat() {
         className="hidden"
         onChange={(e) => { void handleAttachFiles(e.target.files, "file"); e.target.value = ""; }}
       />
+      <input
+        ref={audioInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={(e) => { handlePickAudio(e.target.files); e.target.value = ""; }}
+      />
+
+      {/* Location loading toast-style indicator */}
+      {locationLoading && (
+        <div className="fixed left-1/2 top-20 z-[90] -translate-x-1/2 rounded-full border border-[oklch(0.56_0.22_286/0.3)] bg-[oklch(0.10_0.04_298/0.92)] px-4 py-2 text-xs text-foreground backdrop-blur-xl">
+          Getting your location…
+        </div>
+      )}
+
+      {/* Location preview modal */}
+      {locationPreview && (
+        <div className="fixed inset-0 z-[85] grid place-items-center p-4" role="dialog" aria-modal="true">
+          <button type="button" aria-label="Close" onClick={() => setLocationPreview(null)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm rounded-3xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.10_0.04_298/0.95)] p-5 shadow-2xl backdrop-blur-2xl">
+            <h3 className="font-display text-lg text-foreground">Share your location?</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Only this person will see it. They can open it in Maps.
+            </p>
+            <div className="mt-4">
+              <LocationMessageBubble
+                content={`${locationPreview.lat.toFixed(6)},${locationPreview.lng.toFixed(6)}|My current location`}
+                mine
+              />
+            </div>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setLocationPreview(null)}
+                className="flex-1 rounded-full border border-[oklch(0.56_0.22_286/0.25)] bg-transparent px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-[oklch(0.18_0.07_298/0.5)]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendLocationMessage()}
+                className="flex-1 rounded-full bg-gradient-to-r from-[oklch(0.55_0.18_286)] to-[oklch(0.55_0.18_330)] px-4 py-2.5 text-sm font-semibold text-white shadow-lg active:scale-95"
+              >
+                Send Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audio preview modal */}
+      {audioPreview && (
+        <div className="fixed inset-0 z-[85] grid place-items-center p-4" role="dialog" aria-modal="true">
+          <button type="button" aria-label="Close" onClick={closeAudioPreview} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm rounded-3xl border border-[oklch(0.56_0.22_286/0.25)] bg-[oklch(0.10_0.04_298/0.95)] p-5 shadow-2xl backdrop-blur-2xl">
+            <h3 className="font-display text-lg text-foreground">Send audio?</h3>
+            <p className="mt-1 truncate text-xs text-muted-foreground">{audioPreview.file.name}</p>
+            <audio controls src={audioPreview.url} className="mt-4 w-full" preload="metadata" />
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={closeAudioPreview}
+                disabled={uploadingAttach}
+                className="flex-1 rounded-full border border-[oklch(0.56_0.22_286/0.25)] bg-transparent px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-[oklch(0.18_0.07_298/0.5)] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendAudioMessage()}
+                disabled={uploadingAttach}
+                className="flex-1 rounded-full bg-gradient-to-r from-[oklch(0.55_0.18_286)] to-[oklch(0.55_0.18_330)] px-4 py-2.5 text-sm font-semibold text-white shadow-lg active:scale-95 disabled:opacity-60"
+              >
+                {uploadingAttach ? "Sending…" : "Send Audio"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
 
 
@@ -982,6 +1173,10 @@ function Chat() {
                             <ImageAttachmentBubble path={m.media_url} mine={mine} />
                           ) : m.message_type === "file" && m.media_url ? (
                             <FileAttachmentBubble path={m.media_url} name={m.content || "Attachment"} mine={mine} />
+                          ) : m.message_type === "audio" && m.media_url ? (
+                            <AudioMessageBubble path={m.media_url} name={m.content} mine={mine} />
+                          ) : m.message_type === "location" ? (
+                            <LocationMessageBubble content={m.content} mine={mine} />
                           ) : m.message_type === "gift" || m.content.startsWith("[[gift:") ? (
                             <GiftMessageBubble
                               content={m.content}

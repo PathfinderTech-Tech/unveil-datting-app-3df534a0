@@ -1,5 +1,5 @@
 import { Camera, Image as ImageIcon, FileText, MapPin, Mic, Gift, X } from "lucide-react";
-import { toast } from "sonner";
+
 
 type Props = {
   open: boolean;
@@ -8,6 +8,8 @@ type Props = {
   onCamera: () => void;
   onPhotoLibrary: () => void;
   onFile: () => void;
+  onLocation: () => void;
+  onAudio: () => void;
 };
 
 /**
@@ -15,7 +17,7 @@ type Props = {
  * composer opens this — distinct from the AI Sparkles button, which is
  * dedicated to AI assistance only.
  */
-export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrary, onFile }: Props) {
+export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrary, onFile, onLocation, onAudio }: Props) {
   if (!open) return null;
 
   const wrap = (fn: () => void) => () => {
@@ -50,14 +52,14 @@ export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrar
       label: "Location",
       icon: MapPin,
       tint: "from-[oklch(0.55_0.16_160)] to-[oklch(0.50_0.15_140)]",
-      onClick: () => toast("Share Location coming soon"),
+      onClick: wrap(onLocation),
     },
     {
       id: "audio",
       label: "Audio",
       icon: Mic,
       tint: "from-[oklch(0.55_0.18_300)] to-[oklch(0.50_0.18_330)]",
-      onClick: () => toast("Audio file coming soon"),
+      onClick: wrap(onAudio),
     },
     {
       id: "gift",
