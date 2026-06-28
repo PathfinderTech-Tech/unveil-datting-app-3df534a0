@@ -8,6 +8,8 @@ type Props = {
   onCamera: () => void;
   onPhotoLibrary: () => void;
   onFile: () => void;
+  onLocation: () => void;
+  onAudio: () => void;
 };
 
 /**
