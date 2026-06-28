@@ -14,6 +14,8 @@ import { ConversationHeaderLuxe } from "@/components/chat/ConversationHeaderLuxe
 import { RevealProgressCard } from "@/components/chat/RevealProgressCard";
 import { QuickActionBar } from "@/components/chat/QuickActionBar";
 import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
+import { JournalSheet } from "@/components/chat/JournalSheet";
+import { ImageAttachmentBubble, FileAttachmentBubble } from "@/components/chat/AttachmentMessage";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
@@ -149,6 +151,11 @@ function Chat() {
   const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
   const [giftOpen, setGiftOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [uploadingAttach, setUploadingAttach] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
@@ -453,6 +460,57 @@ function Chat() {
     }
   };
 
+  const MAX_ATTACH_BYTES = 20 * 1024 * 1024; // 20 MB
+
+  const handleAttachFiles = async (files: FileList | null, kind: "image" | "file") => {
+    if (!files || files.length === 0) return;
+    if (!active || !user || !peerId) return;
+    if (mustVerify) { setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
+    setUploadingAttach(true);
+    try {
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_ATTACH_BYTES) {
+          toast.error(`"${file.name}" is too large (max 20MB)`);
+          continue;
+        }
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${active.id}/${user.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("chat-attachments")
+          .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+        if (upErr) {
+          toast.error(upErr.message || `Failed to upload ${file.name}`);
+          continue;
+        }
+        const isImage = (file.type || "").startsWith("image/") || kind === "image";
+        const { error: msgErr } = await supabase.from("messages").insert({
+          conversation_id: active.id,
+          sender_id: user.id,
+          content: isImage ? "📷 Photo" : file.name,
+          message_type: isImage ? "image" : "file",
+          media_url: path,
+          media_type: file.type || null,
+        } as never);
+        if (msgErr) {
+          await supabase.storage.from("chat-attachments").remove([path]);
+          if (msgErr.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+            setPaywallOpen(true);
+            await refreshQuota();
+            return;
+          }
+          toast.error(msgErr.message || "Failed to send attachment");
+          continue;
+        }
+      }
+      await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+      refreshQuota();
+    } finally {
+      setUploadingAttach(false);
+    }
+  };
+
+
   const onDraftChange = (v: string) => {
     setDraft(v);
     if (!active || !user) return;
@@ -598,6 +656,39 @@ function Chat() {
         open={attachOpen}
         onClose={() => setAttachOpen(false)}
         onGift={() => setGiftOpen(true)}
+        onCamera={() => cameraInputRef.current?.click()}
+        onPhotoLibrary={() => photoInputRef.current?.click()}
+        onFile={() => fileInputRef.current?.click()}
+      />
+      <JournalSheet
+        open={journalOpen}
+        onClose={() => setJournalOpen(false)}
+        conversationId={active?.id ?? null}
+        peerName={peerName}
+      />
+      {/* Hidden file inputs — opened by the AttachmentSheet buttons. */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "image"); e.target.value = ""; }}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "image"); e.target.value = ""; }}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,application/pdf,.doc,.docx,.txt,.rtf"
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "file"); e.target.value = ""; }}
       />
 
 
@@ -887,6 +978,10 @@ function Chat() {
                                 mine={mine}
                               />
                             </div>
+                          ) : m.message_type === "image" && m.media_url ? (
+                            <ImageAttachmentBubble path={m.media_url} mine={mine} />
+                          ) : m.message_type === "file" && m.media_url ? (
+                            <FileAttachmentBubble path={m.media_url} name={m.content || "Attachment"} mine={mine} />
                           ) : m.message_type === "gift" || m.content.startsWith("[[gift:") ? (
                             <GiftMessageBubble
                               content={m.content}
@@ -976,7 +1071,7 @@ function Chat() {
                 voiceBadge={false}
                 giftBadge={false}
                 aiBadge={overallScore != null && overallScore >= 80}
-                dateBadge={false}
+                journalBadge={false}
                 onVoice={() => {
                   if (mustVerify) { setVerifyOpen(true); return; }
                   // Call start() synchronously to preserve user-gesture for getUserMedia
@@ -985,7 +1080,7 @@ function Chat() {
                 onGift={() => setGiftOpen(true)}
                 onChallenges={() => { window.location.href = "/challenges"; }}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
-                onDate={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                onJournal={() => setJournalOpen(true)}
               />
 
               {/* ============ LUXURY COMPOSER ============ */}

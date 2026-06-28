@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import "@/styles/unveil-onboarding.css";
 import { LocationPicker } from "@/components/LocationPicker";
-import { COUNTRY_BY_CODE, codeForName } from "@/lib/countries";
+import { COUNTRY_BY_CODE, codeForName, detectCountryFromTimezone } from "@/lib/countries";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 
@@ -138,8 +138,13 @@ function Onboarding() {
   const [name, setName] = useState("");
   const [age, setAge] = useState(28);
   const [gender, setGender] = useState("");
-  const [country, setCountry] = useState("");
-  const [countryCode, setCountryCode] = useState<string | null>(null);
+  // Auto-detect the user's country from their browser timezone so the
+  // visible default is always reflected in form state. Users can still
+  // change it via the LocationPicker dropdown.
+  const detectedCode = typeof window !== "undefined" ? detectCountryFromTimezone() : null;
+  const detectedCountry = detectedCode ? COUNTRY_BY_CODE[detectedCode] ?? null : null;
+  const [country, setCountry] = useState(detectedCountry?.name ?? "");
+  const [countryCode, setCountryCode] = useState<string | null>(detectedCountry?.code ?? null);
   const [stateRegion, setStateRegion] = useState("");
   const [city, setCity] = useState("");
   const [interestedIn, setInterestedIn] = useState("");

@@ -1,12 +1,13 @@
 import { Camera, Image as ImageIcon, FileText, MapPin, Mic, Gift, X } from "lucide-react";
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onGift: () => void;
-  onCamera?: () => void;
-  onPhotoLibrary?: () => void;
-  onFile?: () => void;
+  onCamera: () => void;
+  onPhotoLibrary: () => void;
+  onFile: () => void;
 };
 
 /**
@@ -17,27 +18,32 @@ type Props = {
 export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrary, onFile }: Props) {
   if (!open) return null;
 
+  const wrap = (fn: () => void) => () => {
+    fn();
+    onClose();
+  };
+
   const items = [
     {
       id: "camera",
       label: "Camera",
       icon: Camera,
       tint: "from-[oklch(0.55_0.18_286)] to-[oklch(0.60_0.16_304)]",
-      onClick: onCamera ?? (() => toast("Camera coming soon")),
+      onClick: wrap(onCamera),
     },
     {
       id: "photo",
       label: "Photo Library",
       icon: ImageIcon,
       tint: "from-[oklch(0.58_0.16_220)] to-[oklch(0.50_0.16_260)]",
-      onClick: onPhotoLibrary ?? (() => toast("Photo Library coming soon")),
+      onClick: wrap(onPhotoLibrary),
     },
     {
       id: "file",
       label: "Files",
       icon: FileText,
       tint: "from-[oklch(0.55_0.14_180)] to-[oklch(0.50_0.15_200)]",
-      onClick: onFile ?? (() => toast("Files coming soon")),
+      onClick: wrap(onFile),
     },
     {
       id: "location",
@@ -58,7 +64,7 @@ export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrar
       label: "Gift",
       icon: Gift,
       tint: "from-[oklch(0.62_0.16_346)] to-[oklch(0.55_0.16_328)]",
-      onClick: () => { onGift(); onClose(); },
+      onClick: wrap(onGift),
     },
   ];
 
@@ -103,9 +109,4 @@ export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrar
       </div>
     </div>
   );
-}
-
-// Lazy-load toast only when a placeholder action fires
-function toast(msg: string) {
-  import("sonner").then(({ toast }) => toast(msg));
 }
