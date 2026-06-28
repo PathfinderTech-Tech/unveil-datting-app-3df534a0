@@ -68,11 +68,21 @@ function CheckoutReturn() {
     try { localStorage.removeItem("unveil:checkoutReturn"); } catch { /* ignore */ }
   }, [session_id, product]);
 
-  // Redirect after overlay completes.
+  // Hard fallback: regardless of overlay state, redirect after 2.2s.
+  // The overlay's onComplete may not fire reliably in throttled tabs or
+  // when the user backgrounds the WebView during checkout.
+  useEffect(() => {
+    if (!session_id) return;
+    const hard = setTimeout(() => {
+      try { window.location.replace(dest); } catch { window.location.href = dest; }
+    }, 2200);
+    return () => clearTimeout(hard);
+  }, [session_id, dest]);
+
+  // Redirect after overlay completes (faster path when it does fire).
   useEffect(() => {
     if (!overlayDone) return;
-    const t = setTimeout(() => { window.location.replace(dest); }, 400);
-    return () => clearTimeout(t);
+    try { window.location.replace(dest); } catch { window.location.href = dest; }
   }, [overlayDone, dest, navigate]);
 
   const message = session_id
