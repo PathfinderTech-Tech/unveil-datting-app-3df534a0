@@ -978,6 +978,10 @@ function Chat() {
                                 mine={mine}
                               />
                             </div>
+                          ) : m.message_type === "image" && m.media_url ? (
+                            <ImageAttachmentBubble path={m.media_url} mine={mine} />
+                          ) : m.message_type === "file" && m.media_url ? (
+                            <FileAttachmentBubble path={m.media_url} name={m.content || "Attachment"} mine={mine} />
                           ) : m.message_type === "gift" || m.content.startsWith("[[gift:") ? (
                             <GiftMessageBubble
                               content={m.content}
