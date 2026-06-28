@@ -90,7 +90,7 @@ function Membership() {
                 </div>
                 <Link
                   to="/checkout"
-                  search={{ product: "message_pass_2w" } as any}
+                  search={{ product: "message_pass_2w", ...(rt ? { returnTo: rt } : {}) } as any}
                   className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
                 >
                   Get 2-Week Pass
