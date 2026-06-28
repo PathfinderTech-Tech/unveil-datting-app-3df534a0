@@ -1,7 +1,7 @@
-import { Mic, Gift, Sparkles, Calendar, Trophy } from "lucide-react";
+import { Mic, Gift, Sparkles, BookHeart, Trophy } from "lucide-react";
 
 type Action = {
-  id: "voice" | "gift" | "challenges" | "ai" | "date";
+  id: "voice" | "gift" | "challenges" | "ai" | "journal";
   label: string;
   badge?: boolean;
   onClick: () => void;
@@ -13,12 +13,12 @@ type Props = {
   onGift: () => void;
   onChallenges: () => void;
   onAi: () => void;
-  onDate: () => void;
+  onJournal: () => void;
   voiceBadge?: boolean;
   giftBadge?: boolean;
   challengesBadge?: boolean;
   aiBadge?: boolean;
-  dateBadge?: boolean;
+  journalBadge?: boolean;
   disabled?: boolean;
 };
 
@@ -31,12 +31,12 @@ export function QuickActionBar({
   onGift,
   onChallenges,
   onAi,
-  onDate,
+  onJournal,
   voiceBadge,
   giftBadge,
   challengesBadge,
   aiBadge,
-  dateBadge,
+  journalBadge,
   disabled,
 }: Props) {
   const actions: Action[] = [
@@ -44,7 +44,7 @@ export function QuickActionBar({
     { id: "gift", label: "Gift", onClick: onGift, badge: giftBadge, disabled },
     { id: "challenges", label: "Play", onClick: onChallenges, badge: challengesBadge, disabled },
     { id: "ai", label: "AI", onClick: onAi, badge: aiBadge, disabled },
-    { id: "date", label: "Date", onClick: onDate, badge: dateBadge, disabled },
+    { id: "journal", label: "Journal", onClick: onJournal, badge: journalBadge, disabled },
   ];
 
   return (
@@ -82,7 +82,7 @@ function tileBg(id: Action["id"]): string {
       return "bg-gradient-to-br from-[oklch(0.62_0.16_158)] to-[oklch(0.55_0.15_180)]";
     case "ai":
       return "bg-gradient-to-br from-[oklch(0.72_0.12_68)] to-[oklch(0.62_0.12_48)]";
-    case "date":
+    case "journal":
       return "bg-gradient-to-br from-[oklch(0.48_0.14_240)] to-[oklch(0.40_0.14_265)]";
   }
 }
@@ -98,7 +98,7 @@ function iconFor(id: Action["id"]) {
       return <Trophy className={cls} />;
     case "ai":
       return <Sparkles className={cls} />;
-    case "date":
-      return <Calendar className={cls} />;
+    case "journal":
+      return <BookHeart className={cls} />;
   }
 }
