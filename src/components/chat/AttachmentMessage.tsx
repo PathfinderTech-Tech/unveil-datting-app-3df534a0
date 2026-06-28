@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "chat-attachments";
