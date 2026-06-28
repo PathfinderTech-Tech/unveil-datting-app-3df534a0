@@ -17,7 +17,7 @@ type Props = {
  * composer opens this — distinct from the AI Sparkles button, which is
  * dedicated to AI assistance only.
  */
-export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrary, onFile }: Props) {
+export function AttachmentSheet({ open, onClose, onGift, onCamera, onPhotoLibrary, onFile, onLocation, onAudio }: Props) {
   if (!open) return null;
 
   const wrap = (fn: () => void) => () => {
