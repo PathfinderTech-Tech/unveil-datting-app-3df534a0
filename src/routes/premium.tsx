@@ -48,8 +48,10 @@ const PLANS: { key: PlanKey; label: string; price: string; cadence: string; sub?
 
 function Membership() {
   const navigate = useNavigate();
+  const { returnTo } = Route.useSearch();
+  const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
   const goPremium = (key: PlanKey) =>
-    navigate({ to: "/checkout", search: { product: key } as any });
+    navigate({ to: "/checkout", search: { product: key, ...(rt ? { returnTo: rt } : {}) } as any });
 
   return (
     <div className="min-h-screen">
