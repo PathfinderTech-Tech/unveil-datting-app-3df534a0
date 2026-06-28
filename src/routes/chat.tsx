@@ -151,6 +151,11 @@ function Chat() {
   const [panelTab, setPanelTab] = useState<"insights" | "ai" | "discovery" | "icebreakers" | "reveal">("insights");
   const [giftOpen, setGiftOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [uploadingAttach, setUploadingAttach] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "d13" | "d47" | "locked">("all");
@@ -600,6 +605,39 @@ function Chat() {
         open={attachOpen}
         onClose={() => setAttachOpen(false)}
         onGift={() => setGiftOpen(true)}
+        onCamera={() => cameraInputRef.current?.click()}
+        onPhotoLibrary={() => photoInputRef.current?.click()}
+        onFile={() => fileInputRef.current?.click()}
+      />
+      <JournalSheet
+        open={journalOpen}
+        onClose={() => setJournalOpen(false)}
+        conversationId={active?.id ?? null}
+        peerName={peerName}
+      />
+      {/* Hidden file inputs — opened by the AttachmentSheet buttons. */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "image"); e.target.value = ""; }}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "image"); e.target.value = ""; }}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,application/pdf,.doc,.docx,.txt,.rtf"
+        className="hidden"
+        onChange={(e) => { void handleAttachFiles(e.target.files, "file"); e.target.value = ""; }}
       />
 
 
@@ -978,7 +1016,7 @@ function Chat() {
                 voiceBadge={false}
                 giftBadge={false}
                 aiBadge={overallScore != null && overallScore >= 80}
-                dateBadge={false}
+                journalBadge={false}
                 onVoice={() => {
                   if (mustVerify) { setVerifyOpen(true); return; }
                   // Call start() synchronously to preserve user-gesture for getUserMedia
@@ -987,7 +1025,7 @@ function Chat() {
                 onGift={() => setGiftOpen(true)}
                 onChallenges={() => { window.location.href = "/challenges"; }}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
-                onDate={() => { setPanelTab("icebreakers"); setPanelOpen(true); if (ideas.length === 0) fetchIcebreakers(ideaCategory); }}
+                onJournal={() => setJournalOpen(true)}
               />
 
               {/* ============ LUXURY COMPOSER ============ */}
