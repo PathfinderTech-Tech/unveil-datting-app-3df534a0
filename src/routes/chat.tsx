@@ -460,6 +460,57 @@ function Chat() {
     }
   };
 
+  const MAX_ATTACH_BYTES = 20 * 1024 * 1024; // 20 MB
+
+  const handleAttachFiles = async (files: FileList | null, kind: "image" | "file") => {
+    if (!files || files.length === 0) return;
+    if (!active || !user || !peerId) return;
+    if (mustVerify) { setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { setPaywallOpen(true); return; }
+    setUploadingAttach(true);
+    try {
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_ATTACH_BYTES) {
+          toast.error(`"${file.name}" is too large (max 20MB)`);
+          continue;
+        }
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${active.id}/${user.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("chat-attachments")
+          .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+        if (upErr) {
+          toast.error(upErr.message || `Failed to upload ${file.name}`);
+          continue;
+        }
+        const isImage = (file.type || "").startsWith("image/") || kind === "image";
+        const { error: msgErr } = await supabase.from("messages").insert({
+          conversation_id: active.id,
+          sender_id: user.id,
+          content: isImage ? "📷 Photo" : file.name,
+          message_type: isImage ? "image" : "file",
+          media_url: path,
+          media_type: file.type || null,
+        } as never);
+        if (msgErr) {
+          await supabase.storage.from("chat-attachments").remove([path]);
+          if (msgErr.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+            setPaywallOpen(true);
+            await refreshQuota();
+            return;
+          }
+          toast.error(msgErr.message || "Failed to send attachment");
+          continue;
+        }
+      }
+      await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+      refreshQuota();
+    } finally {
+      setUploadingAttach(false);
+    }
+  };
+
+
   const onDraftChange = (v: string) => {
     setDraft(v);
     if (!active || !user) return;
