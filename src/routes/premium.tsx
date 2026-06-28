@@ -15,6 +15,9 @@ export const Route = createFileRoute("/premium")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { returnTo?: string } => ({
+    returnTo: typeof s.returnTo === "string" && s.returnTo.startsWith("/") ? s.returnTo : undefined,
+  }),
   component: Membership,
 });
 
