@@ -1,5 +1,5 @@
 import { Camera, Image as ImageIcon, FileText, MapPin, Mic, Gift, X } from "lucide-react";
-import { toast } from "sonner";
+
 
 type Props = {
   open: boolean;
