@@ -118,7 +118,7 @@ function Membership() {
                 </div>
                 <Link
                   to="/checkout"
-                  search={{ product: "message_pass" } as any}
+                  search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
                   className="inline-flex items-center justify-center rounded-full border-2 border-accent bg-accent/20 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/30"
                 >
                   Get 24-Hour Pass
