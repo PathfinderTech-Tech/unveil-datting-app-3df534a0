@@ -1423,6 +1423,7 @@ function Chat() {
                             ) : (
                               <Link
                                 to="/premium"
+                                search={{ returnTo: typeof window !== "undefined" ? window.location.pathname + window.location.search : undefined } as any}
                                 className="block rounded-2xl border border-border/60 bg-surface/40 p-4 text-center text-sm font-semibold text-primary hover:border-primary/40"
                               >
                                 Upgrade for More AI Insights →
