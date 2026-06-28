@@ -16,7 +16,6 @@ import { QuickActionBar } from "@/components/chat/QuickActionBar";
 import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
 import { JournalSheet } from "@/components/chat/JournalSheet";
 import { ImageAttachmentBubble, FileAttachmentBubble } from "@/components/chat/AttachmentMessage";
-import { AttachmentSheet } from "@/components/chat/AttachmentSheet";
 
 import { toast } from "sonner";
 import { generateIcebreakers, type IcebreakerCategory } from "@/lib/icebreakers.functions";
