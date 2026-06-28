@@ -514,6 +514,111 @@ function Chat() {
     }
   };
 
+  const requestLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error("Location is not supported on this device.");
+      return;
+    }
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocationLoading(false);
+        setLocationPreview({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => {
+        setLocationLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Location permission denied. Enable it in your device settings to share your location.");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          toast.error("Couldn't determine your location. Try again outdoors or with Wi-Fi on.");
+        } else if (err.code === err.TIMEOUT) {
+          toast.error("Location request timed out. Please try again.");
+        } else {
+          toast.error("Couldn't get your location.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  };
+
+  const sendLocationMessage = async () => {
+    if (!locationPreview || !active || !user) return;
+    if (mustVerify) { setLocationPreview(null); setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { setLocationPreview(null); setPaywallOpen(true); return; }
+    const { lat, lng } = locationPreview;
+    const content = `${lat.toFixed(6)},${lng.toFixed(6)}|My current location`;
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: active.id,
+      sender_id: user.id,
+      content,
+      message_type: "location",
+    } as never);
+    if (error) {
+      if (error.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) {
+        setLocationPreview(null);
+        setPaywallOpen(true);
+        await refreshQuota();
+        return;
+      }
+      toast.error(error.message || "Couldn't share location");
+      return;
+    }
+    setLocationPreview(null);
+    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+    refreshQuota();
+  };
+
+  const handlePickAudio = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (file.size > MAX_ATTACH_BYTES) {
+      toast.error(`"${file.name}" is too large (max 20MB)`);
+      return;
+    }
+    setAudioPreview({ file, url: URL.createObjectURL(file) });
+  };
+
+  const sendAudioMessage = async () => {
+    if (!audioPreview || !active || !user) return;
+    if (mustVerify) { closeAudioPreview(); setVerifyOpen(true); return; }
+    if (!quota.unlimited && quota.remaining <= 0) { closeAudioPreview(); setPaywallOpen(true); return; }
+    const file = audioPreview.file;
+    setUploadingAttach(true);
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${active.id}/${user.id}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("chat-attachments")
+        .upload(path, file, { contentType: file.type || "audio/mpeg", upsert: false });
+      if (upErr) { toast.error(upErr.message || "Failed to upload audio"); return; }
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: active.id,
+        sender_id: user.id,
+        content: file.name,
+        message_type: "audio",
+        media_url: path,
+        media_type: file.type || "audio/mpeg",
+      } as never);
+      if (msgErr) {
+        await supabase.storage.from("chat-attachments").remove([path]);
+        if (msgErr.message?.toUpperCase().includes("DAILY_MESSAGE_LIMIT_REACHED")) { setPaywallOpen(true); await refreshQuota(); return; }
+        toast.error(msgErr.message || "Failed to send audio");
+        return;
+      }
+      await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
+      refreshQuota();
+      closeAudioPreview();
+    } finally {
+      setUploadingAttach(false);
+    }
+  };
+
+  const closeAudioPreview = () => {
+    if (audioPreview?.url) URL.revokeObjectURL(audioPreview.url);
+    setAudioPreview(null);
+  };
+
+
 
   const onDraftChange = (v: string) => {
     setDraft(v);
