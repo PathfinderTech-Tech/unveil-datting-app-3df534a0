@@ -63,7 +63,7 @@ function Home() {
           </div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Now on Web &amp; iOS · Android coming soon
+            Live
           </div>
           <h1 className="font-display text-4xl font-light leading-[1.05] sm:text-5xl md:text-7xl">
             Connection begins
