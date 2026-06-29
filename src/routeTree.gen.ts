@@ -40,6 +40,7 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DatePlanRouteImport } from './routes/date-plan'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactShareRouteImport } from './routes/contact-share'
@@ -224,6 +225,11 @@ const DiscoverRoute = DiscoverRouteImport.update({
   path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DatePlanRoute = DatePlanRouteImport.update({
   id: '/date-plan',
   path: '/date-plan',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/contact-share': typeof ContactShareRoute
   '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
@@ -440,6 +447,7 @@ export interface FileRoutesByTo {
   '/contact-share': typeof ContactShareRoute
   '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
@@ -502,6 +510,7 @@ export interface FileRoutesById {
   '/contact-share': typeof ContactShareRoute
   '/cookies': typeof CookiesRoute
   '/date-plan': typeof DatePlanRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
   '/game': typeof GameRoute
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/contact-share'
     | '/cookies'
     | '/date-plan'
+    | '/delete-account'
     | '/discover'
     | '/discover-summary'
     | '/game'
@@ -626,6 +636,7 @@ export interface FileRouteTypes {
     | '/contact-share'
     | '/cookies'
     | '/date-plan'
+    | '/delete-account'
     | '/discover'
     | '/discover-summary'
     | '/game'
@@ -687,6 +698,7 @@ export interface FileRouteTypes {
     | '/contact-share'
     | '/cookies'
     | '/date-plan'
+    | '/delete-account'
     | '/discover'
     | '/discover-summary'
     | '/game'
@@ -749,6 +761,7 @@ export interface RootRouteChildren {
   ContactShareRoute: typeof ContactShareRoute
   CookiesRoute: typeof CookiesRoute
   DatePlanRoute: typeof DatePlanRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
   DiscoverRoute: typeof DiscoverRoute
   DiscoverSummaryRoute: typeof DiscoverSummaryRoute
   GameRoute: typeof GameRoute
@@ -1017,6 +1030,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/date-plan': {
       id: '/date-plan'
       path: '/date-plan'
@@ -1249,6 +1269,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactShareRoute: ContactShareRoute,
   CookiesRoute: CookiesRoute,
   DatePlanRoute: DatePlanRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
   DiscoverRoute: DiscoverRoute,
   DiscoverSummaryRoute: DiscoverSummaryRoute,
   GameRoute: GameRoute,
