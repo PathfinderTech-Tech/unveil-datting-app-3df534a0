@@ -166,7 +166,7 @@ function Settings() {
                 <span className="muted-pill">Always on</span>
               </Row>
               <p className="mt-3 text-[11px] text-muted-foreground">
-                Fine-grained notification controls are coming soon. Critical account & safety alerts will always be delivered.
+                Critical account & safety alerts are always delivered.
               </p>
             </Card>
           </Group>

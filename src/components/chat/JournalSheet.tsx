@@ -138,7 +138,7 @@ export function JournalSheet({ open, onClose, conversationId, peerName }: Props)
 
           <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-surface/20 p-4">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-foreground/70">
-              <Trophy className="h-3.5 w-3.5" /> Coming soon
+              <Trophy className="h-3.5 w-3.5" /> Journal
             </div>
             <p className="text-[12px] text-muted-foreground">
               AI summaries, calendar mood, milestones (first voice, first gift, photo unveiled),
