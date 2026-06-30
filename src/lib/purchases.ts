@@ -1,25 +1,28 @@
 /**
  * Unified purchases / entitlement layer
  * --------------------------------------
- * Web → existing Stripe Embedded Checkout (createCheckoutSession + Stripe webhook).
- * iOS → RevenueCat SDK (StoreKit under the hood; receipts + restore handled by RC).
+ * Web     → existing Stripe Embedded Checkout (createCheckoutSession + Stripe webhook).
+ * iOS     → RevenueCat SDK (StoreKit under the hood; receipts + restore handled by RC).
+ * Android → RevenueCat SDK (Google Play Billing Library v8 under the hood;
+ *           acknowledgement, server-side receipt validation, and restore are
+ *           handled automatically by RC — Google requires acknowledgement
+ *           within 3 days or the purchase auto-refunds).
  *
- * Entitlement (single source of truth on iOS): `unveil_premium`
+ * Entitlement (single source of truth on native): `unveil_premium`
  *
- * Products (App Store Connect IDs match RevenueCat product IDs):
- *   - premium_monthly      (auto-renewing subscription)
- *   - premium_quarterly    (auto-renewing subscription)
- *   - premium_annual       (auto-renewing subscription)
- *   - pass_24h             (consumable — 24h unlimited messaging pass)
- *   - pass_2w              (consumable — 2-week unlimited messaging pass, if enabled in the active offering)
+ * Products (App Store Connect / Google Play Console IDs must match the
+ * RevenueCat product IDs below):
+ *   - premium_monthly      (auto-renewing subscription — $15.99 / month)
+ *   - premium_quarterly    (auto-renewing subscription — $39.99 / 3 months)
+ *   - premium_annual       (auto-renewing subscription — $149.99 / year)
+ *   - pass_24h             (consumable — Daily Pass, $1.99)
+ *   - pass_2w              (consumable — Two-Week Unlimited Pass, $9.99)
  *   - verification_badge   (non-consumable — one-time verification fee)
  *
  * The RevenueCat SDK is loaded dynamically inside `loadRC()` so the web
- * bundle stays free of native-only code. The actual
- * `@revenuecat/purchases-capacitor` package is installed during the
- * Capacitor build step (see IOS_BUILD.md).
+ * bundle stays free of native-only code.
  */
-import { isIOS } from "./platform";
+import { isIOS, isAndroid, isNative } from "./platform";
 import { getRevenueCatConfig } from "./revenuecat-config.functions";
 
 export type ProductId =
@@ -40,18 +43,15 @@ export interface PurchaseOffer {
 }
 
 export interface Entitlements {
-  /** True if the user has the "unveil_premium" entitlement (any premium plan or active pass). */
   premium: boolean;
-  /** True if a 24h messaging pass is currently active. */
   activePass: boolean;
-  /** True if the user owns the verification badge. */
   verificationBadge: boolean;
-  /** ISO timestamp when the premium entitlement expires, if known. */
   premiumUntil?: string | null;
 }
 
 interface RCConfig {
   iosPublicKey: string | null;
+  androidPublicKey: string | null;
   entitlementId: "unveil_premium";
   offeringId: "default";
 }
@@ -66,18 +66,21 @@ async function getConfig(): Promise<RCConfig> {
 }
 
 /**
- * Lazy-load + initialise the RevenueCat Capacitor SDK on iOS.
+ * Lazy-load + initialise the RevenueCat Capacitor SDK on the current
+ * native platform (iOS → StoreKit, Android → Google Play Billing v8).
  * @internal
  */
 async function loadRC(userId: string): Promise<unknown> {
-  if (!isIOS()) throw new Error("RevenueCat is only available on iOS");
+  if (!isNative()) throw new Error("RevenueCat is only available on native (iOS / Android)");
   const cfg = await getConfig();
-  if (!cfg.iosPublicKey) {
-    throw new Error("RevenueCat iOS public key not configured on server");
+  const apiKey = isIOS() ? cfg.iosPublicKey : cfg.androidPublicKey;
+  if (!apiKey) {
+    throw new Error(
+      `RevenueCat ${isIOS() ? "iOS" : "Android"} public key not configured on server`,
+    );
   }
   if (rcReady) return rcReady;
   rcReady = (async () => {
-    // Runtime-computed specifier so the web build doesn't try to resolve it.
     const specifier = "@revenuecat/purchases-capacitor";
     const mod = (await import(/* @vite-ignore */ specifier).catch(() => null)) as null | {
       Purchases: {
@@ -86,10 +89,10 @@ async function loadRC(userId: string): Promise<unknown> {
     };
     if (!mod) {
       throw new Error(
-        "RevenueCat SDK not bundled. Run `bun add @revenuecat/purchases-capacitor` in the iOS build."
+        "RevenueCat SDK not bundled. Run `bun add @revenuecat/purchases-capacitor` before the native build.",
       );
     }
-    await mod.Purchases.configure({ apiKey: cfg.iosPublicKey!, appUserID: userId });
+    await mod.Purchases.configure({ apiKey, appUserID: userId });
     return mod.Purchases;
   })();
   return rcReady;
@@ -97,11 +100,11 @@ async function loadRC(userId: string): Promise<unknown> {
 
 /**
  * List purchasable offers for the current platform.
- * Web returns the static catalog (cards link out to Stripe Checkout).
- * iOS returns the live App Store offerings via RevenueCat.
+ * Web returns the static catalog. Native returns the live offering from
+ * RevenueCat (StoreKit on iOS, Google Play Billing on Android).
  */
 export async function getOffers(userId: string): Promise<PurchaseOffer[]> {
-  if (isIOS()) {
+  if (isNative()) {
     const Purchases = (await loadRC(userId)) as {
       getOfferings: () => Promise<{
         current?: {
@@ -123,11 +126,16 @@ export async function getOffers(userId: string): Promise<PurchaseOffer[]> {
   return WEB_CATALOG;
 }
 
-/** Purchase a product. iOS → StoreKit via RevenueCat. Web throws. */
+/**
+ * Purchase a product. Routes through RevenueCat on native; throws on web
+ * (web flow uses /checkout?product=<id> for Stripe). RevenueCat
+ * automatically acknowledges Google Play purchases and validates receipts
+ * server-side, so no extra acknowledgement call is required here.
+ */
 export async function purchase(productId: ProductId, userId: string): Promise<void> {
-  if (!isIOS()) {
+  if (!isNative()) {
     throw new Error(
-      "purchase() is iOS-only. On web, navigate to /checkout?product=<id> for Stripe."
+      "purchase() is native-only. On web, navigate to /checkout?product=<id> for Stripe.",
     );
   }
   const Purchases = (await loadRC(userId)) as {
@@ -138,13 +146,20 @@ export async function purchase(productId: ProductId, userId: string): Promise<vo
   };
   const offerings = await Purchases.getOfferings();
   const pkg = offerings.current?.availablePackages?.find((p) => p.identifier === productId);
-  if (!pkg) throw new Error(`Product ${productId} not available in current App Store offering`);
+  if (!pkg) {
+    throw new Error(
+      `Product ${productId} not available in current ${isIOS() ? "App Store" : "Google Play"} offering`,
+    );
+  }
   await Purchases.purchasePackage({ aPackage: pkg });
 }
 
-/** Restore previous purchases. Required by Apple guideline 3.1.1. */
+/**
+ * Restore previous purchases.
+ * Required by Apple guideline 3.1.1 and recommended for Google Play.
+ */
 export async function restorePurchases(userId: string): Promise<{ ok: true } | { error: string }> {
-  if (!isIOS()) return { ok: true };
+  if (!isNative()) return { ok: true };
   try {
     const Purchases = (await loadRC(userId)) as { restorePurchases: () => Promise<unknown> };
     await Purchases.restorePurchases();
@@ -155,12 +170,12 @@ export async function restorePurchases(userId: string): Promise<{ ok: true } | {
 }
 
 /**
- * Read current entitlement state from RevenueCat (iOS) or return a
+ * Read current entitlement state from RevenueCat (native) or return a
  * permissive default on web (where the Stripe-backed `useSubscription`
  * hook remains the source of truth).
  */
 export async function getEntitlements(userId: string): Promise<Entitlements> {
-  if (!isIOS()) {
+  if (!isNative()) {
     return { premium: false, activePass: false, verificationBadge: false };
   }
   const cfg = await getConfig();
@@ -174,7 +189,7 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
   const premiumEnt = info.entitlements.active[cfg.entitlementId];
   const passEnt = info.entitlements.active["active_pass"];
   const ownsBadge = (info.nonSubscriptionTransactions ?? []).some(
-    (t) => t.productIdentifier === "verification_badge"
+    (t) => t.productIdentifier === "verification_badge",
   );
   return {
     premium: !!premiumEnt,
@@ -185,19 +200,23 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
 }
 
 /**
- * Open Apple's native "Manage Subscriptions" sheet (iOS) or the Stripe
- * Customer Portal (web). Apple guideline 3.1.2 requires a manage-subs
- * affordance from inside the app for auto-renewable subscriptions.
+ * Open the native "Manage Subscriptions" sheet on iOS / Android, or the
+ * Stripe Customer Portal on web. Apple 3.1.2 and Google Play policy both
+ * require an in-app affordance to manage auto-renewing subscriptions.
  */
 export function getManageSubscriptionUrl(): string {
   if (isIOS()) return "itms-apps://apps.apple.com/account/subscriptions";
+  if (isAndroid()) {
+    // Deep link to the Google Play subscription management screen for this app.
+    return "https://play.google.com/store/account/subscriptions?package=best.unveil.app";
+  }
   return "/manage-subscription";
 }
 
 /** Static fallback for web — the canonical web catalog lives in /premium and /checkout. */
 const WEB_CATALOG: PurchaseOffer[] = [
-  { productId: "pass_24h", displayPrice: "$1.99", title: "24-Hour Pass", description: "Unlimited messaging for 24 hours" },
-  { productId: "pass_2w", displayPrice: "$9.99", title: "2-Week Pass", description: "Unlimited messaging for 14 days" },
+  { productId: "pass_24h", displayPrice: "$1.99", title: "Daily Pass", description: "Unlimited messaging for 24 hours" },
+  { productId: "pass_2w", displayPrice: "$9.99", title: "Two-Week Unlimited Pass", description: "Unlimited messaging for 14 days" },
   { productId: "premium_monthly", displayPrice: "$15.99", title: "Premium Monthly", description: "Auto-renews monthly" },
   { productId: "premium_quarterly", displayPrice: "$39.99", title: "Premium 3 Months", description: "Save 17% vs monthly" },
   { productId: "premium_annual", displayPrice: "$149.99", title: "Premium Annual", description: "Auto-renews yearly" },
