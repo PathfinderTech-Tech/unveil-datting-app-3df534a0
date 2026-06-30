@@ -46,6 +46,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactShareRouteImport } from './routes/contact-share'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
+import { Route as ChildSafetyRouteImport } from './routes/child-safety'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AvatarRouteImport } from './routes/avatar'
@@ -255,6 +256,11 @@ const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
   path: '/community-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChildSafetyRoute = ChildSafetyRouteImport.update({
+  id: '/child-safety',
+  path: '/child-safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -380,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/avatar': typeof AvatarRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/child-safety': typeof ChildSafetyRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/avatar': typeof AvatarRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/child-safety': typeof ChildSafetyRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
@@ -505,6 +513,7 @@ export interface FileRoutesById {
   '/avatar': typeof AvatarRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/child-safety': typeof ChildSafetyRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/contact': typeof ContactRoute
   '/contact-share': typeof ContactShareRoute
@@ -569,6 +578,7 @@ export interface FileRouteTypes {
     | '/avatar'
     | '/chat'
     | '/checkout'
+    | '/child-safety'
     | '/community-guidelines'
     | '/contact'
     | '/contact-share'
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/avatar'
     | '/chat'
     | '/checkout'
+    | '/child-safety'
     | '/community-guidelines'
     | '/contact'
     | '/contact-share'
@@ -693,6 +704,7 @@ export interface FileRouteTypes {
     | '/avatar'
     | '/chat'
     | '/checkout'
+    | '/child-safety'
     | '/community-guidelines'
     | '/contact'
     | '/contact-share'
@@ -756,6 +768,7 @@ export interface RootRouteChildren {
   AvatarRoute: typeof AvatarRoute
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
+  ChildSafetyRoute: typeof ChildSafetyRoute
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   ContactRoute: typeof ContactRoute
   ContactShareRoute: typeof ContactShareRoute
@@ -1072,6 +1085,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/child-safety': {
+      id: '/child-safety'
+      path: '/child-safety'
+      fullPath: '/child-safety'
+      preLoaderRoute: typeof ChildSafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout': {
       id: '/checkout'
       path: '/checkout'
@@ -1264,6 +1284,7 @@ const rootRouteChildren: RootRouteChildren = {
   AvatarRoute: AvatarRoute,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
+  ChildSafetyRoute: ChildSafetyRoute,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   ContactRoute: ContactRoute,
   ContactShareRoute: ContactShareRoute,
@@ -1321,13 +1342,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
