@@ -15,7 +15,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  *   - Android → Google Play Billing v8 via RevenueCat (see ANDROID_BUILD.md)
  */
 const config: CapacitorConfig = {
-  appId: "best.unveil.app",
+  appId: "tech.pathfinder.unveil",
   appName: "Unveil",
   webDir: "dist/client",
   ios: {
