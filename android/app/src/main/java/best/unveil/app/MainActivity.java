@@ -1,4 +1,4 @@
-package best.unveil.app;
+package tech.pathfinder.unveil;
 
 import com.getcapacitor.BridgeActivity;
 
