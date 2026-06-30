@@ -6,10 +6,6 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-def uploadStoreFile = keystoreProperties['storeFile'] ?: 'upload-keystore.jks'
-def uploadStorePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD') ?: keystoreProperties['storePassword']
-def uploadKeyPassword = System.getenv('ANDROID_KEY_PASSWORD') ?: keystoreProperties['keyPassword']
-def uploadKeyAlias = System.getenv('ANDROID_KEY_ALIAS') ?: keystoreProperties['keyAlias']
 
 android {
     namespace = "tech.pathfinder.unveil"
