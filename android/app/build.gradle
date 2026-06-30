@@ -25,10 +25,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file(uploadStoreFile)
-            storePassword uploadStorePassword
-            keyAlias uploadKeyAlias
-            keyPassword uploadKeyPassword
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
         }
     }
     buildTypes {
