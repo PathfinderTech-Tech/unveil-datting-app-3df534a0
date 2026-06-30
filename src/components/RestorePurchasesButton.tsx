@@ -3,16 +3,16 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { restorePurchases } from "@/lib/purchases";
-import { isIOS } from "@/lib/platform";
+import { isNative } from "@/lib/platform";
 
 /**
- * Apple guideline 3.1.1 — every app selling auto-renewing or non-consumable
- * IAP must expose a "Restore Purchases" affordance. Rendered on Membership,
- * Settings, and Manage Subscription pages.
+ * Apple guideline 3.1.1 and Google Play policy both require an in-app
+ * "Restore Purchases" affordance for apps selling subscriptions or
+ * non-consumable IAP. Rendered on Membership, Settings, and Manage
+ * Subscription pages.
  *
  * On the web build (where Stripe is the source of truth) the button is still
- * shown for parity but resolves immediately — it serves as a UX confirmation
- * that there's nothing to restore for the signed-in account.
+ * shown for parity but resolves immediately.
  */
 export function RestorePurchasesButton({ className = "" }: { className?: string }) {
   const { user } = useAuth();
@@ -28,7 +28,7 @@ export function RestorePurchasesButton({ className = "" }: { className?: string 
       const res = await restorePurchases(user.id);
       if ("error" in res) {
         toast.error(res.error);
-      } else if (isIOS()) {
+      } else if (isNative()) {
         toast.success("Purchases restored.");
       } else {
         toast.success("Your subscription is managed in your account — nothing to restore on the web.");

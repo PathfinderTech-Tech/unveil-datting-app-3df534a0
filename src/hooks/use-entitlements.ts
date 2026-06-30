@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { getEntitlements, type Entitlements } from "@/lib/purchases";
-import { isIOS } from "@/lib/platform";
+import { isNative } from "@/lib/platform";
 
 /**
  * Cross-platform entitlement check.
  *
- * - iOS: reads from RevenueCat (single source of truth on device).
+ * - iOS / Android: reads from RevenueCat (single source of truth on device;
+ *   StoreKit on iOS, Google Play Billing v8 on Android).
  * - Web: falls back to the existing Stripe-backed `useSubscription` hook.
- *
- * Use this anywhere we gate premium features so the same component works
- * inside the Capacitor wrapper without branching.
  */
 export function useEntitlements(): { entitlements: Entitlements; loading: boolean } {
   const { user } = useAuth();
@@ -26,8 +24,7 @@ export function useEntitlements(): { entitlements: Entitlements; loading: boolea
       setLoading(false);
       return;
     }
-    if (!isIOS()) {
-      // Web: skip RC fetch entirely; useSubscription drives the result.
+    if (!isNative()) {
       setRc(null);
       setLoading(false);
       return;
@@ -51,7 +48,7 @@ export function useEntitlements(): { entitlements: Entitlements; loading: boolea
     };
   }, [user]);
 
-  if (isIOS() && rc) {
+  if (isNative() && rc) {
     return { entitlements: rc, loading };
   }
 

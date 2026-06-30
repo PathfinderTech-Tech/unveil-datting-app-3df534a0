@@ -1,15 +1,18 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 /**
- * Capacitor config for the Unveil iOS wrapper.
+ * Capacitor config for the Unveil native wrappers (iOS + Android).
  *
  * Build flow:
- *   1. `bun run build`               — produce SPA bundle in /dist
- *   2. `npx cap sync ios`            — copy bundle into ios/App/App/public
- *   3. `npx cap open ios`            — opens Xcode for archive + TestFlight
+ *   1. `bun run build`                 — produce SPA bundle in /dist/client
+ *   2. `npx cap sync ios`              — copy bundle into ios/App/App/public
+ *      `npx cap sync android`          — copy bundle into android/app/src/main/assets/public
+ *   3. `npx cap open ios` | `android`  — open Xcode / Android Studio for release
  *
- * The web build remains the source of truth. iOS swaps Stripe checkout for
- * StoreKit via RevenueCat (see src/lib/purchases.ts and IOS_BUILD.md).
+ * Payments:
+ *   - Web     → Stripe Embedded Checkout
+ *   - iOS     → StoreKit via RevenueCat (see IOS_BUILD.md)
+ *   - Android → Google Play Billing v8 via RevenueCat (see ANDROID_BUILD.md)
  */
 const config: CapacitorConfig = {
   appId: "best.unveil.app",
@@ -18,13 +21,14 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "always",
     backgroundColor: "#09070d",
-    // Allow only HTTPS at runtime (we never load mixed content).
     limitsNavigationsToAppBoundDomains: false,
   },
+  android: {
+    backgroundColor: "#09070d",
+    // Google Play requires HTTPS for any remote content the WebView loads.
+    allowMixedContent: false,
+  },
   server: {
-    // During TestFlight we ship the bundled SPA. To point a build at the
-    // live production site for QA, set `url: "https://unveil.best"` and run
-    // `npx cap sync ios` again.
     androidScheme: "https",
   },
 };
