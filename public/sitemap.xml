@@ -15,4 +15,5 @@
   <url><loc>https://unveil.best/refund</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://unveil.best/support</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://unveil.best/contact</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://unveil.best/child-safety</loc><priority>0.8</priority><changefreq>yearly</changefreq></url>
 </urlset>
