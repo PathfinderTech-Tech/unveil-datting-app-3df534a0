@@ -81,7 +81,9 @@ present). The iOS key `REVENUECAT_IOS_PUBLIC_KEY` is unchanged.
 ## 5. App version & signing
 
 - `android/app/build.gradle` → bump `versionCode` and `versionName` before
-  every Play upload.
+  every Play upload. **Current production:** `versionCode 2`,
+  `versionName "1.0.1"` (v1 / 1.0.0 was consumed by the first upload
+  attempt and cannot be reused — Play rejects duplicate version codes).
 - Generate an upload keystore once:
   ```bash
   keytool -genkey -v -keystore unveil-upload.jks \
