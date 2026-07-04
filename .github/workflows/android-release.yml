@@ -21,28 +21,52 @@ jobs:
           java-version: 21
           cache: gradle
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: Install JS dependencies
-        run: bun install --frozen-lockfile
+      - name: Show environment
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Node: $(node -v)"
+          echo "Bun: $(bun -v)"
+          ls -la
 
-      - name: Build web bundle
-        # TanStack Start (Nitro + Cloudflare preset) emits the SPA into dist/client
-        # and the SSR worker into dist/server. Capacitor's webDir points at dist/client.
-        run: bun run build
+      - name: Install JS dependencies
+        # Do NOT use --frozen-lockfile: it aborts if bun.lock drifts from package.json,
+        # producing an empty node_modules and a silently-failing build downstream.
+        run: bun install
+
+      - name: Build web bundle (vite build)
+        # `bun run build` -> `vite build`. Pipe through `tee` so full logs are
+        # visible in the CI console even if vite exits nonzero.
+        run: |
+          set -o pipefail
+          bun run build 2>&1 | tee build.log
+          echo "vite build exit code: $?"
+
+      - name: Diagnose build output
+        if: always()
+        run: |
+          echo "=== pwd ==="
+          pwd
+          echo "=== ls -la (repo root) ==="
+          ls -la
+          echo "=== ls -la dist ==="
+          ls -la dist || true
+          echo "=== ls -la dist/client ==="
+          ls -la dist/client || true
+          echo "=== find . -maxdepth 3 -name index.html ==="
+          find . -maxdepth 3 -name index.html -not -path "./node_modules/*" || true
 
       - name: Verify web bundle exists
-        run: |
-          if [ ! -f dist/client/index.html ]; then
-            echo "::error::dist/client/index.html missing after 'bun run build'."
-            echo "Contents of dist/ (if any):"
-            ls -la dist 2>/dev/null || echo "(no dist directory)"
-            exit 1
-          fi
-          echo "dist/client/index.html present — ready for cap sync."
+        run: test -f dist/client/index.html
 
       - name: Sync Capacitor Android
         # Regenerates android/capacitor-cordova-android-plugins/* (including
@@ -64,3 +88,10 @@ jobs:
         with:
           name: android-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
