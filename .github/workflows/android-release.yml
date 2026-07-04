@@ -21,6 +21,22 @@ jobs:
           java-version: 21
           cache: gradle
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build web bundle
+        run: bun run build
+
+      - name: Sync Capacitor Android
+        # Regenerates android/capacitor-cordova-android-plugins/* (including
+        # cordova.variables.gradle) and copies dist/client into the native shell.
+        run: bunx cap sync android
+
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
