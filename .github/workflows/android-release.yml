@@ -30,7 +30,19 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build web bundle
+        # TanStack Start (Nitro + Cloudflare preset) emits the SPA into dist/client
+        # and the SSR worker into dist/server. Capacitor's webDir points at dist/client.
         run: bun run build
+
+      - name: Verify web bundle exists
+        run: |
+          if [ ! -f dist/client/index.html ]; then
+            echo "::error::dist/client/index.html missing after 'bun run build'."
+            echo "Contents of dist/ (if any):"
+            ls -la dist 2>/dev/null || echo "(no dist directory)"
+            exit 1
+          fi
+          echo "dist/client/index.html present — ready for cap sync."
 
       - name: Sync Capacitor Android
         # Regenerates android/capacitor-cordova-android-plugins/* (including
