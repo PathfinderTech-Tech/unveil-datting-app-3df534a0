@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Unveil</string>
     <string name="title_activity_main">Unveil</string>
-    <string name="package_name">best.unveil.app</string>
-    <string name="custom_url_scheme">best.unveil.app</string>
+    <string name="package_name">tech.pathfinder.unveil</string>
+    <string name="custom_url_scheme">tech.pathfinder.unveil</string>
 </resources>
