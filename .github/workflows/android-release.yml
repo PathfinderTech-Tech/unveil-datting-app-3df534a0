@@ -44,12 +44,19 @@ jobs:
         run: bun install
 
       - name: Build web bundle (vite build)
-        # `bun run build` -> `vite build`. Pipe through `tee` so full logs are
-        # visible in the CI console even if vite exits nonzero.
+        # `bun run build` -> `vite build` (TanStack Start / Nitro). Pipe through
+        # `tee` so full logs are visible in the CI console even if vite exits nonzero.
         run: |
           set -o pipefail
           bun run build 2>&1 | tee build.log
           echo "vite build exit code: $?"
+
+      - name: Copy web bundle to dist/client
+        # TanStack Start / Nitro writes client assets to .output/public/.
+        # Capacitor's webDir (and downstream steps) expect dist/client/.
+        run: |
+          mkdir -p dist/client
+          cp -r .output/public/. dist/client/
 
       - name: Diagnose build output
         if: always()
@@ -62,8 +69,8 @@ jobs:
           ls -la dist || true
           echo "=== ls -la dist/client ==="
           ls -la dist/client || true
-          echo "=== find . -maxdepth 3 -name index.html ==="
-          find . -maxdepth 3 -name index.html -not -path "./node_modules/*" || true
+          echo "=== find dist -maxdepth 3 -type f ==="
+          find dist -maxdepth 3 -type f || true
 
       - name: Verify web bundle exists
         run: test -f dist/client/index.html
