@@ -30,6 +30,9 @@ android {
             if (keystorePropertiesFile.exists()) {
                 storeFile file(keystoreProperties['storeFile'])
             }
+            if (keystoreProperties['storeType']) {
+                storeType keystoreProperties['storeType']
+            }
             storePassword keystoreProperties['storePassword']
         }
     }

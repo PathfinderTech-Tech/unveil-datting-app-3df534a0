@@ -86,16 +86,22 @@ jobs:
       - name: Decode keystore and write signing config
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_TYPE: ${{ secrets.KEYSTORE_TYPE || 'JKS' }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.ANDROID_KEY_PASSWORD || secrets.KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
+          [ -n "$KEYSTORE_BASE64" ] || { echo "Missing Android keystore secret"; exit 1; }
+          [ -n "$KEYSTORE_PASSWORD" ] || { echo "Missing Android keystore password secret"; exit 1; }
+          [ -n "$KEY_ALIAS" ] || { echo "Missing Android key alias secret"; exit 1; }
+          [ -n "$KEY_PASSWORD" ] || { echo "Missing Android key password secret"; exit 1; }
           echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           cat > android/key.properties <<EOF
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
           storeFile=../app/upload-keystore.jks
+          storeType=$KEYSTORE_TYPE
           EOF
 
       - name: Verify keystore exists
