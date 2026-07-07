@@ -26,6 +26,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { trackEvent } from "@/lib/analytics";
 import { ThoughtModal } from "@/components/ThoughtModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
+import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
@@ -43,6 +44,7 @@ type ProfileState = {
 };
 
 const MATCHES_PROFILE_TIMEOUT_MS = 10000;
+const MATCHES_LIST_TIMEOUT_MS = 15000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -133,22 +135,30 @@ function Matches() {
     if (!profileState?.onboardingComplete) return;
     let alive = true;
     setLoading(true);
-    loadRealMatches({
-      limit: 40,
-      nearbyOnly: filters.nearbyOnly,
-      radiusKm: filters.radiusKm || null,
-      country: filters.country || null,
-      continent: filters.continent || null,
-      internationalOnly: filters.internationalOnly,
-      language: filters.language || null,
-      intent: filters.intent || null,
-      ageMin: filters.ageMin,
-      ageMax: filters.ageMax,
-    }).then((rows) => {
-      if (!alive) return;
-      setMatches(rows);
-      setLoading(false);
-    });
+    (async () => {
+      try {
+        const rows = await withTimeout(loadRealMatches({
+          limit: 40,
+          nearbyOnly: filters.nearbyOnly,
+          radiusKm: filters.radiusKm || null,
+          country: filters.country || null,
+          continent: filters.continent || null,
+          internationalOnly: filters.internationalOnly,
+          language: filters.language || null,
+          intent: filters.intent || null,
+          ageMin: filters.ageMin,
+          ageMax: filters.ageMax,
+        }), MATCHES_LIST_TIMEOUT_MS);
+        if (!alive) return;
+        setMatches(rows);
+      } catch (error) {
+        console.warn("[matches] list load failed; rendering safe empty state", error);
+        if (!alive) return;
+        setMatches([]);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
     return () => { alive = false; };
   }, [filters, profileState?.onboardingComplete]);
 
@@ -266,7 +276,7 @@ function Matches() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
-        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+        <LoadingScreen label="Loading matches" />
       </div>
     );
   }
@@ -277,13 +287,15 @@ function Matches() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
-        <div className="mx-auto max-w-md p-12 text-center">
-          <h1 className="font-display text-3xl font-bold">Sign in to see your matches.</h1>
-          <p className="mt-2 text-muted-foreground">Your profile and matches travel with your account.</p>
-          <Link to="/login" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
-            Log in <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <AppStateScreen
+          title="You are logged out"
+          message="Sign in to see your matches."
+          tone="warning"
+          primaryLabel="Login"
+          primaryTo="/login"
+          secondaryLabel="Sign up"
+          secondaryTo="/signup"
+        />
       </div>
     );
   }
@@ -334,10 +346,7 @@ function Matches() {
             <Sparkles className="h-6 w-6" />
           </div>
           <h1 className="mt-5 font-display text-4xl font-light md:text-5xl">Your profile is <span className="text-gradient-aura italic">live</span>.</h1>
-          <p className="mt-3 text-muted-foreground">
-            We're searching for compatible connections. New people complete onboarding every day —
-            you'll see them here as they arrive.
-          </p>
+          <p className="mt-3 text-muted-foreground">No matches yet. We are still searching for compatible connections.</p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <Link to="/" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm hover:bg-surface-2">

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useMyLocationTrust, LocationTrustBadge } from "@/components/LocationTrustBadge";
+import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({
@@ -197,6 +198,32 @@ function MessagesPage() {
   });
   const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-24 lg:pb-0">
+        <UnveilNav />
+        <LoadingScreen label="Loading messages" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background pb-24 lg:pb-0">
+        <UnveilNav />
+        <AppStateScreen
+          title="You are logged out"
+          message="Sign in to continue to your conversations."
+          tone="warning"
+          primaryLabel="Login"
+          primaryTo="/login"
+          secondaryLabel="Sign up"
+          secondaryTo="/signup"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <UnveilNav />
@@ -238,11 +265,16 @@ function MessagesPage() {
           />
         </div>
 
-        {!loading && rows.length === 0 && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">No conversations yet</p>
-            <p className="mt-1 text-xs text-muted-foreground/80">Start matching to begin conversations.</p>
-          </div>
+        {rows.length === 0 && (
+          <AppStateScreen
+            title="No messages yet"
+            message="You do not have any conversations yet. Start matching to begin chatting."
+            tone="neutral"
+            primaryLabel="Open Matches"
+            primaryTo="/matches"
+            secondaryLabel="Go Home"
+            secondaryTo="/"
+          />
         )}
 
         {filtered.length > 0 && (

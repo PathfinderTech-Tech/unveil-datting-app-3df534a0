@@ -14,6 +14,7 @@ import { SignedImage } from "@/components/SignedImage";
 
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -102,7 +103,7 @@ function missingSections(p: ProfileRow | null, voiceCount: number): string[] {
 
 function ProfilePage() {
   const { checking } = useRequireOnboarding();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [voices, setVoices] = useState<VoiceRow[]>([]);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -147,7 +148,50 @@ function ProfilePage() {
     return (
       <div className="min-h-screen">
         <UnveilNav />
-        <div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Loading…</div>
+        <LoadingScreen label="Loading profile" />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <LoadingScreen label="Loading profile" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <AppStateScreen
+          title="You are logged out"
+          message="Please sign in to open your profile."
+          tone="warning"
+          primaryLabel="Login"
+          primaryTo="/login"
+          secondaryLabel="Sign up"
+          secondaryTo="/signup"
+        />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <AppStateScreen
+          title="No profile found"
+          message="We could not find your profile data yet. Continue onboarding to complete setup."
+          tone="warning"
+          primaryLabel="Continue onboarding"
+          primaryTo="/onboarding"
+          secondaryLabel="Go Home"
+          secondaryTo="/"
+        />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
 import { useAuth } from "@/hooks/use-auth";
+import { AppStateScreen, LoadingScreen, OfflineScreen } from "@/components/AppStateScreen";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
 import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
 
@@ -29,8 +30,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, error } = useAuth();
   const navigate = useNavigate();
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
   // First-time visitors (no auth, no welcome seen) → /welcome
   useEffect(() => {
@@ -41,6 +43,41 @@ function Home() {
       }
     } catch {}
   }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <LoadingScreen label="Loading UNVEIL" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <AppStateScreen
+          title="Supabase connection error"
+          message="UNVEIL could not load account services. Check production environment variables and network access."
+          tone="error"
+          primaryLabel="Retry"
+          onPrimary={() => window.location.reload()}
+          secondaryLabel="Open login"
+          secondaryTo="/login"
+        />
+      </div>
+    );
+  }
+
+  if (isOffline) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <OfflineScreen onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
 
   if (user && !loading) {
     return (

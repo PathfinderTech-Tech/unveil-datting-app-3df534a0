@@ -7,6 +7,7 @@ import { PhoneAuthForm } from "@/components/PhoneAuthForm";
 import { ArrowRight } from "lucide-react";
 import { getEmailCooldown, cooldownMessage, logDeletionAttempt } from "@/lib/cooldown";
 import { PasswordInput } from "@/components/ui/password-input";
+import { OfflineScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "UNVEIL — Sign in" }] }),
@@ -20,6 +21,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [cooldownBanner, setCooldownBanner] = useState<string | null>(null);
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -39,7 +41,13 @@ function Login() {
       setLoading(false);
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    let error: { message: string } | null = null;
+    try {
+      const res = await supabase.auth.signInWithPassword({ email, password });
+      error = res.error;
+    } catch {
+      error = { message: "Supabase error: failed to connect. Please try again." };
+    }
     setLoading(false);
     if (error) setErr(error.message);
     else navigate({ to: "/matches" });
@@ -47,12 +55,22 @@ function Login() {
 
   const forgot = async () => {
     if (!email) { setErr("Enter your email first"); return; }
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    let error: { message: string } | null = null;
+    try {
+      const res = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      error = res.error;
+    } catch {
+      error = { message: "Supabase error: failed to send reset email." };
+    }
     if (error) setErr(error.message);
     else setErr("Check your email for the reset link.");
   };
+
+  if (isOffline) {
+    return <OfflineScreen onRetry={() => window.location.reload()} />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">

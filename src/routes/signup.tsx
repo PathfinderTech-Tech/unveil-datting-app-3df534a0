@@ -6,6 +6,7 @@ import { OAuthButtons, OrDivider } from "@/components/OAuthButtons";
 import { PhoneAuthForm } from "@/components/PhoneAuthForm";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
+import { OfflineScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Create your UNVEIL account." }] }),
@@ -18,6 +19,7 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,11 +32,17 @@ function Signup() {
       setLoading(false);
       return;
     }
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/onboarding` },
-    });
+    let error: { message: string } | null = null;
+    try {
+      const res = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      });
+      error = res.error;
+    } catch {
+      error = { message: "Supabase error: account creation failed." };
+    }
     setLoading(false);
     if (error) {
       const msg = error.message || "";
@@ -49,6 +57,10 @@ function Signup() {
       navigate({ to: "/onboarding" });
     }
   };
+
+  if (isOffline) {
+    return <OfflineScreen onRetry={() => window.location.reload()} />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">

@@ -28,9 +28,15 @@ const config: CapacitorConfig = {
     // Google Play requires HTTPS for any remote content the WebView loads.
     allowMixedContent: false,
   },
-  server: {
-    androidScheme: "https",
-  },
+  ...(process.env.CAPACITOR_LIVE_URL
+    ? {
+        server: {
+          url: process.env.CAPACITOR_LIVE_URL,
+          allowNavigation: ["unveil.best", "www.unveil.best", "*.unveil.best"],
+          androidScheme: "https",
+        },
+      }
+    : {}),
 };
 
 export default config;
