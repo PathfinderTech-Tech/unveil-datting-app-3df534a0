@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 import appCss from "../styles.css?url";
 import "@/i18n";
@@ -50,33 +51,226 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
+    <FatalAppScreen
+      title="Something went wrong"
+      message="Something went wrong. Please restart UNVEIL."
+      primaryAction={
+        <button
+          onClick={() => {
+            router.invalidate();
+            reset();
+            window.location.reload();
+          }}
+          className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+        >
+          Retry
+        </button>
+      }
+      secondaryAction={
+        <a
+          href="/"
+          className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+        >
+          Go home
+        </a>
+      }
+    />
+  );
+}
+
+function FatalAppScreen({
+  title,
+  message,
+  primaryAction,
+  secondaryAction,
+}: {
+  title: string;
+  message: string;
+  primaryAction: React.ReactNode;
+  secondaryAction?: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#09070d] px-4 text-foreground">
+      <div className="w-full max-w-md rounded-3xl border border-primary/20 bg-card/95 p-8 text-center shadow-glow backdrop-blur">
+        <img src={logoAsset.url} alt="UNVEIL" className="mx-auto h-16 w-16 rounded-2xl" />
+        <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">{title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-          >
-            Go home
-          </a>
+          {primaryAction}
+          {secondaryAction}
         </div>
       </div>
     </div>
+  );
+}
+
+function LaunchOverlay({ timedOut }: { timedOut: boolean }) {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#09070d] px-6 text-foreground">
+      <div className="w-full max-w-sm rounded-3xl border border-primary/20 bg-card/95 p-8 text-center shadow-glow backdrop-blur">
+        <img src={logoAsset.url} alt="UNVEIL" className="mx-auto h-20 w-20 rounded-[1.75rem] shadow-glow" />
+        <h1 className="mt-5 font-display text-3xl font-light">UNVEIL</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {timedOut ? "UNVEIL is taking longer than expected to open." : "Preparing your experience…"}
+        </p>
+        <div className="mt-6 flex justify-center">
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-white/10">
+            <div className={`h-full rounded-full bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-300 ${timedOut ? "w-full" : "animate-[pulse_1.4s_ease-in-out_infinite] w-2/3"}`} />
+          </div>
+        </div>
+        {timedOut && (
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function useLaunchState() {
+  const [ready, setReady] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    let painted = false;
+    let minimumDelayDone = false;
+
+    const maybeReady = () => {
+      if (!active || !painted || !minimumDelayDone) return;
+      setReady(true);
+      setTimedOut(false);
+    };
+
+    const minimumDelay = window.setTimeout(() => {
+      minimumDelayDone = true;
+      maybeReady();
+    }, 900);
+
+    const timeout = window.setTimeout(() => {
+      if (!active) return;
+      setTimedOut(true);
+    }, 8000);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        painted = true;
+        maybeReady();
+      });
+    });
+
+    void (async () => {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (!Capacitor.isNativePlatform()) return;
+        const { SplashScreen } = await import("@capacitor/splash-screen");
+        await SplashScreen.hide();
+      } catch {
+        /* noop */
+      }
+    })();
+
+    return () => {
+      active = false;
+      window.clearTimeout(minimumDelay);
+      window.clearTimeout(timeout);
+    };
+  }, []);
+
+  return {
+    showOverlay: !ready,
+    timedOut,
+  };
+}
+
+function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
+  const [fatalError, setFatalError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const onError = (event: ErrorEvent) => {
+      console.error(event.error ?? event.message);
+      setFatalError(event.error instanceof Error ? event.error : new Error(event.message || "Unexpected runtime error"));
+    };
+
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error(event.reason);
+      const message =
+        event.reason instanceof Error
+          ? event.reason.message
+          : typeof event.reason === "string"
+            ? event.reason
+            : "Unexpected async runtime error";
+      setFatalError(event.reason instanceof Error ? event.reason : new Error(message));
+    };
+
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onUnhandledRejection);
+    };
+  }, []);
+
+  if (fatalError) {
+    return (
+      <FatalAppScreen
+        title="Something went wrong"
+        message="Something went wrong. Please restart UNVEIL."
+        primaryAction={
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+          >
+            Retry
+          </button>
+        }
+      />
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function AppBootLayer() {
+  const { showOverlay, timedOut } = useLaunchState();
+
+  if (!showOverlay) return null;
+  return <LaunchOverlay timedOut={timedOut} />;
+}
+
+function AppChrome() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useAppLifecycle();
+
+  const isLanding = pathname === "/";
+  const variant: "center" | "corner" | "edge" = isLanding ? "center" : "corner";
+  const opacity = isLanding ? 0.008 : 0.005;
+  const isChromeless = pathname.startsWith("/chat") || pathname.startsWith("/match/");
+
+  return (
+    <>
+      <CooldownGuard />
+      <VeilBackdrop variant={variant} opacity={opacity} />
+      {!isChromeless && <GlobalBackButton />}
+      <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0"}`}>
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        {!isChromeless && <SiteFooter />}
+        {!isChromeless && <MobileBottomNav />}
+        {import.meta.env.DEV && <ThemeTokenSwitcher />}
+      </div>
+      <AppBootLayer />
+    </>
   );
 }
 
@@ -149,35 +343,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  useAppLifecycle();
-
-
-  // Watermark is extremely subtle — center nearly invisible, edges barely perceptible.
-  const isLanding = pathname === "/";
-  const variant: "center" | "corner" | "edge" = isLanding ? "center" : "corner";
-  const opacity = isLanding ? 0.008 : 0.005;
-
-  // Full-screen, composer-driven views: suppress site footer and mobile bottom
-  // nav so they cannot layer behind the chat composer / emoji tray / voice
-  // recorder on iPhone screen sizes (SE → Pro Max).
-  const isChromeless = pathname.startsWith("/chat") || pathname.startsWith("/match/");
 
   return (
     <QueryClientProvider client={queryClient}>
       <PresenceProvider>
-        <CooldownGuard />
-
-        <VeilBackdrop variant={variant} opacity={opacity} />
-        {!isChromeless && <GlobalBackButton />}
-        <div className={`relative z-10 flex min-h-[100dvh] flex-col ${isChromeless ? "" : "pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0"}`}>
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          {!isChromeless && <SiteFooter />}
-          {!isChromeless && <MobileBottomNav />}
-          {import.meta.env.DEV && <ThemeTokenSwitcher />}
-        </div>
+        <AppRuntimeGuard>
+          <AppChrome />
+        </AppRuntimeGuard>
       </PresenceProvider>
     </QueryClientProvider>
   );

@@ -28,6 +28,16 @@ const config: CapacitorConfig = {
     // Google Play requires HTTPS for any remote content the WebView loads.
     allowMixedContent: false,
   },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 1200,
+      backgroundColor: "#09070d",
+      showSpinner: false,
+      androidSpinnerStyle: "small",
+      splashFullScreen: true,
+      splashImmersive: false,
+    },
+  },
   ...(process.env.CAPACITOR_LIVE_URL
     ? {
         server: {

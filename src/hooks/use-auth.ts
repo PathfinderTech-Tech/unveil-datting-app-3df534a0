@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabaseConfigError, supabase } from "@/integrations/supabase/client";
 import { ensureProfileForUser } from "@/lib/auth-profile-bootstrap";
 
 const AUTH_BOOT_TIMEOUT_MS = 8000;
@@ -22,38 +22,63 @@ export function useAuth() {
 
   useEffect(() => {
     let alive = true;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (!alive) return;
-      setError(null);
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        void ensureProfileForUser(s.user);
-      }
+    const configError = getSupabaseConfigError();
+    if (configError) {
+      setError("Unable to connect to authentication services.");
+      setSession(null);
+      setUser(null);
       setLoading(false);
-    });
-    withTimeout(supabase.auth.getSession(), AUTH_BOOT_TIMEOUT_MS)
-      .then(({ data: { session } }) => {
+      return () => {
+        alive = false;
+      };
+    }
+
+    let unsubscribe = () => {};
+
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
         if (!alive) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          void ensureProfileForUser(session.user);
+        setError(null);
+        setSession(s);
+        setUser(s?.user ?? null);
+        if (s?.user) {
+          void ensureProfileForUser(s.user);
         }
-      })
-      .catch(() => {
-        if (!alive) return;
-        setError("Unable to connect to authentication services.");
-        setSession(null);
-        setUser(null);
-      })
-      .finally(() => {
-        if (!alive) return;
         setLoading(false);
       });
+      unsubscribe = () => {
+        subscription.unsubscribe();
+      };
+
+      void withTimeout(Promise.resolve().then(() => supabase.auth.getSession()), AUTH_BOOT_TIMEOUT_MS)
+        .then(({ data: { session } }) => {
+          if (!alive) return;
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            void ensureProfileForUser(session.user);
+          }
+        })
+        .catch(() => {
+          if (!alive) return;
+          setError("Unable to connect to authentication services.");
+          setSession(null);
+          setUser(null);
+        })
+        .finally(() => {
+          if (!alive) return;
+          setLoading(false);
+        });
+    } catch {
+      setError("Unable to connect to authentication services.");
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+    }
+
     return () => {
       alive = false;
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
