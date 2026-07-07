@@ -684,8 +684,23 @@ function Chat() {
     }
   };
 
-  if (loading || !user) {
-    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
+  if (loading) {
+    return <div className="min-h-screen"><UnveilNav /><div className="p-12 text-center text-muted-foreground">Loading…</div></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen">
+        <UnveilNav />
+        <div className="mx-auto max-w-md p-12 text-center">
+          <h1 className="font-display text-3xl font-bold">Sign in to open chats.</h1>
+          <p className="mt-2 text-muted-foreground">Your conversations are tied to your UNVEIL account.</p>
+          <Link to="/login" className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-primary-foreground shadow-glow">
+            Go to login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const dayN = matchInfo ? daysSince(matchInfo.created_at) : null;

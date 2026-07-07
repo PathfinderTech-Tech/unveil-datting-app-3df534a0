@@ -23,29 +23,45 @@ const DEFAULT: MessageQuota = {
   loading: true,
 };
 
+const QUOTA_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("quota timeout")), ms);
+    }),
+  ]);
+}
+
 export function useMessageQuota() {
   const [quota, setQuota] = useState<MessageQuota>(DEFAULT);
 
   const refresh = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setQuota({ ...DEFAULT, loading: false });
-      return;
-    }
-    const { data } = await (supabase as any).rpc("get_message_quota", { _uid: user.id });
-    const row = Array.isArray(data) ? data[0] : data;
-    if (row) {
-      setQuota({
-        dailyLimit: row.daily_limit ?? 5,
-        used: row.used ?? 0,
-        remaining: row.remaining ?? 5,
-        resetsAt: row.resets_at ?? null,
-        unlimited: !!row.unlimited,
-        premiumUntil: row.premium_until ?? null,
-        messagePassUntil: row.message_pass_until ?? null,
-        loading: false,
-      });
-    } else {
+    try {
+      const { data: { user } } = await withTimeout(supabase.auth.getUser(), QUOTA_TIMEOUT_MS);
+      if (!user) {
+        setQuota({ ...DEFAULT, loading: false });
+        return;
+      }
+      const { data } = await withTimeout((supabase as any).rpc("get_message_quota", { _uid: user.id }), QUOTA_TIMEOUT_MS);
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row) {
+        setQuota({
+          dailyLimit: row.daily_limit ?? 5,
+          used: row.used ?? 0,
+          remaining: row.remaining ?? 5,
+          resetsAt: row.resets_at ?? null,
+          unlimited: !!row.unlimited,
+          premiumUntil: row.premium_until ?? null,
+          messagePassUntil: row.message_pass_until ?? null,
+          loading: false,
+        });
+      } else {
+        setQuota({ ...DEFAULT, loading: false });
+      }
+    } catch (error) {
+      console.warn("[quota] failed; using defaults", error);
       setQuota({ ...DEFAULT, loading: false });
     }
   }, []);

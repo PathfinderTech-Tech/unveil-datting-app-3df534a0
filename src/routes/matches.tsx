@@ -42,6 +42,17 @@ type ProfileState = {
   photosRemaining: number;
 };
 
+const MATCHES_PROFILE_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("matches profile bootstrap timeout")), ms);
+    }),
+  ]);
+}
+
 function normalizeArchetype(value: unknown): Archetype {
   return typeof value === "string" && value in ARCHETYPES ? (value as Archetype) : "signal";
 }
@@ -65,41 +76,55 @@ function Matches() {
     if (authLoading || !user) return;
     let alive = true;
     (async () => {
-      const [{ data }, { data: onb }] = await Promise.all([
-        supabase.from("profiles")
-          .select("onboarding_complete, compatibility_score, archetype, first_name, gender, country, intention, relationship_intent, photo_url, profile_photo_url")
-          .eq("id", user.id).maybeSingle(),
-        supabase.from("onboarding_answers")
-          .select("answers").eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (!alive) return;
-      const arch = normalizeArchetype(data?.archetype);
+      try {
+        const [{ data }, { data: onb }] = await withTimeout(Promise.all([
+          supabase.from("profiles")
+            .select("onboarding_complete, compatibility_score, archetype, first_name, gender, country, intention, relationship_intent, photo_url, profile_photo_url")
+            .eq("id", user.id).maybeSingle(),
+          supabase.from("onboarding_answers")
+            .select("answers").eq("user_id", user.id).maybeSingle(),
+        ]), MATCHES_PROFILE_TIMEOUT_MS);
+        if (!alive) return;
+        const arch = normalizeArchetype(data?.archetype);
 
-      // Compute resume progress for the "Finish your profile" card.
-      const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
-      const discovery = (answers?.discovery as Record<string, unknown> | undefined) ?? {};
-      const intent = data?.relationship_intent || data?.intention;
-      const hasIdentity = !!data?.first_name && !!data?.gender && !!data?.country && !!intent;
-      const hasConnStyle = typeof answers?.connectionStyle === "string" && !!answers.connectionStyle;
-      const hasProfession = typeof answers?.profession === "string" && !!answers.profession;
-      const hasPhoto = !!(data?.profile_photo_url || data?.photo_url);
-      const discoveryKeys = ["pace", "energy", "conflict", "future", "intimacy", "decisions"];
-      const discoveryAnswered = discoveryKeys.filter((k) => !!discovery[k]).length;
-      const totalSegments = 5; // identity, connection style, photo, profession, discovery
-      const doneSegments =
-        (hasIdentity ? 1 : 0) + (hasConnStyle ? 1 : 0) + (hasPhoto ? 1 : 0) +
-        (hasProfession ? 1 : 0) + (discoveryAnswered === discoveryKeys.length ? 1 : 0);
-      const completionPct = Math.round((doneSegments / totalSegments) * 100);
+        // Compute resume progress for the "Finish your profile" card.
+        const answers = (onb?.answers as Record<string, unknown> | null) ?? null;
+        const discovery = (answers?.discovery as Record<string, unknown> | undefined) ?? {};
+        const intent = data?.relationship_intent || data?.intention;
+        const hasIdentity = !!data?.first_name && !!data?.gender && !!data?.country && !!intent;
+        const hasConnStyle = typeof answers?.connectionStyle === "string" && !!answers.connectionStyle;
+        const hasProfession = typeof answers?.profession === "string" && !!answers.profession;
+        const hasPhoto = !!(data?.profile_photo_url || data?.photo_url);
+        const discoveryKeys = ["pace", "energy", "conflict", "future", "intimacy", "decisions"];
+        const discoveryAnswered = discoveryKeys.filter((k) => !!discovery[k]).length;
+        const totalSegments = 5; // identity, connection style, photo, profession, discovery
+        const doneSegments =
+          (hasIdentity ? 1 : 0) + (hasConnStyle ? 1 : 0) + (hasPhoto ? 1 : 0) +
+          (hasProfession ? 1 : 0) + (discoveryAnswered === discoveryKeys.length ? 1 : 0);
+        const completionPct = Math.round((doneSegments / totalSegments) * 100);
 
-      setProfileState({
-        onboardingComplete: !!data?.onboarding_complete,
-        baseScore: data?.compatibility_score ?? 70,
-        archetype: arch,
-        archetypeName: ARCHETYPES[arch].name,
-        completionPct,
-        questionsRemaining: Math.max(0, discoveryKeys.length - discoveryAnswered),
-        photosRemaining: hasPhoto ? 0 : 1,
-      });
+        setProfileState({
+          onboardingComplete: !!data?.onboarding_complete,
+          baseScore: data?.compatibility_score ?? 70,
+          archetype: arch,
+          archetypeName: ARCHETYPES[arch].name,
+          completionPct,
+          questionsRemaining: Math.max(0, discoveryKeys.length - discoveryAnswered),
+          photosRemaining: hasPhoto ? 0 : 1,
+        });
+      } catch (error) {
+        console.warn("[matches] profile bootstrap failed; using safe defaults", error);
+        if (!alive) return;
+        setProfileState({
+          onboardingComplete: true,
+          baseScore: 70,
+          archetype: "signal",
+          archetypeName: ARCHETYPES.signal.name,
+          completionPct: 0,
+          questionsRemaining: 0,
+          photosRemaining: 0,
+        });
+      }
     })();
     return () => { alive = false; };
   }, [user, authLoading]);

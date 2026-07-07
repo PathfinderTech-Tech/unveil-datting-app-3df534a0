@@ -114,6 +114,17 @@ const VOICE_INTRO_PROMPT_TEXTS = VOICE_INTRO_PROMPTS.map((p) => p.prompt);
 
 const TOTAL = STEPS.length;
 
+const ONBOARDING_HYDRATE_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("onboarding hydrate timeout")), ms);
+    }),
+  ]);
+}
+
 type Answers = Record<string, unknown>;
 
 function Onboarding() {
@@ -214,78 +225,81 @@ function Onboarding() {
     if (!user) { setHydrated(true); return; }
     let alive = true;
     (async () => {
-      const [{ data: prof }, { data: onb }] = await Promise.all([
-        supabase.from("profiles")
-          .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
-          .eq("id", user.id).maybeSingle(),
-        supabase.from("onboarding_answers")
-          .select("answers").eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (!alive) return;
+      try {
+        const [{ data: prof }, { data: onb }] = await withTimeout(Promise.all([
+          supabase.from("profiles")
+            .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+            .eq("id", user.id).maybeSingle(),
+          supabase.from("onboarding_answers")
+            .select("answers").eq("user_id", user.id).maybeSingle(),
+        ]), ONBOARDING_HYDRATE_TIMEOUT_MS);
+        if (!alive) return;
 
-      const isEditing = typeof window !== "undefined" && /[?&]edit=1\b/.test(window.location.search);
-      if (prof?.onboarding_complete && !isEditing) { navigate({ to: "/matches", replace: true }); return; }
+        const isEditing = typeof window !== "undefined" && /[?&]edit=1\b/.test(window.location.search);
+        if (prof?.onboarding_complete && !isEditing) { navigate({ to: "/matches", replace: true }); return; }
 
+        if (prof?.first_name) setName(prof.first_name);
+        if (typeof prof?.age === "number") setAge(prof.age);
+        if (prof?.gender) setGender(prof.gender);
+        if (prof?.country) setCountry(prof.country);
+        // Backfill country_code from the legacy free-text country if missing
+        const initialCode = (prof as { country_code?: string | null } | null)?.country_code ?? codeForName(prof?.country);
+        if (initialCode) setCountryCode(initialCode);
+        if (prof?.state_region) setStateRegion(prof.state_region);
+        if (prof?.city) setCity(prof.city);
+        if (prof?.interested_in) setInterestedIn(prof.interested_in);
+        const intentVal = prof?.relationship_intent || prof?.intention;
+        if (intentVal) setIntent(intentVal);
+  if (user.email && !user.email.endsWith("@phone.unveil.local")) setEmail(user.email);
+        if (prof?.bio) setBio(prof.bio);
+        if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
+        const sel = prof?.profile_photo_url || prof?.photo_url;
+        if (sel) setPhotoUrl(sel);
+        // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
 
-      if (prof?.first_name) setName(prof.first_name);
-      if (typeof prof?.age === "number") setAge(prof.age);
-      if (prof?.gender) setGender(prof.gender);
-      if (prof?.country) setCountry(prof.country);
-      // Backfill country_code from the legacy free-text country if missing
-      const initialCode = (prof as { country_code?: string | null } | null)?.country_code ?? codeForName(prof?.country);
-      if (initialCode) setCountryCode(initialCode);
-      if (prof?.state_region) setStateRegion(prof.state_region);
-      if (prof?.city) setCity(prof.city);
-      if (prof?.interested_in) setInterestedIn(prof.interested_in);
-      const intentVal = prof?.relationship_intent || prof?.intention;
-      if (intentVal) setIntent(intentVal);
-      if (user.email && !user.email.endsWith("@phone.unveil.local")) setEmail(user.email);
-      if (prof?.bio) setBio(prof.bio);
-      if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
-      const sel = prof?.profile_photo_url || prof?.photo_url;
-      if (sel) setPhotoUrl(sel);
-      // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
-
-      const a = (onb?.answers as Answers | null) ?? null;
-      if (a) {
-        // appearance is always "real" now — ignored from saved answers.
-        if (typeof a.agree18 === "boolean") setAgree18(a.agree18);
-        if (typeof a.agreeTerms === "boolean") setAgreeTerms(a.agreeTerms);
-        if (typeof a.agreePrivacy === "boolean") setAgreePrivacy(a.agreePrivacy);
-        if (typeof a.agreeCommunity === "boolean") setAgreeCommunity(a.agreeCommunity);
-        if (typeof a.lifestyle === "string") setLifestyle(a.lifestyle);
-        if (Array.isArray(a.languages)) setLanguagesSpoken(a.languages as string[]);
-        if (typeof a.workCategory === "string") setWorkCategory(a.workCategory);
-        if (typeof a.profession === "string") setProfession(a.profession as Profession);
-        if (a.compat && typeof a.compat === "object") {
-          setCompat((c) => ({ ...c, ...(a.compat as Record<CompatKey, string>) }));
+        const a = (onb?.answers as Answers | null) ?? null;
+        if (a) {
+          // appearance is always "real" now — ignored from saved answers.
+          if (typeof a.agree18 === "boolean") setAgree18(a.agree18);
+          if (typeof a.agreeTerms === "boolean") setAgreeTerms(a.agreeTerms);
+          if (typeof a.agreePrivacy === "boolean") setAgreePrivacy(a.agreePrivacy);
+          if (typeof a.agreeCommunity === "boolean") setAgreeCommunity(a.agreeCommunity);
+          if (typeof a.lifestyle === "string") setLifestyle(a.lifestyle);
+          if (Array.isArray(a.languages)) setLanguagesSpoken(a.languages as string[]);
+          if (typeof a.workCategory === "string") setWorkCategory(a.workCategory);
+          if (typeof a.profession === "string") setProfession(a.profession as Profession);
+          if (a.compat && typeof a.compat === "object") {
+            setCompat((c) => ({ ...c, ...(a.compat as Record<CompatKey, string>) }));
+          }
+          if (a.discovery && typeof a.discovery === "object") setDiscovery(a.discovery as Partial<DiscoveryProfile>);
+          if (a.spark && typeof a.spark === "object") setSpark(a.spark as Record<string, string>);
+          // verifyChoice is auto-skipped — paid verification has been retired.
         }
-        if (a.discovery && typeof a.discovery === "object") setDiscovery(a.discovery as Partial<DiscoveryProfile>);
-        if (a.spark && typeof a.spark === "object") setSpark(a.spark as Record<string, string>);
-        // verifyChoice is auto-skipped — paid verification has been retired.
+        // Resume at first incomplete step
+        const next = computeResumeStep({
+          agree18: a?.agree18 === true || false,
+          agreeTerms: a?.agreeTerms === true || false,
+          agreePrivacy: a?.agreePrivacy === true || false,
+          agreeCommunity: a?.agreeCommunity === true || false,
+          name: prof?.first_name ?? "",
+          gender: prof?.gender ?? "",
+          country: prof?.country ?? "",
+          interestedIn: prof?.interested_in ?? "",
+          intent: (prof?.relationship_intent || prof?.intention) ?? "",
+          email: isPhoneUser ? "phone@ok" : (user.email ?? ""),
+          photoUrl: sel ?? null,
+          bio: prof?.bio ?? "",
+          interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
+          compat: { ...({} as Record<CompatKey, string>), ...((a?.compat as Record<CompatKey, string>) ?? {}) },
+          discovery: (a?.discovery as Partial<DiscoveryProfile>) ?? {},
+        });
+        setStep(next);
+        setResumed(next > 1);
+      } catch (error) {
+        console.warn("[onboarding] hydration failed; starting with defaults", error);
+      } finally {
+        if (alive) setHydrated(true);
       }
-
-      // Resume at first incomplete step
-      const next = computeResumeStep({
-        agree18: a?.agree18 === true || false,
-        agreeTerms: a?.agreeTerms === true || false,
-        agreePrivacy: a?.agreePrivacy === true || false,
-        agreeCommunity: a?.agreeCommunity === true || false,
-        name: prof?.first_name ?? "",
-        gender: prof?.gender ?? "",
-        country: prof?.country ?? "",
-        interestedIn: prof?.interested_in ?? "",
-        intent: (prof?.relationship_intent || prof?.intention) ?? "",
-        email: isPhoneUser ? "phone@ok" : (user.email ?? ""),
-        photoUrl: sel ?? null,
-        bio: prof?.bio ?? "",
-        interests: Array.isArray(prof?.interests) ? (prof!.interests as string[]) : [],
-        compat: { ...({} as Record<CompatKey, string>), ...((a?.compat as Record<CompatKey, string>) ?? {}) },
-        discovery: (a?.discovery as Partial<DiscoveryProfile>) ?? {},
-      });
-      setStep(next);
-      setResumed(next > 1);
-      setHydrated(true);
     })();
     return () => { alive = false; };
   }, [user, authLoading, navigate]);
