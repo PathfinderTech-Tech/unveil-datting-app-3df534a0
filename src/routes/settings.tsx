@@ -147,6 +147,9 @@ function Settings() {
               </Row>
             </Card>
             <Card>
+              <HealthConsentRow />
+            </Card>
+            <Card>
               <h3 className="font-display text-base">{t("common.language")}</h3>
               <p className="mt-1 text-xs text-muted-foreground">Change the interface language anytime.</p>
               <div className="mt-3"><LanguageSwitcher showSpoken /></div>
