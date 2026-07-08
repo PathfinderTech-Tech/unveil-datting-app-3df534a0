@@ -351,7 +351,7 @@ function JourneyDetail({ journeyId, onLeft }: { journeyId: string; onLeft: () =>
               </div>
             </div>
           </div>
-          <CityPin side="to" city={journey.to_city} flag={journey.to_flag} tone="indigo" />
+          <CityPin side="to" city={journey.to_city} flag={journey.to_flag ?? "🌍"} tone="indigo" />
         </div>
 
         <WorldMap progressPct={pct} fromCity={journey.from_city} toCity={journey.to_city} />
