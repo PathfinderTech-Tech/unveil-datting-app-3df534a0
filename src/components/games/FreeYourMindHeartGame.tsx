@@ -1239,6 +1239,15 @@ function Board({
             const gateOpen = gate ? openGates.includes(gate.id) : false;
             const collided = collisionAt && collisionAt.row === r && collisionAt.col === c;
             const trailHere = trails.filter((t) => t.row === r && t.col === c);
+            const previewIdx = preview?.cells.findIndex((p) => p.r === r && p.c === c) ?? -1;
+            const previewSide: Side | undefined = preview
+              ? arrows.find((a) => a.id === (preview.cells.length ? undefined : undefined))?.side
+              : undefined;
+            const previewArrow = preview ? arrows.find((a) => a.status === "idle" && preview.cells.some((p) => p.r === a.curRow && p.c === a.curCol) === false && preview.cells.length > 0) : null;
+            // simpler: derive side from occ arrow being previewed via previewId isn't here; pass previewOwnerSide below
+            const isPreviewBlock =
+              preview?.blockCell && preview.blockCell.r === r && preview.blockCell.c === c;
+            const isBlocker = !!(blockerId && occ && occ.id === blockerId);
 
             return (
               <Cell
@@ -1251,7 +1260,14 @@ function Board({
                 gateOpen={gateOpen}
                 collided={!!collided}
                 trails={trailHere}
+                previewIndex={previewIdx}
+                previewLength={preview?.cells.length ?? 0}
+                previewSide={preview ? (arrows.find((a) => a.id === previewOwnerId(arrows, preview)) ?? arrows[0])?.side : undefined}
+                previewBlock={!!isPreviewBlock}
+                previewBad={!!preview && preview.outcome !== "exit"}
+                isBlocker={isBlocker}
                 onTap={onTap}
+                onPreview={onPreview}
               />
             );
           }),
@@ -1260,7 +1276,7 @@ function Board({
 
       {/* Board hint text */}
       <div className="pointer-events-none mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-        Tap an arrow to release its energy
+        Hover or focus an arrow to preview its path · tap to release
       </div>
     </div>
   );
