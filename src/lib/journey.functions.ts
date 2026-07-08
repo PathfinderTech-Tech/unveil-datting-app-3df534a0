@@ -452,10 +452,11 @@ export const updateJourneySettings = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const patch: Record<string, any> = {};
-    if (typeof data.shareInChat === "boolean") patch.share_in_chat = data.shareInChat;
-    if (Object.keys(patch).length === 0) return { ok: true };
-    const { error } = await supabase.from("journeys").update(patch).eq("id", data.journeyId);
+    if (typeof data.shareInChat !== "boolean") return { ok: true };
+    const { error } = await supabase
+      .from("journeys")
+      .update({ share_in_chat: data.shareInChat })
+      .eq("id", data.journeyId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
