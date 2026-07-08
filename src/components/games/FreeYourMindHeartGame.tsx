@@ -856,12 +856,29 @@ function PlayScreen({
       trajectory: [],
     })),
   );
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [openGates, setOpenGates] = useState<Set<string>>(new Set());
+  const [brokenWalls, setBrokenWalls] = useState<Set<string>>(new Set());
+  const [collectedKeys, setCollectedKeys] = useState<Set<string>>(new Set());
+  const [usedPortals, setUsedPortals] = useState<Set<string>>(new Set());
+  const [triggeredSwitches, setTriggeredSwitches] = useState<Set<string>>(
+    new Set(),
+  );
+
+  interface Snapshot {
+    arrowId: string;
+    openGates: Set<string>;
+    brokenWalls: Set<string>;
+    collectedKeys: Set<string>;
+    usedPortals: Set<string>;
+    triggeredSwitches: Set<string>;
+  }
+  const [history, setHistory] = useState<Snapshot[]>([]);
   const [moves, setMoves] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
   const [message, setMessage] = useState<string | null>(level.tutorial ?? null);
   const [blockerId, setBlockerId] = useState<string | null>(null);
+  const [blockerCell, setBlockerCell] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const audioCtx = useRef<AudioContext | null>(null);
 
@@ -904,15 +921,18 @@ function PlayScreen({
 
   // Blocker highlight auto-clear
   useEffect(() => {
-    if (!blockerId) return;
-    const t = setTimeout(() => setBlockerId(null), 1600);
+    if (!blockerId && !blockerCell) return;
+    const t = setTimeout(() => {
+      setBlockerId(null);
+      setBlockerCell(null);
+    }, 1800);
     return () => clearTimeout(t);
-  }, [blockerId]);
+  }, [blockerId, blockerCell]);
 
   // Message auto-clear (except tutorial on level 1)
   useEffect(() => {
     if (!message || message === level.tutorial) return;
-    const t = setTimeout(() => setMessage(null), 3000);
+    const t = setTimeout(() => setMessage(null), 3400);
     return () => clearTimeout(t);
   }, [message, level.tutorial]);
 
@@ -927,20 +947,9 @@ function PlayScreen({
     return () => clearTimeout(to);
   }, [allFreed, moves, elapsed, level.arrows.length, onWin, playTone]);
 
-  // Walls lookup
   const wallSet = useMemo(
     () => new Set(level.walls.map(([r, c]) => `${r},${c}`)),
     [level.walls],
-  );
-  const exitFor = useCallback(
-    (r: number, c: number, side: Side) =>
-      level.exits.some((e) => e.row === r && e.col === c && e.side === side),
-    [level.exits],
-  );
-  const anyExitAt = useCallback(
-    (r: number, c: number) =>
-      level.exits.some((e) => e.row === r && e.col === c),
-    [level.exits],
   );
 
   const releaseArrow = (id: string) => {
@@ -948,94 +957,63 @@ function PlayScreen({
     const arrow = arrows.find((a) => a.id === id);
     if (!arrow || arrow.freed || arrow.animating) return;
 
-    // Trace trajectory
-    const [dr, dc] = DELTA[arrow.dir];
-    const trajectory: Array<[number, number]> = [[arrow.row, arrow.col]];
-    let r = arrow.row;
-    let c = arrow.col;
-    let blocked: { reason: string; blockerId?: string } | null = null;
-    let escaped = false;
+    const result = traceArrow(arrow, arrows, level, {
+      wallSet,
+      openGates,
+      brokenWalls,
+      collectedKeys,
+      usedPortals,
+      triggeredSwitches,
+    });
 
-    while (true) {
-      const nr = r + dr;
-      const nc = c + dc;
-
-      // Off-grid: only allowed if the last cell was a matching exit
-      if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
-        if (exitFor(r, c, arrow.side)) {
-          escaped = true;
-        } else if (anyExitAt(r, c)) {
-          blocked = {
-            reason: `That exit is for ${
-              arrow.side === "mind" ? "Heart" : "Mind"
-            }, not ${arrow.side === "mind" ? "Mind" : "Heart"}. Try a different arrow.`,
-          };
-        } else {
-          blocked = {
-            reason: `${cap(arrow.side)} flew off the edge with no matching exit.`,
-          };
-        }
-        break;
-      }
-
-      // Wall
-      if (wallSet.has(`${nr},${nc}`)) {
-        blocked = {
-          reason: `${cap(arrow.side)} is blocked by a wall. Try releasing a different arrow first.`,
-        };
-        break;
-      }
-
-      // Other arrow (unfreed)
-      const other = arrows.find(
-        (a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc,
-      );
-      if (other) {
-        blocked = {
-          reason: `${cap(arrow.side)} is blocked by the highlighted ${cap(
-            other.side,
-          )} arrow. Free it first.`,
-          blockerId: other.id,
-        };
-        break;
-      }
-
-      trajectory.push([nr, nc]);
-      r = nr;
-      c = nc;
-
-      // Matching exit tile reached
-      if (exitFor(r, c, arrow.side)) {
-        escaped = true;
-        break;
-      }
-    }
-
-    if (blocked || !escaped) {
-      setMessage(blocked?.reason ?? "This arrow has nowhere to go.");
-      if (blocked?.blockerId) setBlockerId(blocked.blockerId);
+    if (!result.escaped) {
+      setMessage(result.reason ?? "This arrow has nowhere to go.");
+      if (result.blockerId) setBlockerId(result.blockerId);
+      if (result.blockerCell) setBlockerCell(result.blockerCell);
       playTone(180, 0.18, "sawtooth");
       return;
     }
+
+    // Snapshot BEFORE mutating so Undo can restore.
+    const snapshot: Snapshot = {
+      arrowId: arrow.id,
+      openGates: new Set(openGates),
+      brokenWalls: new Set(brokenWalls),
+      collectedKeys: new Set(collectedKeys),
+      usedPortals: new Set(usedPortals),
+      triggeredSwitches: new Set(triggeredSwitches),
+    };
 
     // Animate
     playTone(arrow.side === "mind" ? 660 : 520, 0.15, "triangle");
     setArrows((prev) =>
       prev.map((a) =>
         a.id === arrow.id
-          ? { ...a, animating: true, progress: 0, trajectory }
+          ? { ...a, animating: true, progress: 0, trajectory: result.trajectory }
           : a,
       ),
     );
     setMoves((m) => m + 1);
-    setHistory((h) => [...h, { arrowId: arrow.id }]);
+    setHistory((h) => [...h, snapshot]);
+
+    // Apply world-state mutations from the trace.
+    if (result.opens.length)
+      setOpenGates((s) => new Set([...s, ...result.opens]));
+    if (result.breaks.length)
+      setBrokenWalls((s) => new Set([...s, ...result.breaks]));
+    if (result.collects.length)
+      setCollectedKeys((s) => new Set([...s, ...result.collects]));
+    if (result.portals.length)
+      setUsedPortals((s) => new Set([...s, ...result.portals]));
+    if (result.switches.length)
+      setTriggeredSwitches((s) => new Set([...s, ...result.switches]));
 
     const stepMs = 90;
-    const totalSteps = trajectory.length - 1;
+    const totalSteps = result.trajectory.length - 1;
     let step = 0;
     const iv = setInterval(() => {
       step += 1;
-      const p = step / totalSteps;
+      const p = totalSteps > 0 ? step / totalSteps : 1;
       setArrows((prev) =>
         prev.map((a) => (a.id === arrow.id ? { ...a, progress: p } : a)),
       );
@@ -1068,6 +1046,11 @@ function PlayScreen({
           : a,
       ),
     );
+    setOpenGates(last.openGates);
+    setBrokenWalls(last.brokenWalls);
+    setCollectedKeys(last.collectedKeys);
+    setUsedPortals(last.usedPortals);
+    setTriggeredSwitches(last.triggeredSwitches);
     setHistory((h) => h.slice(0, -1));
     setMoves((m) => Math.max(0, m - 1));
     setMessage("Undid last release.");
@@ -1083,25 +1066,44 @@ function PlayScreen({
         trajectory: [],
       })),
     );
+    setOpenGates(new Set());
+    setBrokenWalls(new Set());
+    setCollectedKeys(new Set());
+    setUsedPortals(new Set());
+    setTriggeredSwitches(new Set());
     setHistory([]);
     setMoves(0);
     setElapsed(0);
     setBlockerId(null);
+    setBlockerCell(null);
     setMessage(level.tutorial ?? "Level reset.");
   };
 
   const hint = () => {
-    // Simple heuristic: find an arrow that would succeed right now.
-    const solvable = arrows.find((a) => !a.freed && canRelease(a, arrows, level));
+    const state = {
+      wallSet,
+      openGates,
+      brokenWalls,
+      collectedKeys,
+      usedPortals,
+      triggeredSwitches,
+    };
+    const solvable = arrows.find(
+      (a) => !a.freed && traceArrow(a, arrows, level, state).escaped,
+    );
     if (solvable) {
       setBlockerId(solvable.id);
-      setMessage(`Try releasing the ${cap(solvable.side)} arrow ${DIR_LABEL[solvable.dir]}.`);
+      setMessage(
+        `Try releasing the ${cap(solvable.side)} arrow ${DIR_LABEL[solvable.dir]}.`,
+      );
     } else {
       setMessage("No arrow can move right now. Try Undo or Restart.");
     }
     setShowHint(true);
     setTimeout(() => setShowHint(false), 2000);
   };
+
+
 
   const best = undefined; // best comes from parent progress; kept optional
   const freezes = 1;
