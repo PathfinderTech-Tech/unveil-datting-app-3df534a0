@@ -284,24 +284,21 @@ const LEVELS: LevelConfig[] = [
     name: "One Way Up",
     rows: 5,
     cols: 5,
-    walls: [
-      [1, 0],
-      [1, 4],
-    ],
+    walls: [],
     exits: [
       { row: 0, col: 2, side: "mind" },
-      { row: 2, col: 4, side: "heart" },
+      { row: 0, col: 4, side: "heart" },
     ],
     arrows: [
       { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
-      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+      { id: "h1", row: 4, col: 4, dir: "up", side: "heart" },
     ],
     oneWays: [{ row: 2, col: 2, dir: "up" }],
     tutorial:
-      "One-way tiles only let arrows through in the arrow's direction. Mind goes up through it. Heart moves right and passes around it.",
+      "One-way tiles only let arrows through in the arrow's direction. The purple ⇧ shows which way is allowed.",
   },
 
-  // 9 — Combine: switch + order + gate.
+  // 9 — Combine: switch + order + gate. One switch opens two gates.
   {
     id: 9,
     chapter: "Resonance",
@@ -312,7 +309,7 @@ const LEVELS: LevelConfig[] = [
     exits: [
       { row: 0, col: 1, side: "mind" },
       { row: 0, col: 4, side: "mind" },
-      { row: 5, col: 2, side: "heart" },
+      { row: 2, col: 5, side: "heart" },
     ],
     arrows: [
       { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
@@ -327,6 +324,8 @@ const LEVELS: LevelConfig[] = [
     tutorial:
       "One switch can open several gates of its color. Free the switch-runner first.",
   },
+
+
 
   // 10 — Grand finale: breakable + key + gate combined.
   {
