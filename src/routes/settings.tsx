@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NearbyDiscoverySettings } from "@/components/NearbyDiscoverySettings";
