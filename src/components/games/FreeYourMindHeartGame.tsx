@@ -299,13 +299,14 @@ const LEVELS: LevelConfig[] = [
     rows: 7,
     cols: 7,
     walls: [
-      [3, 0],
-      [3, 6],
-      [0, 3],
-      [6, 3],
+      [3, 2],
+      [3, 4],
     ],
     exits: [
-      { row: 3, col: 3, side: "mind" }, // shared center via teleport? Actually mind exit at 3,3 conflicts. Move.
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 5, side: "mind" },
+      { row: 6, col: 1, side: "heart" },
+      { row: 6, col: 5, side: "heart" },
     ],
     arrows: [
       { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
