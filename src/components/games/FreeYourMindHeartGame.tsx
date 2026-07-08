@@ -665,6 +665,21 @@ export function FreeYourMindHeartGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.arrows, status]);
 
+  // Live preview of the currently hovered / focused idle arrow's route.
+  const preview = useMemo<PathPreview | null>(() => {
+    if (!previewId) return null;
+    const a = run.arrows.find((x) => x.id === previewId);
+    if (!a || a.status !== "idle") return null;
+    return computePath(a, run, level, cellMap);
+  }, [previewId, run, level, cellMap]);
+
+  // Level 1 tutorial: always highlight the next expected arrow.
+  const tutorialHintId =
+    level.id === 1 && status === "playing"
+      ? level.hintOrder.find((id) => run.arrows.find((a) => a.id === id)?.status === "idle") ?? null
+      : null;
+  const effectiveHintId = hintId ?? tutorialHintId;
+
   function releaseArrow(id: string) {
     if (status !== "playing" || paused || movingRef.current) return;
     const arrow = run.arrows.find((a) => a.id === id);
