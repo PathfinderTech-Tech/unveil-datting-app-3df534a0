@@ -1291,7 +1291,14 @@ function Cell({
   gateOpen,
   collided,
   trails,
+  previewIndex,
+  previewLength,
+  previewSide,
+  previewBlock,
+  previewBad,
+  isBlocker,
   onTap,
+  onPreview,
 }: {
   type: CellType;
   arrow?: ArrowState;
@@ -1301,7 +1308,14 @@ function Cell({
   gateOpen?: boolean;
   collided?: boolean;
   trails: Array<{ side: Side; freshness: number; key: string }>;
+  previewIndex?: number;
+  previewLength?: number;
+  previewSide?: Side;
+  previewBlock?: boolean;
+  previewBad?: boolean;
+  isBlocker?: boolean;
   onTap: (id: string) => void;
+  onPreview?: (id: string | null) => void;
 }) {
   const base = "relative aspect-square rounded-xl border transition-all duration-200";
   let cellClass = "border-white/5 bg-white/[0.02]";
@@ -1325,8 +1339,33 @@ function Cell({
       : "border-white/15 bg-black/50 shadow-inner";
   }
 
+  const showPreview = (previewIndex ?? -1) >= 0;
+  const previewColor = previewSide === "heart" ? "rgba(244,114,182,0.55)" : "rgba(103,232,249,0.55)";
+  const previewOpacity = showPreview
+    ? Math.max(0.25, 1 - (previewIndex! / Math.max(1, (previewLength ?? 1))) * 0.6)
+    : 0;
+
   return (
     <div className={`${base} ${cellClass} ${collided ? "animate-[shake_0.35s_ease-in-out] ring-2 ring-rose-400/70" : ""}`}>
+      {/* Path preview overlay */}
+      {showPreview && (
+        <span
+          className="pointer-events-none absolute inset-1 rounded-lg animate-[glowPulse_1.4s_ease-in-out_infinite]"
+          style={{
+            background: `radial-gradient(circle, ${previewColor} 0%, transparent 75%)`,
+            opacity: previewOpacity,
+            boxShadow: `inset 0 0 12px ${previewColor}`,
+          }}
+        />
+      )}
+      {previewBlock && (
+        <span
+          className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ${
+            previewBad ? "ring-rose-400/80 animate-[glowPulse_0.9s_ease-in-out_infinite]" : "ring-emerald-300/70"
+          }`}
+        />
+      )}
+
       {/* Trails */}
       {trails.map((t) => (
         <span
@@ -1355,6 +1394,9 @@ function Cell({
       {(type === "teleport-a" || type === "teleport-b") && (
         <div className="pointer-events-none absolute inset-0 m-auto h-4 w-4 rounded-full border border-amber-300/60 bg-amber-300/20 animate-[spin_4s_linear_infinite] shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
       )}
+      {type === "wall" && (
+        <div className="pointer-events-none absolute inset-1 rounded-md bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.05)_0_4px,transparent_4px_8px)]" />
+      )}
       {gate && !gateOpen && (
         <div className="pointer-events-none absolute inset-1 rounded-md border border-white/20 bg-[repeating-linear-gradient(45deg,transparent_0_4px,rgba(255,255,255,0.06)_4px_8px)]" />
       )}
@@ -1368,13 +1410,19 @@ function Cell({
           type="button"
           disabled={disabled || arrow.status !== "idle"}
           onClick={() => onTap(arrow.id)}
+          onMouseEnter={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
+          onMouseLeave={() => onPreview && onPreview(null)}
+          onFocus={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
+          onBlur={() => onPreview && onPreview(null)}
           className={`absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
             arrow.side === "mind"
               ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
               : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
           } ${arrow.status === "moving" ? "scale-110 animate-[glowPulse_0.6s_ease-in-out_infinite]" : "hover:scale-105 active:scale-95"} ${
             arrow.status === "lost" ? "opacity-30 grayscale animate-[shake_0.35s_ease-in-out]" : ""
-          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""}`}
+          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""} ${
+            isBlocker ? "ring-4 ring-rose-400 ring-offset-2 ring-offset-transparent animate-[glowPulse_0.7s_ease-in-out_infinite]" : ""
+          }`}
           aria-label={`Release ${arrow.side} arrow ${arrow.dir}`}
         >
           {arrow.dir === "up" && "↑"}
