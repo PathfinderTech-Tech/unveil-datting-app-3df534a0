@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type React from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { ArrowLeft, Clock, Lightbulb, Shuffle, Heart, Sparkles, RotateCcw, Flame, Gem } from "lucide-react";
 import { toast } from "sonner";
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/challenges/complete-picture")({
 type SymbolDef = {
   key: string;
   label: string;
-  render: () => JSX.Element;
+  render: () => React.ReactElement;
 };
 
 // Shared defs for gradients + glow
@@ -282,7 +283,7 @@ const R = {
       <ellipse cx="26" cy="26" rx="6" ry="4" fill="#fff" opacity="0.7" />
     </SvgTile>
   ),
-} satisfies Record<string, () => JSX.Element>;
+} satisfies Record<string, () => React.ReactElement>;
 
 const SYMBOL_LIBRARY: SymbolDef[] = [
   { key: "heart",     label: "Crystal Heart", render: R.heart },
