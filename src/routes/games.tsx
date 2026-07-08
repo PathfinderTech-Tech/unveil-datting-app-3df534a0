@@ -1,16 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS, TWO_TRUTHS_PROMPTS, DESERT_ISLAND,
 } from "@/lib/synapse-store";
-import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight } from "lucide-react";
+import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
       { title: "Games — UNVEIL" },
-      { name: "description", content: "Five playful mini-games that reveal chemistry before you meet." },
+      { name: "description", content: "Playful mini-games that reveal chemistry before you meet." },
     ],
   }),
   component: GamesGallery,
@@ -23,6 +23,27 @@ const GAMES: { id: GameId; title: string; tagline: string; icon: any; hue: strin
   { id: "flags", title: "Red Flag / Green Flag", tagline: "Spot the vibe in five seconds.", icon: Flag, hue: "from-rose-500/30 to-amber-500/10" },
   { id: "ttl", title: "Two Truths & a Lie", tagline: "Classic. Always works.", icon: HeartHandshake, hue: "from-cyan-500/30 to-blue-500/10" },
   { id: "island", title: "Desert Island", tagline: "5 items. 1 luxury. 1 person.", icon: Palmtree, hue: "from-emerald-500/30 to-teal-500/10" },
+];
+
+const FEATURED_GAMES: {
+  to: string; title: string; tagline: string; icon: any; hue: string; badge?: string;
+}[] = [
+  {
+    to: "/love-tiles",
+    title: "UNVEIL Love Tiles",
+    tagline: "Piece by piece, love comes into focus.",
+    icon: Heart,
+    hue: "from-pink-500/40 to-fuchsia-500/10",
+    badge: "NEW",
+  },
+  {
+    to: "/challenges/free-your-mind-heart",
+    title: "Free Your Mind & Heart",
+    tagline: "Guide the mind and the heart to freedom.",
+    icon: Compass,
+    hue: "from-indigo-500/40 to-purple-500/10",
+    badge: "LIVE",
+  },
 ];
 
 function GamesGallery() {
@@ -58,7 +79,38 @@ function GamesGallery() {
 
         {active === null ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURED_GAMES.map((g) => {
+              const Icon = g.icon;
+              return (
+                <Link
+                  key={g.to}
+                  to={g.to}
+                  className="group relative overflow-hidden rounded-3xl border border-pink-300/40 bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-pink-300/70 hover:shadow-glow"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${g.hue} opacity-70`} />
+                  <div className="relative">
+                    <div className="mb-5 flex items-center justify-between">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-aura text-primary-foreground">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      {g.badge && (
+                        <span className="rounded-full bg-gradient-hero px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-primary-foreground">
+                          {g.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-display text-2xl font-light">{g.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{g.tagline}</p>
+                    <div className="mt-5 flex items-center justify-between">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-primary">Play now</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
             {GAMES.map((g) => {
+
               const Icon = g.icon;
               const earned = chemistry[g.id];
               return (
