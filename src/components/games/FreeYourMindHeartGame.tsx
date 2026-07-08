@@ -1155,7 +1155,10 @@ function Board({
   hintId,
   paused,
   collisionAt,
+  blockerId,
+  preview,
   onTap,
+  onPreview,
 }: {
   level: LevelConfig;
   cellMap: Record<string, CellType>;
@@ -1165,7 +1168,10 @@ function Board({
   hintId: string | null;
   paused: boolean;
   collisionAt?: { row: number; col: number };
+  blockerId?: string;
+  preview: PathPreview | null;
   onTap: (id: string) => void;
+  onPreview: (id: string | null) => void;
 }) {
   const gateMap = useMemo(() => {
     const m: Record<string, GateDef> = {};
