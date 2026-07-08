@@ -72,7 +72,7 @@ export async function ensureProfileForUser(user: User): Promise<void> {
 
   const { error: patchError } = await supabase
     .from("profiles")
-    .update(patch)
+    .update(patch as never)
     .eq("id", user.id);
   if (patchError) console.warn("[auth-profile-bootstrap] profile patch failed", patchError);
 }
