@@ -995,63 +995,401 @@ function PlayScreen({
     setTimeout(() => setShowHint(false), 2000);
   };
 
+  const best = undefined; // best comes from parent progress; kept optional
+  const freezes = 1;
+  const hintsLeft = 3;
+  const undosLeft = Math.max(0, 2 - history.length);
+
   return (
     <div className="space-y-4">
-      <TopBar
-        level={level}
-        moves={moves}
-        elapsed={elapsed}
-        totalArrows={level.arrows.length}
-        freed={arrows.filter((a) => a.freed).length}
-        onExit={onExit}
-        onPause={() => setPaused((p) => !p)}
-        paused={paused}
-      />
+      {/* ── Title block: brain / heart flanking headline ─────────────── */}
+      <TitleBlock onExit={onExit} />
 
-      <div className="relative rounded-3xl border border-white/10 bg-black/40 p-4 shadow-[0_0_60px_-20px_rgba(167,139,250,0.6)] backdrop-blur">
-        <Board
-          level={level}
-          arrows={arrows}
-          blockerId={blockerId}
-          highlightHint={showHint ? blockerId : null}
-          onArrowTap={releaseArrow}
-          wallSet={wallSet}
+      {/* ── HUD row: Moves, Level, Timer, Stars, Reward ──────────────── */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <StatCard
+          icon={<Heart className="h-4 w-4 fill-pink-400 text-pink-300" />}
+          label="Moves"
+          value={`${moves}/${Math.max(36, level.arrows.length * 12)}`}
+          tone="pink"
         />
-        {paused && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 backdrop-blur">
-            <div className="text-center">
-              <Pause className="mx-auto h-8 w-8 text-white/70" />
-              <div className="mt-2 font-display text-white">Paused</div>
-              <button
-                onClick={() => setPaused(false)}
-                className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
-              >
-                <Play className="h-4 w-4" /> Resume
-              </button>
+        <StatCard
+          icon={<Zap className="h-4 w-4 text-amber-300" />}
+          label={`Level ${level.id}`}
+          value={level.chapter}
+          tone="amber"
+        />
+        <StatCard
+          icon={<Timer className="h-4 w-4 text-cyan-300" />}
+          label={formatTime(elapsed)}
+          value={best ? `Best: ${formatTime(best)}` : "Best: —"}
+          tone="cyan"
+        />
+        <StatCard
+          icon={<Star className="h-4 w-4 fill-amber-300 text-amber-300" />}
+          label={`${starsPreview(moves, level.arrows.length, elapsed)} Stars`}
+          value={<StarRow count={starsPreview(moves, level.arrows.length, elapsed)} />}
+          tone="amber"
+        />
+        <StatCard
+          icon={<Gift className="h-4 w-4 text-fuchsia-300" />}
+          label="Daily Reward"
+          value="Claim in 12h"
+          tone="fuchsia"
+        />
+      </div>
+
+      {/* ── Board + side rails ───────────────────────────────────────── */}
+      <div className="relative flex gap-3">
+        {/* Left tool rail */}
+        <div className="hidden flex-col gap-2 sm:flex">
+          <ToolPill
+            icon={<Lightbulb className="h-5 w-5 text-amber-300" />}
+            label="Hint"
+            badge={hintsLeft}
+            onClick={hint}
+          />
+          <ToolPill
+            icon={<Undo2 className="h-5 w-5 text-fuchsia-300" />}
+            label="Undo"
+            badge={undosLeft}
+            onClick={undo}
+            disabled={history.length === 0}
+          />
+          <ToolPill
+            icon={<Snowflake className="h-5 w-5 text-cyan-300" />}
+            label="Freeze"
+            badge={freezes}
+            onClick={() => setPaused((p) => !p)}
+          />
+        </div>
+
+        <div className="relative flex-1">
+          <PremiumFrame>
+            <Board
+              level={level}
+              arrows={arrows}
+              blockerId={blockerId}
+              highlightHint={showHint ? blockerId : null}
+              onArrowTap={releaseArrow}
+              wallSet={wallSet}
+            />
+            {paused && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 backdrop-blur">
+                <div className="text-center">
+                  <Pause className="mx-auto h-8 w-8 text-white/70" />
+                  <div className="mt-2 font-display text-white">Paused</div>
+                  <button
+                    onClick={() => setPaused(false)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+                  >
+                    <Play className="h-4 w-4" /> Resume
+                  </button>
+                </div>
+              </div>
+            )}
+          </PremiumFrame>
+        </div>
+
+        {/* Right rewards column */}
+        <div className="hidden w-24 flex-col gap-2 sm:flex">
+          <div className="relative overflow-hidden rounded-2xl border border-fuchsia-400/25 bg-white/[0.04] p-3 text-center backdrop-blur-xl">
+            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/60">
+              Path
+            </div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/60">
+              Rewards
+            </div>
+            <div className="mt-3 space-y-2">
+              <RewardRow
+                icon={<Heart className="h-4 w-4 fill-pink-400 text-pink-300" />}
+                value="50"
+              />
+              <RewardRow
+                icon={<Key className="h-4 w-4 text-amber-300" />}
+                value="+1"
+              />
+              <RewardRow
+                icon={<Star className="h-4 w-4 fill-fuchsia-400 text-fuchsia-300" />}
+                value="+20"
+              />
             </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Mobile tool rail */}
+      <div className="flex items-center justify-center gap-2 sm:hidden">
+        <ToolPill
+          icon={<Lightbulb className="h-4 w-4 text-amber-300" />}
+          label="Hint"
+          badge={hintsLeft}
+          onClick={hint}
+          compact
+        />
+        <ToolPill
+          icon={<Undo2 className="h-4 w-4 text-fuchsia-300" />}
+          label="Undo"
+          badge={undosLeft}
+          onClick={undo}
+          disabled={history.length === 0}
+          compact
+        />
+        <ToolPill
+          icon={<Snowflake className="h-4 w-4 text-cyan-300" />}
+          label="Freeze"
+          badge={freezes}
+          onClick={() => setPaused((p) => !p)}
+          compact
+        />
+        <ToolPill
+          icon={<RotateCcw className="h-4 w-4 text-white/80" />}
+          label="Reset"
+          onClick={restart}
+          compact
+        />
       </div>
 
       {message && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-3 text-center text-sm text-white/85 backdrop-blur">
+        <div className="relative overflow-hidden rounded-2xl border border-fuchsia-400/30 bg-white/[0.04] p-3 pl-11 text-sm text-white/90 backdrop-blur-xl">
+          <span
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-lg"
+            aria-hidden
+          >
+            🌿
+          </span>
           {message}
+          <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-pink-300"
+            aria-hidden
+          >
+            <Heart className="h-4 w-4 fill-pink-400 text-pink-300" />
+          </span>
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-2">
-        <ToolButton onClick={undo} disabled={history.length === 0}>
-          <Undo2 className="h-4 w-4" /> Undo
-        </ToolButton>
-        <ToolButton onClick={restart}>
-          <RotateCcw className="h-4 w-4" /> Restart
-        </ToolButton>
-        <ToolButton onClick={hint}>
-          <Lightbulb className="h-4 w-4" /> Hint
-        </ToolButton>
+      {/* Subtitle + Skip Level button */}
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+        <p className="text-center text-xs text-white/70 sm:text-left">
+          Clear the confusion, release what holds you back, and open the doors
+          to <span className="text-pink-300">love</span> and{" "}
+          <span className="text-cyan-300">clarity</span>.
+        </p>
+        <button
+          onClick={restart}
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+          style={{
+            background:
+              "linear-gradient(90deg,#a78bfa,#ec4899,#f59e0b,#ec4899,#a78bfa)",
+            backgroundSize: "200% 100%",
+            animation: "fymhFlow 6s linear infinite",
+            boxShadow: "0 0 24px -6px rgba(236,72,153,0.7)",
+          }}
+        >
+          Reset Level{" "}
+          <span className="inline-flex items-center gap-1 rounded-full bg-black/30 px-2 py-0.5 text-xs">
+            <Gem className="h-3 w-3 text-amber-200" /> 50
+          </span>
+        </button>
       </div>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Premium play-screen chrome
+
+function TitleBlock({ onExit }: { onExit: () => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-4 py-5 text-center backdrop-blur-xl">
+      <button
+        onClick={onExit}
+        className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] text-white/70 hover:bg-white/[0.12]"
+        aria-label="Back to levels"
+      >
+        <ArrowLeft className="h-3 w-3" /> Levels
+      </button>
+      <div
+        className="pointer-events-none absolute -left-2 top-6 h-24 w-24 opacity-90"
+        style={{ animation: "fymhIdle 3s ease-in-out infinite" }}
+      >
+        <Brain
+          className="h-full w-full text-cyan-300"
+          style={{
+            filter:
+              "drop-shadow(0 0 14px rgba(103,232,249,0.9)) drop-shadow(0 0 30px rgba(59,130,246,0.6))",
+          }}
+        />
+      </div>
+      <div
+        className="pointer-events-none absolute -right-2 top-6 h-24 w-24 opacity-90"
+        style={{ animation: "fymhIdle 3.4s ease-in-out infinite" }}
+      >
+        <Heart
+          className="h-full w-full fill-pink-400 text-pink-400"
+          style={{
+            filter:
+              "drop-shadow(0 0 14px rgba(244,114,182,0.9)) drop-shadow(0 0 30px rgba(217,70,239,0.6))",
+          }}
+        />
+      </div>
+      <div className="relative">
+        <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
+          UNVEIL · NEW CHALLENGE
+        </div>
+        <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-4xl">
+          <span className="block text-white">FREE YOUR</span>
+          <span className="inline-block bg-gradient-to-r from-cyan-300 via-white to-pink-300 bg-clip-text text-transparent">
+            MIND &amp; HEART
+          </span>
+        </h1>
+        <p className="mt-2 text-xs text-white/70 sm:text-sm">
+          Piece by piece, love comes into view. Guide the arrows to set both{" "}
+          <span className="font-semibold text-amber-200">FREE</span>.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PremiumFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {/* animated gradient border */}
+      <div
+        className="absolute -inset-[1.5px] rounded-[26px] opacity-90"
+        style={{
+          background:
+            "conic-gradient(from 0deg,#a78bfa,#ec4899,#f59e0b,#22d3ee,#a78bfa)",
+          filter: "blur(10px)",
+          animation: "fymhFlow 12s linear infinite",
+        }}
+      />
+      <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-b from-[#120a24]/95 to-[#0b0518]/95 p-3 shadow-[0_30px_80px_-30px_rgba(167,139,250,0.6)] backdrop-blur-xl sm:p-4">
+        {/* dot star field inside board */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px)",
+            backgroundSize: "18px 18px",
+          }}
+        />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  tone: "pink" | "cyan" | "amber" | "fuchsia";
+}) {
+  const ring = {
+    pink: "shadow-[0_0_18px_-4px_rgba(244,114,182,0.5)] border-pink-400/25",
+    cyan: "shadow-[0_0_18px_-4px_rgba(103,232,249,0.5)] border-cyan-400/25",
+    amber: "shadow-[0_0_18px_-4px_rgba(251,191,36,0.5)] border-amber-400/25",
+    fuchsia:
+      "shadow-[0_0_18px_-4px_rgba(217,70,239,0.5)] border-fuchsia-400/25",
+  }[tone];
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-2xl border bg-white/[0.03] px-3 py-2 backdrop-blur-xl ${ring}`}
+    >
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
+        {icon}
+      </div>
+      <div className="min-w-0 leading-tight">
+        <div className="truncate font-mono text-[10px] uppercase tracking-wider text-white/60">
+          {label}
+        </div>
+        <div className="truncate text-sm font-semibold text-white">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function StarRow({ count }: { count: number }) {
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      {[1, 2, 3].map((n) => (
+        <Star
+          key={n}
+          className={`h-3 w-3 ${
+            n <= count
+              ? "fill-amber-300 text-amber-300"
+              : "text-white/25"
+          }`}
+        />
+      ))}
+    </span>
+  );
+}
+
+function ToolPill({
+  icon,
+  label,
+  badge,
+  onClick,
+  disabled,
+  compact,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+  onClick: () => void;
+  disabled?: boolean;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl transition hover:border-fuchsia-400/50 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40 ${
+        compact ? "h-14 w-16 gap-0.5 px-2" : "h-16 w-16 gap-1 p-2"
+      }`}
+    >
+      {typeof badge === "number" && (
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 px-1 font-mono text-[10px] font-bold text-white shadow">
+          {badge}
+        </span>
+      )}
+      {icon}
+      <span className="text-[10px] font-medium text-white/80">{label}</span>
+    </button>
+  );
+}
+
+function RewardRow({
+  icon,
+  value,
+}: {
+  icon: React.ReactNode;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-white/[0.04] px-2 py-1">
+      {icon}
+      <span className="font-mono text-xs font-bold text-white">{value}</span>
+    </div>
+  );
+}
+
+function formatTime(s: number) {
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+}
+
+function starsPreview(moves: number, arrowCount: number, seconds: number) {
+  return starsFor(moves, arrowCount, seconds);
 }
 
 function canRelease(
