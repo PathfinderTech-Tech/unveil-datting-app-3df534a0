@@ -128,9 +128,9 @@ function Challenges() {
 
 function PublicChallenges() {
   const tiles = [
+    { to: "/games",  icon: Sparkles,       title: "Solo Mind Games",             desc: "Puzzles that quietly improve your matching signal.", badge: "NEW" },
     { to: "/insights-ai", icon: Calendar,       title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
     { to: "/spark",  icon: MessageCircle,  title: "Icebreakers & Reflections",   desc: "Short prompts that shape your bio and unlock new conversation hooks." },
-    { to: "/games",  icon: Sparkles,       title: "Solo Mind Games",             desc: "Puzzles that quietly improve your matching signal." },
     { to: "/insights-ai", icon: Heart,        title: "Community Reflections",       desc: "See how your answers compare with the wider UNVEIL community." },
   ] as const;
 
