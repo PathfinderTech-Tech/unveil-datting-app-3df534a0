@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import {
   WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS, TWO_TRUTHS_PROMPTS, DESERT_ISLAND,
 } from "@/lib/synapse-store";
-import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass } from "lucide-react";
+import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
   head: () => ({
@@ -28,6 +28,14 @@ const GAMES: { id: GameId; title: string; tagline: string; icon: any; hue: strin
 const FEATURED_GAMES: {
   to: string; title: string; tagline: string; icon: any; hue: string; badge?: string;
 }[] = [
+  {
+    to: "/journey",
+    title: "UNVEIL Journey",
+    tagline: "Walk the world. Together.",
+    icon: Globe,
+    hue: "from-indigo-500/40 to-pink-500/10",
+    badge: "NEW",
+  },
   {
     to: "/love-tiles",
     title: "UNVEIL Love Tiles",

@@ -34,6 +34,7 @@ import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoveTilesRouteImport } from './routes/love-tiles'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as InsightsAiRouteImport } from './routes/insights-ai'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as GiftsRouteImport } from './routes/gifts'
@@ -195,6 +196,11 @@ const LoveTilesRoute = LoveTilesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JourneyRoute = JourneyRouteImport.update({
+  id: '/journey',
+  path: '/journey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightsAiRoute = InsightsAiRouteImport.update({
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
+  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -470,6 +477,7 @@ export interface FileRoutesByTo {
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
+  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -535,6 +543,7 @@ export interface FileRoutesById {
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
+  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -601,6 +610,7 @@ export interface FileRouteTypes {
     | '/gifts'
     | '/insights'
     | '/insights-ai'
+    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -665,6 +675,7 @@ export interface FileRouteTypes {
     | '/gifts'
     | '/insights'
     | '/insights-ai'
+    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -729,6 +740,7 @@ export interface FileRouteTypes {
     | '/gifts'
     | '/insights'
     | '/insights-ai'
+    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -794,6 +806,7 @@ export interface RootRouteChildren {
   GiftsRoute: typeof GiftsRoute
   InsightsRoute: typeof InsightsRoute
   InsightsAiRoute: typeof InsightsAiRoute
+  JourneyRoute: typeof JourneyRoute
   LoginRoute: typeof LoginRoute
   LoveTilesRoute: typeof LoveTilesRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
@@ -1012,6 +1025,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journey': {
+      id: '/journey'
+      path: '/journey'
+      fullPath: '/journey'
+      preLoaderRoute: typeof JourneyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insights-ai': {
@@ -1318,6 +1338,7 @@ const rootRouteChildren: RootRouteChildren = {
   GiftsRoute: GiftsRoute,
   InsightsRoute: InsightsRoute,
   InsightsAiRoute: InsightsAiRoute,
+  JourneyRoute: JourneyRoute,
   LoginRoute: LoginRoute,
   LoveTilesRoute: LoveTilesRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
