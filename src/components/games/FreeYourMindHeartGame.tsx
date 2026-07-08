@@ -29,6 +29,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 type Dir = "up" | "down" | "left" | "right";
 type Side = "mind" | "heart";
+type LockColor = "blue" | "rose" | "gold";
 
 interface ArrowDef {
   id: string;
@@ -36,6 +37,37 @@ interface ArrowDef {
   col: number;
   dir: Dir;
   side: Side;
+}
+
+interface GateTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface SwitchTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface KeyTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface BreakableTile {
+  row: number;
+  col: number;
+}
+interface PortalTile {
+  id: string;
+  row: number;
+  col: number;
+  pairId: string;
+}
+interface OneWayTile {
+  row: number;
+  col: number;
+  dir: Dir;
 }
 
 interface LevelConfig {
@@ -47,6 +79,12 @@ interface LevelConfig {
   walls: Array<[number, number]>;
   exits: Array<{ row: number; col: number; side: Side }>;
   arrows: ArrowDef[];
+  gates?: GateTile[];
+  switches?: SwitchTile[];
+  keys?: KeyTile[];
+  breakables?: BreakableTile[];
+  portals?: PortalTile[];
+  oneWays?: OneWayTile[];
   tutorial?: string;
 }
 
