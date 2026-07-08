@@ -11,6 +11,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  RotateCw,
   Sparkles,
   Star,
   Trophy,
@@ -18,6 +19,7 @@ import {
   Volume2,
   VolumeX,
   Zap,
+  Send,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 
@@ -26,6 +28,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 type Dir = "up" | "down" | "left" | "right";
 type Side = "mind" | "heart";
+type Point = { r: number; c: number };
 
 type CellType =
   | "empty"
@@ -41,7 +44,7 @@ interface GateDef {
   id: string;
   row: number;
   col: number;
-  openBy: Side; // opened when a side's arrow triggers its matching switch
+  openBy: Side;
 }
 
 interface ArrowDef {
@@ -66,34 +69,27 @@ interface LevelConfig {
   teleports?: Array<{ a: [number, number]; b: [number, number] }>;
   moveTarget: number;
   timeTarget: number;
-  hintOrder: string[];
   tutorial?: string;
 }
 
-type ArrowStatus = "idle" | "moving" | "freed" | "lost";
+type ArrowStatus = "idle" | "planning" | "animating" | "freed" | "lost";
 
-interface ArrowState extends ArrowDef {
+interface ArrowState {
+  id: string;
+  side: Side;
+  startRow: number;
+  startCol: number;
+  dir: Dir;
+  plannedPath: Point[]; // includes start cell at index 0
   status: ArrowStatus;
-  curRow: number;
-  curCol: number;
-  trail: Array<{ row: number; col: number; t: number }>;
+  animIdx: number; // current index while animating
 }
 
 interface RunState {
   arrows: ArrowState[];
   moves: number;
-  openGates: string[];
   failReason?: string;
-  collisionAt?: { row: number; col: number };
-  blockerId?: string;
-}
-
-type PathOutcome = "exit" | "wrong-exit" | "wall" | "edge" | "arrow" | "gate";
-interface PathPreview {
-  cells: Array<{ r: number; c: number }>;
-  outcome: PathOutcome;
-  blockerId?: string;
-  blockCell?: { r: number; c: number };
+  collisionAt?: Point;
 }
 
 interface Totals {
@@ -118,7 +114,9 @@ interface Progress {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Levels — progressive mechanics: 1–5 basic, 6–8 shared paths, 9–12 switches/teleports.
+// Levels — same 12 configs as before. In the new path-planning engine, gates /
+// switches / teleports render as decorative tiles and are treated as passable.
+// Advanced puzzle mechanics for these will unlock in a later chapter update.
 
 const DELTA: Record<Dir, [number, number]> = {
   up: [-1, 0],
@@ -126,6 +124,9 @@ const DELTA: Record<Dir, [number, number]> = {
   left: [0, -1],
   right: [0, 1],
 };
+
+const ROTATE_CW: Record<Dir, Dir> = { up: "right", right: "down", down: "left", left: "up" };
+const ROTATE_CCW: Record<Dir, Dir> = { up: "left", left: "down", down: "right", right: "up" };
 
 const LEVELS: LevelConfig[] = [
   {
@@ -143,10 +144,9 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 2, col: 2, dir: "up", side: "mind" },
       { id: "h1", row: 3, col: 2, dir: "down", side: "heart" },
     ],
-    moveTarget: 2,
-    timeTarget: 20,
-    hintOrder: ["m1", "h1"],
-    tutorial: "Tap an arrow to release its energy. Free both Mind and Heart.",
+    moveTarget: 4,
+    timeTarget: 40,
+    tutorial: "Plan the route for each arrow, then press Release. Mind must reach a cyan exit, Heart a pink one.",
   },
   {
     id: 2,
@@ -166,9 +166,8 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 4, col: 0, dir: "up", side: "mind" },
       { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
     ],
-    moveTarget: 2,
-    timeTarget: 25,
-    hintOrder: ["m1", "h1"],
+    moveTarget: 8,
+    timeTarget: 45,
   },
   {
     id: 3,
@@ -190,9 +189,8 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 2, col: 1, dir: "down", side: "heart" },
       { id: "m2", row: 3, col: 4, dir: "up", side: "mind" },
     ],
-    moveTarget: 3,
-    timeTarget: 35,
-    hintOrder: ["m1", "m2", "h1"],
+    moveTarget: 12,
+    timeTarget: 60,
   },
   {
     id: 4,
@@ -217,9 +215,8 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
       { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
     ],
-    moveTarget: 4,
-    timeTarget: 40,
-    hintOrder: ["m1", "h1", "m2", "h2"],
+    moveTarget: 12,
+    timeTarget: 70,
   },
   {
     id: 5,
@@ -246,11 +243,9 @@ const LEVELS: LevelConfig[] = [
       { id: "h2", row: 3, col: 4, dir: "down", side: "heart" },
       { id: "m3", row: 5, col: 5, dir: "left", side: "mind" },
     ],
-    moveTarget: 5,
-    timeTarget: 55,
-    hintOrder: ["m3", "h1", "h2", "m1", "m2"],
+    moveTarget: 18,
+    timeTarget: 90,
   },
-  // ── Chapter 2: Shared Pathways ──────────────────────────────────────
   {
     id: 6,
     chapter: "Entangled",
@@ -271,10 +266,9 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 3, col: 3, dir: "left", side: "mind" },
       { id: "h1", row: 2, col: 2, dir: "right", side: "heart" },
     ],
-    moveTarget: 2,
-    timeTarget: 25,
-    hintOrder: ["m1", "h1"],
-    tutorial: "Sometimes the Mind must clear the way first.",
+    moveTarget: 10,
+    timeTarget: 55,
+    tutorial: "Two arrows share the middle. Route their paths so they don't collide at the same tile.",
   },
   {
     id: 7,
@@ -297,9 +291,8 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 5, col: 0, dir: "right", side: "heart" },
       { id: "h2", row: 5, col: 6, dir: "left", side: "heart" },
     ],
-    moveTarget: 4,
-    timeTarget: 45,
-    hintOrder: ["h1", "h2", "m1", "m2"],
+    moveTarget: 16,
+    timeTarget: 80,
   },
   {
     id: 8,
@@ -323,24 +316,18 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
       { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
     ],
-    moveTarget: 4,
-    timeTarget: 50,
-    hintOrder: ["m1", "h1", "m2", "h2"],
+    moveTarget: 18,
+    timeTarget: 90,
   },
-  // ── Chapter 3: Switches & Portals ───────────────────────────────────
   {
     id: 9,
     chapter: "Resonance",
-    name: "Heart Unlocks Mind",
+    name: "Open Field",
     rows: 6,
     cols: 7,
     walls: [
-      [2, 0],
       [2, 1],
-      [2, 2],
-      [2, 4],
       [2, 5],
-      [2, 6],
     ],
     exits: [
       { row: 0, col: 3, side: "mind" },
@@ -350,24 +337,19 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
       { id: "h1", row: 5, col: 6, dir: "left", side: "heart" },
     ],
-    gates: [{ id: "g1", row: 2, col: 3, openBy: "heart" }],
-    switches: [{ row: 5, col: 3, side: "heart", openGates: ["g1"] }],
-    moveTarget: 2,
-    timeTarget: 30,
-    hintOrder: ["h1", "m1"],
-    tutorial: "Heart's path crosses a switch that opens the Mind's gate.",
+    moveTarget: 10,
+    timeTarget: 60,
   },
   {
     id: 10,
     chapter: "Resonance",
-    name: "Twin Portals",
+    name: "Long Way Home",
     rows: 7,
     cols: 7,
     walls: [
-      [3, 0],
-      [3, 1],
-      [3, 5],
-      [3, 6],
+      [3, 2],
+      [3, 3],
+      [3, 4],
     ],
     exits: [
       { row: 0, col: 0, side: "mind" },
@@ -377,16 +359,13 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 5, col: 3, dir: "left", side: "mind" },
       { id: "h1", row: 1, col: 3, dir: "right", side: "heart" },
     ],
-    teleports: [{ a: [5, 0], b: [0, 5] }, { a: [1, 6], b: [6, 1] }],
-    moveTarget: 2,
-    timeTarget: 25,
-    hintOrder: ["m1", "h1"],
-    tutorial: "Portals link distant tiles. Step in — arrive elsewhere.",
+    moveTarget: 16,
+    timeTarget: 75,
   },
   {
     id: 11,
     chapter: "Resonance",
-    name: "Sequence of Two",
+    name: "Split Decision",
     rows: 7,
     cols: 8,
     walls: [
@@ -404,17 +383,8 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 1, col: 0, dir: "down", side: "heart" },
       { id: "m2", row: 5, col: 0, dir: "up", side: "mind" },
     ],
-    gates: [
-      { id: "g1", row: 3, col: 7, openBy: "heart" },
-      { id: "g2", row: 3, col: 0, openBy: "mind" },
-    ],
-    switches: [
-      { row: 1, col: 4, side: "heart", openGates: ["g1"] },
-      { row: 5, col: 3, side: "mind", openGates: ["g2"] },
-    ],
-    moveTarget: 3,
-    timeTarget: 45,
-    hintOrder: ["h1", "m1", "m2"],
+    moveTarget: 20,
+    timeTarget: 100,
   },
   {
     id: 12,
@@ -440,18 +410,23 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 1, col: 3, dir: "down", side: "heart" },
       { id: "h2", row: 1, col: 4, dir: "down", side: "heart" },
     ],
-    teleports: [{ a: [4, 0], b: [4, 7] }],
-    moveTarget: 4,
-    timeTarget: 55,
-    hintOrder: ["m1", "h1", "m2", "h2"],
-    tutorial: "Balance the crossing. Both must reach freedom together.",
+    moveTarget: 22,
+    timeTarget: 110,
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistence
 
-const STORAGE_KEY = "unveil.fymh.v2";
+const STORAGE_KEY = "unveil.fymh.v3";
+
+function defaultProgress(): Progress {
+  return {
+    unlocked: 1,
+    best: {},
+    totals: { lovePoints: 0, xp: 0, diamonds: 0, keys: 0, streak: 0, lastPlayed: null },
+  };
+}
 
 function loadProgress(): Progress {
   if (typeof window === "undefined") return defaultProgress();
@@ -468,14 +443,6 @@ function loadProgress(): Progress {
   } catch {
     return defaultProgress();
   }
-}
-
-function defaultProgress(): Progress {
-  return {
-    unlocked: 1,
-    best: {},
-    totals: { lovePoints: 0, xp: 0, diamonds: 0, keys: 0, streak: 0, lastPlayed: null },
-  };
 }
 
 function saveProgress(p: Progress) {
@@ -497,12 +464,16 @@ function bumpStreak(prev: Totals): Totals {
 
 function haptic(ms = 15) {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    try { navigator.vibrate(ms); } catch { /* ignore */ }
+    try {
+      navigator.vibrate(ms);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Engine
+// Engine helpers
 
 function buildCellMap(level: LevelConfig): Record<string, CellType> {
   const map: Record<string, CellType> = {};
@@ -516,91 +487,116 @@ function buildCellMap(level: LevelConfig): Record<string, CellType> {
   return map;
 }
 
+function initialArrows(level: LevelConfig): ArrowState[] {
+  return level.arrows.map((a) => ({
+    id: a.id,
+    side: a.side,
+    startRow: a.row,
+    startCol: a.col,
+    dir: a.dir,
+    plannedPath: [{ r: a.row, c: a.col }],
+    status: "idle" as ArrowStatus,
+    animIdx: 0,
+  }));
+}
+
 function initialRun(level: LevelConfig): RunState {
-  return {
-    moves: 0,
-    openGates: [],
-    arrows: level.arrows.map((a) => ({
-      ...a,
-      status: "idle",
-      curRow: a.row,
-      curCol: a.col,
-      trail: [],
-    })),
-  };
+  return { moves: 0, arrows: initialArrows(level) };
 }
 
 function starsFor(moves: number, time: number, level: LevelConfig): number {
   if (moves <= level.moveTarget && time <= level.timeTarget) return 3;
-  if (moves <= level.moveTarget + 1 && time <= level.timeTarget + 15) return 2;
+  if (moves <= level.moveTarget + 4 && time <= level.timeTarget + 20) return 2;
   return 1;
 }
 
-// Simulates the arrow travel without mutating state — used for preview + hints.
-function computePath(
+function keyOf(p: Point) {
+  return `${p.r}-${p.c}`;
+}
+
+// Would extending an arrow's plan onto tile (nr,nc) be legal at plan time?
+function canExtend(
   arrow: ArrowState,
-  run: RunState,
+  nr: number,
+  nc: number,
   level: LevelConfig,
   cellMap: Record<string, CellType>,
-): PathPreview {
-  const cells: Array<{ r: number; c: number }> = [];
-  const dir = arrow.dir;
-  const [dr, dc] = DELTA[dir];
-  let r = arrow.curRow;
-  let c = arrow.curCol;
-  const openGates = [...run.openGates];
-  const teleMap = new Map<string, [number, number]>();
-  for (const t of level.teleports ?? []) {
-    teleMap.set(`${t.a[0]}-${t.a[1]}`, t.b);
-    teleMap.set(`${t.b[0]}-${t.b[1]}`, t.a);
+  allArrows: ArrowState[],
+): { ok: true } | { ok: false; reason: string } {
+  if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) return { ok: false, reason: "Out of bounds" };
+  const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
+  const dr = Math.abs(nr - tip.r);
+  const dc = Math.abs(nc - tip.c);
+  if (dr + dc !== 1) return { ok: false, reason: "Not adjacent to the current path tip" };
+  const type = cellMap[`${nr}-${nc}`] ?? "empty";
+  if (type === "wall") return { ok: false, reason: "That tile is a wall" };
+  // Cannot cross another arrow's start cell
+  for (const other of allArrows) {
+    if (other.id === arrow.id) continue;
+    if (other.startRow === nr && other.startCol === nc) return { ok: false, reason: "Another arrow starts there" };
   }
-  for (let i = 0; i < 200; i++) {
-    const nr = r + dr;
-    const nc = c + dc;
-    if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) {
-      return { cells, outcome: "edge", blockCell: { r, c } };
+  // Cannot revisit a cell already in your own path (except undo)
+  if (arrow.plannedPath.some((p) => p.r === nr && p.c === nc)) {
+    return { ok: false, reason: "Your path already visits that tile" };
+  }
+  // Cannot end early on an exit of the wrong side (allowed to pass through? No — exits are terminal, so stop there)
+  if (type === "mind-exit" && arrow.side !== "mind") return { ok: false, reason: "That's a Mind exit" };
+  if (type === "heart-exit" && arrow.side !== "heart") return { ok: false, reason: "That's a Heart exit" };
+  return { ok: true };
+}
+
+function dirBetween(a: Point, b: Point): Dir | null {
+  if (b.r === a.r - 1 && b.c === a.c) return "up";
+  if (b.r === a.r + 1 && b.c === a.c) return "down";
+  if (b.r === a.r && b.c === a.c - 1) return "left";
+  if (b.r === a.r && b.c === a.c + 1) return "right";
+  return null;
+}
+
+// Every arrow's path must end on a matching exit for a valid release.
+function validateForRelease(arrows: ArrowState[], cellMap: Record<string, CellType>): { ok: true } | { ok: false; reason: string } {
+  for (const a of arrows) {
+    if (a.plannedPath.length < 2) return { ok: false, reason: `Plan a path for the ${a.side === "mind" ? "Mind" : "Heart"} arrow first.` };
+    const tip = a.plannedPath[a.plannedPath.length - 1];
+    const type = cellMap[`${tip.r}-${tip.c}`] ?? "empty";
+    const needed = a.side === "mind" ? "mind-exit" : "heart-exit";
+    if (type !== needed) {
+      return { ok: false, reason: `${a.side === "mind" ? "Mind" : "Heart"} path must end on a matching exit.` };
     }
-    const key = `${nr}-${nc}`;
-    const type = cellMap[key] ?? "empty";
-    const gate = (level.gates ?? []).find((g) => g.row === nr && g.col === nc);
-    if (gate && !openGates.includes(gate.id)) {
-      return { cells, outcome: "gate", blockCell: { r: nr, c: nc } };
+  }
+  // Check for simultaneous collisions during animation
+  const maxLen = Math.max(...arrows.map((a) => a.plannedPath.length));
+  for (let t = 0; t < maxLen; t++) {
+    const seen = new Map<string, ArrowState>();
+    for (const a of arrows) {
+      const idx = Math.min(t, a.plannedPath.length - 1);
+      // once freed (finished path), don't collide anymore
+      if (t >= a.plannedPath.length) continue;
+      const p = a.plannedPath[idx];
+      const k = keyOf(p);
+      const other = seen.get(k);
+      if (other) {
+        return { ok: false, reason: `Paths collide at row ${p.r + 1}, col ${p.c + 1}. Reroute one of them.` };
+      }
+      seen.set(k, a);
     }
-    if (type === "wall") return { cells, outcome: "wall", blockCell: { r: nr, c: nc } };
-    if (type === "mind-exit" || type === "heart-exit") {
-      const exitSide: Side = type === "mind-exit" ? "mind" : "heart";
-      cells.push({ r: nr, c: nc });
-      if (exitSide === arrow.side) return { cells, outcome: "exit" };
-      return { cells, outcome: "wrong-exit", blockCell: { r: nr, c: nc } };
-    }
-    const blocker = run.arrows.find(
-      (a) =>
-        a.id !== arrow.id &&
-        (a.status === "idle" || a.status === "lost") &&
-        a.curRow === nr &&
-        a.curCol === nc,
-    );
-    if (blocker) {
-      return { cells, outcome: "arrow", blockerId: blocker.id, blockCell: { r: nr, c: nc } };
-    }
-    cells.push({ r: nr, c: nc });
-    if (type === "switch-mind" || type === "switch-heart") {
-      const s = (level.switches ?? []).find((s) => s.row === nr && s.col === nc);
-      const need: Side = type === "switch-mind" ? "mind" : "heart";
-      if (s && arrow.side === need) {
-        for (const gid of s.openGates) if (!openGates.includes(gid)) openGates.push(gid);
+    // Also check swap-collision (two arrows crossing on the same edge)
+    for (const a of arrows) {
+      if (t + 1 >= a.plannedPath.length) continue;
+      const aFrom = a.plannedPath[t];
+      const aTo = a.plannedPath[t + 1];
+      for (const b of arrows) {
+        if (b.id === a.id) continue;
+        if (t + 1 >= b.plannedPath.length) continue;
+        const bFrom = b.plannedPath[t];
+        const bTo = b.plannedPath[t + 1];
+        if (aFrom.r === bTo.r && aFrom.c === bTo.c && aTo.r === bFrom.r && aTo.c === bFrom.c) {
+          return { ok: false, reason: `Two arrows swap through each other at row ${aTo.r + 1}, col ${aTo.c + 1}.` };
+        }
       }
     }
-    const tgt = teleMap.get(`${nr}-${nc}`);
-    if (tgt) {
-      r = tgt[0];
-      c = tgt[1];
-      continue;
-    }
-    r = nr;
-    c = nc;
   }
-  return { cells, outcome: "edge" };
+  return { ok: true };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -614,276 +610,175 @@ export function FreeYourMindHeartGame() {
   const [seconds, setSeconds] = useState(0);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [hintId, setHintId] = useState<string | null>(null);
-  const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
+  const [status, setStatus] = useState<"planning" | "animating" | "won" | "lost">("planning");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rewardFlash, setRewardFlash] = useState<null | { lp: number; xp: number; dia: number; keys: number; stars: number }>(null);
   const [victoryTick, setVictoryTick] = useState(0);
-  const [previewId, setPreviewId] = useState<string | null>(null);
-  const [tutorialStep, setTutorialStep] = useState(0);
-  const movingRef = useRef(false);
+  const [releaseError, setReleaseError] = useState<string | null>(null);
 
   const level = LEVELS[levelIndex];
   const cellMap = useMemo(() => buildCellMap(level), [level]);
 
   useEffect(() => setProgress(loadProgress()), []);
 
+  // Reset when level changes
   useEffect(() => {
     setRun(initialRun(level));
     setHistory([]);
     setSeconds(0);
-    setStatus("playing");
-    setHintId(null);
+    setStatus("planning");
+    setSelectedId(level.arrows[0]?.id ?? null);
     setRewardFlash(null);
-    setPreviewId(null);
-    setTutorialStep(0);
-    movingRef.current = false;
+    setReleaseError(null);
   }, [level]);
 
+  // Timer
   useEffect(() => {
-    if (paused || status !== "playing") return;
+    if (paused || status !== "planning") return;
     const t = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => window.clearInterval(t);
   }, [paused, status]);
 
-  // Occupancy: idle arrows block their cell; lost arrows block; freed do not.
-  const occupancy = useMemo(() => {
-    const occ: Record<string, ArrowState> = {};
-    for (const a of run.arrows) {
-      if (a.status === "idle" || a.status === "moving" || a.status === "lost") {
-        occ[`${a.curRow}-${a.curCol}`] = a;
+  const selectedArrow = useMemo(
+    () => run.arrows.find((a) => a.id === selectedId) ?? null,
+    [run.arrows, selectedId],
+  );
+
+  const pushHistory = useCallback(() => setHistory((h) => [...h, run]), [run]);
+
+  // Extend selected arrow's plan by one tile in direction `d`
+  const extendSelected = useCallback(
+    (d: Dir) => {
+      if (status !== "planning" || paused) return;
+      const arrow = run.arrows.find((a) => a.id === selectedId);
+      if (!arrow) return;
+      const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
+      const [dr, dc] = DELTA[d];
+      const nr = tip.r + dr;
+      const nc = tip.c + dc;
+      const check = canExtend(arrow, nr, nc, level, cellMap, run.arrows);
+      if (!check.ok) {
+        setReleaseError(check.reason);
+        haptic(6);
+        return;
       }
-    }
-    return occ;
-  }, [run.arrows]);
-
-  useEffect(() => {
-    if (status !== "playing") return;
-    const allFreed = run.arrows.every((a) => a.status === "freed");
-    const anyLost = run.arrows.some((a) => a.status === "lost");
-    if (allFreed && run.arrows.length > 0) handleWin();
-    else if (anyLost && !run.arrows.some((a) => a.status === "moving")) setStatus("lost");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.arrows, status]);
-
-  // Live preview of the currently hovered / focused idle arrow's route.
-  const preview = useMemo<PathPreview | null>(() => {
-    if (!previewId) return null;
-    const a = run.arrows.find((x) => x.id === previewId);
-    if (!a || a.status !== "idle") return null;
-    return computePath(a, run, level, cellMap);
-  }, [previewId, run, level, cellMap]);
-
-  // Level 1 tutorial: always highlight the next expected arrow.
-  const tutorialHintId =
-    level.id === 1 && status === "playing"
-      ? level.hintOrder.find((id) => run.arrows.find((a) => a.id === id)?.status === "idle") ?? null
-      : null;
-  const effectiveHintId = hintId ?? tutorialHintId;
-
-  function releaseArrow(id: string) {
-    if (status !== "playing" || paused || movingRef.current) return;
-    const arrow = run.arrows.find((a) => a.id === id);
-    if (!arrow || arrow.status !== "idle") return;
-
-    haptic(12);
-    setHistory((h) => [...h, run]);
-    setHintId(null);
-    setPreviewId(null);
-    movingRef.current = true;
-
-    let cur = { r: arrow.curRow, c: arrow.curCol };
-    let dir = arrow.dir;
-    let openGates = [...run.openGates];
-    let localArrows = run.arrows.map((a) =>
-      a.id === id ? { ...a, status: "moving" as ArrowStatus, trail: [] } : a,
-    );
-    setRun({
-      ...run,
-      moves: run.moves + 1,
-      arrows: localArrows,
-      failReason: undefined,
-      collisionAt: undefined,
-      blockerId: undefined,
-    });
-
-    const teleportMap = new Map<string, [number, number]>();
-    for (const t of level.teleports ?? []) {
-      teleportMap.set(`${t.a[0]}-${t.a[1]}`, t.b);
-      teleportMap.set(`${t.b[0]}-${t.b[1]}`, t.a);
-    }
-    const switchAt = (r: number, c: number) =>
-      (level.switches ?? []).find((s) => s.row === r && s.col === c);
-    const gateAt = (r: number, c: number) =>
-      (level.gates ?? []).find((g) => g.row === r && g.col === c);
-
-    const fail = (reason: string, blockR: number, blockC: number, blockerId?: string) => {
-      haptic(40);
-      localArrows = localArrows.map((a) =>
-        a.id === id ? { ...a, status: "lost" as ArrowStatus, curRow: cur.r, curCol: cur.c } : a,
-      );
+      pushHistory();
+      setReleaseError(null);
+      haptic(8);
       setRun((prev) => ({
         ...prev,
-        arrows: localArrows,
-        openGates,
-        failReason: reason,
-        collisionAt: { row: blockR, col: blockC },
-        blockerId,
+        moves: prev.moves + 1,
+        arrows: prev.arrows.map((a) =>
+          a.id === arrow.id
+            ? {
+                ...a,
+                dir: d,
+                plannedPath: [...a.plannedPath, { r: nr, c: nc }],
+              }
+            : a,
+        ),
       }));
-      movingRef.current = false;
-    };
+    },
+    [cellMap, level, paused, pushHistory, run.arrows, selectedId, status],
+  );
 
-    const succeed = (r: number, c: number) => {
-      haptic(25);
-      localArrows = localArrows.map((a) =>
-        a.id === id ? { ...a, status: "freed" as ArrowStatus, curRow: r, curCol: c } : a,
-      );
-      setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
-      movingRef.current = false;
-    };
-
-    const step = () => {
-      const [dr, dc] = DELTA[dir];
-      const nr = cur.r + dr;
-      const nc = cur.c + dc;
-
-      if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) {
-        fail(`${arrow.side === "mind" ? "Mind" : "Heart"} flew off the edge with no exit.`, cur.r, cur.c);
-        return;
-      }
-      const key = `${nr}-${nc}`;
-      const cellType = cellMap[key] ?? "empty";
-
-      // Closed gate = wall
-      const gate = gateAt(nr, nc);
-      if (gate && !openGates.includes(gate.id)) {
-        fail(`A ${gate.openBy === "mind" ? "Mind" : "Heart"} switch must open this gate first.`, nr, nc);
-        return;
-      }
-      if (cellType === "wall") {
-        fail(`${arrow.side === "mind" ? "Mind" : "Heart"} hit an obstacle. Clear the path before releasing.`, nr, nc);
-        return;
-      }
-      if (cellType === "mind-exit" || cellType === "heart-exit") {
-        const exitSide: Side = cellType === "mind-exit" ? "mind" : "heart";
-        if (exitSide === arrow.side) {
-          // arrive at exit
-          localArrows = localArrows.map((a) =>
-            a.id === id
-              ? { ...a, curRow: nr, curCol: nc, trail: [...a.trail, { row: nr, col: nc, t: Date.now() }] }
-              : a,
-          );
-          setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
-          window.setTimeout(() => succeed(nr, nc), 120);
-          return;
-        }
-        fail(
-          arrow.side === "mind"
-            ? "Mind reached a Heart exit. Wrong door."
-            : "Heart reached a Mind exit. Wrong door.",
-          nr,
-          nc,
-        );
-        return;
-      }
-      // Collision with any occupying arrow (idle/lost)
-      const blocker = localArrows.find(
-        (a) => a.id !== id && (a.status === "idle" || a.status === "lost") && a.curRow === nr && a.curCol === nc,
-      );
-      if (blocker) {
-        const meLabel = arrow.side === "mind" ? "Mind" : "Heart";
-        const themLabel = blocker.side === "mind" ? "Mind" : "Heart";
-        fail(
-          blocker.side === arrow.side
-            ? `Blocked: another ${meLabel} arrow is in the way. Release it first — see the pulsing highlight.`
-            : `${meLabel} is blocked by a ${themLabel} arrow. Free the highlighted ${themLabel} first, then try again.`,
-          nr,
-          nc,
-          blocker.id,
-        );
-        return;
-      }
-
-      // Advance
-      cur = { r: nr, c: nc };
-      localArrows = localArrows.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              curRow: nr,
-              curCol: nc,
-              trail: [...a.trail, { row: nr, col: nc, t: Date.now() }].slice(-6),
-            }
-          : a,
-      );
-
-      // Switch trigger
-      if (cellType === "switch-mind" || cellType === "switch-heart") {
-        const s = switchAt(nr, nc);
-        const need: Side = cellType === "switch-mind" ? "mind" : "heart";
-        if (s && arrow.side === need) {
-          for (const gid of s.openGates) if (!openGates.includes(gid)) openGates.push(gid);
-        }
-      }
-
-      // Teleport
-      const tgt = teleportMap.get(`${nr}-${nc}`);
-      setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
-      if (tgt) {
-        window.setTimeout(() => {
-          cur = { r: tgt[0], c: tgt[1] };
-          localArrows = localArrows.map((a) =>
-            a.id === id
-              ? {
-                  ...a,
-                  curRow: tgt[0],
-                  curCol: tgt[1],
-                  trail: [...a.trail, { row: tgt[0], col: tgt[1], t: Date.now() }].slice(-6),
-                }
-              : a,
-          );
-          setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
-          window.setTimeout(step, 140);
-        }, 120);
-        return;
-      }
-      window.setTimeout(step, 140);
-    };
-
-    window.setTimeout(step, 140);
-
-    // silence unused-var lint
-    void dir;
-  }
-
-  function undo() {
-    if (movingRef.current) return;
+  const undoOne = useCallback(() => {
+    if (status !== "planning") return;
     const last = history[history.length - 1];
     if (!last) return;
     setRun(last);
     setHistory((h) => h.slice(0, -1));
-    setStatus("playing");
-    setHintId(null);
-    haptic(10);
-  }
+    setReleaseError(null);
+    haptic(8);
+  }, [history, status]);
 
-  function restart() {
-    if (movingRef.current) return;
+  const restartLevel = useCallback(() => {
     setRun(initialRun(level));
     setHistory([]);
     setSeconds(0);
-    setStatus("playing");
-    setHintId(null);
+    setStatus("planning");
+    setSelectedId(level.arrows[0]?.id ?? null);
+    setReleaseError(null);
     haptic(10);
-  }
+  }, [level]);
 
-  function showHint() {
-    if (movingRef.current) return;
-    const next = level.hintOrder.find((id) => run.arrows.find((a) => a.id === id)?.status === "idle");
-    if (next) {
-      setHintId(next);
-      haptic(8);
+  const rotateSelected = useCallback(
+    (cw: boolean) => {
+      if (status !== "planning") return;
+      const arrow = run.arrows.find((a) => a.id === selectedId);
+      if (!arrow) return;
+      setRun((prev) => ({
+        ...prev,
+        arrows: prev.arrows.map((a) =>
+          a.id === arrow.id ? { ...a, dir: cw ? ROTATE_CW[a.dir] : ROTATE_CCW[a.dir] } : a,
+        ),
+      }));
+      haptic(6);
+    },
+    [run.arrows, selectedId, status],
+  );
+
+  const cycleSelected = useCallback(
+    (delta: number) => {
+      if (run.arrows.length === 0) return;
+      const idx = Math.max(0, run.arrows.findIndex((a) => a.id === selectedId));
+      const next = (idx + delta + run.arrows.length) % run.arrows.length;
+      setSelectedId(run.arrows[next].id);
+    },
+    [run.arrows, selectedId],
+  );
+
+  const releaseAll = useCallback(() => {
+    if (status !== "planning" || paused) return;
+    const check = validateForRelease(run.arrows, cellMap);
+    if (!check.ok) {
+      setReleaseError(check.reason);
+      haptic(30);
+      return;
     }
-  }
+    setReleaseError(null);
+    setStatus("animating");
+    haptic(20);
+    // Start animation: advance every arrow's animIdx over time
+    setRun((prev) => ({
+      ...prev,
+      arrows: prev.arrows.map((a) => ({ ...a, status: "animating" as ArrowStatus, animIdx: 0 })),
+    }));
+  }, [cellMap, paused, run.arrows, status]);
+
+  // Animation loop
+  useEffect(() => {
+    if (status !== "animating") return;
+    const timer = window.setInterval(() => {
+      setRun((prev) => {
+        const next = prev.arrows.map((a) => {
+          if (a.status !== "animating") return a;
+          const nextIdx = a.animIdx + 1;
+          if (nextIdx >= a.plannedPath.length) {
+            return { ...a, status: "freed" as ArrowStatus, animIdx: a.plannedPath.length - 1 };
+          }
+          return { ...a, animIdx: nextIdx };
+        });
+        return { ...prev, arrows: next };
+      });
+    }, 160);
+    return () => window.clearInterval(timer);
+  }, [status]);
+
+  // Detect end of animation
+  useEffect(() => {
+    if (status !== "animating") return;
+    const stillMoving = run.arrows.some((a) => a.status === "animating");
+    if (!stillMoving) {
+      const allFreed = run.arrows.every((a) => a.status === "freed");
+      if (allFreed) {
+        handleWin();
+      } else {
+        setStatus("lost");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.arrows, status]);
 
   function handleWin() {
     const stars = starsFor(run.moves, seconds, level);
@@ -900,7 +795,7 @@ export function FreeYourMindHeartGame() {
     haptic(60);
 
     setProgress((prev) => {
-      const bumpedTotals = bumpStreak(prev.totals);
+      const bumped = bumpStreak(prev.totals);
       const prevBest = prev.best[level.id];
       const nextBest: Best =
         !prevBest || stars > prevBest.stars || (stars === prevBest.stars && run.moves < prevBest.moves)
@@ -910,11 +805,11 @@ export function FreeYourMindHeartGame() {
         unlocked: Math.max(prev.unlocked, Math.min(level.id + 1, LEVELS.length)),
         best: { ...prev.best, [level.id]: nextBest },
         totals: {
-          ...bumpedTotals,
-          lovePoints: bumpedTotals.lovePoints + lp,
-          xp: bumpedTotals.xp + xp,
-          diamonds: bumpedTotals.diamonds + dia,
-          keys: bumpedTotals.keys + keys,
+          ...bumped,
+          lovePoints: bumped.lovePoints + lp,
+          xp: bumped.xp + xp,
+          diamonds: bumped.diamonds + dia,
+          keys: bumped.keys + keys,
         },
       };
       saveProgress(next);
@@ -926,6 +821,83 @@ export function FreeYourMindHeartGame() {
     if (levelIndex + 1 >= LEVELS.length) return;
     setLevelIndex((i) => i + 1);
   }, [levelIndex]);
+
+  // Keyboard controls
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    function onKey(e: KeyboardEvent) {
+      if (paused) return;
+      if (status !== "planning") return;
+      switch (e.key) {
+        case "ArrowUp":
+          e.preventDefault();
+          extendSelected("up");
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          extendSelected("down");
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          extendSelected("left");
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          extendSelected("right");
+          break;
+        case "Backspace":
+        case "z":
+        case "Z":
+          e.preventDefault();
+          undoOne();
+          break;
+        case "r":
+        case "R":
+          e.preventDefault();
+          rotateSelected(!e.shiftKey);
+          break;
+        case "Enter":
+          e.preventDefault();
+          releaseAll();
+          break;
+        case "Tab":
+          e.preventDefault();
+          cycleSelected(e.shiftKey ? -1 : 1);
+          break;
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cycleSelected, extendSelected, paused, releaseAll, rotateSelected, status, undoOne]);
+
+  function onCellClick(r: number, c: number) {
+    if (status !== "planning" || paused) return;
+    // Click an arrow's start cell → select it
+    const arrowHere = run.arrows.find((a) => a.startRow === r && a.startCol === c);
+    if (arrowHere) {
+      setSelectedId(arrowHere.id);
+      setReleaseError(null);
+      haptic(6);
+      return;
+    }
+    // Click on any tile → try to extend selected arrow towards that tile if adjacent to its tip
+    const arrow = run.arrows.find((a) => a.id === selectedId);
+    if (!arrow) return;
+    const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
+    const d = dirBetween(tip, { r, c });
+    if (d) {
+      extendSelected(d);
+      return;
+    }
+    // Click on previous cell in own path → undo
+    if (arrow.plannedPath.length >= 2) {
+      const prev = arrow.plannedPath[arrow.plannedPath.length - 2];
+      if (prev.r === r && prev.c === c) {
+        undoOne();
+        return;
+      }
+    }
+  }
 
   const best = progress.best[level.id];
   const totalStars = Object.values(progress.best).reduce((a, b) => a + b.stars, 0);
@@ -985,13 +957,10 @@ export function FreeYourMindHeartGame() {
           <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m · ${best.time}s` : "—"} />
         </div>
 
-        {level.id === 1 && status === "playing" ? (
-          <Level1Coach
-            freedCount={run.arrows.filter((a) => a.status === "freed").length}
-            hasMoved={run.moves > 0}
-          />
+        {level.id === 1 ? (
+          <Level1Coach arrows={run.arrows} />
         ) : (
-          level.tutorial && status === "playing" && run.moves === 0 && (
+          level.tutorial && (
             <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
               <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
               <span>{level.tutorial}</span>
@@ -1004,37 +973,52 @@ export function FreeYourMindHeartGame() {
           level={level}
           cellMap={cellMap}
           arrows={run.arrows}
-          openGates={run.openGates}
-          occupancy={occupancy}
-          hintId={effectiveHintId}
-          paused={paused}
-          collisionAt={run.collisionAt}
-          blockerId={run.blockerId}
-          preview={preview}
-          previewSide={previewId ? run.arrows.find((a) => a.id === previewId)?.side : undefined}
-          onTap={releaseArrow}
-          onPreview={setPreviewId}
+          selectedId={selectedId}
+          onCellClick={onCellClick}
+          animating={status === "animating"}
         />
 
-        {/* Live status line explaining last outcome / next action */}
-        <StatusLine
-          run={run}
-          preview={preview}
-          previewArrow={previewId ? run.arrows.find((a) => a.id === previewId) ?? null : null}
-          status={status}
-        />
-
+        {/* Status / error line */}
+        {releaseError && status === "planning" && (
+          <div className="mt-3 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-xs text-rose-100 backdrop-blur">
+            {releaseError}
+          </div>
+        )}
+        {status === "planning" && !releaseError && selectedArrow && (
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 backdrop-blur">
+            {planningHint(selectedArrow, cellMap)}
+          </div>
+        )}
 
         {/* Bottom controls */}
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          <ControlBtn onClick={undo} disabled={!history.length || movingRef.current} icon={<Undo2 className="h-4 w-4" />} label="Undo" />
-          <ControlBtn onClick={restart} icon={<RotateCcw className="h-4 w-4" />} label="Restart" />
-          <ControlBtn onClick={showHint} icon={<Lightbulb className="h-4 w-4" />} label="Hint" />
+        <div className="mt-4 grid grid-cols-5 gap-2">
+          <ControlBtn onClick={undoOne} disabled={!history.length || status !== "planning"} icon={<Undo2 className="h-4 w-4" />} label="Undo" />
+          <ControlBtn onClick={restartLevel} icon={<RotateCcw className="h-4 w-4" />} label="Restart" />
+          <ControlBtn
+            onClick={() => rotateSelected(true)}
+            disabled={status !== "planning" || !selectedArrow}
+            icon={<RotateCw className="h-4 w-4" />}
+            label="Rotate"
+          />
           <ControlBtn
             onClick={() => setPaused((p) => !p)}
             icon={paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             label={paused ? "Resume" : "Pause"}
           />
+          <button
+            type="button"
+            onClick={releaseAll}
+            disabled={status !== "planning"}
+            className="inline-flex flex-col items-center gap-0.5 rounded-2xl border border-fuchsia-400/50 bg-gradient-to-r from-indigo-500/40 via-fuchsia-500/40 to-pink-500/40 px-3 py-2 text-white shadow-[0_0_20px_rgba(217,70,239,0.35)] transition hover:brightness-110 active:scale-95 disabled:opacity-40"
+          >
+            <Send className="h-4 w-4" />
+            <span className="text-[10px] uppercase tracking-wide">Release</span>
+          </button>
+        </div>
+
+        {/* Keyboard help */}
+        <div className="mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
+          Click a tile · Arrow keys · Tab to switch · Backspace to undo · Enter to release
         </div>
 
         {/* Level select */}
@@ -1079,14 +1063,18 @@ export function FreeYourMindHeartGame() {
       {/* Overlays */}
       {status === "lost" && (
         <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path blocked</div>
-          <h2 className="mb-2 font-display text-3xl">Here's what happened.</h2>
-          <p className="mb-5 max-w-sm text-sm text-white/80">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path failed</div>
+          <h2 className="mb-2 font-display text-3xl">Almost — try a new route.</h2>
+          <p className="mb-5 max-w-sm text-sm text-white/80">
+            {run.arrows.find((a) => a.status !== "freed")
+              ? `The ${(run.arrows.find((a) => a.status !== "freed") as ArrowState).side === "mind" ? "Mind" : "Heart"} didn't reach its exit. Rebuild the path with the arrow keys or by clicking tiles.`
+              : "Not every arrow reached its exit."}
+          </p>
           <div className="flex justify-center gap-2">
-            <button onClick={undo} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
+            <button onClick={undoOne} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
               Undo
             </button>
-            <button onClick={restart} className="rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
+            <button onClick={restartLevel} className="rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
               Restart Level
             </button>
           </div>
@@ -1111,7 +1099,7 @@ export function FreeYourMindHeartGame() {
               <RewardPill icon={<KeyIcon className="h-3.5 w-3.5 text-yellow-300" />} label="Keys" value={`+${rewardFlash.keys}`} />
             </div>
             <div className="flex justify-center gap-2">
-              <button onClick={restart} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80">
+              <button onClick={restartLevel} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80">
                 Replay
               </button>
               {levelIndex + 1 < LEVELS.length ? (
@@ -1131,7 +1119,7 @@ export function FreeYourMindHeartGame() {
         </Overlay>
       )}
 
-      {paused && status === "playing" && (
+      {paused && status === "planning" && (
         <Overlay>
           <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">Paused</div>
           <h2 className="mb-5 font-display text-3xl">Take a breath.</h2>
@@ -1144,6 +1132,20 @@ export function FreeYourMindHeartGame() {
   );
 }
 
+function planningHint(a: ArrowState, cellMap: Record<string, CellType>): string {
+  const label = a.side === "mind" ? "Mind" : "Heart";
+  if (a.plannedPath.length === 1) {
+    return `${label} selected. Use arrow keys or click an adjacent tile to start building its route.`;
+  }
+  const tip = a.plannedPath[a.plannedPath.length - 1];
+  const type = cellMap[`${tip.r}-${tip.c}`] ?? "empty";
+  const needed = a.side === "mind" ? "mind-exit" : "heart-exit";
+  if (type === needed) {
+    return `${label} route reaches a matching exit ✓. Plan the other arrows, then press Release.`;
+  }
+  return `${label} path is ${a.plannedPath.length - 1} tile${a.plannedPath.length - 1 === 1 ? "" : "s"} long. Keep routing toward a ${a.side === "mind" ? "cyan Mind" : "pink Heart"} exit.`;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Board
 
@@ -1151,58 +1153,61 @@ function Board({
   level,
   cellMap,
   arrows,
-  openGates,
-  occupancy,
-  hintId,
-  paused,
-  collisionAt,
-  blockerId,
-  preview,
-  previewSide,
-  onTap,
-  onPreview,
+  selectedId,
+  onCellClick,
+  animating,
 }: {
   level: LevelConfig;
   cellMap: Record<string, CellType>;
   arrows: ArrowState[];
-  openGates: string[];
-  occupancy: Record<string, ArrowState>;
-  hintId: string | null;
-  paused: boolean;
-  collisionAt?: { row: number; col: number };
-  blockerId?: string;
-  preview: PathPreview | null;
-  previewSide?: Side;
-  onTap: (id: string) => void;
-  onPreview: (id: string | null) => void;
+  selectedId: string | null;
+  onCellClick: (r: number, c: number) => void;
+  animating: boolean;
 }) {
-  const gateMap = useMemo(() => {
-    const m: Record<string, GateDef> = {};
-    for (const g of level.gates ?? []) m[`${g.row}-${g.col}`] = g;
-    return m;
-  }, [level]);
-
-  // Build trail overlay
-  const trails = useMemo(() => {
-    const t: Array<{ row: number; col: number; side: Side; freshness: number; key: string }> = [];
-    const now = Date.now();
+  // Compute per-cell overlays: planned path cells (side + order), animated positions.
+  const planCells = useMemo(() => {
+    const m = new Map<string, { side: Side; idx: number; total: number; isTip: boolean; arrowId: string; selected: boolean }>();
     for (const a of arrows) {
-      a.trail.forEach((p, i) => {
-        t.push({
-          row: p.row,
-          col: p.col,
-          side: a.side,
-          freshness: Math.max(0, 1 - (now - p.t) / 900),
-          key: `${a.id}-${i}-${p.row}-${p.col}`,
-        });
+      if (a.status === "freed" && !animating) continue;
+      const total = a.plannedPath.length;
+      a.plannedPath.forEach((p, idx) => {
+        if (idx === 0) return; // start cell shown as arrow, not as path
+        const k = `${p.r}-${p.c}`;
+        const prev = m.get(k);
+        if (!prev) {
+          m.set(k, {
+            side: a.side,
+            idx,
+            total,
+            isTip: idx === total - 1,
+            arrowId: a.id,
+            selected: a.id === selectedId,
+          });
+        }
       });
     }
-    return t;
-  }, [arrows]);
+    return m;
+  }, [animating, arrows, selectedId]);
+
+  const selectedArrow = arrows.find((a) => a.id === selectedId);
+  const validNext = useMemo(() => {
+    const s = new Set<string>();
+    if (!selectedArrow || animating) return s;
+    if (selectedArrow.status === "freed") return s;
+    const tip = selectedArrow.plannedPath[selectedArrow.plannedPath.length - 1];
+    for (const d of Object.keys(DELTA) as Dir[]) {
+      const [dr, dc] = DELTA[d];
+      const nr = tip.r + dr;
+      const nc = tip.c + dc;
+      const check = canExtend(selectedArrow, nr, nc, level, cellMap, arrows);
+      if (check.ok) s.add(`${nr}-${nc}`);
+    }
+    return s;
+  }, [animating, arrows, cellMap, level, selectedArrow]);
 
   return (
     <div className="relative mx-auto overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 shadow-[0_25px_80px_-25px_rgba(129,140,248,0.55)] backdrop-blur-xl">
-      {/* Inner ambient glow */}
+      {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-0 opacity-70">
         <div className="absolute left-6 top-6 h-32 w-32 rounded-full bg-indigo-500/20 blur-3xl animate-[floaty_9s_ease-in-out_infinite]" />
         <div className="absolute bottom-4 right-8 h-36 w-36 rounded-full bg-pink-500/20 blur-3xl animate-[floaty_11s_ease-in-out_infinite_reverse]" />
@@ -1218,7 +1223,7 @@ function Board({
             style={{
               left: `${(i * 37) % 100}%`,
               top: `${(i * 53) % 100}%`,
-              // @ts-ignore -- css var
+              // @ts-ignore css var
               "--d": `${6 + (i % 5) * 2}s`,
               animationDelay: `${(i % 6) * 0.7}s`,
             }}
@@ -1237,46 +1242,37 @@ function Board({
           Array.from({ length: level.cols }).map((_, c) => {
             const key = `${r}-${c}`;
             const type = cellMap[key] ?? "empty";
-            const occ = occupancy[key];
-            const gate = gateMap[key];
-            const gateOpen = gate ? openGates.includes(gate.id) : false;
-            const collided = collisionAt && collisionAt.row === r && collisionAt.col === c;
-            const trailHere = trails.filter((t) => t.row === r && t.col === c);
-            const previewIdx = preview
-              ? preview.cells.findIndex((p) => p.r === r && p.c === c)
-              : -1;
-            const isPreviewBlock =
-              preview?.blockCell && preview.blockCell.r === r && preview.blockCell.c === c;
-            const isBlocker = !!(blockerId && occ && occ.id === blockerId);
+            const plan = planCells.get(key);
+            const isValid = validNext.has(key);
+            // arrows currently at this cell (start cell when planning; animIdx cell when animating)
+            const arrowsHere = arrows.filter((a) => {
+              if (animating || a.status === "animating") {
+                const idx = Math.min(a.animIdx, a.plannedPath.length - 1);
+                const p = a.plannedPath[idx];
+                return p.r === r && p.c === c && a.status !== "freed";
+              }
+              if (a.status === "freed") return false;
+              return a.startRow === r && a.startCol === c;
+            });
 
             return (
               <Cell
                 key={key}
                 type={type}
-                arrow={occ}
-                hint={occ?.id === hintId}
-                disabled={paused}
-                gate={gate}
-                gateOpen={gateOpen}
-                collided={!!collided}
-                trails={trailHere}
-                previewIndex={previewIdx}
-                previewLength={preview?.cells.length ?? 0}
-                previewSide={previewSide}
-                previewBlock={!!isPreviewBlock}
-                previewBad={!!preview && preview.outcome !== "exit"}
-                isBlocker={isBlocker}
-                onTap={onTap}
-                onPreview={onPreview}
+                arrowsHere={arrowsHere}
+                selectedId={selectedId}
+                plan={plan}
+                isValidNext={isValid}
+                animating={animating}
+                onClick={() => onCellClick(r, c)}
               />
             );
           }),
         )}
       </div>
 
-      {/* Board hint text */}
       <div className="pointer-events-none mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-        Hover or focus an arrow to preview its path · tap to release
+        Plan the route · glowing tiles are valid next steps
       </div>
     </div>
   );
@@ -1284,38 +1280,20 @@ function Board({
 
 function Cell({
   type,
-  arrow,
-  hint,
-  disabled,
-  gate,
-  gateOpen,
-  collided,
-  trails,
-  previewIndex,
-  previewLength,
-  previewSide,
-  previewBlock,
-  previewBad,
-  isBlocker,
-  onTap,
-  onPreview,
+  arrowsHere,
+  selectedId,
+  plan,
+  isValidNext,
+  animating,
+  onClick,
 }: {
   type: CellType;
-  arrow?: ArrowState;
-  hint?: boolean;
-  disabled?: boolean;
-  gate?: GateDef;
-  gateOpen?: boolean;
-  collided?: boolean;
-  trails: Array<{ side: Side; freshness: number; key: string }>;
-  previewIndex?: number;
-  previewLength?: number;
-  previewSide?: Side;
-  previewBlock?: boolean;
-  previewBad?: boolean;
-  isBlocker?: boolean;
-  onTap: (id: string) => void;
-  onPreview?: (id: string | null) => void;
+  arrowsHere: ArrowState[];
+  selectedId: string | null;
+  plan?: { side: Side; idx: number; total: number; isTip: boolean; arrowId: string; selected: boolean };
+  isValidNext?: boolean;
+  animating: boolean;
+  onClick: () => void;
 }) {
   const base = "relative aspect-square rounded-xl border transition-all duration-200";
   let cellClass = "border-white/5 bg-white/[0.02]";
@@ -1333,51 +1311,45 @@ function Cell({
   if (type === "teleport-a" || type === "teleport-b")
     cellClass = "border-amber-400/40 bg-amber-500/5 shadow-[inset_0_0_10px_rgba(251,191,36,0.3)]";
 
-  if (gate) {
-    cellClass = gateOpen
-      ? "border-emerald-400/40 bg-emerald-500/5"
-      : "border-white/15 bg-black/50 shadow-inner";
-  }
-
-  const showPreview = (previewIndex ?? -1) >= 0;
-  const previewColor = previewSide === "heart" ? "rgba(244,114,182,0.55)" : "rgba(103,232,249,0.55)";
-  const previewOpacity = showPreview
-    ? Math.max(0.25, 1 - (previewIndex! / Math.max(1, (previewLength ?? 1))) * 0.6)
-    : 0;
+  const clickable = !animating && (type !== "wall");
+  const validGlow = isValidNext && !animating;
 
   return (
-    <div className={`${base} ${cellClass} ${collided ? "animate-[shake_0.35s_ease-in-out] ring-2 ring-rose-400/70" : ""}`}>
-      {/* Path preview overlay */}
-      {showPreview && (
+    <div className={`${base} ${cellClass}`}>
+      {/* Wall pattern */}
+      {type === "wall" && (
+        <div className="pointer-events-none absolute inset-1 rounded-md bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.08)_0_4px,transparent_4px_8px)]" />
+      )}
+
+      {/* Planned path overlay */}
+      {plan && (
         <span
-          className="pointer-events-none absolute inset-1 rounded-lg animate-[glowPulse_1.4s_ease-in-out_infinite]"
+          className={`pointer-events-none absolute inset-1 rounded-lg ${
+            plan.selected ? "animate-[glowPulse_1.3s_ease-in-out_infinite]" : ""
+          }`}
           style={{
-            background: `radial-gradient(circle, ${previewColor} 0%, transparent 75%)`,
-            opacity: previewOpacity,
-            boxShadow: `inset 0 0 12px ${previewColor}`,
+            background:
+              plan.side === "heart"
+                ? `radial-gradient(circle, rgba(244,114,182,0.55) 0%, rgba(244,114,182,0.15) 70%, transparent 100%)`
+                : `radial-gradient(circle, rgba(103,232,249,0.55) 0%, rgba(103,232,249,0.15) 70%, transparent 100%)`,
+            opacity: 0.4 + (plan.idx / Math.max(1, plan.total)) * 0.5,
+            boxShadow:
+              plan.side === "heart"
+                ? "inset 0 0 12px rgba(244,114,182,0.5)"
+                : "inset 0 0 12px rgba(103,232,249,0.5)",
           }}
         />
       )}
-      {previewBlock && (
-        <span
-          className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ${
-            previewBad ? "ring-rose-400/80 animate-[glowPulse_0.9s_ease-in-out_infinite]" : "ring-emerald-300/70"
-          }`}
-        />
+      {plan?.isTip && !animating && (
+        <span className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-amber-300/70" />
       )}
 
-      {/* Trails */}
-      {trails.map((t) => (
-        <span
-          key={t.key}
-          className={`pointer-events-none absolute inset-1 rounded-lg blur-[2px] ${
-            t.side === "mind" ? "bg-cyan-400/40" : "bg-pink-400/40"
-          }`}
-          style={{ opacity: 0.15 + t.freshness * 0.65 }}
-        />
-      ))}
+      {/* Valid-next indicator */}
+      {validGlow && !plan && arrowsHere.length === 0 && (
+        <span className="pointer-events-none absolute inset-2 rounded-full border border-emerald-300/60 bg-emerald-300/10 animate-[glowPulse_1.4s_ease-in-out_infinite]" />
+      )}
 
-      {/* Icons for special cells */}
+      {/* Exit icons */}
       {type === "mind-exit" && (
         <Brain className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-cyan-300/80 animate-pulse" />
       )}
@@ -1386,51 +1358,88 @@ function Cell({
       )}
       {(type === "switch-mind" || type === "switch-heart") && (
         <div
-          className={`pointer-events-none absolute inset-0 m-auto flex h-3 w-3 items-center justify-center rounded-full ${
-            type === "switch-mind" ? "bg-cyan-300/60 shadow-[0_0_10px_rgba(103,232,249,0.7)]" : "bg-pink-300/60 shadow-[0_0_10px_rgba(244,114,182,0.7)]"
+          className={`pointer-events-none absolute inset-0 m-auto h-3 w-3 rounded-full ${
+            type === "switch-mind"
+              ? "bg-cyan-300/60 shadow-[0_0_10px_rgba(103,232,249,0.7)]"
+              : "bg-pink-300/60 shadow-[0_0_10px_rgba(244,114,182,0.7)]"
           }`}
         />
       )}
       {(type === "teleport-a" || type === "teleport-b") && (
         <div className="pointer-events-none absolute inset-0 m-auto h-4 w-4 rounded-full border border-amber-300/60 bg-amber-300/20 animate-[spin_4s_linear_infinite] shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
       )}
-      {type === "wall" && (
-        <div className="pointer-events-none absolute inset-1 rounded-md bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.05)_0_4px,transparent_4px_8px)]" />
-      )}
-      {gate && !gateOpen && (
-        <div className="pointer-events-none absolute inset-1 rounded-md border border-white/20 bg-[repeating-linear-gradient(45deg,transparent_0_4px,rgba(255,255,255,0.06)_4px_8px)]" />
-      )}
-      {gate && gateOpen && (
-        <div className="pointer-events-none absolute inset-0 m-auto h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
-      )}
 
-      {/* Arrow */}
-      {arrow && arrow.status !== "freed" && (
+      {/* Clickable overlay */}
+      {clickable && (
         <button
           type="button"
-          disabled={disabled || arrow.status !== "idle"}
-          onClick={() => onTap(arrow.id)}
-          onMouseEnter={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
-          onMouseLeave={() => onPreview && onPreview(null)}
-          onFocus={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
-          onBlur={() => onPreview && onPreview(null)}
-          className={`absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
-            arrow.side === "mind"
-              ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
-              : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
-          } ${arrow.status === "moving" ? "scale-110 animate-[glowPulse_0.6s_ease-in-out_infinite]" : "hover:scale-105 active:scale-95"} ${
-            arrow.status === "lost" ? "opacity-30 grayscale animate-[shake_0.35s_ease-in-out]" : ""
-          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""} ${
-            isBlocker ? "ring-4 ring-rose-400 ring-offset-2 ring-offset-transparent animate-[glowPulse_0.7s_ease-in-out_infinite]" : ""
-          }`}
-          aria-label={`Release ${arrow.side} arrow ${arrow.dir}`}
-        >
-          {arrow.dir === "up" && "↑"}
-          {arrow.dir === "down" && "↓"}
-          {arrow.dir === "left" && "←"}
-          {arrow.dir === "right" && "→"}
-        </button>
+          onClick={onClick}
+          className="absolute inset-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          aria-label={`Cell tile`}
+        />
       )}
+
+      {/* Arrow token */}
+      {arrowsHere.map((a) => {
+        const selected = a.id === selectedId && !animating;
+        return (
+          <div
+            key={a.id}
+            className={`pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
+              a.side === "mind"
+                ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
+            } ${
+              selected ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""
+            } ${a.status === "animating" ? "scale-110" : ""}`}
+          >
+            {a.dir === "up" && "↑"}
+            {a.dir === "down" && "↓"}
+            {a.dir === "left" && "←"}
+            {a.dir === "right" && "→"}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Level 1 coach
+
+function Level1Coach({ arrows }: { arrows: ArrowState[] }) {
+  const anyPlanned = arrows.some((a) => a.plannedPath.length > 1);
+  const anyReached = arrows.some((a) => a.plannedPath.length > 1 && (a.plannedPath[a.plannedPath.length - 1] as Point));
+  const allEndAtExit = arrows.every((a) => a.plannedPath.length > 1); // rough proxy for "ready"
+
+  const step =
+    !anyPlanned
+      ? {
+          title: "Step 1 · Select an arrow",
+          body: "Click the ↑ Mind arrow. Its start cell will highlight amber.",
+        }
+      : !allEndAtExit
+        ? {
+            title: "Step 2 · Build a route",
+            body: "Click the glowing green tiles (or use ← ↑ ↓ →) to extend the path one tile at a time toward a matching exit.",
+          }
+        : {
+            title: "Step 3 · Release",
+            body: "Both paths look good? Press Release. Each arrow will follow the exact route you planned.",
+          };
+
+  return (
+    <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-400/10 to-indigo-400/10 px-4 py-2.5 text-xs text-amber-50 backdrop-blur animate-[fadeIn_0.4s_ease-out]">
+      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300 animate-[glowPulse_1.6s_ease-in-out_infinite]" />
+      <div className="flex-1">
+        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber-200/80">{step.title}</div>
+        <div className="mt-0.5 text-[12px] leading-snug text-white/90">{step.body}</div>
+        <div className="mt-1 text-[10px] text-white/50">
+          Keyboard: arrows to extend · Tab to switch arrow · Backspace to undo · R to rotate · Enter to release
+        </div>
+      </div>
+      {/* suppress unused var warning */}
+      <span className="hidden">{String(anyReached)}</span>
     </div>
   );
 }
@@ -1445,92 +1454,6 @@ function Chip({ icon, label, value, className = "" }: { icon: React.ReactNode; l
         {icon} {label}
       </div>
       <div className="mt-0.5 font-display text-sm text-white">{value}</div>
-    </div>
-  );
-}
-
-function Level1Coach({ freedCount, hasMoved }: { freedCount: number; hasMoved: boolean }) {
-  const steps = [
-    {
-      title: "Step 1 · Release the Mind",
-      body: "Tap the glowing ↑ Mind arrow. Watch it travel to the cyan Mind exit and clear itself from the maze.",
-    },
-    {
-      title: "Step 2 · Free the Heart",
-      body: "Now tap the ↓ Heart arrow. It flows down through the opened path into the pink Heart exit.",
-    },
-    {
-      title: "Almost there…",
-      body: "One arrow to go. Every tap opens more of the path — that's what 'clear the path' means.",
-    },
-  ];
-  const idx = Math.min(freedCount, steps.length - 1);
-  const s = steps[idx];
-  return (
-    <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-400/10 to-indigo-400/10 px-4 py-2.5 text-xs text-amber-50 backdrop-blur animate-[fadeIn_0.4s_ease-out]">
-      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300 animate-[glowPulse_1.6s_ease-in-out_infinite]" />
-      <div className="flex-1">
-        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber-200/80">{s.title}</div>
-        <div className="mt-0.5 text-[12px] leading-snug text-white/90">{s.body}</div>
-        {!hasMoved && idx === 0 && (
-          <div className="mt-1 text-[10px] text-white/50">Hint: hover any arrow to preview its route before tapping.</div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatusLine({
-  run,
-  preview,
-  previewArrow,
-  status,
-}: {
-  run: RunState;
-  preview: PathPreview | null;
-  previewArrow: ArrowState | null;
-  status: "playing" | "won" | "lost";
-}) {
-  if (status !== "playing") return null;
-  let text: string | null = null;
-  let tone: "info" | "warn" | "good" = "info";
-
-  if (preview && previewArrow) {
-    const label = previewArrow.side === "mind" ? "Mind" : "Heart";
-    if (preview.outcome === "exit") {
-      text = `${label} will reach its exit — clearing ${preview.cells.length} tile${preview.cells.length === 1 ? "" : "s"} on the way.`;
-      tone = "good";
-    } else if (preview.outcome === "arrow") {
-      text = `${label} will be blocked by another arrow (highlighted). Free it first.`;
-      tone = "warn";
-    } else if (preview.outcome === "wall") {
-      text = `${label} will hit an obstacle. This path is closed.`;
-      tone = "warn";
-    } else if (preview.outcome === "gate") {
-      text = `${label} will hit a closed gate. Trigger the matching switch first.`;
-      tone = "warn";
-    } else if (preview.outcome === "wrong-exit") {
-      text = `${label} would arrive at the wrong exit door.`;
-      tone = "warn";
-    } else if (preview.outcome === "edge") {
-      text = `${label} would fly off the board.`;
-      tone = "warn";
-    }
-  } else if (run.failReason) {
-    text = run.failReason;
-    tone = "warn";
-  }
-
-  if (!text) return null;
-  const color =
-    tone === "warn"
-      ? "border-rose-400/40 bg-rose-500/10 text-rose-100"
-      : tone === "good"
-        ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
-        : "border-white/10 bg-white/5 text-white/80";
-  return (
-    <div className={`mt-3 rounded-2xl border px-4 py-2 text-xs backdrop-blur ${color}`}>
-      {text}
     </div>
   );
 }
@@ -1614,13 +1537,6 @@ function StyleTag() {
         0%,100% { filter: brightness(1) drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
         50% { filter: brightness(1.25) drop-shadow(0 0 14px rgba(255,255,255,0.8)); }
       }
-      @keyframes shake {
-        0%,100% { transform: translateX(0); }
-        20% { transform: translateX(-3px); }
-        40% { transform: translateX(3px); }
-        60% { transform: translateX(-2px); }
-        80% { transform: translateX(2px); }
-      }
       @keyframes popIn {
         0% { transform: scale(0.4); opacity: 0; }
         60% { transform: scale(1.2); opacity: 1; }
@@ -1632,9 +1548,9 @@ function StyleTag() {
         to { transform: scale(1); opacity: 1; }
       }
       @keyframes portal {
-        0% { transform: scale(0); opacity: 0; }
-        50% { opacity: 0.8; }
-        100% { transform: scale(2.5); opacity: 0; }
+        0% { transform: scale(0.4) rotate(0deg); opacity: 0; }
+        60% { transform: scale(1.15) rotate(180deg); opacity: 1; }
+        100% { transform: scale(1) rotate(360deg); opacity: 0.7; }
       }
     `}</style>
   );
