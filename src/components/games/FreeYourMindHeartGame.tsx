@@ -312,11 +312,15 @@ export function FreeYourMindHeartGame() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0616] text-foreground">
+    <div className="min-h-screen bg-[#07030f] text-white">
       <UnveilNav />
       <AmbientBackdrop />
-      <div className="relative mx-auto max-w-3xl px-4 pb-16 pt-6">
-        <Header muted={muted} onToggleMute={() => setMuted((m) => !m)} />
+      <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-4">
+        <Header
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+          totals={progress.totals}
+        />
         {screen === "map" && (
           <LevelMap
             levels={SHIP_LEVELS}
@@ -380,31 +384,166 @@ export function FreeYourMindHeartGame() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Ambient decoration
+// Ambient decoration — nebula, floating particles, butterflies, roses
 
 function AmbientBackdrop() {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 32 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        size: 1 + Math.random() * 2.5,
+        delay: Math.random() * 8,
+        dur: 6 + Math.random() * 8,
+        hue: Math.random() > 0.5 ? "236,72,153" : "167,139,250",
+      })),
+    [],
+  );
+  const butterflies = useMemo(
+    () =>
+      Array.from({ length: 5 }).map((_, i) => ({
+        id: i,
+        left: 4 + Math.random() * 92,
+        top: 10 + Math.random() * 70,
+        delay: Math.random() * 6,
+        dur: 10 + Math.random() * 10,
+        scale: 0.7 + Math.random() * 0.6,
+        hue: i % 2 === 0 ? "#f0abfc" : "#c084fc",
+      })),
+    [],
+  );
+
   return (
     <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+      {/* Nebula glows */}
       <div
-        className="absolute -left-40 top-10 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        className="absolute -left-40 top-10 h-[560px] w-[560px] rounded-full opacity-50 blur-3xl"
         style={{
           background:
             "radial-gradient(circle, rgba(167,139,250,0.55), transparent 60%)",
         }}
       />
       <div
-        className="absolute -right-40 top-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        className="absolute -right-40 top-40 h-[560px] w-[560px] rounded-full opacity-50 blur-3xl"
         style={{
           background:
             "radial-gradient(circle, rgba(236,72,153,0.5), transparent 60%)",
         }}
       />
       <div
-        className="absolute bottom-0 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+        className="absolute bottom-0 left-1/2 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
         style={{
           background:
             "radial-gradient(circle, rgba(226,200,150,0.4), transparent 60%)",
         }}
+      />
+      {/* Vignette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
+      {/* Floating particles */}
+      {particles.map((p) => (
+        <span
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.size,
+            background: `rgba(${p.hue},0.9)`,
+            boxShadow: `0 0 ${p.size * 4}px rgba(${p.hue},0.9)`,
+            animation: `fymhFloat ${p.dur}s ease-in-out ${p.delay}s infinite`,
+          }}
+        />
+      ))}
+      {/* Butterflies */}
+      {butterflies.map((b) => (
+        <span
+          key={b.id}
+          className="absolute"
+          style={{
+            left: `${b.left}%`,
+            top: `${b.top}%`,
+            transform: `scale(${b.scale})`,
+            animation: `fymhFly ${b.dur}s ease-in-out ${b.delay}s infinite`,
+            color: b.hue,
+            filter: `drop-shadow(0 0 8px ${b.hue})`,
+          }}
+        >
+          <svg width="22" height="18" viewBox="0 0 22 18" fill="currentColor">
+            <path d="M11 9c-1.5-4-4-7-7-7-2 0-3 1.5-3 3.5 0 3 3.5 5.5 10 6zm0 0c1.5-4 4-7 7-7 2 0 3 1.5 3 3.5 0 3-3.5 5.5-10 6zm0 0c-1.5 3-4 6-7 6-2 0-3-1.5-3-3 0-2.5 3-4.5 10-5zm0 0c1.5 3 4 6 7 6 2 0 3-1.5 3-3 0-2.5-3-4.5-10-5z" />
+          </svg>
+        </span>
+      ))}
+      {/* Rose corners */}
+      <RoseCorner className="left-0 bottom-0" />
+      <RoseCorner className="right-0 bottom-0 scale-x-[-1]" />
+      <style>{`
+        @keyframes fymhFloat {
+          0%,100% { transform: translateY(0) translateX(0); opacity: .3; }
+          50% { transform: translateY(-24px) translateX(8px); opacity: 1; }
+        }
+        @keyframes fymhFly {
+          0%,100% { transform: translate(0,0) rotate(-4deg) scale(var(--s,1)); }
+          25% { transform: translate(30px,-20px) rotate(6deg); }
+          50% { transform: translate(60px,10px) rotate(-2deg); }
+          75% { transform: translate(20px,30px) rotate(4deg); }
+        }
+        @keyframes fymhPulse {
+          0%,100% { opacity: .55; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.06); }
+        }
+        @keyframes fymhFlow {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
+        }
+        @keyframes fymhIdle {
+          0%,100% { transform: translateY(0); }
+          50% { transform: translateY(-2px); }
+        }
+        @keyframes fymhCandle {
+          0%,100% { opacity: .8; transform: scaleY(1); }
+          50% { opacity: 1; transform: scaleY(1.1); }
+        }
+        @keyframes fymhSpark {
+          0% { opacity: 0; transform: translateY(0) scale(0.4); }
+          20% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function RoseCorner({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`absolute h-40 w-40 opacity-70 ${className}`}
+      style={{
+        background:
+          "radial-gradient(circle at 30% 70%, rgba(236,72,153,0.35), transparent 55%), radial-gradient(circle at 60% 90%, rgba(190,24,93,0.4), transparent 60%)",
+      }}
+    >
+      {/* Candle flame */}
+      <div
+        className="absolute bottom-6 left-6 h-6 w-2 rounded-full"
+        style={{
+          background:
+            "linear-gradient(to top, #f59e0b, #fde68a 60%, transparent)",
+          filter: "blur(1px)",
+          animation: "fymhCandle 1.8s ease-in-out infinite",
+          transformOrigin: "bottom center",
+        }}
+      />
+      <div
+        className="absolute bottom-4 left-5 h-3 w-4 rounded-full opacity-70 blur-md"
+        style={{ background: "#f59e0b" }}
       />
     </div>
   );
