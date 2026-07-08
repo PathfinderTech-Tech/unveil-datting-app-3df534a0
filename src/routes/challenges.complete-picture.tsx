@@ -1,381 +1,383 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { ArrowLeft, Clock, Check, X, Trophy, Sparkles, RotateCcw } from "lucide-react";
-import { useUserId, awardBadge } from "@/lib/games-api";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Clock, Lightbulb, Shuffle, Heart, Sparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-
-import heart from "@/assets/puzzles/heart.png";
-import apple from "@/assets/puzzles/apple.png";
-import flower from "@/assets/puzzles/flower.png";
-import moon from "@/assets/puzzles/moon.png";
-import ring from "@/assets/puzzles/ring.png";
-import compass from "@/assets/puzzles/compass.png";
-import butterfly from "@/assets/puzzles/butterfly.png";
-import crown from "@/assets/puzzles/crown.png";
-import map from "@/assets/puzzles/map.png";
-import veil from "@/assets/puzzles/veil.png";
-
-type Puzzle = {
-  id: string;
-  name: string;
-  image: string;
-  /** Index (1-4) of the correct piece. */
-  correct: 1 | 2 | 3 | 4;
-  explanation: string;
-};
-
-const PUZZLES: Puzzle[] = [
-  { id: "heart",     name: "Heart",     image: heart,     correct: 2, explanation: "The missing piece has one tab on the left and one on the bottom." },
-  { id: "apple",     name: "Apple",     image: apple,     correct: 3, explanation: "Look at the curve — the piece fits the rounded body of the apple." },
-  { id: "flower",    name: "Flower",    image: flower,    correct: 1, explanation: "The petal contour matches piece 1." },
-  { id: "moon",      name: "Moon",      image: moon,      correct: 2, explanation: "Crescent curve aligns with the cut on piece 2." },
-  { id: "ring",      name: "Ring",      image: ring,      correct: 4, explanation: "The band thickness matches the fourth piece." },
-  { id: "compass",   name: "Compass",   image: compass,   correct: 3, explanation: "The dial gap fits the third piece's arrow tabs." },
-  { id: "butterfly", name: "Butterfly", image: butterfly, correct: 1, explanation: "Wing symmetry matches piece 1." },
-  { id: "crown",     name: "Crown",     image: crown,     correct: 2, explanation: "The jewel slot aligns with piece 2." },
-  { id: "map",       name: "Map",       image: map,       correct: 4, explanation: "Folded crease matches the contour of piece 4." },
-  { id: "veil",      name: "Veil",      image: veil,      correct: 1, explanation: "The hem's flow matches piece 1." },
-];
-
-const QUESTION_SECONDS = 15;
 
 export const Route = createFileRoute("/challenges/complete-picture")({
   head: () => ({
     meta: [
-      { title: "Complete the Picture — UNVEIL Challenges" },
-      { name: "description", content: "Choose the piece that best completes the picture. 10 puzzles, 15 seconds each." },
+      { title: "UNVEIL Love Tiles — UNVEIL" },
+      { name: "description", content: "Piece by piece, love comes into focus. A romantic Mahjong-style tile match game." },
     ],
   }),
-  errorComponent: ({ error }) => (
-    <div className="min-h-screen"><UnveilNav /><div className="mx-auto max-w-md p-12 text-center">
-      <div className="text-sm text-destructive">{error.message}</div>
-      <Link to="/challenges" className="mt-4 inline-block text-primary">Back to Challenges</Link>
-    </div></div>
-  ),
-  notFoundComponent: () => (
-    <div className="min-h-screen"><UnveilNav /><div className="mx-auto max-w-md p-12 text-center text-muted-foreground">Not found.</div></div>
-  ),
-  component: CompletePicture,
+  component: LoveTiles,
 });
 
-type Phase = "playing" | "correct" | "wrong" | "done";
+// Symbol set — romantic mahjong theme
+const SYMBOLS = [
+  { key: "heart",   glyph: "❤️", label: "Heart" },
+  { key: "rose",    glyph: "🌹", label: "Rose" },
+  { key: "ring",    glyph: "💍", label: "Ring" },
+  { key: "key",     glyph: "🗝️", label: "Key" },
+  { key: "lock",    glyph: "🔒", label: "Lock" },
+  { key: "letter",  glyph: "💌", label: "Love Letter" },
+  { key: "candle",  glyph: "🕯️", label: "Candle" },
+  { key: "dove",    glyph: "🕊️", label: "Dove" },
+  { key: "tulip",   glyph: "🌷", label: "Tulip" },
+  { key: "moon",    glyph: "🌙", label: "Moon" },
+  { key: "sparkle", glyph: "✨", label: "Sparkle" },
+  { key: "kiss",    glyph: "💋", label: "Kiss" },
+] as const;
 
-function CompletePicture() {
-  const uid = useUserId();
-  const navigate = useNavigate();
-  const [idx, setIdx] = useState(0);
-  const [pick, setPick] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<Phase>("playing");
-  const [seconds, setSeconds] = useState(QUESTION_SECONDS);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const savedRef = useRef(false);
+type Tile = {
+  id: string;        // unique per tile
+  symbol: string;    // symbol key
+  glyph: string;
+  cleared: boolean;
+};
 
-  const total = PUZZLES.length;
-  const q = PUZZLES[idx];
-  const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
+const LEVEL_CONFIG = [
+  { level: 1, pairs: 8,  seconds: 90 },
+  { level: 2, pairs: 10, seconds: 90 },
+  { level: 3, pairs: 12, seconds: 100 },
+];
 
-  // Per-question timer
+function makeBoard(pairs: number): Tile[] {
+  const chosen = [...SYMBOLS].sort(() => Math.random() - 0.5).slice(0, pairs);
+  const tiles: Tile[] = [];
+  chosen.forEach((s, i) => {
+    tiles.push({ id: `${s.key}-a-${i}`, symbol: s.key, glyph: s.glyph, cleared: false });
+    tiles.push({ id: `${s.key}-b-${i}`, symbol: s.key, glyph: s.glyph, cleared: false });
+  });
+  return tiles.sort(() => Math.random() - 0.5);
+}
+
+function LoveTiles() {
+  const [levelIdx, setLevelIdx] = useState(0);
+  const cfg = LEVEL_CONFIG[levelIdx];
+  const [tiles, setTiles] = useState<Tile[]>(() => makeBoard(cfg.pairs));
+  const [selected, setSelected] = useState<string[]>([]);
+  const [matched, setMatched] = useState(0);
+  const [seconds, setSeconds] = useState(cfg.seconds);
+  const [hints, setHints] = useState(2);
+  const [shuffles, setShuffles] = useState(2);
+  const [boost, setBoost] = useState(false);
+  const [hintPair, setHintPair] = useState<string[]>([]);
+  const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
+  const lockRef = useRef(false);
+
+  const total = cfg.pairs;
+
+  const resetLevel = useCallback((idx: number) => {
+    const c = LEVEL_CONFIG[idx];
+    setTiles(makeBoard(c.pairs));
+    setSelected([]);
+    setMatched(0);
+    setSeconds(c.seconds);
+    setHintPair([]);
+    setStatus("playing");
+    lockRef.current = false;
+  }, []);
+
+  // Timer
   useEffect(() => {
-    if (phase !== "playing") return;
-    setSeconds(QUESTION_SECONDS);
-    timerRef.current && clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) {
-          clearInterval(timerRef.current!);
-          // Auto-submit as wrong if time runs out
-          setPhase("wrong");
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => { timerRef.current && clearInterval(timerRef.current); };
-  }, [idx, phase]);
+    if (status !== "playing") return;
+    if (seconds <= 0) { setStatus("lost"); return; }
+    const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [seconds, status]);
 
-  // Save final score once
+  // Match check
   useEffect(() => {
-    if (phase !== "done" || savedRef.current) return;
-    savedRef.current = true;
-    if (!uid) return;
-    (async () => {
-      try {
-        await supabase.from("game_results").insert({
-          user_id: uid,
-          total_score: score,
-          emotional_score: accuracy,
-          archetype: "complete_picture",
-          attempts: [{ game: "complete_picture", total, score, accuracy }],
-        } as never);
-        if (accuracy >= 80) awardBadge("complete-picture-ace");
-      } catch (e) {
-        console.warn("save score failed", e);
-      }
-    })();
-  }, [phase, uid, score, total, accuracy]);
-
-  function submit() {
-    if (phase !== "playing" || pick == null) return;
-    timerRef.current && clearInterval(timerRef.current);
-    if (pick === q.correct) {
-      setScore((s) => s + 1);
-      setPhase("correct");
+    if (selected.length !== 2) return;
+    lockRef.current = true;
+    const [a, b] = selected;
+    const ta = tiles.find((t) => t.id === a);
+    const tb = tiles.find((t) => t.id === b);
+    if (ta && tb && ta.symbol === tb.symbol) {
+      setTimeout(() => {
+        setTiles((prev) => prev.map((t) => (t.id === a || t.id === b ? { ...t, cleared: true } : t)));
+        setMatched((m) => {
+          const next = m + 1;
+          if (next >= total) setStatus("won");
+          return next;
+        });
+        setSelected([]);
+        lockRef.current = false;
+      }, 320);
     } else {
-      setPhase("wrong");
+      setTimeout(() => {
+        setSelected([]);
+        lockRef.current = false;
+      }, 720);
     }
-  }
+  }, [selected, tiles, total]);
 
-  function next() {
-    if (idx + 1 >= total) { setPhase("done"); return; }
-    setIdx((i) => i + 1);
-    setPick(null);
-    setPhase("playing");
-  }
-
-  function playAgain() {
-    setIdx(0); setPick(null); setScore(0); setPhase("playing"); setSeconds(QUESTION_SECONDS);
-    savedRef.current = false;
-  }
-
-  const progressPct = ((idx + (phase === "playing" ? 0 : 1)) / total) * 100;
-
-  return (
-    <div className="min-h-screen pb-24 lg:pb-0">
-      <UnveilNav />
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-        {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate({ to: "/challenges" })}
-            className="rounded-full border border-border bg-card p-2 text-muted-foreground hover:text-foreground"
-            aria-label="Back to Challenges"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div className="text-center">
-            <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">UNVEIL · New Challenge</div>
-            <h1 className="bg-gradient-hero bg-clip-text font-display text-xl font-bold tracking-tight text-transparent">
-              <Sparkles className="mr-1 inline h-4 w-4 text-accent" />
-              Complete the Picture
-            </h1>
-          </div>
-          <div className="w-9" />
-        </div>
-
-        {phase !== "done" && (
-          <div className="mb-3 h-1 overflow-hidden rounded-full bg-surface">
-            <div className="h-full rounded-full bg-gradient-hero transition-all duration-500" style={{ width: `${progressPct}%` }} />
-          </div>
-        )}
-
-        {phase === "done" ? (
-          <FinalScreen
-            score={score} total={total} accuracy={accuracy}
-            onPlayAgain={playAgain}
-            onBack={() => navigate({ to: "/challenges" })}
-          />
-        ) : (
-          <div className="rounded-3xl border border-border bg-card p-5 shadow-glow sm:p-6">
-            {/* Question header */}
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">Question {idx + 1} of {total}</div>
-              <TimerBadge seconds={seconds} active={phase === "playing"} />
-            </div>
-
-            {/* Feedback state takes over middle */}
-            {phase === "correct" ? (
-              <Feedback kind="correct" puzzle={q} onNext={next} isLast={idx + 1 >= total} />
-            ) : phase === "wrong" ? (
-              <Feedback kind="wrong" puzzle={q} onNext={next} isLast={idx + 1 >= total} />
-            ) : (
-              <>
-                <div className="mb-3 text-center font-display text-lg">Choose the piece that best completes the picture.</div>
-                <div className="mx-auto mb-5 flex aspect-square w-full max-w-xs items-center justify-center rounded-2xl bg-gradient-to-br from-surface/60 to-background p-4">
-                  <img src={q.image} alt={q.name} loading="eager" width={512} height={512} className="h-full w-full object-contain drop-shadow-[0_8px_30px_rgba(168,85,247,0.25)]" />
-                </div>
-
-                <div className="mb-5 grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((n) => {
-                    const active = pick === n;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => setPick(n as 1 | 2 | 3 | 4)}
-                        className={`group relative aspect-square overflow-hidden rounded-2xl border-2 p-3 transition-all ${
-                          active
-                            ? "border-primary bg-primary/10 shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
-                            : "border-border bg-surface hover:border-primary/40"
-                        }`}
-                        aria-pressed={active}
-                      >
-                        <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-background/80 font-mono text-xs font-semibold text-foreground">
-                          {n}
-                        </div>
-                        <PuzzlePieceVisual seed={`${q.id}-${n}`} active={active} hue={hueFor(q.id)} />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  disabled={pick == null}
-                  onClick={submit}
-                  className="w-full rounded-full bg-gradient-hero py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-all disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Submit Answer
-                </button>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TimerBadge({ seconds, active }: { seconds: number; active: boolean }) {
-  const danger = seconds <= 5;
-  return (
-    <div
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-xs ${
-        !active
-          ? "border-emerald-500/40 text-emerald-400"
-          : danger
-            ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse"
-            : "border-primary/40 bg-primary/10 text-primary"
-      }`}
-    >
-      <Clock className="h-3 w-3" /> {String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}
-    </div>
-  );
-}
-
-function Feedback({ kind, puzzle, onNext, isLast }: { kind: "correct" | "wrong"; puzzle: Puzzle; onNext: () => void; isLast: boolean }) {
-  const isCorrect = kind === "correct";
-  return (
-    <div className="text-center">
-      <div
-        className={`mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full ${
-          isCorrect ? "bg-emerald-500/15 text-emerald-400" : "bg-destructive/15 text-destructive"
-        }`}
-      >
-        {isCorrect ? <Check className="h-8 w-8" /> : <X className="h-8 w-8" />}
-      </div>
-      <div className={`font-display text-2xl font-bold ${isCorrect ? "text-emerald-400" : "text-destructive"}`}>
-        {isCorrect ? "Correct!" : "Not quite!"}
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {isCorrect ? "Great job! You have a great eye." : "Better luck next time."}
-      </p>
-
-      <div className="my-5 rounded-2xl border border-border bg-surface/50 p-4 text-left">
-        <div className="mb-1 font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Explanation</div>
-        <div className="text-sm">{puzzle.explanation}</div>
-      </div>
-
-      <div className="mx-auto mb-4 flex aspect-square w-full max-w-[240px] items-center justify-center rounded-2xl bg-gradient-to-br from-surface/60 to-background p-3">
-        <img src={puzzle.image} alt={puzzle.name} width={512} height={512} className="h-full w-full object-contain" />
-      </div>
-
-      {!isCorrect && (
-        <div className="mb-4 text-sm text-emerald-400">
-          Correct answer was: <span className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10 font-mono">{puzzle.correct}</span>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={onNext}
-        className="w-full rounded-full bg-gradient-hero py-3 text-sm font-semibold text-primary-foreground shadow-glow"
-      >
-        {isLast ? "See Results" : "Next Question"}
-      </button>
-    </div>
-  );
-}
-
-function FinalScreen({ score, total, accuracy, onPlayAgain, onBack }: { score: number; total: number; accuracy: number; onPlayAgain: () => void; onBack: () => void }) {
-  return (
-    <div className="rounded-3xl border border-border bg-card p-6 text-center shadow-glow">
-      <div className="relative mx-auto mb-3 flex h-24 w-24 items-center justify-center">
-        <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-hero opacity-30 blur-xl" />
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-accent bg-surface">
-          <Trophy className="h-10 w-10 text-accent" />
-        </div>
-      </div>
-      <h2 className="bg-gradient-hero bg-clip-text font-display text-2xl font-bold text-transparent">Challenge Complete!</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Great job!</p>
-
-      <div className="my-5 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-surface/60 p-4">
-          <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Your Score</div>
-          <div className="mt-1 font-display text-2xl">
-            <span className="text-accent">{score}</span>
-            <span className="text-muted-foreground"> / {total}</span>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-surface/60 p-4">
-          <div className="font-mono text-[10px] uppercase tracking-luxury text-muted-foreground">Accuracy</div>
-          <div className="mt-1 font-display text-2xl text-accent">{accuracy}%</div>
-        </div>
-      </div>
-
-      <p className="mb-5 text-xs text-muted-foreground">
-        You answered {score} out of {total} correctly. Keep playing to improve your score!
-      </p>
-
-      <div className="space-y-2">
-        <button
-          onClick={onPlayAgain}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-hero py-3 text-sm font-semibold text-primary-foreground shadow-glow"
-        >
-          <RotateCcw className="h-4 w-4" /> Play Again
-        </button>
-        <button
-          onClick={onBack}
-          className="w-full rounded-full border border-border bg-surface py-3 text-sm text-muted-foreground hover:text-foreground"
-        >
-          Back to Challenges
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// Simple SVG puzzle piece, tinted per-question so options look like the picture's missing piece.
-function PuzzlePieceVisual({ seed, active, hue }: { seed: string; active: boolean; hue: number }) {
-  // Add subtle rotation variety based on seed
-  const deg = useMemo(() => {
-    let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-    return (h % 4) * 90;
-  }, [seed]);
-  const fill = `hsl(${hue} 75% 55%)`;
-  const stroke = `hsl(${hue} 70% 35%)`;
-  return (
-    <div className="flex h-full w-full items-center justify-center" style={{ transform: `rotate(${deg}deg)` }}>
-      <svg viewBox="0 0 100 100" className={`h-3/4 w-3/4 transition-transform ${active ? "scale-110" : ""}`}>
-        <path
-          d="M20 20 H 42 a8 8 0 1 1 16 0 H 80 V 42 a8 8 0 1 0 0 16 V 80 H 58 a8 8 0 1 1 -16 0 H 20 V 58 a8 8 0 1 0 0 -16 Z"
-          fill={fill}
-          stroke={stroke}
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-}
-
-function hueFor(id: string): number {
-  // Map puzzle id to a hue close to the puzzle color
-  const map: Record<string, number> = {
-    heart: 0, apple: 110, flower: 330, moon: 48, ring: 45,
-    compass: 38, butterfly: 215, crown: 45, map: 220, veil: 220,
+  const onTap = (id: string) => {
+    if (status !== "playing" || lockRef.current) return;
+    const t = tiles.find((x) => x.id === id);
+    if (!t || t.cleared || selected.includes(id)) return;
+    setHintPair([]);
+    setSelected((s) => (s.length < 2 ? [...s, id] : s));
   };
-  return map[id] ?? 280;
+
+  const useHint = () => {
+    if (hints <= 0 || status !== "playing") return;
+    const remaining = tiles.filter((t) => !t.cleared);
+    const bySym = new Map<string, string[]>();
+    remaining.forEach((t) => {
+      const arr = bySym.get(t.symbol) ?? [];
+      arr.push(t.id);
+      bySym.set(t.symbol, arr);
+    });
+    const pair = [...bySym.values()].find((ids) => ids.length >= 2);
+    if (pair) {
+      setHintPair([pair[0], pair[1]]);
+      setHints((h) => h - 1);
+      setTimeout(() => setHintPair([]), 1600);
+    } else {
+      toast("No pairs left to hint");
+    }
+  };
+
+  const useShuffle = () => {
+    if (shuffles <= 0 || status !== "playing") return;
+    setTiles((prev) => {
+      const cleared = prev.filter((t) => t.cleared);
+      const live = prev.filter((t) => !t.cleared).sort(() => Math.random() - 0.5);
+      return [...live, ...cleared];
+    });
+    setSelected([]);
+    setShuffles((s) => s - 1);
+    toast("Board reshuffled");
+  };
+
+  const useBoost = () => {
+    if (boost) return;
+    setBoost(true);
+    setSeconds((s) => s + 15);
+    toast("💖 Love Boost x2 — +15s");
+  };
+
+  const nextLevel = () => {
+    if (levelIdx + 1 < LEVEL_CONFIG.length) {
+      const n = levelIdx + 1;
+      setLevelIdx(n);
+      setHints(2); setShuffles(2); setBoost(false);
+      resetLevel(n);
+    } else {
+      toast("You've completed all levels 💕");
+    }
+  };
+
+  const progress = `${matched}/${total}`;
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
+  return (
+    <div className="min-h-screen relative overflow-hidden bg-[radial-gradient(ellipse_at_top,rgba(80,20,80,0.35),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(180,40,90,0.25),transparent_65%)]">
+      <UnveilNav />
+
+      {/* Floating petals */}
+      <Petals />
+
+      <div className="relative mx-auto max-w-md px-4 pb-28 pt-4">
+        {/* Top row */}
+        <div className="flex items-center justify-between">
+          <Link
+            to="/challenges"
+            className="inline-flex items-center gap-2 rounded-full border border-pink-400/40 bg-black/40 px-3 py-1.5 text-xs text-pink-100 backdrop-blur hover:border-pink-300"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </Link>
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-pink-200/80">
+            UNVEIL · New Challenge
+          </div>
+          <div className="w-[52px]" />
+        </div>
+
+        {/* Title */}
+        <div className="mt-4 text-center">
+          <h1
+            className="font-display text-3xl font-bold tracking-wide"
+            style={{
+              background: "linear-gradient(180deg,#ffd1e8 0%,#ff6fae 45%,#c447a8 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              filter: "drop-shadow(0 0 14px rgba(255,90,170,0.45))",
+            }}
+          >
+            UNVEIL LOVE TILES
+          </h1>
+          <p className="mt-1 text-xs text-pink-100/70">Piece by piece, love comes into focus.</p>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-4 grid grid-cols-3 items-center gap-2">
+          <div className="flex items-center justify-center gap-2 rounded-full border border-pink-400/40 bg-black/40 px-3 py-2 text-pink-200 shadow-[0_0_18px_-6px_rgba(255,90,170,0.7)]">
+            <Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" />
+            <span className="font-mono text-xs">{progress}</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-full border border-purple-400/50 bg-black/40 px-3 py-2 text-purple-100 shadow-[0_0_18px_-6px_rgba(180,120,255,0.7)]">
+            <Clock className="h-3.5 w-3.5" />
+            <span className="font-mono text-xs">{mm}:{ss}</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-full border border-amber-300/50 bg-black/40 px-3 py-2 text-amber-100 shadow-[0_0_18px_-6px_rgba(255,200,80,0.6)]">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="font-mono text-xs">Level {cfg.level}</span>
+          </div>
+        </div>
+
+        {/* Board */}
+        <div
+          className="mt-5 rounded-3xl border border-pink-400/25 bg-gradient-to-b from-black/50 to-purple-950/40 p-3 shadow-[0_0_50px_-15px_rgba(255,90,170,0.55)] backdrop-blur"
+        >
+          <div className="grid grid-cols-4 gap-2">
+            {tiles.map((t) => {
+              const isSelected = selected.includes(t.id);
+              const isHint = hintPair.includes(t.id);
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onTap(t.id)}
+                  disabled={t.cleared}
+                  className={[
+                    "relative aspect-[3/4] rounded-xl border text-3xl transition-all duration-200",
+                    "flex items-center justify-center",
+                    t.cleared
+                      ? "opacity-0 pointer-events-none scale-90"
+                      : "bg-gradient-to-b from-[#fff2e0] to-[#f7d9c2] border-amber-200/70 shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.7)]",
+                    isSelected && !t.cleared
+                      ? "ring-2 ring-pink-400 shadow-[0_0_22px_rgba(255,90,170,0.9)] -translate-y-0.5"
+                      : "",
+                    isHint && !t.cleared ? "ring-2 ring-amber-300 shadow-[0_0_22px_rgba(255,200,80,0.9)]" : "",
+                  ].join(" ")}
+                  aria-label={`Tile ${t.symbol}`}
+                >
+                  <span className="drop-shadow-sm">{t.glyph}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="mt-5 grid grid-cols-3 items-end gap-3">
+          <button
+            onClick={useHint}
+            disabled={hints <= 0}
+            className="relative flex flex-col items-center gap-1 rounded-2xl border border-purple-400/40 bg-black/40 px-3 py-3 text-purple-100 disabled:opacity-40"
+          >
+            <Lightbulb className="h-5 w-5" />
+            <span className="text-xs">Hint</span>
+            <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-purple-500 text-[10px] text-white">{hints}</span>
+          </button>
+
+          <button
+            onClick={useBoost}
+            className="relative flex flex-col items-center gap-1 rounded-2xl border border-pink-400/50 bg-gradient-to-b from-pink-500/20 to-transparent px-3 py-3 text-pink-100 shadow-[0_0_28px_-8px_rgba(255,90,170,0.85)]"
+          >
+            <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-b from-pink-400 to-rose-600 text-white shadow-[0_0_16px_rgba(255,90,170,0.9)]">
+              <span className="text-xs font-bold">x2</span>
+            </div>
+            <span className="text-[11px] tracking-wide text-pink-100/90">Love Boost</span>
+          </button>
+
+          <button
+            onClick={useShuffle}
+            disabled={shuffles <= 0}
+            className="relative flex flex-col items-center gap-1 rounded-2xl border border-purple-400/40 bg-black/40 px-3 py-3 text-purple-100 disabled:opacity-40"
+          >
+            <Shuffle className="h-5 w-5" />
+            <span className="text-xs">Shuffle</span>
+            <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-purple-500 text-[10px] text-white">{shuffles}</span>
+          </button>
+        </div>
+
+        {/* Instruction */}
+        <div className="mt-5 rounded-2xl border border-pink-400/30 bg-black/40 px-4 py-3 text-center text-xs text-pink-100/90 backdrop-blur">
+          <span className="mr-2">❤</span>
+          Match pairs to clear the board and reveal the hidden picture
+          <span className="ml-2">❤</span>
+        </div>
+
+        {/* Win / lose overlay */}
+        {status !== "playing" && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-3xl border border-pink-400/50 bg-gradient-to-b from-purple-950 to-black p-6 text-center shadow-[0_0_60px_-10px_rgba(255,90,170,0.7)]">
+              <div className="text-5xl">{status === "won" ? "💖" : "🕯️"}</div>
+              <h2 className="mt-3 font-display text-2xl text-pink-100">
+                {status === "won" ? "Love Revealed" : "Time's up"}
+              </h2>
+              <p className="mt-1 text-sm text-pink-100/70">
+                {status === "won"
+                  ? `Level ${cfg.level} cleared with ${mm}:${ss} left.`
+                  : "The picture faded. Try again to bring it back."}
+              </p>
+              <div className="mt-5 flex gap-3">
+                <button
+                  onClick={() => resetLevel(levelIdx)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-pink-400/50 bg-black/40 py-2.5 text-sm text-pink-100"
+                >
+                  <RotateCcw className="h-4 w-4" /> Replay
+                </button>
+                {status === "won" && levelIdx + 1 < LEVEL_CONFIG.length && (
+                  <button
+                    onClick={nextLevel}
+                    className="flex-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 py-2.5 text-sm font-medium text-white shadow-[0_0_24px_rgba(255,90,170,0.7)]"
+                  >
+                    Next Level
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Petals() {
+  const petals = useMemo(
+    () =>
+      Array.from({ length: 14 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 8,
+        duration: 10 + Math.random() * 10,
+        size: 10 + Math.random() * 14,
+        rotate: Math.random() * 360,
+      })),
+    [],
+  );
+  return (
+    <>
+      <style>{`
+        @keyframes petalFall {
+          0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+          10% { opacity: 0.9; }
+          100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+      `}</style>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {petals.map((p) => (
+          <span
+            key={p.id}
+            className="absolute top-0 select-none"
+            style={{
+              left: `${p.left}%`,
+              fontSize: `${p.size}px`,
+              animation: `petalFall ${p.duration}s linear ${p.delay}s infinite`,
+              transform: `rotate(${p.rotate}deg)`,
+              filter: "drop-shadow(0 0 6px rgba(255,90,170,0.6))",
+            }}
+          >
+            🌸
+          </span>
+        ))}
+      </div>
+    </>
+  );
 }
