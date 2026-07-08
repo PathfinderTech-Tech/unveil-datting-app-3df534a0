@@ -195,10 +195,11 @@ export const createSoloJourney = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
     const preset = ROUTE_PRESETS.find((r) => r.id === data.routeId);
     if (!preset) throw new Error("Unknown route");
-    const { data: j, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: j, error } = await supabaseAdmin
       .from("journeys")
       .insert({
         created_by: userId,
@@ -211,7 +212,7 @@ export const createSoloJourney = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const { error: pe } = await supabase
+    const { error: pe } = await supabaseAdmin
       .from("journey_participants")
       .insert({ journey_id: j.id, user_id: userId, role: "solo" });
     if (pe) throw new Error(pe.message);
@@ -245,7 +246,8 @@ export const createCoupleJourney = createServerFn({ method: "POST" })
 
     const partnerRole = data.myRole === "heart" ? "mind" : "heart";
 
-    const { data: j, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: j, error } = await supabaseAdmin
       .from("journeys")
       .insert({
         created_by: userId,
@@ -259,12 +261,12 @@ export const createCoupleJourney = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const { error: pe } = await supabase
+    const { error: pe } = await supabaseAdmin
       .from("journey_participants")
       .insert({ journey_id: j.id, user_id: userId, role: data.myRole });
     if (pe) throw new Error(pe.message);
 
-    const { error: ie } = await supabase
+    const { error: ie } = await supabaseAdmin
       .from("journey_invites")
       .insert({
         journey_id: j.id,
