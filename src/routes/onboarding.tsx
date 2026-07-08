@@ -144,6 +144,7 @@ function Onboarding() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeCommunity, setAgreeCommunity] = useState(false);
+  const [healthConsent, setHealthConsent] = useState(false);
 
   // Step 2
   const [name, setName] = useState("");
