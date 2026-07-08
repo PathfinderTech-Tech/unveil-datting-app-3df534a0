@@ -63,6 +63,7 @@ import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as ChallengesFreeYourMindHeartRouteImport } from './routes/challenges.free-your-mind-heart'
 import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
@@ -341,6 +342,12 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const ChallengesFreeYourMindHeartRoute =
+  ChallengesFreeYourMindHeartRouteImport.update({
+    id: '/challenges/free-your-mind-heart',
+    path: '/challenges/free-your-mind-heart',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ChallengesCompletePictureRoute =
   ChallengesCompletePictureRouteImport.update({
     id: '/challenges/complete-picture',
@@ -426,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
+  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -489,6 +497,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
+  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -553,6 +562,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
+  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -618,6 +628,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
+    | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
+    | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -744,6 +756,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/complete-picture'
+    | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -807,6 +820,7 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
   ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
+  ChallengesFreeYourMindHeartRoute: typeof ChallengesFreeYourMindHeartRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
   PlayEscapeRoute: typeof PlayEscapeRoute
@@ -1204,6 +1218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/challenges/free-your-mind-heart': {
+      id: '/challenges/free-your-mind-heart'
+      path: '/challenges/free-your-mind-heart'
+      fullPath: '/challenges/free-your-mind-heart'
+      preLoaderRoute: typeof ChallengesFreeYourMindHeartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/challenges/complete-picture': {
       id: '/challenges/complete-picture'
       path: '/challenges/complete-picture'
@@ -1323,6 +1344,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
   ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
+  ChallengesFreeYourMindHeartRoute: ChallengesFreeYourMindHeartRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
   PlayEscapeRoute: PlayEscapeRoute,
