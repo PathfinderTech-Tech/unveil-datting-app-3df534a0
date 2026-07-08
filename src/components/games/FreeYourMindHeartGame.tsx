@@ -1449,6 +1449,92 @@ function Chip({ icon, label, value, className = "" }: { icon: React.ReactNode; l
   );
 }
 
+function Level1Coach({ freedCount, hasMoved }: { freedCount: number; hasMoved: boolean }) {
+  const steps = [
+    {
+      title: "Step 1 · Release the Mind",
+      body: "Tap the glowing ↑ Mind arrow. Watch it travel to the cyan Mind exit and clear itself from the maze.",
+    },
+    {
+      title: "Step 2 · Free the Heart",
+      body: "Now tap the ↓ Heart arrow. It flows down through the opened path into the pink Heart exit.",
+    },
+    {
+      title: "Almost there…",
+      body: "One arrow to go. Every tap opens more of the path — that's what 'clear the path' means.",
+    },
+  ];
+  const idx = Math.min(freedCount, steps.length - 1);
+  const s = steps[idx];
+  return (
+    <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-400/10 to-indigo-400/10 px-4 py-2.5 text-xs text-amber-50 backdrop-blur animate-[fadeIn_0.4s_ease-out]">
+      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300 animate-[glowPulse_1.6s_ease-in-out_infinite]" />
+      <div className="flex-1">
+        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber-200/80">{s.title}</div>
+        <div className="mt-0.5 text-[12px] leading-snug text-white/90">{s.body}</div>
+        {!hasMoved && idx === 0 && (
+          <div className="mt-1 text-[10px] text-white/50">Hint: hover any arrow to preview its route before tapping.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatusLine({
+  run,
+  preview,
+  previewArrow,
+  status,
+}: {
+  run: RunState;
+  preview: PathPreview | null;
+  previewArrow: ArrowState | null;
+  status: "playing" | "won" | "lost";
+}) {
+  if (status !== "playing") return null;
+  let text: string | null = null;
+  let tone: "info" | "warn" | "good" = "info";
+
+  if (preview && previewArrow) {
+    const label = previewArrow.side === "mind" ? "Mind" : "Heart";
+    if (preview.outcome === "exit") {
+      text = `${label} will reach its exit — clearing ${preview.cells.length} tile${preview.cells.length === 1 ? "" : "s"} on the way.`;
+      tone = "good";
+    } else if (preview.outcome === "arrow") {
+      text = `${label} will be blocked by another arrow (highlighted). Free it first.`;
+      tone = "warn";
+    } else if (preview.outcome === "wall") {
+      text = `${label} will hit an obstacle. This path is closed.`;
+      tone = "warn";
+    } else if (preview.outcome === "gate") {
+      text = `${label} will hit a closed gate. Trigger the matching switch first.`;
+      tone = "warn";
+    } else if (preview.outcome === "wrong-exit") {
+      text = `${label} would arrive at the wrong exit door.`;
+      tone = "warn";
+    } else if (preview.outcome === "edge") {
+      text = `${label} would fly off the board.`;
+      tone = "warn";
+    }
+  } else if (run.failReason) {
+    text = run.failReason;
+    tone = "warn";
+  }
+
+  if (!text) return null;
+  const color =
+    tone === "warn"
+      ? "border-rose-400/40 bg-rose-500/10 text-rose-100"
+      : tone === "good"
+        ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
+        : "border-white/10 bg-white/5 text-white/80";
+  return (
+    <div className={`mt-3 rounded-2xl border px-4 py-2 text-xs backdrop-blur ${color}`}>
+      {text}
+    </div>
+  );
+}
+
 function InfoStat({ label, value, accent }: { label: string; value: string; accent?: "warn" }) {
   return (
     <div className={`rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 backdrop-blur ${accent === "warn" ? "border-amber-400/40" : ""}`}>
