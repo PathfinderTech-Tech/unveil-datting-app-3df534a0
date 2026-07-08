@@ -576,6 +576,16 @@ function Onboarding() {
               <Agree v={agreeTerms} onChange={setAgreeTerms} label={<>I accept the <a href="/terms" target="_blank" className="text-primary underline">Terms of Service</a>.</>} />
               <Agree v={agreePrivacy} onChange={setAgreePrivacy} label={<>I've read the <a href="/privacy" target="_blank" className="text-primary underline">Privacy Policy</a>.</>} />
               <Agree v={agreeCommunity} onChange={setAgreeCommunity} label={<>I'll follow the <a href="/community-guidelines" target="_blank" className="text-primary underline">Community Guidelines</a>.</>} />
+              <div className="mt-2 border-t border-border pt-3">
+                <Agree
+                  v={healthConsent}
+                  onChange={setHealthConsent}
+                  label={<>I allow UNVEIL to use my steps and walking distance to power <strong>Journey</strong>. <span className="text-muted-foreground">(Optional)</span></>}
+                />
+                <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+                  UNVEIL uses movement data only to update your Journey progress. Your exact location is never tracked. You can change this anytime in Settings → Privacy.
+                </p>
+              </div>
             </div>
           </div>
         )}
