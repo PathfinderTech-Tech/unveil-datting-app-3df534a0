@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
@@ -32,7 +32,17 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { user, loading, error } = useAuth();
   const navigate = useNavigate();
-  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+  const [isOffline, setIsOffline] = useState(false);
+  useEffect(() => {
+    const update = () => setIsOffline(typeof navigator !== "undefined" && navigator.onLine === false);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
 
   // First-time visitors (no auth, no welcome seen) → /welcome
   useEffect(() => {

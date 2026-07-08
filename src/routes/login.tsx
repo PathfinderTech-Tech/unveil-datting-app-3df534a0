@@ -21,7 +21,17 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [cooldownBanner, setCooldownBanner] = useState<string | null>(null);
-  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+  const [isOffline, setIsOffline] = useState(false);
+  useEffect(() => {
+    const update = () => setIsOffline(typeof navigator !== "undefined" && navigator.onLine === false);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
