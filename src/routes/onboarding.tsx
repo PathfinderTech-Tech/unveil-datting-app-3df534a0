@@ -229,7 +229,7 @@ function Onboarding() {
       try {
         const [{ data: prof }, { data: onb }] = await withTimeout(Promise.all([
           supabase.from("profiles")
-            .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+            .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete, journey_health_consent")
             .eq("id", user.id).maybeSingle(),
           supabase.from("onboarding_answers")
             .select("answers").eq("user_id", user.id).maybeSingle(),
