@@ -195,10 +195,11 @@ export const createSoloJourney = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
     const preset = ROUTE_PRESETS.find((r) => r.id === data.routeId);
     if (!preset) throw new Error("Unknown route");
-    const { data: j, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: j, error } = await supabaseAdmin
       .from("journeys")
       .insert({
         created_by: userId,
@@ -211,7 +212,7 @@ export const createSoloJourney = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    const { error: pe } = await supabase
+    const { error: pe } = await supabaseAdmin
       .from("journey_participants")
       .insert({ journey_id: j.id, user_id: userId, role: "solo" });
     if (pe) throw new Error(pe.message);
