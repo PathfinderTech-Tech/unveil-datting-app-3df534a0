@@ -79,7 +79,38 @@ function GamesGallery() {
 
         {active === null ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURED_GAMES.map((g) => {
+              const Icon = g.icon;
+              return (
+                <Link
+                  key={g.to}
+                  to={g.to}
+                  className="group relative overflow-hidden rounded-3xl border border-pink-300/40 bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-pink-300/70 hover:shadow-glow"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${g.hue} opacity-70`} />
+                  <div className="relative">
+                    <div className="mb-5 flex items-center justify-between">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-aura text-primary-foreground">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      {g.badge && (
+                        <span className="rounded-full bg-gradient-hero px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-primary-foreground">
+                          {g.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-display text-2xl font-light">{g.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{g.tagline}</p>
+                    <div className="mt-5 flex items-center justify-between">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-primary">Play now</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
             {GAMES.map((g) => {
+
               const Icon = g.icon;
               const earned = chemistry[g.id];
               return (
