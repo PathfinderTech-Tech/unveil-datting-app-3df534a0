@@ -256,6 +256,9 @@ function Onboarding() {
         if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
         const sel = prof?.profile_photo_url || prof?.photo_url;
         if (sel) setPhotoUrl(sel);
+        if (typeof (prof as { journey_health_consent?: boolean } | null)?.journey_health_consent === "boolean") {
+          setHealthConsent(!!(prof as { journey_health_consent?: boolean }).journey_health_consent);
+        }
         // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
 
         const a = (onb?.answers as Answers | null) ?? null;
