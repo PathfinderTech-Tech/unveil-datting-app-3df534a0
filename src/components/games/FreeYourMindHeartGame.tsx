@@ -618,6 +618,8 @@ export function FreeYourMindHeartGame() {
   const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
   const [rewardFlash, setRewardFlash] = useState<null | { lp: number; xp: number; dia: number; keys: number; stars: number }>(null);
   const [victoryTick, setVictoryTick] = useState(0);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [tutorialStep, setTutorialStep] = useState(0);
   const movingRef = useRef(false);
 
   const level = LEVELS[levelIndex];
