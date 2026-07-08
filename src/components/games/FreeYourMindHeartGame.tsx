@@ -126,6 +126,7 @@ const DIR_LABEL: Record<Dir, string> = {
 // The puzzle in every level is choosing the correct release ORDER.
 
 const LEVELS: LevelConfig[] = [
+  // 1 — First Breath. Just release both.
   {
     id: 1,
     chapter: "Awakening",
@@ -134,20 +135,22 @@ const LEVELS: LevelConfig[] = [
     cols: 5,
     walls: [],
     exits: [
-      { row: 0, col: 2, side: "mind" },
-      { row: 4, col: 2, side: "heart" },
+      { row: 0, col: 1, side: "mind" },
+      { row: 4, col: 3, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 2, col: 2, dir: "up", side: "mind" },
-      { id: "h1", row: 3, col: 2, dir: "down", side: "heart" },
+      { id: "m1", row: 2, col: 1, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
     ],
     tutorial:
-      "Tap an arrow to release it. It travels in its arrow direction until it reaches a matching exit. Free both to win.",
+      "Tap an arrow to release it. It flies in its arrow direction until it reaches a matching door. Free both to win.",
   },
+
+  // 2 — Order matters. Heart blocks Mind. Release Heart first.
   {
     id: 2,
     chapter: "Awakening",
-    name: "Clear the Way",
+    name: "Who Goes First?",
     rows: 5,
     cols: 5,
     walls: [],
@@ -155,136 +158,203 @@ const LEVELS: LevelConfig[] = [
       { row: 0, col: 2, side: "mind" },
       { row: 2, col: 0, side: "heart" },
     ],
-    // m1 wants to go up but h1 blocks it at (2,2). Release h1 first.
     arrows: [
       { id: "h1", row: 2, col: 2, dir: "left", side: "heart" },
       { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
     ],
-    tutorial: "Order matters. If a path is blocked, free the blocker first.",
+    tutorial:
+      "If one arrow blocks another, release the blocker first. The blocker will be highlighted in red when it stops you.",
   },
+
+  // 3 — Switch opens gate. Heart steps on switch → Mind's gate opens.
   {
     id: 3,
     chapter: "Awakening",
-    name: "Cross Paths",
+    name: "The Blue Switch",
     rows: 5,
     cols: 5,
     walls: [],
     exits: [
-      { row: 2, col: 4, side: "mind" },
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    switches: [{ row: 2, col: 2, color: "blue" }],
+    tutorial:
+      "A blue gate blocks Mind. Heart can cross the blue switch to open it. Release Heart first.",
+  },
+
+  // 4 — Reinforce switch/gate with rose color and crossing paths.
+  {
+    id: 4,
+    chapter: "Entangled",
+    name: "Open the Gate",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 4, col: 3, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 3, dir: "down", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 1, color: "rose" }],
+    switches: [{ row: 2, col: 3, color: "rose" }],
+    tutorial:
+      "Each gate matches a switch of the same color. Send the right friend to the switch first.",
+  },
+
+  // 5 — Breakable wall. Heart crosses it, breaks it, Mind then passes.
+  {
+    id: 5,
+    chapter: "Entangled",
+    name: "The Cracked Wall",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    breakables: [{ row: 2, col: 2 }],
+    tutorial:
+      "A cracked wall blocks the way. The first arrow that reaches it breaks through and clears it for the next.",
+  },
+
+  // 6 — Portal. Mind teleports across.
+  {
+    id: 6,
+    chapter: "Entangled",
+    name: "Through the Portal",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 4, side: "mind" },
       { row: 4, col: 2, side: "heart" },
     ],
     arrows: [
-      { id: "h1", row: 2, col: 2, dir: "down", side: "heart" },
-      { id: "m1", row: 2, col: 0, dir: "right", side: "mind" },
+      { id: "m1", row: 4, col: 0, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 2, dir: "down", side: "heart" },
     ],
-    // Release h1 first to clear the row, then m1 goes right.
+    portals: [
+      { id: "p1", row: 2, col: 0, pairId: "p2" },
+      { id: "p2", row: 2, col: 4, pairId: "p1" },
+    ],
+    tutorial:
+      "Portals teleport an arrow to their twin, then it keeps flying in the same direction.",
   },
+
+  // 7 — Key. Heart picks up key that unlocks Mind's gate.
   {
-    id: 4,
-    chapter: "Awakening",
-    name: "Three Voices",
+    id: 7,
+    chapter: "Resonance",
+    name: "The Golden Key",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 2, col: 2, color: "gold" }],
+    tutorial:
+      "Keys unlock every gate of their color. Pick up the gold key first, then the gold gate stays open.",
+  },
+
+  // 8 — One-way tile. Only arrows moving in the arrow's direction may pass.
+  {
+    id: 8,
+    chapter: "Resonance",
+    name: "One Way Up",
+    rows: 5,
+    cols: 5,
+    walls: [
+      [1, 0],
+      [1, 4],
+    ],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    oneWays: [{ row: 2, col: 2, dir: "up" }],
+    tutorial:
+      "One-way tiles only let arrows through in the arrow's direction. Mind goes up through it. Heart moves right and passes around it.",
+  },
+
+  // 9 — Combine: switch + order + gate.
+  {
+    id: 9,
+    chapter: "Resonance",
+    name: "Two Doors",
+    rows: 6,
+    cols: 6,
+    walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 5, col: 2, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "blue" },
+      { row: 1, col: 4, color: "blue" },
+    ],
+    switches: [{ row: 2, col: 2, color: "blue" }],
+    tutorial:
+      "One switch can open several gates of its color. Free the switch-runner first.",
+  },
+
+  // 10 — Grand finale: breakable + key + gate combined.
+  {
+    id: 10,
+    chapter: "Union",
+    name: "Free Both",
     rows: 6,
     cols: 6,
     walls: [],
     exits: [
       { row: 0, col: 2, side: "mind" },
-      { row: 5, col: 3, side: "heart" },
-      { row: 3, col: 5, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 3, col: 2, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 4, dir: "right", side: "mind" },
-      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
+      { id: "m1", row: 5, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
     ],
-  },
-  {
-    id: 5,
-    chapter: "Entangled",
-    name: "Locked Row",
-    rows: 6,
-    cols: 6,
-    walls: [
-      [1, 3],
-      [4, 2],
-    ],
-    exits: [
-      { row: 0, col: 1, side: "mind" },
-      { row: 5, col: 4, side: "heart" },
-    ],
-    arrows: [
-      { id: "h1", row: 2, col: 1, dir: "right", side: "heart" }, // blocks m1
-      { id: "m1", row: 3, col: 1, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 4, dir: "up", side: "mind" }, // blocks h2 potential? no h2
-      { id: "h2", row: 5, col: 4, dir: "left", side: "heart" }, // wait h2 needs to reach heart exit at (5,4)?
-    ],
-    // Adjust: keep it simple — remove h2
-  },
-  {
-    id: 6,
-    chapter: "Entangled",
-    name: "Twin Flames",
-    rows: 6,
-    cols: 7,
-    walls: [[2, 3]],
-    exits: [
-      { row: 0, col: 1, side: "mind" },
-      { row: 0, col: 5, side: "mind" },
-      { row: 5, col: 1, side: "heart" },
-      { row: 5, col: 5, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
-      { id: "m2", row: 4, col: 5, dir: "up", side: "mind" },
-      { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
-      { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
-    ],
-  },
-  {
-    id: 7,
-    chapter: "Entangled",
-    name: "Order of Release",
-    rows: 6,
-    cols: 6,
-    walls: [],
-    exits: [
-      { row: 0, col: 3, side: "mind" },
-      { row: 5, col: 2, side: "heart" },
-    ],
-    // Chain: h1 blocks m1, m2 blocks h1. Solve: m2 → h1 → m1.
-    arrows: [
-      { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
-      { id: "h1", row: 2, col: 3, dir: "left", side: "heart" }, // blocks m1 at (2,3)
-      { id: "m2", row: 2, col: 0, dir: "right", side: "mind" }, // wait — m2 dir right; heart exit? no, mind exit not on this row.
-      // Simpler: use h2 that blocks h1's path
-      { id: "h2", row: 2, col: 1, dir: "down", side: "heart" }, // h1 travels left through (2,2)(2,1) — blocked by h2. Release h2 first (down → (5,1)? no heart exit at (5,2). h2 blocked by nothing at col 1 downward)
-    ],
-  },
-  {
-    id: 8,
-    chapter: "Resonance",
-    name: "Open Field",
-    rows: 6,
-    cols: 6,
-    walls: [
-      [2, 2],
-      [3, 3],
-    ],
-    exits: [
-      { row: 0, col: 0, side: "mind" },
-      { row: 5, col: 5, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 5, col: 0, dir: "up", side: "mind" },
-      { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
-    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 2, col: 2, color: "gold" }],
+    breakables: [{ row: 3, col: 2 }],
+    tutorial:
+      "Everything at once: Heart grabs the key and opens the gate. Mind breaks the cracked wall and rises to freedom.",
   },
 ];
 
-// Trim / normalize any level that references invalid arrows during authoring;
-// keep only what we intend to ship.
-const SHIP_LEVELS: LevelConfig[] = LEVELS.filter((l) =>
-  [1, 2, 3, 4, 6, 8].includes(l.id),
-).map((l, i) => ({ ...l, id: i + 1 }));
+const SHIP_LEVELS: LevelConfig[] = LEVELS.map((l, i) => ({ ...l, id: i + 1 }));
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistence
