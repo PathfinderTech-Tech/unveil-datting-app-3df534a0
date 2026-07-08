@@ -634,6 +634,8 @@ export function FreeYourMindHeartGame() {
     setStatus("playing");
     setHintId(null);
     setRewardFlash(null);
+    setPreviewId(null);
+    setTutorialStep(0);
     movingRef.current = false;
   }, [level]);
 
