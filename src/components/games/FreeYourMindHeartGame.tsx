@@ -3,17 +3,24 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Brain,
+  Gem,
+  Gift,
   Heart,
+  Key,
   Lightbulb,
+  Menu,
   Pause,
   Play,
   RotateCcw,
+  Snowflake,
   Sparkles,
   Star,
+  Timer,
   Trophy,
   Undo2,
   Volume2,
   VolumeX,
+  Zap,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 
