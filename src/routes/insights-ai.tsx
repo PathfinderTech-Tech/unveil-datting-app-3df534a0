@@ -11,6 +11,7 @@ import robotMascot from "@/assets/ai-insights-robot.png";
 
 import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 import { AiQuotaStatus } from "@/components/AiQuotaStatus";
+import { PageBackButton } from "@/components/PageBackButton";
 
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
@@ -140,6 +141,7 @@ function InsightsAiPage() {
     <div className="min-h-screen bg-background">
       <UnveilNav />
       <div className="mx-auto max-w-5xl px-6 py-10">
+        <div className="mb-4"><PageBackButton fallback="/matches" /></div>
         <HeroBlock premium />
 
         <div className="mt-4"><AiQuotaStatus /></div>
