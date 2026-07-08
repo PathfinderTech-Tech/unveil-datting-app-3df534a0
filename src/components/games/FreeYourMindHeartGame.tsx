@@ -1078,9 +1078,9 @@ export function FreeYourMindHeartGame() {
       {/* Overlays */}
       {status === "lost" && (
         <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path collapsed</div>
-          <h2 className="mb-2 font-display text-3xl">Try a different order.</h2>
-          <p className="mb-5 max-w-sm text-sm text-white/70">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path blocked</div>
+          <h2 className="mb-2 font-display text-3xl">Here's what happened.</h2>
+          <p className="mb-5 max-w-sm text-sm text-white/80">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
           <div className="flex justify-center gap-2">
             <button onClick={undo} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
               Undo
