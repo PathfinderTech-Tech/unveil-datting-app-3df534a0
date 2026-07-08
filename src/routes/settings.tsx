@@ -357,3 +357,66 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
     </div>
   );
 }
+
+function HealthConsentRow() {
+  const { user } = useAuth();
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("journey_health_consent")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+      setEnabled(!!(data as { journey_health_consent?: boolean } | null)?.journey_health_consent);
+    })();
+    return () => { alive = false; };
+  }, [user]);
+
+  async function toggle(next: boolean) {
+    if (!user || saving) return;
+    setSaving(true);
+    const prev = enabled;
+    setEnabled(next);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        journey_health_consent: next,
+        journey_health_consent_at: next ? new Date().toISOString() : null,
+      } as never)
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) {
+      setEnabled(prev);
+      toast.error(error.message);
+    } else {
+      toast.success(next ? "Health tracking enabled for Journey." : "Health tracking disabled.");
+    }
+  }
+
+  return (
+    <div>
+      <h3 className="font-display text-base">Health tracking for Journey</h3>
+      <p className="mt-1 text-xs text-muted-foreground">
+        UNVEIL uses movement data (steps, walking/running distance) only to update your Journey progress. Your exact location is never tracked.
+      </p>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <span className="text-sm">{enabled ? "Allowed" : "Not allowed"}</span>
+        <button
+          type="button"
+          disabled={enabled === null || saving}
+          onClick={() => toggle(!enabled)}
+          className={`inline-flex h-6 w-11 items-center rounded-full transition ${enabled ? "bg-primary" : "bg-muted"} disabled:opacity-50`}
+          aria-pressed={!!enabled}
+        >
+          <span className={`inline-block h-5 w-5 transform rounded-full bg-background shadow transition ${enabled ? "translate-x-5" : "translate-x-1"}`} />
+        </button>
+      </div>
+    </div>
+  );
+}
