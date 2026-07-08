@@ -985,11 +985,18 @@ export function FreeYourMindHeartGame() {
           <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m · ${best.time}s` : "—"} />
         </div>
 
-        {level.tutorial && status === "playing" && run.moves === 0 && (
-          <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
-            <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
-            <span>{level.tutorial}</span>
-          </div>
+        {level.id === 1 && status === "playing" ? (
+          <Level1Coach
+            freedCount={run.arrows.filter((a) => a.status === "freed").length}
+            hasMoved={run.moves > 0}
+          />
+        ) : (
+          level.tutorial && status === "playing" && run.moves === 0 && (
+            <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
+              <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
+              <span>{level.tutorial}</span>
+            </div>
+          )
         )}
 
         {/* Board */}
@@ -999,11 +1006,23 @@ export function FreeYourMindHeartGame() {
           arrows={run.arrows}
           openGates={run.openGates}
           occupancy={occupancy}
-          hintId={hintId}
+          hintId={effectiveHintId}
           paused={paused}
           collisionAt={run.collisionAt}
+          blockerId={run.blockerId}
+          preview={preview}
           onTap={releaseArrow}
+          onPreview={setPreviewId}
         />
+
+        {/* Live status line explaining last outcome / next action */}
+        <StatusLine
+          run={run}
+          preview={preview}
+          previewArrow={previewId ? run.arrows.find((a) => a.id === previewId) ?? null : null}
+          status={status}
+        />
+
 
         {/* Bottom controls */}
         <div className="mt-4 grid grid-cols-4 gap-2">
