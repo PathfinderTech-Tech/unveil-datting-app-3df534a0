@@ -341,7 +341,7 @@ function JourneyDetail({ journeyId, onLeft }: { journeyId: string; onLeft: () =>
       {/* Map card */}
       <section className="relative overflow-hidden rounded-3xl border border-pink-500/25 bg-white/[0.03] p-5 backdrop-blur md:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <CityPin side="from" city={journey.from_city} flag={journey.from_flag} tone="pink" />
+          <CityPin side="from" city={journey.from_city} flag={journey.from_flag ?? "🌍"} tone="pink" />
           <div className="flex-1 min-w-[160px] px-2">
             <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-2xl border border-pink-400/30 bg-black/40 px-4 py-3">
               <MapPin className="h-4 w-4 text-pink-400" />
