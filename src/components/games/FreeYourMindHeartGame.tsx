@@ -23,6 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { toast } from "sonner";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
