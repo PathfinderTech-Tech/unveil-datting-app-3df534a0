@@ -1,16 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
   WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS, TWO_TRUTHS_PROMPTS, DESERT_ISLAND,
 } from "@/lib/synapse-store";
-import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight } from "lucide-react";
+import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
       { title: "Games — UNVEIL" },
-      { name: "description", content: "Five playful mini-games that reveal chemistry before you meet." },
+      { name: "description", content: "Playful mini-games that reveal chemistry before you meet." },
     ],
   }),
   component: GamesGallery,
@@ -23,6 +23,27 @@ const GAMES: { id: GameId; title: string; tagline: string; icon: any; hue: strin
   { id: "flags", title: "Red Flag / Green Flag", tagline: "Spot the vibe in five seconds.", icon: Flag, hue: "from-rose-500/30 to-amber-500/10" },
   { id: "ttl", title: "Two Truths & a Lie", tagline: "Classic. Always works.", icon: HeartHandshake, hue: "from-cyan-500/30 to-blue-500/10" },
   { id: "island", title: "Desert Island", tagline: "5 items. 1 luxury. 1 person.", icon: Palmtree, hue: "from-emerald-500/30 to-teal-500/10" },
+];
+
+const FEATURED_GAMES: {
+  to: string; title: string; tagline: string; icon: any; hue: string; badge?: string;
+}[] = [
+  {
+    to: "/love-tiles",
+    title: "UNVEIL Love Tiles",
+    tagline: "Piece by piece, love comes into focus.",
+    icon: Heart,
+    hue: "from-pink-500/40 to-fuchsia-500/10",
+    badge: "NEW",
+  },
+  {
+    to: "/challenges/free-your-mind-heart",
+    title: "Free Your Mind & Heart",
+    tagline: "Guide the mind and the heart to freedom.",
+    icon: Compass,
+    hue: "from-indigo-500/40 to-purple-500/10",
+    badge: "LIVE",
+  },
 ];
 
 function GamesGallery() {
