@@ -949,6 +949,177 @@ export type Database = {
         }
         Relationships: []
       }
+      journey_invites: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          journey_id: string
+          responded_at: string | null
+          role_offered: string
+          status: string
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          journey_id: string
+          responded_at?: string | null
+          role_offered: string
+          status?: string
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          journey_id?: string
+          responded_at?: string | null
+          role_offered?: string
+          status?: string
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_invites_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_logs: {
+        Row: {
+          activity: string
+          created_at: string
+          id: string
+          journey_id: string
+          logged_on: string
+          miles: number
+          steps: number | null
+          user_id: string
+        }
+        Insert: {
+          activity?: string
+          created_at?: string
+          id?: string
+          journey_id: string
+          logged_on?: string
+          miles: number
+          steps?: number | null
+          user_id: string
+        }
+        Update: {
+          activity?: string
+          created_at?: string
+          id?: string
+          journey_id?: string
+          logged_on?: string
+          miles?: number
+          steps?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_logs_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_participants: {
+        Row: {
+          joined_at: string
+          journey_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          journey_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          journey_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_participants_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journeys: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          from_city: string
+          from_country: string | null
+          from_flag: string | null
+          id: string
+          landmarks: Json
+          mode: string
+          share_in_chat: boolean
+          status: string
+          to_city: string
+          to_country: string | null
+          to_flag: string | null
+          total_km: number | null
+          total_miles: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          from_city: string
+          from_country?: string | null
+          from_flag?: string | null
+          id?: string
+          landmarks?: Json
+          mode: string
+          share_in_chat?: boolean
+          status?: string
+          to_city: string
+          to_country?: string | null
+          to_flag?: string | null
+          total_km?: number | null
+          total_miles: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          from_city?: string
+          from_country?: string | null
+          from_flag?: string | null
+          id?: string
+          landmarks?: Json
+          mode?: string
+          share_in_chat?: boolean
+          status?: string
+          to_city?: string
+          to_country?: string | null
+          to_flag?: string | null
+          total_km?: number | null
+          total_miles?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       location_verifications: {
         Row: {
           created_at: string
@@ -2425,6 +2596,10 @@ export type Database = {
       }
       is_email_approved: { Args: { _email: string }; Returns: boolean }
       is_email_in_cooldown: { Args: { _email: string }; Returns: boolean }
+      is_journey_participant: {
+        Args: { _journey_id: string; _user_id: string }
+        Returns: boolean
+      }
       like_profile: {
         Args: { _target: string }
         Returns: {
