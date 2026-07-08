@@ -1758,16 +1758,28 @@ function Board({
   level,
   arrows,
   blockerId,
+  blockerCell,
   highlightHint,
   onArrowTap,
   wallSet,
+  openGates,
+  brokenWalls,
+  collectedKeys,
+  usedPortals,
+  triggeredSwitches,
 }: {
   level: LevelConfig;
   arrows: LiveArrow[];
   blockerId: string | null;
+  blockerCell: string | null;
   highlightHint: string | null;
   onArrowTap: (id: string) => void;
   wallSet: Set<string>;
+  openGates: Set<string>;
+  brokenWalls: Set<string>;
+  collectedKeys: Set<string>;
+  usedPortals: Set<string>;
+  triggeredSwitches: Set<string>;
 }) {
   const CELL = 52;
   const GAP = 4;
@@ -1781,12 +1793,18 @@ function Board({
     height: CELL,
   });
 
+  const colorHex = (color: string) =>
+    color === "blue"
+      ? "#38bdf8"
+      : color === "rose"
+        ? "#fb7185"
+        : "#fbbf24";
+
   return (
     <div
       className="relative mx-auto"
       style={{ width: w, height: h, maxWidth: "100%" }}
     >
-      {/* Neon pathway backdrop under all cells */}
       <div
         className="pointer-events-none absolute -inset-2 rounded-2xl opacity-60"
         style={{
@@ -1795,11 +1813,31 @@ function Board({
         }}
       />
 
-      {/* Grid cells */}
       {Array.from({ length: level.rows }).map((_, r) =>
         Array.from({ length: level.cols }).map((_, c) => {
-          const isWall = wallSet.has(`${r},${c}`);
+          const cellKey = `${r},${c}`;
+          const isWall = wallSet.has(cellKey);
           const exit = level.exits.find((e) => e.row === r && e.col === c);
+          const gate = level.gates?.find((g) => g.row === r && g.col === c);
+          const sw = level.switches?.find((s) => s.row === r && s.col === c);
+          const k = level.keys?.find((kk) => kk.row === r && kk.col === c);
+          const brk = level.breakables?.find(
+            (b) => b.row === r && b.col === c,
+          );
+          const portal = level.portals?.find(
+            (p) => p.row === r && p.col === c,
+          );
+          const ow = level.oneWays?.find((o) => o.row === r && o.col === c);
+          const isBlockerCell = blockerCell === cellKey;
+
+          const gateOpen = gate
+            ? openGates.has(gate.color) || collectedKeys.has(gate.color)
+            : false;
+          const swOn = sw ? triggeredSwitches.has(cellKey) : false;
+          const keyTaken = k ? collectedKeys.has(k.color) : false;
+          const broken = brk ? brokenWalls.has(cellKey) : false;
+          const portalUsed = portal ? usedPortals.has(portal.id) : false;
+
           return (
             <div
               key={`${r}-${c}`}
@@ -1810,9 +1848,11 @@ function Board({
               }`}
               style={{
                 ...cellStyle(r, c),
-                boxShadow: isWall
-                  ? "inset 0 0 12px rgba(217,70,239,0.25)"
-                  : "inset 0 0 6px rgba(167,139,250,0.08)",
+                boxShadow: isBlockerCell
+                  ? "inset 0 0 0 2px rgba(248,113,113,0.9), 0 0 20px rgba(248,113,113,0.6)"
+                  : isWall
+                    ? "inset 0 0 12px rgba(217,70,239,0.25)"
+                    : "inset 0 0 6px rgba(167,139,250,0.08)",
               }}
             >
               {isWall && (
@@ -1825,10 +1865,123 @@ function Board({
                 />
               )}
               {exit && <DoorExit side={exit.side} />}
+
+              {gate && (
+                <div
+                  className="absolute inset-1 flex items-center justify-center rounded-lg"
+                  style={{
+                    background: gateOpen
+                      ? `linear-gradient(180deg, ${colorHex(gate.color)}22, transparent)`
+                      : `linear-gradient(180deg, ${colorHex(gate.color)}cc, ${colorHex(gate.color)}55)`,
+                    border: `1.5px solid ${colorHex(gate.color)}${gateOpen ? "55" : "ff"}`,
+                    boxShadow: gateOpen
+                      ? "none"
+                      : `0 0 14px ${colorHex(gate.color)}aa, inset 0 0 10px ${colorHex(gate.color)}66`,
+                    opacity: gateOpen ? 0.35 : 1,
+                  }}
+                >
+                  {gateOpen ? (
+                    <span className="text-[10px] font-bold text-white/60">
+                      OPEN
+                    </span>
+                  ) : (
+                    <span className="text-lg">🔒</span>
+                  )}
+                </div>
+              )}
+
+              {sw && (
+                <div
+                  className="absolute inset-2 flex items-center justify-center rounded-full"
+                  style={{
+                    background: swOn
+                      ? `radial-gradient(circle, ${colorHex(sw.color)}ee, ${colorHex(sw.color)}55)`
+                      : `radial-gradient(circle, ${colorHex(sw.color)}66, transparent 70%)`,
+                    border: `2px solid ${colorHex(sw.color)}`,
+                    boxShadow: swOn
+                      ? `0 0 16px ${colorHex(sw.color)}`
+                      : `0 0 6px ${colorHex(sw.color)}66`,
+                  }}
+                >
+                  <span className="text-[10px] font-bold text-white">
+                    {swOn ? "●" : "○"}
+                  </span>
+                </div>
+              )}
+
+              {k && !keyTaken && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Key
+                    className="h-5 w-5"
+                    style={{
+                      color: colorHex(k.color),
+                      filter: `drop-shadow(0 0 8px ${colorHex(k.color)})`,
+                    }}
+                  />
+                </div>
+              )}
+
+              {brk && !broken && (
+                <div
+                  className="absolute inset-1 rounded-lg border border-orange-400/60"
+                  style={{
+                    background:
+                      "linear-gradient(135deg,#7c2d12aa,#431407cc)",
+                    boxShadow: "inset 0 0 10px rgba(251,146,60,0.5)",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(-45deg, rgba(251,146,60,0.35) 0 2px, transparent 2px 7px)",
+                    }}
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center text-lg">
+                    💥
+                  </span>
+                </div>
+              )}
+
+              {portal && (
+                <div
+                  className="absolute inset-2 rounded-full"
+                  style={{
+                    background: `conic-gradient(from 0deg, #a78bfa, #22d3ee, #ec4899, #a78bfa)`,
+                    opacity: portalUsed ? 0.25 : 0.85,
+                    animation: portalUsed
+                      ? undefined
+                      : "fymhFlow 3s linear infinite",
+                    boxShadow: portalUsed
+                      ? "none"
+                      : "0 0 18px rgba(167,139,250,0.7)",
+                  }}
+                >
+                  <div className="absolute inset-1.5 rounded-full bg-[#0a0616]/85 flex items-center justify-center">
+                    <Sparkles className="h-3 w-3 text-fuchsia-200" />
+                  </div>
+                </div>
+              )}
+
+              {ow && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span
+                    className="text-2xl font-black text-purple-300/80"
+                    style={{
+                      transform: `rotate(${dirRotation(ow.dir)}deg)`,
+                      textShadow: "0 0 10px rgba(168,85,247,0.9)",
+                    }}
+                  >
+                    ⇧
+                  </span>
+                </div>
+              )}
             </div>
           );
         }),
       )}
+
+
 
       {/* Arrows */}
       {arrows.map((a) => {
