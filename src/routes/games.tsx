@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import {
   WOULD_YOU_RATHER, RED_FLAGS, GREEN_FLAGS, TWO_TRUTHS_PROMPTS, DESERT_ISLAND,
 } from "@/lib/synapse-store";
-import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass } from "lucide-react";
+import { Sparkles, Flag, HeartHandshake, Palmtree, Brain, Trophy, ArrowRight, Heart, Compass, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
   head: () => ({
