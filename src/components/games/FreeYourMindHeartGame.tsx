@@ -536,6 +536,73 @@ function starsFor(moves: number, time: number, level: LevelConfig): number {
   return 1;
 }
 
+// Simulates the arrow travel without mutating state — used for preview + hints.
+function computePath(
+  arrow: ArrowState,
+  run: RunState,
+  level: LevelConfig,
+  cellMap: Record<string, CellType>,
+): PathPreview {
+  const cells: Array<{ r: number; c: number }> = [];
+  const dir = arrow.dir;
+  const [dr, dc] = DELTA[dir];
+  let r = arrow.curRow;
+  let c = arrow.curCol;
+  const openGates = [...run.openGates];
+  const teleMap = new Map<string, [number, number]>();
+  for (const t of level.teleports ?? []) {
+    teleMap.set(`${t.a[0]}-${t.a[1]}`, t.b);
+    teleMap.set(`${t.b[0]}-${t.b[1]}`, t.a);
+  }
+  for (let i = 0; i < 200; i++) {
+    const nr = r + dr;
+    const nc = c + dc;
+    if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) {
+      return { cells, outcome: "edge", blockCell: { r, c } };
+    }
+    const key = `${nr}-${nc}`;
+    const type = cellMap[key] ?? "empty";
+    const gate = (level.gates ?? []).find((g) => g.row === nr && g.col === nc);
+    if (gate && !openGates.includes(gate.id)) {
+      return { cells, outcome: "gate", blockCell: { r: nr, c: nc } };
+    }
+    if (type === "wall") return { cells, outcome: "wall", blockCell: { r: nr, c: nc } };
+    if (type === "mind-exit" || type === "heart-exit") {
+      const exitSide: Side = type === "mind-exit" ? "mind" : "heart";
+      cells.push({ r: nr, c: nc });
+      if (exitSide === arrow.side) return { cells, outcome: "exit" };
+      return { cells, outcome: "wrong-exit", blockCell: { r: nr, c: nc } };
+    }
+    const blocker = run.arrows.find(
+      (a) =>
+        a.id !== arrow.id &&
+        (a.status === "idle" || a.status === "lost") &&
+        a.curRow === nr &&
+        a.curCol === nc,
+    );
+    if (blocker) {
+      return { cells, outcome: "arrow", blockerId: blocker.id, blockCell: { r: nr, c: nc } };
+    }
+    cells.push({ r: nr, c: nc });
+    if (type === "switch-mind" || type === "switch-heart") {
+      const s = (level.switches ?? []).find((s) => s.row === nr && s.col === nc);
+      const need: Side = type === "switch-mind" ? "mind" : "heart";
+      if (s && arrow.side === need) {
+        for (const gid of s.openGates) if (!openGates.includes(gid)) openGates.push(gid);
+      }
+    }
+    const tgt = teleMap.get(`${nr}-${nc}`);
+    if (tgt) {
+      r = tgt[0];
+      c = tgt[1];
+      continue;
+    }
+    r = nr;
+    c = nc;
+  }
+  return { cells, outcome: "edge" };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 
