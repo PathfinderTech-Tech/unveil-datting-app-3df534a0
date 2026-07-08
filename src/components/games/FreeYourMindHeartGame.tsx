@@ -688,6 +688,7 @@ export function FreeYourMindHeartGame() {
     haptic(12);
     setHistory((h) => [...h, run]);
     setHintId(null);
+    setPreviewId(null);
     movingRef.current = true;
 
     let cur = { r: arrow.curRow, c: arrow.curCol };
@@ -696,7 +697,14 @@ export function FreeYourMindHeartGame() {
     let localArrows = run.arrows.map((a) =>
       a.id === id ? { ...a, status: "moving" as ArrowStatus, trail: [] } : a,
     );
-    setRun({ ...run, moves: run.moves + 1, arrows: localArrows, failReason: undefined, collisionAt: undefined });
+    setRun({
+      ...run,
+      moves: run.moves + 1,
+      arrows: localArrows,
+      failReason: undefined,
+      collisionAt: undefined,
+      blockerId: undefined,
+    });
 
     const teleportMap = new Map<string, [number, number]>();
     for (const t of level.teleports ?? []) {
