@@ -29,6 +29,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 type Dir = "up" | "down" | "left" | "right";
 type Side = "mind" | "heart";
+type LockColor = "blue" | "rose" | "gold";
 
 interface ArrowDef {
   id: string;
@@ -36,6 +37,37 @@ interface ArrowDef {
   col: number;
   dir: Dir;
   side: Side;
+}
+
+interface GateTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface SwitchTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface KeyTile {
+  row: number;
+  col: number;
+  color: LockColor;
+}
+interface BreakableTile {
+  row: number;
+  col: number;
+}
+interface PortalTile {
+  id: string;
+  row: number;
+  col: number;
+  pairId: string;
+}
+interface OneWayTile {
+  row: number;
+  col: number;
+  dir: Dir;
 }
 
 interface LevelConfig {
@@ -47,6 +79,12 @@ interface LevelConfig {
   walls: Array<[number, number]>;
   exits: Array<{ row: number; col: number; side: Side }>;
   arrows: ArrowDef[];
+  gates?: GateTile[];
+  switches?: SwitchTile[];
+  keys?: KeyTile[];
+  breakables?: BreakableTile[];
+  portals?: PortalTile[];
+  oneWays?: OneWayTile[];
   tutorial?: string;
 }
 
@@ -88,6 +126,7 @@ const DIR_LABEL: Record<Dir, string> = {
 // The puzzle in every level is choosing the correct release ORDER.
 
 const LEVELS: LevelConfig[] = [
+  // 1 — First Breath. Just release both.
   {
     id: 1,
     chapter: "Awakening",
@@ -96,20 +135,22 @@ const LEVELS: LevelConfig[] = [
     cols: 5,
     walls: [],
     exits: [
-      { row: 0, col: 2, side: "mind" },
-      { row: 4, col: 2, side: "heart" },
+      { row: 0, col: 1, side: "mind" },
+      { row: 4, col: 3, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 2, col: 2, dir: "up", side: "mind" },
-      { id: "h1", row: 3, col: 2, dir: "down", side: "heart" },
+      { id: "m1", row: 2, col: 1, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
     ],
     tutorial:
-      "Tap an arrow to release it. It travels in its arrow direction until it reaches a matching exit. Free both to win.",
+      "Tap an arrow to release it. It flies in its arrow direction until it reaches a matching door. Free both to win.",
   },
+
+  // 2 — Order matters. Heart blocks Mind. Release Heart first.
   {
     id: 2,
     chapter: "Awakening",
-    name: "Clear the Way",
+    name: "Who Goes First?",
     rows: 5,
     cols: 5,
     walls: [],
@@ -117,136 +158,202 @@ const LEVELS: LevelConfig[] = [
       { row: 0, col: 2, side: "mind" },
       { row: 2, col: 0, side: "heart" },
     ],
-    // m1 wants to go up but h1 blocks it at (2,2). Release h1 first.
     arrows: [
       { id: "h1", row: 2, col: 2, dir: "left", side: "heart" },
       { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
     ],
-    tutorial: "Order matters. If a path is blocked, free the blocker first.",
+    tutorial:
+      "If one arrow blocks another, release the blocker first. The blocker will be highlighted in red when it stops you.",
   },
+
+  // 3 — Switch opens gate. Heart steps on switch → Mind's gate opens.
   {
     id: 3,
     chapter: "Awakening",
-    name: "Cross Paths",
+    name: "The Blue Switch",
     rows: 5,
     cols: 5,
     walls: [],
     exits: [
-      { row: 2, col: 4, side: "mind" },
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    switches: [{ row: 2, col: 2, color: "blue" }],
+    tutorial:
+      "A blue gate blocks Mind. Heart can cross the blue switch to open it. Release Heart first.",
+  },
+
+  // 4 — Reinforce switch/gate with rose color and crossing paths.
+  {
+    id: 4,
+    chapter: "Entangled",
+    name: "Open the Gate",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 4, col: 3, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 3, dir: "down", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 1, color: "rose" }],
+    switches: [{ row: 2, col: 3, color: "rose" }],
+    tutorial:
+      "Each gate matches a switch of the same color. Send the right friend to the switch first.",
+  },
+
+  // 5 — Breakable wall. Heart crosses it, breaks it, Mind then passes.
+  {
+    id: 5,
+    chapter: "Entangled",
+    name: "The Cracked Wall",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    breakables: [{ row: 2, col: 2 }],
+    tutorial:
+      "A cracked wall blocks the way. The first arrow that reaches it breaks through and clears it for the next.",
+  },
+
+  // 6 — Portal. Mind teleports across.
+  {
+    id: 6,
+    chapter: "Entangled",
+    name: "Through the Portal",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 4, side: "mind" },
       { row: 4, col: 2, side: "heart" },
     ],
     arrows: [
-      { id: "h1", row: 2, col: 2, dir: "down", side: "heart" },
-      { id: "m1", row: 2, col: 0, dir: "right", side: "mind" },
+      { id: "m1", row: 4, col: 0, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 2, dir: "down", side: "heart" },
     ],
-    // Release h1 first to clear the row, then m1 goes right.
+    portals: [
+      { id: "p1", row: 2, col: 0, pairId: "p2" },
+      { id: "p2", row: 2, col: 4, pairId: "p1" },
+    ],
+    tutorial:
+      "Portals teleport an arrow to their twin, then it keeps flying in the same direction.",
   },
+
+  // 7 — Key. Heart picks up key that unlocks Mind's gate.
   {
-    id: 4,
-    chapter: "Awakening",
-    name: "Three Voices",
+    id: 7,
+    chapter: "Resonance",
+    name: "The Golden Key",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 2, col: 2, color: "gold" }],
+    tutorial:
+      "Keys unlock every gate of their color. Pick up the gold key first, then the gold gate stays open.",
+  },
+
+  // 8 — One-way tile. Only arrows moving in the arrow's direction may pass.
+  {
+    id: 8,
+    chapter: "Resonance",
+    name: "One Way Up",
+    rows: 5,
+    cols: 5,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 0, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 4, col: 4, dir: "up", side: "heart" },
+    ],
+    oneWays: [{ row: 2, col: 2, dir: "up" }],
+    tutorial:
+      "One-way tiles only let arrows through in the arrow's direction. The purple ⇧ shows which way is allowed.",
+  },
+
+  // 9 — Combine: switch + order + gate. One switch opens two gates.
+  {
+    id: 9,
+    chapter: "Resonance",
+    name: "Two Doors",
+    rows: 6,
+    cols: 6,
+    walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "blue" },
+      { row: 1, col: 4, color: "blue" },
+    ],
+    switches: [{ row: 2, col: 2, color: "blue" }],
+    tutorial:
+      "One switch can open several gates of its color. Free the switch-runner first.",
+  },
+
+
+
+  // 10 — Grand finale: breakable + key + gate combined.
+  {
+    id: 10,
+    chapter: "Union",
+    name: "Free Both",
     rows: 6,
     cols: 6,
     walls: [],
     exits: [
       { row: 0, col: 2, side: "mind" },
-      { row: 5, col: 3, side: "heart" },
-      { row: 3, col: 5, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 3, col: 2, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 4, dir: "right", side: "mind" },
-      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
+      { id: "m1", row: 5, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
     ],
-  },
-  {
-    id: 5,
-    chapter: "Entangled",
-    name: "Locked Row",
-    rows: 6,
-    cols: 6,
-    walls: [
-      [1, 3],
-      [4, 2],
-    ],
-    exits: [
-      { row: 0, col: 1, side: "mind" },
-      { row: 5, col: 4, side: "heart" },
-    ],
-    arrows: [
-      { id: "h1", row: 2, col: 1, dir: "right", side: "heart" }, // blocks m1
-      { id: "m1", row: 3, col: 1, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 4, dir: "up", side: "mind" }, // blocks h2 potential? no h2
-      { id: "h2", row: 5, col: 4, dir: "left", side: "heart" }, // wait h2 needs to reach heart exit at (5,4)?
-    ],
-    // Adjust: keep it simple — remove h2
-  },
-  {
-    id: 6,
-    chapter: "Entangled",
-    name: "Twin Flames",
-    rows: 6,
-    cols: 7,
-    walls: [[2, 3]],
-    exits: [
-      { row: 0, col: 1, side: "mind" },
-      { row: 0, col: 5, side: "mind" },
-      { row: 5, col: 1, side: "heart" },
-      { row: 5, col: 5, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
-      { id: "m2", row: 4, col: 5, dir: "up", side: "mind" },
-      { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
-      { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
-    ],
-  },
-  {
-    id: 7,
-    chapter: "Entangled",
-    name: "Order of Release",
-    rows: 6,
-    cols: 6,
-    walls: [],
-    exits: [
-      { row: 0, col: 3, side: "mind" },
-      { row: 5, col: 2, side: "heart" },
-    ],
-    // Chain: h1 blocks m1, m2 blocks h1. Solve: m2 → h1 → m1.
-    arrows: [
-      { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
-      { id: "h1", row: 2, col: 3, dir: "left", side: "heart" }, // blocks m1 at (2,3)
-      { id: "m2", row: 2, col: 0, dir: "right", side: "mind" }, // wait — m2 dir right; heart exit? no, mind exit not on this row.
-      // Simpler: use h2 that blocks h1's path
-      { id: "h2", row: 2, col: 1, dir: "down", side: "heart" }, // h1 travels left through (2,2)(2,1) — blocked by h2. Release h2 first (down → (5,1)? no heart exit at (5,2). h2 blocked by nothing at col 1 downward)
-    ],
-  },
-  {
-    id: 8,
-    chapter: "Resonance",
-    name: "Open Field",
-    rows: 6,
-    cols: 6,
-    walls: [
-      [2, 2],
-      [3, 3],
-    ],
-    exits: [
-      { row: 0, col: 0, side: "mind" },
-      { row: 5, col: 5, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 5, col: 0, dir: "up", side: "mind" },
-      { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
-    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 2, col: 2, color: "gold" }],
+    breakables: [{ row: 3, col: 2 }],
+    tutorial:
+      "Everything at once: Heart grabs the key and opens the gate. Mind breaks the cracked wall and rises to freedom.",
   },
 ];
 
-// Trim / normalize any level that references invalid arrows during authoring;
-// keep only what we intend to ship.
-const SHIP_LEVELS: LevelConfig[] = LEVELS.filter((l) =>
-  [1, 2, 3, 4, 6, 8].includes(l.id),
-).map((l, i) => ({ ...l, id: i + 1 }));
+const SHIP_LEVELS: LevelConfig[] = LEVELS.map((l, i) => ({ ...l, id: i + 1 }));
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistence
@@ -748,12 +855,29 @@ function PlayScreen({
       trajectory: [],
     })),
   );
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [openGates, setOpenGates] = useState<Set<string>>(new Set());
+  const [brokenWalls, setBrokenWalls] = useState<Set<string>>(new Set());
+  const [collectedKeys, setCollectedKeys] = useState<Set<string>>(new Set());
+  const [usedPortals, setUsedPortals] = useState<Set<string>>(new Set());
+  const [triggeredSwitches, setTriggeredSwitches] = useState<Set<string>>(
+    new Set(),
+  );
+
+  interface Snapshot {
+    arrowId: string;
+    openGates: Set<string>;
+    brokenWalls: Set<string>;
+    collectedKeys: Set<string>;
+    usedPortals: Set<string>;
+    triggeredSwitches: Set<string>;
+  }
+  const [history, setHistory] = useState<Snapshot[]>([]);
   const [moves, setMoves] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
   const [message, setMessage] = useState<string | null>(level.tutorial ?? null);
   const [blockerId, setBlockerId] = useState<string | null>(null);
+  const [blockerCell, setBlockerCell] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const audioCtx = useRef<AudioContext | null>(null);
 
@@ -796,15 +920,18 @@ function PlayScreen({
 
   // Blocker highlight auto-clear
   useEffect(() => {
-    if (!blockerId) return;
-    const t = setTimeout(() => setBlockerId(null), 1600);
+    if (!blockerId && !blockerCell) return;
+    const t = setTimeout(() => {
+      setBlockerId(null);
+      setBlockerCell(null);
+    }, 1800);
     return () => clearTimeout(t);
-  }, [blockerId]);
+  }, [blockerId, blockerCell]);
 
   // Message auto-clear (except tutorial on level 1)
   useEffect(() => {
     if (!message || message === level.tutorial) return;
-    const t = setTimeout(() => setMessage(null), 3000);
+    const t = setTimeout(() => setMessage(null), 3400);
     return () => clearTimeout(t);
   }, [message, level.tutorial]);
 
@@ -819,20 +946,9 @@ function PlayScreen({
     return () => clearTimeout(to);
   }, [allFreed, moves, elapsed, level.arrows.length, onWin, playTone]);
 
-  // Walls lookup
   const wallSet = useMemo(
     () => new Set(level.walls.map(([r, c]) => `${r},${c}`)),
     [level.walls],
-  );
-  const exitFor = useCallback(
-    (r: number, c: number, side: Side) =>
-      level.exits.some((e) => e.row === r && e.col === c && e.side === side),
-    [level.exits],
-  );
-  const anyExitAt = useCallback(
-    (r: number, c: number) =>
-      level.exits.some((e) => e.row === r && e.col === c),
-    [level.exits],
   );
 
   const releaseArrow = (id: string) => {
@@ -840,94 +956,63 @@ function PlayScreen({
     const arrow = arrows.find((a) => a.id === id);
     if (!arrow || arrow.freed || arrow.animating) return;
 
-    // Trace trajectory
-    const [dr, dc] = DELTA[arrow.dir];
-    const trajectory: Array<[number, number]> = [[arrow.row, arrow.col]];
-    let r = arrow.row;
-    let c = arrow.col;
-    let blocked: { reason: string; blockerId?: string } | null = null;
-    let escaped = false;
+    const result = traceArrow(arrow, arrows, level, {
+      wallSet,
+      openGates,
+      brokenWalls,
+      collectedKeys,
+      usedPortals,
+      triggeredSwitches,
+    });
 
-    while (true) {
-      const nr = r + dr;
-      const nc = c + dc;
-
-      // Off-grid: only allowed if the last cell was a matching exit
-      if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
-        if (exitFor(r, c, arrow.side)) {
-          escaped = true;
-        } else if (anyExitAt(r, c)) {
-          blocked = {
-            reason: `That exit is for ${
-              arrow.side === "mind" ? "Heart" : "Mind"
-            }, not ${arrow.side === "mind" ? "Mind" : "Heart"}. Try a different arrow.`,
-          };
-        } else {
-          blocked = {
-            reason: `${cap(arrow.side)} flew off the edge with no matching exit.`,
-          };
-        }
-        break;
-      }
-
-      // Wall
-      if (wallSet.has(`${nr},${nc}`)) {
-        blocked = {
-          reason: `${cap(arrow.side)} is blocked by a wall. Try releasing a different arrow first.`,
-        };
-        break;
-      }
-
-      // Other arrow (unfreed)
-      const other = arrows.find(
-        (a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc,
-      );
-      if (other) {
-        blocked = {
-          reason: `${cap(arrow.side)} is blocked by the highlighted ${cap(
-            other.side,
-          )} arrow. Free it first.`,
-          blockerId: other.id,
-        };
-        break;
-      }
-
-      trajectory.push([nr, nc]);
-      r = nr;
-      c = nc;
-
-      // Matching exit tile reached
-      if (exitFor(r, c, arrow.side)) {
-        escaped = true;
-        break;
-      }
-    }
-
-    if (blocked || !escaped) {
-      setMessage(blocked?.reason ?? "This arrow has nowhere to go.");
-      if (blocked?.blockerId) setBlockerId(blocked.blockerId);
+    if (!result.escaped) {
+      setMessage(result.reason ?? "This arrow has nowhere to go.");
+      if (result.blockerId) setBlockerId(result.blockerId);
+      if (result.blockerCell) setBlockerCell(result.blockerCell);
       playTone(180, 0.18, "sawtooth");
       return;
     }
+
+    // Snapshot BEFORE mutating so Undo can restore.
+    const snapshot: Snapshot = {
+      arrowId: arrow.id,
+      openGates: new Set(openGates),
+      brokenWalls: new Set(brokenWalls),
+      collectedKeys: new Set(collectedKeys),
+      usedPortals: new Set(usedPortals),
+      triggeredSwitches: new Set(triggeredSwitches),
+    };
 
     // Animate
     playTone(arrow.side === "mind" ? 660 : 520, 0.15, "triangle");
     setArrows((prev) =>
       prev.map((a) =>
         a.id === arrow.id
-          ? { ...a, animating: true, progress: 0, trajectory }
+          ? { ...a, animating: true, progress: 0, trajectory: result.trajectory }
           : a,
       ),
     );
     setMoves((m) => m + 1);
-    setHistory((h) => [...h, { arrowId: arrow.id }]);
+    setHistory((h) => [...h, snapshot]);
+
+    // Apply world-state mutations from the trace.
+    if (result.opens.length)
+      setOpenGates((s) => new Set([...s, ...result.opens]));
+    if (result.breaks.length)
+      setBrokenWalls((s) => new Set([...s, ...result.breaks]));
+    if (result.collects.length)
+      setCollectedKeys((s) => new Set([...s, ...result.collects]));
+    if (result.portals.length)
+      setUsedPortals((s) => new Set([...s, ...result.portals]));
+    if (result.switches.length)
+      setTriggeredSwitches((s) => new Set([...s, ...result.switches]));
 
     const stepMs = 90;
-    const totalSteps = trajectory.length - 1;
+    const totalSteps = result.trajectory.length - 1;
     let step = 0;
     const iv = setInterval(() => {
       step += 1;
-      const p = step / totalSteps;
+      const p = totalSteps > 0 ? step / totalSteps : 1;
       setArrows((prev) =>
         prev.map((a) => (a.id === arrow.id ? { ...a, progress: p } : a)),
       );
@@ -960,6 +1045,11 @@ function PlayScreen({
           : a,
       ),
     );
+    setOpenGates(last.openGates);
+    setBrokenWalls(last.brokenWalls);
+    setCollectedKeys(last.collectedKeys);
+    setUsedPortals(last.usedPortals);
+    setTriggeredSwitches(last.triggeredSwitches);
     setHistory((h) => h.slice(0, -1));
     setMoves((m) => Math.max(0, m - 1));
     setMessage("Undid last release.");
@@ -975,25 +1065,44 @@ function PlayScreen({
         trajectory: [],
       })),
     );
+    setOpenGates(new Set());
+    setBrokenWalls(new Set());
+    setCollectedKeys(new Set());
+    setUsedPortals(new Set());
+    setTriggeredSwitches(new Set());
     setHistory([]);
     setMoves(0);
     setElapsed(0);
     setBlockerId(null);
+    setBlockerCell(null);
     setMessage(level.tutorial ?? "Level reset.");
   };
 
   const hint = () => {
-    // Simple heuristic: find an arrow that would succeed right now.
-    const solvable = arrows.find((a) => !a.freed && canRelease(a, arrows, level));
+    const state = {
+      wallSet,
+      openGates,
+      brokenWalls,
+      collectedKeys,
+      usedPortals,
+      triggeredSwitches,
+    };
+    const solvable = arrows.find(
+      (a) => !a.freed && traceArrow(a, arrows, level, state).escaped,
+    );
     if (solvable) {
       setBlockerId(solvable.id);
-      setMessage(`Try releasing the ${cap(solvable.side)} arrow ${DIR_LABEL[solvable.dir]}.`);
+      setMessage(
+        `Try releasing the ${cap(solvable.side)} arrow ${DIR_LABEL[solvable.dir]}.`,
+      );
     } else {
       setMessage("No arrow can move right now. Try Undo or Restart.");
     }
     setShowHint(true);
     setTimeout(() => setShowHint(false), 2000);
   };
+
+
 
   const best = undefined; // best comes from parent progress; kept optional
   const freezes = 1;
@@ -1070,10 +1179,17 @@ function PlayScreen({
               level={level}
               arrows={arrows}
               blockerId={blockerId}
+              blockerCell={blockerCell}
               highlightHint={showHint ? blockerId : null}
               onArrowTap={releaseArrow}
               wallSet={wallSet}
+              openGates={openGates}
+              brokenWalls={brokenWalls}
+              collectedKeys={collectedKeys}
+              usedPortals={usedPortals}
+              triggeredSwitches={triggeredSwitches}
             />
+
             {paused && (
               <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 backdrop-blur">
                 <div className="text-center">
@@ -1392,37 +1508,233 @@ function starsPreview(moves: number, arrowCount: number, seconds: number) {
   return starsFor(moves, arrowCount, seconds);
 }
 
-function canRelease(
+interface TraceState {
+  wallSet: Set<string>;
+  openGates: Set<string>;
+  brokenWalls: Set<string>;
+  collectedKeys: Set<string>;
+  usedPortals: Set<string>;
+  triggeredSwitches: Set<string>;
+}
+
+interface TraceResult {
+  escaped: boolean;
+  reason?: string;
+  blockerId?: string;
+  blockerCell?: string;
+  trajectory: Array<[number, number]>;
+  opens: string[]; // gate colors newly opened
+  breaks: string[]; // "r,c" breakables destroyed
+  collects: string[]; // key colors collected
+  portals: string[]; // portal ids consumed
+  switches: string[]; // switch "r,c" triggered
+}
+
+function traceArrow(
   arrow: LiveArrow,
   all: LiveArrow[],
   level: LevelConfig,
-): boolean {
-  const [dr, dc] = DELTA[arrow.dir];
-  const wallSet = new Set(level.walls.map(([r, c]) => `${r},${c}`));
+  state: TraceState,
+): TraceResult {
+  const [dr0, dc0] = DELTA[arrow.dir];
+  let dr = dr0;
+  let dc = dc0;
+  const trajectory: Array<[number, number]> = [[arrow.row, arrow.col]];
+  const opens: string[] = [];
+  const breaks: string[] = [];
+  const collects: string[] = [];
+  const portalsConsumed: string[] = [];
+  const switchesHit: string[] = [];
+
+  // Running unlocked colors (base + newly collected keys / triggered switches).
+  const runningOpen = new Set<string>([
+    ...state.openGates,
+    ...state.collectedKeys,
+  ]);
+
   let r = arrow.row;
   let c = arrow.col;
-  while (true) {
+  const maxSteps = level.rows * level.cols * 4;
+  let steps = 0;
+
+  while (steps++ < maxSteps) {
     const nr = r + dr;
     const nc = c + dc;
+
+    // Off-grid
     if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
-      return level.exits.some(
+      const matches = level.exits.some(
         (e) => e.row === r && e.col === c && e.side === arrow.side,
       );
+      if (matches) {
+        return {
+          escaped: true,
+          trajectory,
+          opens,
+          breaks,
+          collects,
+          portals: portalsConsumed,
+          switches: switchesHit,
+        };
+      }
+      const wrongDoor = level.exits.find((e) => e.row === r && e.col === c);
+      const reason = wrongDoor
+        ? `That door is for ${cap(wrongDoor.side)}, not ${cap(arrow.side)}. Try a different arrow.`
+        : `${cap(arrow.side)} flew off the edge with no matching door.`;
+      return {
+        escaped: false,
+        reason,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
     }
-    if (wallSet.has(`${nr},${nc}`)) return false;
-    if (
-      all.some((a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc)
-    )
-      return false;
+
+    const key = `${nr},${nc}`;
+
+    // Static wall
+    if (state.wallSet.has(key)) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} hit a stone wall. Try a different arrow.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Breakable
+    const breakable = level.breakables?.find((b) => b.row === nr && b.col === nc);
+    const alreadyBroken =
+      breakable && (state.brokenWalls.has(key) || breaks.includes(key));
+    if (breakable && !alreadyBroken) {
+      // Break it and pass through.
+      breaks.push(key);
+    }
+
+    // Gate
+    const gate = level.gates?.find((g) => g.row === nr && g.col === nc);
+    if (gate && !runningOpen.has(gate.color)) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} cannot pass the ${gate.color} gate. Find the ${gate.color} switch or key first.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // One-way
+    const ow = level.oneWays?.find((o) => o.row === nr && o.col === nc);
+    if (ow && ow.dir !== arrow.dir) {
+      return {
+        escaped: false,
+        reason: `A one-way tile blocks ${cap(arrow.side)} — it only lets arrows through going ${ow.dir}.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Other arrow (unfreed) — but arrow can pass onto a matching exit occupied by nothing.
+    const other = all.find(
+      (a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc,
+    );
+    if (other) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} is blocked by the highlighted ${cap(other.side)} arrow. Free it first.`,
+        blockerId: other.id,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Enter cell
+    trajectory.push([nr, nc]);
     r = nr;
     c = nc;
+
+    // Pick up features on the tile
+    const sw = level.switches?.find((s) => s.row === r && s.col === c);
+    if (sw && !runningOpen.has(sw.color)) {
+      runningOpen.add(sw.color);
+      opens.push(sw.color);
+      switchesHit.push(`${r},${c}`);
+    }
+    const k = level.keys?.find((kk) => kk.row === r && kk.col === c);
+    if (k && !state.collectedKeys.has(k.color) && !collects.includes(k.color)) {
+      runningOpen.add(k.color);
+      collects.push(k.color);
+    }
+
+    // Portal
+    const portal = level.portals?.find((p) => p.row === r && p.col === c);
     if (
-      level.exits.some(
-        (e) => e.row === r && e.col === c && e.side === arrow.side,
-      )
-    )
-      return true;
+      portal &&
+      !state.usedPortals.has(portal.id) &&
+      !portalsConsumed.includes(portal.id)
+    ) {
+      const pair = level.portals?.find((p) => p.id === portal.pairId);
+      if (pair) {
+        portalsConsumed.push(portal.id, pair.id);
+        r = pair.row;
+        c = pair.col;
+        trajectory.push([r, c]);
+      }
+    }
+
+    // Matching exit
+    if (
+      level.exits.some((e) => e.row === r && e.col === c && e.side === arrow.side)
+    ) {
+      // Continue: exits are only valid when the arrow actually leaves the grid on next step.
+      // If exit is on an edge and the next step goes off-grid, we escape then; otherwise keep going.
+      const nnr = r + dr;
+      const nnc = c + dc;
+      if (nnr < 0 || nnr >= level.rows || nnc < 0 || nnc >= level.cols) {
+        return {
+          escaped: true,
+          trajectory,
+          opens,
+          breaks,
+          collects,
+          portals: portalsConsumed,
+          switches: switchesHit,
+        };
+      }
+    }
   }
+
+  return {
+    escaped: false,
+    reason: "This arrow has nowhere to go.",
+    trajectory,
+    opens,
+    breaks,
+    collects,
+    portals: portalsConsumed,
+    switches: switchesHit,
+  };
 }
 
 function starsFor(moves: number, arrowCount: number, seconds: number): number {
@@ -1435,6 +1747,7 @@ function cap(s: string) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // UI subcomponents
 
@@ -1444,16 +1757,28 @@ function Board({
   level,
   arrows,
   blockerId,
+  blockerCell,
   highlightHint,
   onArrowTap,
   wallSet,
+  openGates,
+  brokenWalls,
+  collectedKeys,
+  usedPortals,
+  triggeredSwitches,
 }: {
   level: LevelConfig;
   arrows: LiveArrow[];
   blockerId: string | null;
+  blockerCell: string | null;
   highlightHint: string | null;
   onArrowTap: (id: string) => void;
   wallSet: Set<string>;
+  openGates: Set<string>;
+  brokenWalls: Set<string>;
+  collectedKeys: Set<string>;
+  usedPortals: Set<string>;
+  triggeredSwitches: Set<string>;
 }) {
   const CELL = 52;
   const GAP = 4;
@@ -1467,12 +1792,18 @@ function Board({
     height: CELL,
   });
 
+  const colorHex = (color: string) =>
+    color === "blue"
+      ? "#38bdf8"
+      : color === "rose"
+        ? "#fb7185"
+        : "#fbbf24";
+
   return (
     <div
       className="relative mx-auto"
       style={{ width: w, height: h, maxWidth: "100%" }}
     >
-      {/* Neon pathway backdrop under all cells */}
       <div
         className="pointer-events-none absolute -inset-2 rounded-2xl opacity-60"
         style={{
@@ -1481,11 +1812,31 @@ function Board({
         }}
       />
 
-      {/* Grid cells */}
       {Array.from({ length: level.rows }).map((_, r) =>
         Array.from({ length: level.cols }).map((_, c) => {
-          const isWall = wallSet.has(`${r},${c}`);
+          const cellKey = `${r},${c}`;
+          const isWall = wallSet.has(cellKey);
           const exit = level.exits.find((e) => e.row === r && e.col === c);
+          const gate = level.gates?.find((g) => g.row === r && g.col === c);
+          const sw = level.switches?.find((s) => s.row === r && s.col === c);
+          const k = level.keys?.find((kk) => kk.row === r && kk.col === c);
+          const brk = level.breakables?.find(
+            (b) => b.row === r && b.col === c,
+          );
+          const portal = level.portals?.find(
+            (p) => p.row === r && p.col === c,
+          );
+          const ow = level.oneWays?.find((o) => o.row === r && o.col === c);
+          const isBlockerCell = blockerCell === cellKey;
+
+          const gateOpen = gate
+            ? openGates.has(gate.color) || collectedKeys.has(gate.color)
+            : false;
+          const swOn = sw ? triggeredSwitches.has(cellKey) : false;
+          const keyTaken = k ? collectedKeys.has(k.color) : false;
+          const broken = brk ? brokenWalls.has(cellKey) : false;
+          const portalUsed = portal ? usedPortals.has(portal.id) : false;
+
           return (
             <div
               key={`${r}-${c}`}
@@ -1496,9 +1847,11 @@ function Board({
               }`}
               style={{
                 ...cellStyle(r, c),
-                boxShadow: isWall
-                  ? "inset 0 0 12px rgba(217,70,239,0.25)"
-                  : "inset 0 0 6px rgba(167,139,250,0.08)",
+                boxShadow: isBlockerCell
+                  ? "inset 0 0 0 2px rgba(248,113,113,0.9), 0 0 20px rgba(248,113,113,0.6)"
+                  : isWall
+                    ? "inset 0 0 12px rgba(217,70,239,0.25)"
+                    : "inset 0 0 6px rgba(167,139,250,0.08)",
               }}
             >
               {isWall && (
@@ -1511,10 +1864,123 @@ function Board({
                 />
               )}
               {exit && <DoorExit side={exit.side} />}
+
+              {gate && (
+                <div
+                  className="absolute inset-1 flex items-center justify-center rounded-lg"
+                  style={{
+                    background: gateOpen
+                      ? `linear-gradient(180deg, ${colorHex(gate.color)}22, transparent)`
+                      : `linear-gradient(180deg, ${colorHex(gate.color)}cc, ${colorHex(gate.color)}55)`,
+                    border: `1.5px solid ${colorHex(gate.color)}${gateOpen ? "55" : "ff"}`,
+                    boxShadow: gateOpen
+                      ? "none"
+                      : `0 0 14px ${colorHex(gate.color)}aa, inset 0 0 10px ${colorHex(gate.color)}66`,
+                    opacity: gateOpen ? 0.35 : 1,
+                  }}
+                >
+                  {gateOpen ? (
+                    <span className="text-[10px] font-bold text-white/60">
+                      OPEN
+                    </span>
+                  ) : (
+                    <span className="text-lg">🔒</span>
+                  )}
+                </div>
+              )}
+
+              {sw && (
+                <div
+                  className="absolute inset-2 flex items-center justify-center rounded-full"
+                  style={{
+                    background: swOn
+                      ? `radial-gradient(circle, ${colorHex(sw.color)}ee, ${colorHex(sw.color)}55)`
+                      : `radial-gradient(circle, ${colorHex(sw.color)}66, transparent 70%)`,
+                    border: `2px solid ${colorHex(sw.color)}`,
+                    boxShadow: swOn
+                      ? `0 0 16px ${colorHex(sw.color)}`
+                      : `0 0 6px ${colorHex(sw.color)}66`,
+                  }}
+                >
+                  <span className="text-[10px] font-bold text-white">
+                    {swOn ? "●" : "○"}
+                  </span>
+                </div>
+              )}
+
+              {k && !keyTaken && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Key
+                    className="h-5 w-5"
+                    style={{
+                      color: colorHex(k.color),
+                      filter: `drop-shadow(0 0 8px ${colorHex(k.color)})`,
+                    }}
+                  />
+                </div>
+              )}
+
+              {brk && !broken && (
+                <div
+                  className="absolute inset-1 rounded-lg border border-orange-400/60"
+                  style={{
+                    background:
+                      "linear-gradient(135deg,#7c2d12aa,#431407cc)",
+                    boxShadow: "inset 0 0 10px rgba(251,146,60,0.5)",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(-45deg, rgba(251,146,60,0.35) 0 2px, transparent 2px 7px)",
+                    }}
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center text-lg">
+                    💥
+                  </span>
+                </div>
+              )}
+
+              {portal && (
+                <div
+                  className="absolute inset-2 rounded-full"
+                  style={{
+                    background: `conic-gradient(from 0deg, #a78bfa, #22d3ee, #ec4899, #a78bfa)`,
+                    opacity: portalUsed ? 0.25 : 0.85,
+                    animation: portalUsed
+                      ? undefined
+                      : "fymhFlow 3s linear infinite",
+                    boxShadow: portalUsed
+                      ? "none"
+                      : "0 0 18px rgba(167,139,250,0.7)",
+                  }}
+                >
+                  <div className="absolute inset-1.5 rounded-full bg-[#0a0616]/85 flex items-center justify-center">
+                    <Sparkles className="h-3 w-3 text-fuchsia-200" />
+                  </div>
+                </div>
+              )}
+
+              {ow && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span
+                    className="text-2xl font-black text-purple-300/80"
+                    style={{
+                      transform: `rotate(${dirRotation(ow.dir)}deg)`,
+                      textShadow: "0 0 10px rgba(168,85,247,0.9)",
+                    }}
+                  >
+                    ⇧
+                  </span>
+                </div>
+              )}
             </div>
           );
         }),
       )}
+
+
 
       {/* Arrows */}
       {arrows.map((a) => {
