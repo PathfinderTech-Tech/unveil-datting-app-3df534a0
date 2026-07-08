@@ -148,8 +148,8 @@ const LEVELS: LevelConfig[] = [
     ],
     arrows: [
       { id: "m1", row: 3, col: 2, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 3, dir: "right", side: "mind" },
-      { id: "h1", row: 3, col: 3, dir: "down", side: "heart" }, // shares col but different row anyway
+      { id: "m2", row: 3, col: 4, dir: "right", side: "mind" },
+      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
     ],
   },
   {
