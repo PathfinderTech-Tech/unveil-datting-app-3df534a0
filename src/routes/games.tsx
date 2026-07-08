@@ -40,7 +40,7 @@ function GamesGallery() {
       <div className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-8 flex items-end justify-between gap-6">
           <div>
-            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Playful Prototypes</div>
+            
             <h1 className="mt-2 font-display text-5xl font-light md:text-6xl">
               Play <span className="text-gradient-hero italic">first.</span>
             </h1>
