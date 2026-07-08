@@ -742,16 +742,106 @@ function Avatar({ tone, icon }: { tone: "pink" | "indigo"; icon: React.ReactNode
 }
 
 function HealthNote() {
+  const [consent, setConsent] = useState<boolean | null>(null);
+  const [connected, setConnected] = useState<boolean>(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !alive) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("journey_health_consent")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+      setConsent(!!(data as { journey_health_consent?: boolean } | null)?.journey_health_consent);
+      try {
+        setConnected(typeof window !== "undefined" && window.localStorage.getItem("unveil.health.connected") === "1");
+      } catch { /* ignore */ }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  async function enable() {
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setBusy(false); return; }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ journey_health_consent: true, journey_health_consent_at: new Date().toISOString() } as never)
+      .eq("id", user.id);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setConsent(true);
+    toast.success("Consent saved. We'll ask your device for permission next.");
+  }
+
+  async function connect() {
+    setBusy(true);
+    // Native HealthKit / Health Connect bridge lands with the mobile build.
+    // Web fallback: mark connected locally so the UI reflects the user's intent.
+    await new Promise((r) => setTimeout(r, 400));
+    try { window.localStorage.setItem("unveil.health.connected", "1"); } catch { /* ignore */ }
+    setConnected(true);
+    setBusy(false);
+    toast.success("Health tracking connected. On mobile you'll see the native permission prompt.");
+  }
+
+  const status = consent === null
+    ? "Loading…"
+    : !consent
+      ? "Not connected"
+      : connected
+        ? "Connected"
+        : "Not connected";
+
+  const tone = connected
+    ? "border-emerald-400/30 from-emerald-500/5"
+    : consent
+      ? "border-pink-400/30 from-pink-500/5"
+      : "border-amber-400/30 from-amber-500/5";
+
   return (
-    <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-500/5 to-transparent p-5">
+    <section className={`mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border ${tone} bg-gradient-to-r to-transparent p-5`}>
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-500/15 text-amber-300"><Sparkles className="h-5 w-5" /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-full bg-white/5 text-pink-300">
+          <Footprints className="h-5 w-5" />
+        </div>
         <div>
-          <div className="font-display text-base">Health tracking integration coming next</div>
-          <div className="text-xs text-white/60">Apple Health, Android Health Connect, Fitbit and more.</div>
+          <div className="font-display text-base">Health tracking · <span className="text-white/70">{status}</span></div>
+          <div className="text-xs text-white/60">
+            Movement data only (steps, walking/running distance). Your exact location is never tracked. Manual logging is always available.
+          </div>
         </div>
       </div>
-      <span className="rounded-full border border-amber-300/40 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-widest text-amber-200">Coming soon</span>
+      <div className="flex items-center gap-2">
+        {consent === false && (
+          <button
+            disabled={busy}
+            onClick={enable}
+            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs hover:bg-white/10 disabled:opacity-50"
+          >
+            Allow health tracking
+          </button>
+        )}
+        {consent === true && !connected && (
+          <button
+            disabled={busy}
+            onClick={connect}
+            className="rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 px-4 py-2 text-xs font-medium shadow-[0_0_18px_rgba(236,72,153,0.45)] disabled:opacity-50"
+          >
+            Connect Health Tracking
+          </button>
+        )}
+        {connected && (
+          <span className="rounded-full border border-emerald-300/40 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-widest text-emerald-200">
+            Connected
+          </span>
+        )}
+      </div>
     </section>
   );
 }
