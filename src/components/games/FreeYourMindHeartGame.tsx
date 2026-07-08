@@ -790,12 +790,15 @@ export function FreeYourMindHeartGame() {
         (a) => a.id !== id && (a.status === "idle" || a.status === "lost") && a.curRow === nr && a.curCol === nc,
       );
       if (blocker) {
+        const meLabel = arrow.side === "mind" ? "Mind" : "Heart";
+        const themLabel = blocker.side === "mind" ? "Mind" : "Heart";
         fail(
           blocker.side === arrow.side
-            ? `Two ${arrow.side === "mind" ? "Minds" : "Hearts"} collided. Release the front one first.`
-            : `${arrow.side === "mind" ? "Mind" : "Heart"} was blocked by ${blocker.side === "mind" ? "Mind" : "Heart"}. Free that one before releasing this.`,
+            ? `Blocked: another ${meLabel} arrow is in the way. Release it first — see the pulsing highlight.`
+            : `${meLabel} is blocked by a ${themLabel} arrow. Free the highlighted ${themLabel} first, then try again.`,
           nr,
           nc,
+          blocker.id,
         );
         return;
       }
