@@ -1157,6 +1157,7 @@ function Board({
   collisionAt,
   blockerId,
   preview,
+  previewSide,
   onTap,
   onPreview,
 }: {
@@ -1170,6 +1171,7 @@ function Board({
   collisionAt?: { row: number; col: number };
   blockerId?: string;
   preview: PathPreview | null;
+  previewSide?: Side;
   onTap: (id: string) => void;
   onPreview: (id: string | null) => void;
 }) {
