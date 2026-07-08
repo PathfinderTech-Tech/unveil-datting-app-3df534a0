@@ -716,7 +716,7 @@ export function FreeYourMindHeartGame() {
     const gateAt = (r: number, c: number) =>
       (level.gates ?? []).find((g) => g.row === r && g.col === c);
 
-    const fail = (reason: string, blockR: number, blockC: number) => {
+    const fail = (reason: string, blockR: number, blockC: number, blockerId?: string) => {
       haptic(40);
       localArrows = localArrows.map((a) =>
         a.id === id ? { ...a, status: "lost" as ArrowStatus, curRow: cur.r, curCol: cur.c } : a,
@@ -727,6 +727,7 @@ export function FreeYourMindHeartGame() {
         openGates,
         failReason: reason,
         collisionAt: { row: blockR, col: blockC },
+        blockerId,
       }));
       movingRef.current = false;
     };
