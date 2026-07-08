@@ -555,37 +555,90 @@ function RoseCorner({ className = "" }: { className?: string }) {
 function Header({
   muted,
   onToggleMute,
+  totals,
 }: {
   muted: boolean;
   onToggleMute: () => void;
+  totals: Totals;
 }) {
   return (
-    <div className="mb-6 flex items-center justify-between">
+    <div className="mb-4 flex items-center justify-between gap-2">
       <Link
         to="/challenges"
-        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 backdrop-blur transition hover:bg-white/10"
+        className="group inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/80 backdrop-blur-xl transition hover:border-fuchsia-400/60 hover:bg-white/[0.08]"
+        aria-label="Back"
       >
-        <ArrowLeft className="h-3.5 w-3.5" /> Challenges
+        <span
+          className="relative flex h-7 w-7 items-center justify-center rounded-full"
+          style={{
+            background:
+              "conic-gradient(from 180deg,#a78bfa,#ec4899,#f472b6,#a78bfa)",
+          }}
+        >
+          <span className="absolute inset-[2px] rounded-full bg-[#0a0616]" />
+          <Sparkles className="relative h-3.5 w-3.5 text-fuchsia-300" />
+        </span>
+        <span className="font-display text-sm tracking-[0.28em] text-white">
+          UNVEIL
+        </span>
       </Link>
-      <div className="text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/50">
-          UNVEIL · Solo Challenge
-        </div>
-        <div className="font-display text-lg text-white">
-          Free Your Mind &amp; Heart
-        </div>
+
+      <div className="flex items-center gap-2">
+        <Chip
+          icon={<Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-300" />}
+          value={totals.lovePoints.toLocaleString()}
+          ring="from-pink-500/70 to-fuchsia-500/70"
+        />
+        <Chip
+          icon={<Gem className="h-3.5 w-3.5 text-amber-300" />}
+          value={totals.xp.toLocaleString()}
+          ring="from-amber-400/70 to-orange-500/70"
+        />
+        <button
+          onClick={onToggleMute}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/70 backdrop-blur hover:bg-white/[0.1]"
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </button>
+        <button
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/70 backdrop-blur hover:bg-white/[0.1]"
+          aria-label="Menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
       </div>
-      <button
-        onClick={onToggleMute}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur hover:bg-white/10"
-        aria-label={muted ? "Unmute" : "Mute"}
-      >
-        {muted ? (
-          <VolumeX className="h-4 w-4" />
-        ) : (
-          <Volume2 className="h-4 w-4" />
-        )}
-      </button>
+    </div>
+  );
+}
+
+function Chip({
+  icon,
+  value,
+  ring,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  ring: string;
+}) {
+  return (
+    <div className="relative">
+      <div
+        className={`absolute -inset-[1px] rounded-full bg-gradient-to-r ${ring} opacity-70 blur-[2px]`}
+      />
+      <div className="relative flex items-center gap-1.5 rounded-full bg-[#0a0616]/90 px-2.5 py-1 backdrop-blur">
+        {icon}
+        <span className="font-mono text-[11px] font-semibold text-white">
+          {value}
+        </span>
+        <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/10 text-[10px] text-white/80">
+          +
+        </span>
+      </div>
     </div>
   );
 }
