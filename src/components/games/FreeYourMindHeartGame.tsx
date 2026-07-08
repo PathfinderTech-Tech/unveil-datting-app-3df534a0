@@ -1180,10 +1180,17 @@ function PlayScreen({
               level={level}
               arrows={arrows}
               blockerId={blockerId}
+              blockerCell={blockerCell}
               highlightHint={showHint ? blockerId : null}
               onArrowTap={releaseArrow}
               wallSet={wallSet}
+              openGates={openGates}
+              brokenWalls={brokenWalls}
+              collectedKeys={collectedKeys}
+              usedPortals={usedPortals}
+              triggeredSwitches={triggeredSwitches}
             />
+
             {paused && (
               <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 backdrop-blur">
                 <div className="text-center">
