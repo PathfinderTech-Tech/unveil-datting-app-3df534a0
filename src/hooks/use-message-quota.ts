@@ -25,9 +25,9 @@ const DEFAULT: MessageQuota = {
 
 const QUOTA_TIMEOUT_MS = 8000;
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<T>((_, reject) => {
       setTimeout(() => reject(new Error("quota timeout")), ms);
     }),
@@ -44,7 +44,7 @@ export function useMessageQuota() {
         setQuota({ ...DEFAULT, loading: false });
         return;
       }
-      const { data } = await withTimeout((supabase as any).rpc("get_message_quota", { _uid: user.id }), QUOTA_TIMEOUT_MS);
+      const { data } = await withTimeout<{ data: any }>((supabase as any).rpc("get_message_quota", { _uid: user.id }), QUOTA_TIMEOUT_MS);
       const row = Array.isArray(data) ? data[0] : data;
       if (row) {
         setQuota({

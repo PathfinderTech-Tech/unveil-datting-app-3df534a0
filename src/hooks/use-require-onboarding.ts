@@ -5,9 +5,9 @@ import { useAuth } from "@/hooks/use-auth";
 
 const ONBOARDING_CHECK_TIMEOUT_MS = 8000;
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<T>((_, reject) => {
       setTimeout(() => reject(new Error("onboarding check timeout")), ms);
     }),
