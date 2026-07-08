@@ -241,10 +241,18 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
 }
 
 function AppBootLayer() {
-  const { showOverlay, timedOut } = useLaunchState();
-
-  if (!showOverlay) return null;
-  return <LaunchOverlay timedOut={timedOut} />;
+  // Hide native splash on mount for Capacitor builds; no web overlay.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (!Capacitor.isNativePlatform()) return;
+        const { SplashScreen } = await import("@capacitor/splash-screen");
+        await SplashScreen.hide();
+      } catch { /* noop */ }
+    })();
+  }, []);
+  return null;
 }
 
 function AppChrome() {
