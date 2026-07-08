@@ -376,8 +376,16 @@ function Onboarding() {
     } else if (step === 3) {
       const discovery_mode = appearance === "real" ? "photo" : "avatar";
       ok = await persist({}, { discovery_mode });
+    } else if (step === 1) {
+      ok = await persist({}, {
+        journey_health_consent: healthConsent,
+        journey_health_consent_at: healthConsent ? new Date().toISOString() : null,
+      });
+      if (ok && healthConsent && typeof window !== "undefined") {
+        try { window.localStorage.setItem("unveil.health.requestOnLogin", "1"); } catch { /* ignore */ }
+      }
     } else {
-      // Steps 1, 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
+      // Steps 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
       ok = await persist();
     }
     if (!ok) return; // stay on this step so the user can retry instead of being silently bounced later
