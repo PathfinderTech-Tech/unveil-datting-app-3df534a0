@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Brain, Heart, Puzzle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brain, Heart, Sparkles } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 
 export const Route = createFileRoute("/game")({
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/game")({
       {
         name: "description",
         content:
-          "Play Complete the Picture, Free Your Mind & Heart, and more single-player challenges.",
+          "Play Free Your Mind & Heart, UNVEIL Love Tiles, and more single-player challenges.",
       },
     ],
   }),
@@ -27,21 +27,12 @@ type SoloGameTile = {
 
 const SOLO_GAMES: SoloGameTile[] = [
   {
-    to: "/challenges/complete-picture",
-    title: "Complete the Picture",
-    subtitle: "Classic Pattern Challenge",
-    description:
-      "Pick the missing piece and finish each visual puzzle. 10 rounds, timed, fully replayable.",
-    badge: "LIVE",
-    icon: Puzzle,
-  },
-  {
     to: "/challenges/free-your-mind-heart",
     title: "Free Your Mind & Heart",
-    subtitle: "New Maze Challenge",
+    subtitle: "Maze Challenge",
     description:
       "Clear both paths and guide the arrows to open both doors. Beat all 5 levels.",
-    badge: "NEW",
+    badge: "LIVE",
     icon: Sparkles,
   },
   {
@@ -77,7 +68,7 @@ function SoloMindGamesHub() {
             <span className="ml-2 bg-gradient-hero bg-clip-text text-transparent">Play with purpose.</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Complete the Picture stays available, and Free Your Mind & Heart is now live directly underneath it.
+            Free Your Mind & Heart and UNVEIL Love Tiles are ready to play.
           </p>
         </section>
 
