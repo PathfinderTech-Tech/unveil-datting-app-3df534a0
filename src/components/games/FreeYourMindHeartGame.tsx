@@ -85,6 +85,15 @@ interface RunState {
   openGates: string[];
   failReason?: string;
   collisionAt?: { row: number; col: number };
+  blockerId?: string;
+}
+
+type PathOutcome = "exit" | "wrong-exit" | "wall" | "edge" | "arrow" | "gate";
+interface PathPreview {
+  cells: Array<{ r: number; c: number }>;
+  outcome: PathOutcome;
+  blockerId?: string;
+  blockCell?: { r: number; c: number };
 }
 
 interface Totals {
