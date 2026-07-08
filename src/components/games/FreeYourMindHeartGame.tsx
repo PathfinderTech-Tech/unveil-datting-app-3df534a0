@@ -1011,6 +1011,7 @@ export function FreeYourMindHeartGame() {
           collisionAt={run.collisionAt}
           blockerId={run.blockerId}
           preview={preview}
+          previewSide={previewId ? run.arrows.find((a) => a.id === previewId)?.side : undefined}
           onTap={releaseArrow}
           onPreview={setPreviewId}
         />
