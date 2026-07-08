@@ -265,18 +265,6 @@ function MessagesPage() {
           />
         </div>
 
-        {rows.length === 0 && (
-          <div className="rounded-2xl border border-border bg-surface/40 p-8 text-center">
-            <h2 className="font-display text-xl">You don't have any conversations yet.</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Start matching to begin chatting.</p>
-            <Link
-              to="/matches"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow"
-            >
-              Find Matches
-            </Link>
-          </div>
-        )}
 
         {filtered.length > 0 && (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
