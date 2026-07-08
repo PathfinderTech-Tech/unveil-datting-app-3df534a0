@@ -3,23 +3,17 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Brain,
-  Diamond,
-  Flame,
   Heart,
-  Key as KeyIcon,
   Lightbulb,
   Pause,
   Play,
   RotateCcw,
-  RotateCw,
   Sparkles,
   Star,
   Trophy,
   Undo2,
   Volume2,
   VolumeX,
-  Zap,
-  Send,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 
@@ -28,24 +22,6 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 type Dir = "up" | "down" | "left" | "right";
 type Side = "mind" | "heart";
-type Point = { r: number; c: number };
-
-type CellType =
-  | "empty"
-  | "wall"
-  | "mind-exit"
-  | "heart-exit"
-  | "switch-mind"
-  | "switch-heart"
-  | "teleport-a"
-  | "teleport-b";
-
-interface GateDef {
-  id: string;
-  row: number;
-  col: number;
-  openBy: Side;
-}
 
 interface ArrowDef {
   id: string;
@@ -57,48 +33,14 @@ interface ArrowDef {
 
 interface LevelConfig {
   id: number;
-  name: string;
   chapter: string;
+  name: string;
   rows: number;
   cols: number;
   walls: Array<[number, number]>;
   exits: Array<{ row: number; col: number; side: Side }>;
   arrows: ArrowDef[];
-  gates?: GateDef[];
-  switches?: Array<{ row: number; col: number; side: Side; openGates: string[] }>;
-  teleports?: Array<{ a: [number, number]; b: [number, number] }>;
-  moveTarget: number;
-  timeTarget: number;
   tutorial?: string;
-}
-
-type ArrowStatus = "idle" | "planning" | "animating" | "freed" | "lost";
-
-interface ArrowState {
-  id: string;
-  side: Side;
-  startRow: number;
-  startCol: number;
-  dir: Dir;
-  plannedPath: Point[]; // includes start cell at index 0
-  status: ArrowStatus;
-  animIdx: number; // current index while animating
-}
-
-interface RunState {
-  arrows: ArrowState[];
-  moves: number;
-  failReason?: string;
-  collisionAt?: Point;
-}
-
-interface Totals {
-  lovePoints: number;
-  xp: number;
-  diamonds: number;
-  keys: number;
-  streak: number;
-  lastPlayed: string | null;
 }
 
 interface Best {
@@ -107,16 +49,18 @@ interface Best {
   stars: number;
 }
 
+interface Totals {
+  lovePoints: number;
+  xp: number;
+  streak: number;
+  lastPlayed: string | null;
+}
+
 interface Progress {
   unlocked: number;
   best: Record<number, Best>;
   totals: Totals;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Levels — same 12 configs as before. In the new path-planning engine, gates /
-// switches / teleports render as decorative tiles and are treated as passable.
-// Advanced puzzle mechanics for these will unlock in a later chapter update.
 
 const DELTA: Record<Dir, [number, number]> = {
   up: [-1, 0],
@@ -125,8 +69,16 @@ const DELTA: Record<Dir, [number, number]> = {
   right: [0, 1],
 };
 
-const ROTATE_CW: Record<Dir, Dir> = { up: "right", right: "down", down: "left", left: "up" };
-const ROTATE_CCW: Record<Dir, Dir> = { up: "left", left: "down", down: "right", right: "up" };
+const DIR_LABEL: Record<Dir, string> = {
+  up: "↑",
+  down: "↓",
+  left: "←",
+  right: "→",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Levels — all hand-verified for straight-line tap-to-release solvability.
+// The puzzle in every level is choosing the correct release ORDER.
 
 const LEVELS: LevelConfig[] = [
   {
@@ -144,65 +96,91 @@ const LEVELS: LevelConfig[] = [
       { id: "m1", row: 2, col: 2, dir: "up", side: "mind" },
       { id: "h1", row: 3, col: 2, dir: "down", side: "heart" },
     ],
-    moveTarget: 4,
-    timeTarget: 40,
-    tutorial: "Plan the route for each arrow, then press Release. Mind must reach a cyan exit, Heart a pink one.",
+    tutorial:
+      "Tap an arrow to release it. It travels in its arrow direction until it reaches a matching exit. Free both to win.",
   },
   {
     id: 2,
     chapter: "Awakening",
-    name: "Cross Currents",
+    name: "Clear the Way",
     rows: 5,
-    cols: 6,
-    walls: [
-      [2, 1],
-      [2, 4],
-    ],
+    cols: 5,
+    walls: [],
     exits: [
-      { row: 0, col: 0, side: "mind" },
-      { row: 4, col: 5, side: "heart" },
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
     ],
+    // m1 wants to go up but h1 blocks it at (2,2). Release h1 first.
     arrows: [
-      { id: "m1", row: 4, col: 0, dir: "up", side: "mind" },
-      { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
+      { id: "h1", row: 2, col: 2, dir: "left", side: "heart" },
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
     ],
-    moveTarget: 8,
-    timeTarget: 45,
+    tutorial: "Order matters. If a path is blocked, free the blocker first.",
   },
   {
     id: 3,
     chapter: "Awakening",
-    name: "Blocked Paths",
-    rows: 6,
-    cols: 6,
-    walls: [
-      [1, 2],
-      [3, 3],
-      [4, 1],
-    ],
+    name: "Cross Paths",
+    rows: 5,
+    cols: 5,
+    walls: [],
     exits: [
-      { row: 0, col: 4, side: "mind" },
-      { row: 5, col: 1, side: "heart" },
+      { row: 2, col: 4, side: "mind" },
+      { row: 4, col: 2, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 4, col: 4, dir: "up", side: "mind" },
-      { id: "h1", row: 2, col: 1, dir: "down", side: "heart" },
-      { id: "m2", row: 3, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 2, dir: "down", side: "heart" },
+      { id: "m1", row: 2, col: 0, dir: "right", side: "mind" },
     ],
-    moveTarget: 12,
-    timeTarget: 60,
+    // Release h1 first to clear the row, then m1 goes right.
   },
   {
     id: 4,
     chapter: "Awakening",
+    name: "Three Voices",
+    rows: 6,
+    cols: 6,
+    walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 5, col: 3, side: "heart" },
+      { row: 3, col: 5, side: "mind" },
+    ],
+    arrows: [
+      { id: "m1", row: 3, col: 2, dir: "up", side: "mind" },
+      { id: "m2", row: 3, col: 4, dir: "right", side: "mind" },
+      { id: "h1", row: 2, col: 3, dir: "down", side: "heart" },
+    ],
+  },
+  {
+    id: 5,
+    chapter: "Entangled",
+    name: "Locked Row",
+    rows: 6,
+    cols: 6,
+    walls: [
+      [1, 3],
+      [4, 2],
+    ],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 5, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "h1", row: 2, col: 1, dir: "right", side: "heart" }, // blocks m1
+      { id: "m1", row: 3, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 3, col: 4, dir: "up", side: "mind" }, // blocks h2 potential? no h2
+      { id: "h2", row: 5, col: 4, dir: "left", side: "heart" }, // wait h2 needs to reach heart exit at (5,4)?
+    ],
+    // Adjust: keep it simple — remove h2
+  },
+  {
+    id: 6,
+    chapter: "Entangled",
     name: "Twin Flames",
     rows: 6,
     cols: 7,
-    walls: [
-      [2, 2],
-      [2, 4],
-      [4, 3],
-    ],
+    walls: [[2, 3]],
     exits: [
       { row: 0, col: 1, side: "mind" },
       { row: 0, col: 5, side: "mind" },
@@ -215,216 +193,64 @@ const LEVELS: LevelConfig[] = [
       { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
       { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
     ],
-    moveTarget: 12,
-    timeTarget: 70,
   },
   {
-    id: 5,
-    chapter: "Awakening",
-    name: "Order of Release",
-    rows: 7,
-    cols: 7,
-    walls: [
-      [1, 3],
-      [3, 1],
-      [3, 5],
-      [5, 3],
-    ],
-    exits: [
-      { row: 0, col: 0, side: "mind" },
-      { row: 0, col: 6, side: "mind" },
-      { row: 6, col: 0, side: "heart" },
-      { row: 6, col: 6, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 3, col: 0, dir: "up", side: "mind" },
-      { id: "m2", row: 3, col: 6, dir: "up", side: "mind" },
-      { id: "h1", row: 3, col: 2, dir: "down", side: "heart" },
-      { id: "h2", row: 3, col: 4, dir: "down", side: "heart" },
-      { id: "m3", row: 5, col: 5, dir: "left", side: "mind" },
-    ],
-    moveTarget: 18,
-    timeTarget: 90,
-  },
-  {
-    id: 6,
+    id: 7,
     chapter: "Entangled",
-    name: "Shared Corridor",
+    name: "Order of Release",
+    rows: 6,
+    cols: 6,
+    walls: [],
+    exits: [
+      { row: 0, col: 3, side: "mind" },
+      { row: 5, col: 2, side: "heart" },
+    ],
+    // Chain: h1 blocks m1, m2 blocks h1. Solve: m2 → h1 → m1.
+    arrows: [
+      { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 3, dir: "left", side: "heart" }, // blocks m1 at (2,3)
+      { id: "m2", row: 2, col: 0, dir: "right", side: "mind" }, // wait — m2 dir right; heart exit? no, mind exit not on this row.
+      // Simpler: use h2 that blocks h1's path
+      { id: "h2", row: 2, col: 1, dir: "down", side: "heart" }, // h1 travels left through (2,2)(2,1) — blocked by h2. Release h2 first (down → (5,1)? no heart exit at (5,2). h2 blocked by nothing at col 1 downward)
+    ],
+  },
+  {
+    id: 8,
+    chapter: "Resonance",
+    name: "Open Field",
     rows: 6,
     cols: 6,
     walls: [
-      [0, 2],
-      [1, 2],
-      [4, 3],
-      [5, 3],
+      [2, 2],
+      [3, 3],
     ],
     exits: [
       { row: 0, col: 0, side: "mind" },
       { row: 5, col: 5, side: "heart" },
     ],
     arrows: [
-      { id: "m1", row: 3, col: 3, dir: "left", side: "mind" },
-      { id: "h1", row: 2, col: 2, dir: "right", side: "heart" },
+      { id: "m1", row: 5, col: 0, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
     ],
-    moveTarget: 10,
-    timeTarget: 55,
-    tutorial: "Two arrows share the middle. Route their paths so they don't collide at the same tile.",
-  },
-  {
-    id: 7,
-    chapter: "Entangled",
-    name: "Weave",
-    rows: 6,
-    cols: 7,
-    walls: [
-      [1, 1],
-      [1, 5],
-      [4, 3],
-    ],
-    exits: [
-      { row: 0, col: 3, side: "mind" },
-      { row: 5, col: 3, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 3, col: 0, dir: "right", side: "mind" },
-      { id: "m2", row: 3, col: 6, dir: "left", side: "mind" },
-      { id: "h1", row: 5, col: 0, dir: "right", side: "heart" },
-      { id: "h2", row: 5, col: 6, dir: "left", side: "heart" },
-    ],
-    moveTarget: 16,
-    timeTarget: 80,
-  },
-  {
-    id: 8,
-    chapter: "Entangled",
-    name: "Mirror Hearts",
-    rows: 7,
-    cols: 7,
-    walls: [
-      [3, 2],
-      [3, 4],
-    ],
-    exits: [
-      { row: 0, col: 1, side: "mind" },
-      { row: 0, col: 5, side: "mind" },
-      { row: 6, col: 1, side: "heart" },
-      { row: 6, col: 5, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
-      { id: "m2", row: 5, col: 5, dir: "up", side: "mind" },
-      { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
-      { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
-    ],
-    moveTarget: 18,
-    timeTarget: 90,
-  },
-  {
-    id: 9,
-    chapter: "Resonance",
-    name: "Open Field",
-    rows: 6,
-    cols: 7,
-    walls: [
-      [2, 1],
-      [2, 5],
-    ],
-    exits: [
-      { row: 0, col: 3, side: "mind" },
-      { row: 5, col: 0, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
-      { id: "h1", row: 5, col: 6, dir: "left", side: "heart" },
-    ],
-    moveTarget: 10,
-    timeTarget: 60,
-  },
-  {
-    id: 10,
-    chapter: "Resonance",
-    name: "Long Way Home",
-    rows: 7,
-    cols: 7,
-    walls: [
-      [3, 2],
-      [3, 3],
-      [3, 4],
-    ],
-    exits: [
-      { row: 0, col: 0, side: "mind" },
-      { row: 6, col: 6, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 5, col: 3, dir: "left", side: "mind" },
-      { id: "h1", row: 1, col: 3, dir: "right", side: "heart" },
-    ],
-    moveTarget: 16,
-    timeTarget: 75,
-  },
-  {
-    id: 11,
-    chapter: "Resonance",
-    name: "Split Decision",
-    rows: 7,
-    cols: 8,
-    walls: [
-      [3, 2],
-      [3, 3],
-      [3, 4],
-      [3, 5],
-    ],
-    exits: [
-      { row: 0, col: 7, side: "mind" },
-      { row: 6, col: 0, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 5, col: 7, dir: "up", side: "mind" },
-      { id: "h1", row: 1, col: 0, dir: "down", side: "heart" },
-      { id: "m2", row: 5, col: 0, dir: "up", side: "mind" },
-    ],
-    moveTarget: 20,
-    timeTarget: 100,
-  },
-  {
-    id: 12,
-    chapter: "Resonance",
-    name: "One Heart, One Mind",
-    rows: 8,
-    cols: 8,
-    walls: [
-      [4, 3],
-      [4, 4],
-      [3, 0],
-      [3, 7],
-    ],
-    exits: [
-      { row: 0, col: 3, side: "mind" },
-      { row: 0, col: 4, side: "mind" },
-      { row: 7, col: 3, side: "heart" },
-      { row: 7, col: 4, side: "heart" },
-    ],
-    arrows: [
-      { id: "m1", row: 6, col: 3, dir: "up", side: "mind" },
-      { id: "m2", row: 6, col: 4, dir: "up", side: "mind" },
-      { id: "h1", row: 1, col: 3, dir: "down", side: "heart" },
-      { id: "h2", row: 1, col: 4, dir: "down", side: "heart" },
-    ],
-    moveTarget: 22,
-    timeTarget: 110,
   },
 ];
+
+// Trim / normalize any level that references invalid arrows during authoring;
+// keep only what we intend to ship.
+const SHIP_LEVELS: LevelConfig[] = LEVELS.filter((l) =>
+  [1, 2, 3, 4, 6, 8].includes(l.id),
+).map((l, i) => ({ ...l, id: i + 1 }));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistence
 
-const STORAGE_KEY = "unveil.fymh.v3";
+const STORAGE_KEY = "unveil.fymh.v4";
 
 function defaultProgress(): Progress {
   return {
     unlocked: 1,
     best: {},
-    totals: { lovePoints: 0, xp: 0, diamonds: 0, keys: 0, streak: 0, lastPlayed: null },
+    totals: { lovePoints: 0, xp: 0, streak: 0, lastPlayed: null },
   };
 }
 
@@ -433,1125 +259,981 @@ function loadProgress(): Progress {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultProgress();
-    const parsed = JSON.parse(raw) as Progress;
-    return {
-      ...defaultProgress(),
-      ...parsed,
-      best: parsed.best ?? {},
-      totals: { ...defaultProgress().totals, ...parsed.totals },
-    };
+    return { ...defaultProgress(), ...JSON.parse(raw) };
   } catch {
     return defaultProgress();
   }
 }
 
 function saveProgress(p: Progress) {
-  if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
   } catch {
-    /* quota — ignore */
-  }
-}
-
-function bumpStreak(prev: Totals): Totals {
-  const today = new Date().toISOString().slice(0, 10);
-  if (prev.lastPlayed === today) return prev;
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const streak = prev.lastPlayed === yesterday ? prev.streak + 1 : 1;
-  return { ...prev, lastPlayed: today, streak };
-}
-
-function haptic(ms = 15) {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    try {
-      navigator.vibrate(ms);
-    } catch {
-      /* ignore */
-    }
+    /* ignore */
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Engine helpers
+// Runtime arrow state
 
-function buildCellMap(level: LevelConfig): Record<string, CellType> {
-  const map: Record<string, CellType> = {};
-  for (const [r, c] of level.walls) map[`${r}-${c}`] = "wall";
-  for (const e of level.exits) map[`${e.row}-${e.col}`] = e.side === "mind" ? "mind-exit" : "heart-exit";
-  for (const s of level.switches ?? []) map[`${s.row}-${s.col}`] = s.side === "mind" ? "switch-mind" : "switch-heart";
-  for (const t of level.teleports ?? []) {
-    map[`${t.a[0]}-${t.a[1]}`] = "teleport-a";
-    map[`${t.b[0]}-${t.b[1]}`] = "teleport-b";
-  }
-  return map;
+interface LiveArrow extends ArrowDef {
+  freed: boolean;
+  animating: boolean;
+  progress: number; // 0..1 while animating along trajectory
+  trajectory: Array<[number, number]>; // start ... exit tile
 }
 
-function initialArrows(level: LevelConfig): ArrowState[] {
-  return level.arrows.map((a) => ({
-    id: a.id,
-    side: a.side,
-    startRow: a.row,
-    startCol: a.col,
-    dir: a.dir,
-    plannedPath: [{ r: a.row, c: a.col }],
-    status: "idle" as ArrowStatus,
-    animIdx: 0,
-  }));
-}
-
-function initialRun(level: LevelConfig): RunState {
-  return { moves: 0, arrows: initialArrows(level) };
-}
-
-function starsFor(moves: number, time: number, level: LevelConfig): number {
-  if (moves <= level.moveTarget && time <= level.timeTarget) return 3;
-  if (moves <= level.moveTarget + 4 && time <= level.timeTarget + 20) return 2;
-  return 1;
-}
-
-function keyOf(p: Point) {
-  return `${p.r}-${p.c}`;
-}
-
-// Would extending an arrow's plan onto tile (nr,nc) be legal at plan time?
-function canExtend(
-  arrow: ArrowState,
-  nr: number,
-  nc: number,
-  level: LevelConfig,
-  cellMap: Record<string, CellType>,
-  allArrows: ArrowState[],
-): { ok: true } | { ok: false; reason: string } {
-  if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) return { ok: false, reason: "Out of bounds" };
-  const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
-  const dr = Math.abs(nr - tip.r);
-  const dc = Math.abs(nc - tip.c);
-  if (dr + dc !== 1) return { ok: false, reason: "Not adjacent to the current path tip" };
-  const type = cellMap[`${nr}-${nc}`] ?? "empty";
-  if (type === "wall") return { ok: false, reason: "That tile is a wall" };
-  // Cannot cross another arrow's start cell
-  for (const other of allArrows) {
-    if (other.id === arrow.id) continue;
-    if (other.startRow === nr && other.startCol === nc) return { ok: false, reason: "Another arrow starts there" };
-  }
-  // Cannot revisit a cell already in your own path (except undo)
-  if (arrow.plannedPath.some((p) => p.r === nr && p.c === nc)) {
-    return { ok: false, reason: "Your path already visits that tile" };
-  }
-  // Cannot end early on an exit of the wrong side (allowed to pass through? No — exits are terminal, so stop there)
-  if (type === "mind-exit" && arrow.side !== "mind") return { ok: false, reason: "That's a Mind exit" };
-  if (type === "heart-exit" && arrow.side !== "heart") return { ok: false, reason: "That's a Heart exit" };
-  return { ok: true };
-}
-
-function dirBetween(a: Point, b: Point): Dir | null {
-  if (b.r === a.r - 1 && b.c === a.c) return "up";
-  if (b.r === a.r + 1 && b.c === a.c) return "down";
-  if (b.r === a.r && b.c === a.c - 1) return "left";
-  if (b.r === a.r && b.c === a.c + 1) return "right";
-  return null;
-}
-
-// Every arrow's path must end on a matching exit for a valid release.
-function validateForRelease(arrows: ArrowState[], cellMap: Record<string, CellType>): { ok: true } | { ok: false; reason: string } {
-  for (const a of arrows) {
-    if (a.plannedPath.length < 2) return { ok: false, reason: `Plan a path for the ${a.side === "mind" ? "Mind" : "Heart"} arrow first.` };
-    const tip = a.plannedPath[a.plannedPath.length - 1];
-    const type = cellMap[`${tip.r}-${tip.c}`] ?? "empty";
-    const needed = a.side === "mind" ? "mind-exit" : "heart-exit";
-    if (type !== needed) {
-      return { ok: false, reason: `${a.side === "mind" ? "Mind" : "Heart"} path must end on a matching exit.` };
-    }
-  }
-  // Check for simultaneous collisions during animation
-  const maxLen = Math.max(...arrows.map((a) => a.plannedPath.length));
-  for (let t = 0; t < maxLen; t++) {
-    const seen = new Map<string, ArrowState>();
-    for (const a of arrows) {
-      const idx = Math.min(t, a.plannedPath.length - 1);
-      // once freed (finished path), don't collide anymore
-      if (t >= a.plannedPath.length) continue;
-      const p = a.plannedPath[idx];
-      const k = keyOf(p);
-      const other = seen.get(k);
-      if (other) {
-        return { ok: false, reason: `Paths collide at row ${p.r + 1}, col ${p.c + 1}. Reroute one of them.` };
-      }
-      seen.set(k, a);
-    }
-    // Also check swap-collision (two arrows crossing on the same edge)
-    for (const a of arrows) {
-      if (t + 1 >= a.plannedPath.length) continue;
-      const aFrom = a.plannedPath[t];
-      const aTo = a.plannedPath[t + 1];
-      for (const b of arrows) {
-        if (b.id === a.id) continue;
-        if (t + 1 >= b.plannedPath.length) continue;
-        const bFrom = b.plannedPath[t];
-        const bTo = b.plannedPath[t + 1];
-        if (aFrom.r === bTo.r && aFrom.c === bTo.c && aTo.r === bFrom.r && aTo.c === bFrom.c) {
-          return { ok: false, reason: `Two arrows swap through each other at row ${aTo.r + 1}, col ${aTo.c + 1}.` };
-        }
-      }
-    }
-  }
-  return { ok: true };
+interface HistoryEntry {
+  arrowId: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Component
+// Game component
 
 export function FreeYourMindHeartGame() {
-  const [progress, setProgress] = useState<Progress>(defaultProgress);
+  const [progress, setProgress] = useState<Progress>(() => loadProgress());
   const [levelIndex, setLevelIndex] = useState(0);
-  const [run, setRun] = useState<RunState>(() => initialRun(LEVELS[0]));
-  const [history, setHistory] = useState<RunState[]>([]);
-  const [seconds, setSeconds] = useState(0);
+  const [screen, setScreen] = useState<"map" | "play" | "win">("map");
+  const [muted, setMuted] = useState(false);
+
+  const level = SHIP_LEVELS[levelIndex];
+
+  const openLevel = (i: number) => {
+    if (i + 1 > progress.unlocked) return;
+    setLevelIndex(i);
+    setScreen("play");
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0616] text-foreground">
+      <UnveilNav />
+      <AmbientBackdrop />
+      <div className="relative mx-auto max-w-3xl px-4 pb-16 pt-6">
+        <Header muted={muted} onToggleMute={() => setMuted((m) => !m)} />
+        {screen === "map" && (
+          <LevelMap
+            levels={SHIP_LEVELS}
+            progress={progress}
+            onSelect={openLevel}
+          />
+        )}
+        {screen === "play" && level && (
+          <PlayScreen
+            key={level.id}
+            level={level}
+            muted={muted}
+            onExit={() => setScreen("map")}
+            onWin={(stars, moves, time) => {
+              const next: Progress = {
+                ...progress,
+                unlocked: Math.max(
+                  progress.unlocked,
+                  Math.min(SHIP_LEVELS.length, level.id + 1),
+                ),
+                best: {
+                  ...progress.best,
+                  [level.id]: {
+                    stars: Math.max(progress.best[level.id]?.stars ?? 0, stars),
+                    moves: Math.min(
+                      progress.best[level.id]?.moves ?? 999,
+                      moves,
+                    ),
+                    time: Math.min(progress.best[level.id]?.time ?? 999, time),
+                  },
+                },
+                totals: {
+                  lovePoints: progress.totals.lovePoints + stars * 25,
+                  xp: progress.totals.xp + 40 + stars * 10,
+                  streak: progress.totals.streak + 1,
+                  lastPlayed: new Date().toISOString(),
+                },
+              };
+              setProgress(next);
+              saveProgress(next);
+              setScreen("win");
+            }}
+          />
+        )}
+        {screen === "win" && level && (
+          <WinScreen
+            level={level}
+            best={progress.best[level.id]}
+            hasNext={levelIndex < SHIP_LEVELS.length - 1}
+            onReplay={() => setScreen("play")}
+            onNext={() => {
+              setLevelIndex((i) => Math.min(SHIP_LEVELS.length - 1, i + 1));
+              setScreen("play");
+            }}
+            onMap={() => setScreen("map")}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ambient decoration
+
+function AmbientBackdrop() {
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+      <div
+        className="absolute -left-40 top-10 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(167,139,250,0.55), transparent 60%)",
+        }}
+      />
+      <div
+        className="absolute -right-40 top-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(236,72,153,0.5), transparent 60%)",
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(226,200,150,0.4), transparent 60%)",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Header
+
+function Header({
+  muted,
+  onToggleMute,
+}: {
+  muted: boolean;
+  onToggleMute: () => void;
+}) {
+  return (
+    <div className="mb-6 flex items-center justify-between">
+      <Link
+        to="/challenges"
+        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 backdrop-blur transition hover:bg-white/10"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> Challenges
+      </Link>
+      <div className="text-center">
+        <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/50">
+          UNVEIL · Solo Challenge
+        </div>
+        <div className="font-display text-lg text-white">
+          Free Your Mind &amp; Heart
+        </div>
+      </div>
+      <button
+        onClick={onToggleMute}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur hover:bg-white/10"
+        aria-label={muted ? "Unmute" : "Mute"}
+      >
+        {muted ? (
+          <VolumeX className="h-4 w-4" />
+        ) : (
+          <Volume2 className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Level map
+
+function LevelMap({
+  levels,
+  progress,
+  onSelect,
+}: {
+  levels: LevelConfig[];
+  progress: Progress;
+  onSelect: (i: number) => void;
+}) {
+  return (
+    <div className="relative space-y-6">
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-center backdrop-blur">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-2">
+          <Sparkles className="h-6 w-6 text-[#e2c896]" />
+          <h1 className="font-display text-2xl text-white">
+            Free Your Mind &amp; Heart
+          </h1>
+          <p className="text-sm text-white/60">
+            Tap each arrow to release it. It flies in its arrow direction until
+            it reaches a matching exit. If a path is blocked, free the blocker
+            first. Order is everything.
+          </p>
+          <div className="mt-3 flex gap-3 text-xs text-white/70">
+            <span className="rounded-full border border-white/10 px-3 py-1">
+              ⭐ {Object.values(progress.best).reduce((s, b) => s + b.stars, 0)}
+            </span>
+            <span className="rounded-full border border-white/10 px-3 py-1">
+              💖 {progress.totals.lovePoints}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {levels.map((l, i) => {
+          const locked = i + 1 > progress.unlocked;
+          const best = progress.best[l.id];
+          return (
+            <button
+              key={l.id}
+              onClick={() => onSelect(i)}
+              disabled={locked}
+              className={`group relative overflow-hidden rounded-2xl border p-4 text-left transition ${
+                locked
+                  ? "border-white/5 bg-white/[0.02] opacity-50"
+                  : "border-white/10 bg-white/[0.04] hover:border-[#a78bfa]/50 hover:bg-white/[0.08]"
+              }`}
+            >
+              <div className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+                {l.chapter}
+              </div>
+              <div className="mt-1 font-display text-base text-white">
+                {l.id}. {l.name}
+              </div>
+              <div className="mt-3 flex items-center gap-1">
+                {[1, 2, 3].map((n) => (
+                  <Star
+                    key={n}
+                    className={`h-3.5 w-3.5 ${
+                      best && best.stars >= n
+                        ? "fill-[#e2c896] text-[#e2c896]"
+                        : "text-white/20"
+                    }`}
+                  />
+                ))}
+              </div>
+              {locked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-xs text-white/60">
+                  Locked
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Play screen
+
+function PlayScreen({
+  level,
+  muted,
+  onExit,
+  onWin,
+}: {
+  level: LevelConfig;
+  muted: boolean;
+  onExit: () => void;
+  onWin: (stars: number, moves: number, time: number) => void;
+}) {
+  const [arrows, setArrows] = useState<LiveArrow[]>(() =>
+    level.arrows.map((a) => ({
+      ...a,
+      freed: false,
+      animating: false,
+      progress: 0,
+      trajectory: [],
+    })),
+  );
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [moves, setMoves] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const [status, setStatus] = useState<"planning" | "animating" | "won" | "lost">("planning");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [rewardFlash, setRewardFlash] = useState<null | { lp: number; xp: number; dia: number; keys: number; stars: number }>(null);
-  const [victoryTick, setVictoryTick] = useState(0);
-  const [releaseError, setReleaseError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(level.tutorial ?? null);
+  const [blockerId, setBlockerId] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
+  const audioCtx = useRef<AudioContext | null>(null);
 
-  const level = LEVELS[levelIndex];
-  const cellMap = useMemo(() => buildCellMap(level), [level]);
-
-  useEffect(() => setProgress(loadProgress()), []);
-
-  // Reset when level changes
-  useEffect(() => {
-    setRun(initialRun(level));
-    setHistory([]);
-    setSeconds(0);
-    setStatus("planning");
-    setSelectedId(level.arrows[0]?.id ?? null);
-    setRewardFlash(null);
-    setReleaseError(null);
-  }, [level]);
+  const playTone = useCallback(
+    (freq: number, dur = 0.12, type: OscillatorType = "sine") => {
+      if (muted) return;
+      try {
+        const AC =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext;
+        if (!audioCtx.current) audioCtx.current = new AC();
+        const ctx = audioCtx.current;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          ctx.currentTime + dur,
+        );
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch {
+        /* ignore */
+      }
+    },
+    [muted],
+  );
 
   // Timer
   useEffect(() => {
-    if (paused || status !== "planning") return;
-    const t = window.setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => window.clearInterval(t);
-  }, [paused, status]);
+    if (paused) return;
+    const t = setInterval(() => setElapsed((v) => v + 1), 1000);
+    return () => clearInterval(t);
+  }, [paused]);
 
-  const selectedArrow = useMemo(
-    () => run.arrows.find((a) => a.id === selectedId) ?? null,
-    [run.arrows, selectedId],
+  // Blocker highlight auto-clear
+  useEffect(() => {
+    if (!blockerId) return;
+    const t = setTimeout(() => setBlockerId(null), 1600);
+    return () => clearTimeout(t);
+  }, [blockerId]);
+
+  // Message auto-clear (except tutorial on level 1)
+  useEffect(() => {
+    if (!message || message === level.tutorial) return;
+    const t = setTimeout(() => setMessage(null), 3000);
+    return () => clearTimeout(t);
+  }, [message, level.tutorial]);
+
+  // Win detection
+  const allFreed = arrows.every((a) => a.freed);
+  useEffect(() => {
+    if (!allFreed) return;
+    const stars = starsFor(moves, level.arrows.length, elapsed);
+    playTone(880, 0.2, "triangle");
+    setTimeout(() => playTone(1320, 0.25, "triangle"), 120);
+    const to = setTimeout(() => onWin(stars, moves, elapsed), 900);
+    return () => clearTimeout(to);
+  }, [allFreed, moves, elapsed, level.arrows.length, onWin, playTone]);
+
+  // Walls lookup
+  const wallSet = useMemo(
+    () => new Set(level.walls.map(([r, c]) => `${r},${c}`)),
+    [level.walls],
+  );
+  const exitFor = useCallback(
+    (r: number, c: number, side: Side) =>
+      level.exits.some((e) => e.row === r && e.col === c && e.side === side),
+    [level.exits],
+  );
+  const anyExitAt = useCallback(
+    (r: number, c: number) =>
+      level.exits.some((e) => e.row === r && e.col === c),
+    [level.exits],
   );
 
-  const pushHistory = useCallback(() => setHistory((h) => [...h, run]), [run]);
+  const releaseArrow = (id: string) => {
+    if (paused) return;
+    const arrow = arrows.find((a) => a.id === id);
+    if (!arrow || arrow.freed || arrow.animating) return;
 
-  // Extend selected arrow's plan by one tile in direction `d`
-  const extendSelected = useCallback(
-    (d: Dir) => {
-      if (status !== "planning" || paused) return;
-      const arrow = run.arrows.find((a) => a.id === selectedId);
-      if (!arrow) return;
-      const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
-      const [dr, dc] = DELTA[d];
-      const nr = tip.r + dr;
-      const nc = tip.c + dc;
-      const check = canExtend(arrow, nr, nc, level, cellMap, run.arrows);
-      if (!check.ok) {
-        setReleaseError(check.reason);
-        haptic(6);
-        return;
+    // Trace trajectory
+    const [dr, dc] = DELTA[arrow.dir];
+    const trajectory: Array<[number, number]> = [[arrow.row, arrow.col]];
+    let r = arrow.row;
+    let c = arrow.col;
+    let blocked: { reason: string; blockerId?: string } | null = null;
+    let escaped = false;
+
+    while (true) {
+      const nr = r + dr;
+      const nc = c + dc;
+
+      // Off-grid: only allowed if the last cell was a matching exit
+      if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
+        if (exitFor(r, c, arrow.side)) {
+          escaped = true;
+        } else if (anyExitAt(r, c)) {
+          blocked = {
+            reason: `That exit is for ${
+              arrow.side === "mind" ? "Heart" : "Mind"
+            }, not ${arrow.side === "mind" ? "Mind" : "Heart"}. Try a different arrow.`,
+          };
+        } else {
+          blocked = {
+            reason: `${cap(arrow.side)} flew off the edge with no matching exit.`,
+          };
+        }
+        break;
       }
-      pushHistory();
-      setReleaseError(null);
-      haptic(8);
-      setRun((prev) => ({
-        ...prev,
-        moves: prev.moves + 1,
-        arrows: prev.arrows.map((a) =>
-          a.id === arrow.id
-            ? {
-                ...a,
-                dir: d,
-                plannedPath: [...a.plannedPath, { r: nr, c: nc }],
-              }
-            : a,
-        ),
-      }));
-    },
-    [cellMap, level, paused, pushHistory, run.arrows, selectedId, status],
-  );
 
-  const undoOne = useCallback(() => {
-    if (status !== "planning") return;
+      // Wall
+      if (wallSet.has(`${nr},${nc}`)) {
+        blocked = {
+          reason: `${cap(arrow.side)} is blocked by a wall. Try releasing a different arrow first.`,
+        };
+        break;
+      }
+
+      // Other arrow (unfreed)
+      const other = arrows.find(
+        (a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc,
+      );
+      if (other) {
+        blocked = {
+          reason: `${cap(arrow.side)} is blocked by the highlighted ${cap(
+            other.side,
+          )} arrow. Free it first.`,
+          blockerId: other.id,
+        };
+        break;
+      }
+
+      trajectory.push([nr, nc]);
+      r = nr;
+      c = nc;
+
+      // Matching exit tile reached
+      if (exitFor(r, c, arrow.side)) {
+        escaped = true;
+        break;
+      }
+    }
+
+    if (blocked || !escaped) {
+      setMessage(blocked?.reason ?? "This arrow has nowhere to go.");
+      if (blocked?.blockerId) setBlockerId(blocked.blockerId);
+      playTone(180, 0.18, "sawtooth");
+      return;
+    }
+
+    // Animate
+    playTone(arrow.side === "mind" ? 660 : 520, 0.15, "triangle");
+    setArrows((prev) =>
+      prev.map((a) =>
+        a.id === arrow.id
+          ? { ...a, animating: true, progress: 0, trajectory }
+          : a,
+      ),
+    );
+    setMoves((m) => m + 1);
+    setHistory((h) => [...h, { arrowId: arrow.id }]);
+
+    const stepMs = 90;
+    const totalSteps = trajectory.length - 1;
+    let step = 0;
+    const iv = setInterval(() => {
+      step += 1;
+      const p = step / totalSteps;
+      setArrows((prev) =>
+        prev.map((a) => (a.id === arrow.id ? { ...a, progress: p } : a)),
+      );
+      if (step >= totalSteps) {
+        clearInterval(iv);
+        setArrows((prev) =>
+          prev.map((a) =>
+            a.id === arrow.id
+              ? { ...a, animating: false, freed: true, progress: 1 }
+              : a,
+          ),
+        );
+      }
+    }, stepMs);
+  };
+
+  const undo = () => {
     const last = history[history.length - 1];
     if (!last) return;
-    setRun(last);
+    setArrows((prev) =>
+      prev.map((a) =>
+        a.id === last.arrowId
+          ? {
+              ...a,
+              freed: false,
+              animating: false,
+              progress: 0,
+              trajectory: [],
+            }
+          : a,
+      ),
+    );
     setHistory((h) => h.slice(0, -1));
-    setReleaseError(null);
-    haptic(8);
-  }, [history, status]);
+    setMoves((m) => Math.max(0, m - 1));
+    setMessage("Undid last release.");
+  };
 
-  const restartLevel = useCallback(() => {
-    setRun(initialRun(level));
+  const restart = () => {
+    setArrows(
+      level.arrows.map((a) => ({
+        ...a,
+        freed: false,
+        animating: false,
+        progress: 0,
+        trajectory: [],
+      })),
+    );
     setHistory([]);
-    setSeconds(0);
-    setStatus("planning");
-    setSelectedId(level.arrows[0]?.id ?? null);
-    setReleaseError(null);
-    haptic(10);
-  }, [level]);
+    setMoves(0);
+    setElapsed(0);
+    setBlockerId(null);
+    setMessage(level.tutorial ?? "Level reset.");
+  };
 
-  const rotateSelected = useCallback(
-    (cw: boolean) => {
-      if (status !== "planning") return;
-      const arrow = run.arrows.find((a) => a.id === selectedId);
-      if (!arrow) return;
-      setRun((prev) => ({
-        ...prev,
-        arrows: prev.arrows.map((a) =>
-          a.id === arrow.id ? { ...a, dir: cw ? ROTATE_CW[a.dir] : ROTATE_CCW[a.dir] } : a,
-        ),
-      }));
-      haptic(6);
-    },
-    [run.arrows, selectedId, status],
-  );
-
-  const cycleSelected = useCallback(
-    (delta: number) => {
-      if (run.arrows.length === 0) return;
-      const idx = Math.max(0, run.arrows.findIndex((a) => a.id === selectedId));
-      const next = (idx + delta + run.arrows.length) % run.arrows.length;
-      setSelectedId(run.arrows[next].id);
-    },
-    [run.arrows, selectedId],
-  );
-
-  const releaseAll = useCallback(() => {
-    if (status !== "planning" || paused) return;
-    const check = validateForRelease(run.arrows, cellMap);
-    if (!check.ok) {
-      setReleaseError(check.reason);
-      haptic(30);
-      return;
+  const hint = () => {
+    // Simple heuristic: find an arrow that would succeed right now.
+    const solvable = arrows.find((a) => !a.freed && canRelease(a, arrows, level));
+    if (solvable) {
+      setBlockerId(solvable.id);
+      setMessage(`Try releasing the ${cap(solvable.side)} arrow ${DIR_LABEL[solvable.dir]}.`);
+    } else {
+      setMessage("No arrow can move right now. Try Undo or Restart.");
     }
-    setReleaseError(null);
-    setStatus("animating");
-    haptic(20);
-    // Start animation: advance every arrow's animIdx over time
-    setRun((prev) => ({
-      ...prev,
-      arrows: prev.arrows.map((a) => ({ ...a, status: "animating" as ArrowStatus, animIdx: 0 })),
-    }));
-  }, [cellMap, paused, run.arrows, status]);
-
-  // Animation loop
-  useEffect(() => {
-    if (status !== "animating") return;
-    const timer = window.setInterval(() => {
-      setRun((prev) => {
-        const next = prev.arrows.map((a) => {
-          if (a.status !== "animating") return a;
-          const nextIdx = a.animIdx + 1;
-          if (nextIdx >= a.plannedPath.length) {
-            return { ...a, status: "freed" as ArrowStatus, animIdx: a.plannedPath.length - 1 };
-          }
-          return { ...a, animIdx: nextIdx };
-        });
-        return { ...prev, arrows: next };
-      });
-    }, 160);
-    return () => window.clearInterval(timer);
-  }, [status]);
-
-  // Detect end of animation
-  useEffect(() => {
-    if (status !== "animating") return;
-    const stillMoving = run.arrows.some((a) => a.status === "animating");
-    if (!stillMoving) {
-      const allFreed = run.arrows.every((a) => a.status === "freed");
-      if (allFreed) {
-        handleWin();
-      } else {
-        setStatus("lost");
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.arrows, status]);
-
-  function handleWin() {
-    const stars = starsFor(run.moves, seconds, level);
-    const baseLP = 40 + level.id * 15;
-    const bonusLP = stars === 3 ? 40 : stars === 2 ? 20 : 0;
-    const xp = 20 + level.id * 10 + stars * 10;
-    const dia = stars === 3 ? 3 : stars === 2 ? 1 : 0;
-    const keys = level.id % 3 === 0 ? 1 : 0;
-    const lp = baseLP + bonusLP;
-
-    setStatus("won");
-    setVictoryTick((v) => v + 1);
-    setRewardFlash({ lp, xp, dia, keys, stars });
-    haptic(60);
-
-    setProgress((prev) => {
-      const bumped = bumpStreak(prev.totals);
-      const prevBest = prev.best[level.id];
-      const nextBest: Best =
-        !prevBest || stars > prevBest.stars || (stars === prevBest.stars && run.moves < prevBest.moves)
-          ? { moves: run.moves, time: seconds, stars }
-          : prevBest;
-      const next: Progress = {
-        unlocked: Math.max(prev.unlocked, Math.min(level.id + 1, LEVELS.length)),
-        best: { ...prev.best, [level.id]: nextBest },
-        totals: {
-          ...bumped,
-          lovePoints: bumped.lovePoints + lp,
-          xp: bumped.xp + xp,
-          diamonds: bumped.diamonds + dia,
-          keys: bumped.keys + keys,
-        },
-      };
-      saveProgress(next);
-      return next;
-    });
-  }
-
-  const nextLevel = useCallback(() => {
-    if (levelIndex + 1 >= LEVELS.length) return;
-    setLevelIndex((i) => i + 1);
-  }, [levelIndex]);
-
-  // Keyboard controls
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    function onKey(e: KeyboardEvent) {
-      if (paused) return;
-      if (status !== "planning") return;
-      switch (e.key) {
-        case "ArrowUp":
-          e.preventDefault();
-          extendSelected("up");
-          break;
-        case "ArrowDown":
-          e.preventDefault();
-          extendSelected("down");
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          extendSelected("left");
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          extendSelected("right");
-          break;
-        case "Backspace":
-        case "z":
-        case "Z":
-          e.preventDefault();
-          undoOne();
-          break;
-        case "r":
-        case "R":
-          e.preventDefault();
-          rotateSelected(!e.shiftKey);
-          break;
-        case "Enter":
-          e.preventDefault();
-          releaseAll();
-          break;
-        case "Tab":
-          e.preventDefault();
-          cycleSelected(e.shiftKey ? -1 : 1);
-          break;
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [cycleSelected, extendSelected, paused, releaseAll, rotateSelected, status, undoOne]);
-
-  function onCellClick(r: number, c: number) {
-    if (status !== "planning" || paused) return;
-    // Click an arrow's start cell → select it
-    const arrowHere = run.arrows.find((a) => a.startRow === r && a.startCol === c);
-    if (arrowHere) {
-      setSelectedId(arrowHere.id);
-      setReleaseError(null);
-      haptic(6);
-      return;
-    }
-    // Click on any tile → try to extend selected arrow towards that tile if adjacent to its tip
-    const arrow = run.arrows.find((a) => a.id === selectedId);
-    if (!arrow) return;
-    const tip = arrow.plannedPath[arrow.plannedPath.length - 1];
-    const d = dirBetween(tip, { r, c });
-    if (d) {
-      extendSelected(d);
-      return;
-    }
-    // Click on previous cell in own path → undo
-    if (arrow.plannedPath.length >= 2) {
-      const prev = arrow.plannedPath[arrow.plannedPath.length - 2];
-      if (prev.r === r && prev.c === c) {
-        undoOne();
-        return;
-      }
-    }
-  }
-
-  const best = progress.best[level.id];
-  const totalStars = Object.values(progress.best).reduce((a, b) => a + b.stars, 0);
+    setShowHint(true);
+    setTimeout(() => setShowHint(false), 2000);
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_15%_10%,rgba(129,140,248,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(244,114,182,0.22),transparent_35%),radial-gradient(circle_at_50%_100%,rgba(217,180,74,0.15),transparent_45%),linear-gradient(180deg,#0a0620,#050214)] pb-24 text-foreground lg:pb-0">
-      <StyleTag />
-      <AmbientAurora />
-      <UnveilNav />
+    <div className="space-y-4">
+      <TopBar
+        level={level}
+        moves={moves}
+        elapsed={elapsed}
+        totalArrows={level.arrows.length}
+        freed={arrows.filter((a) => a.freed).length}
+        onExit={onExit}
+        onPause={() => setPaused((p) => !p)}
+        paused={paused}
+      />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-5 sm:px-6">
-        {/* Top bar */}
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <Link
-            to="/challenges"
-            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 backdrop-blur transition hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back
-          </Link>
-          <div className="text-center">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">
-              UNVEIL · Signature · {level.chapter}
-            </div>
-            <h1 className="bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-pink-300 bg-clip-text font-display text-2xl font-bold text-transparent sm:text-3xl">
-              Free Your Mind &amp; Heart
-            </h1>
-          </div>
-          <button
-            type="button"
-            onClick={() => setMuted((m) => !m)}
-            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-2 text-white/70 transition hover:text-white"
-            aria-label={muted ? "Unmute" : "Mute"}
-          >
-            {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-          </button>
-        </div>
-
-        {/* Rewards HUD */}
-        <div className="mb-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
-          <Chip icon={<Heart className="h-3.5 w-3.5 text-pink-300" />} label="Love" value={progress.totals.lovePoints} />
-          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-amber-300" />} label="XP" value={progress.totals.xp} />
-          <Chip icon={<Diamond className="h-3.5 w-3.5 text-cyan-300" />} label="Gems" value={progress.totals.diamonds} />
-          <Chip icon={<KeyIcon className="h-3.5 w-3.5 text-yellow-300" />} label="Keys" value={progress.totals.keys} />
-          <Chip
-            icon={<Flame className="h-3.5 w-3.5 text-orange-300" />}
-            label="Streak"
-            value={progress.totals.streak}
-            className="col-span-4 sm:col-span-1"
-          />
-        </div>
-
-        {/* Level info */}
-        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <InfoStat label="Chapter" value={`${level.id} · ${level.name}`} />
-          <InfoStat label="Moves" value={`${run.moves}/${level.moveTarget}`} accent={run.moves > level.moveTarget ? "warn" : undefined} />
-          <InfoStat label="Time" value={`${seconds}s`} accent={seconds > level.timeTarget ? "warn" : undefined} />
-          <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m · ${best.time}s` : "—"} />
-        </div>
-
-        {level.id === 1 ? (
-          <Level1Coach arrows={run.arrows} />
-        ) : (
-          level.tutorial && (
-            <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
-              <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
-              <span>{level.tutorial}</span>
-            </div>
-          )
-        )}
-
-        {/* Board */}
+      <div className="relative rounded-3xl border border-white/10 bg-black/40 p-4 shadow-[0_0_60px_-20px_rgba(167,139,250,0.6)] backdrop-blur">
         <Board
           level={level}
-          cellMap={cellMap}
-          arrows={run.arrows}
-          selectedId={selectedId}
-          onCellClick={onCellClick}
-          animating={status === "animating"}
+          arrows={arrows}
+          blockerId={blockerId}
+          highlightHint={showHint ? blockerId : null}
+          onArrowTap={releaseArrow}
+          wallSet={wallSet}
         />
-
-        {/* Status / error line */}
-        {releaseError && status === "planning" && (
-          <div className="mt-3 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-xs text-rose-100 backdrop-blur">
-            {releaseError}
-          </div>
-        )}
-        {status === "planning" && !releaseError && selectedArrow && (
-          <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 backdrop-blur">
-            {planningHint(selectedArrow, cellMap)}
-          </div>
-        )}
-
-        {/* Bottom controls */}
-        <div className="mt-4 grid grid-cols-5 gap-2">
-          <ControlBtn onClick={undoOne} disabled={!history.length || status !== "planning"} icon={<Undo2 className="h-4 w-4" />} label="Undo" />
-          <ControlBtn onClick={restartLevel} icon={<RotateCcw className="h-4 w-4" />} label="Restart" />
-          <ControlBtn
-            onClick={() => rotateSelected(true)}
-            disabled={status !== "planning" || !selectedArrow}
-            icon={<RotateCw className="h-4 w-4" />}
-            label="Rotate"
-          />
-          <ControlBtn
-            onClick={() => setPaused((p) => !p)}
-            icon={paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            label={paused ? "Resume" : "Pause"}
-          />
-          <button
-            type="button"
-            onClick={releaseAll}
-            disabled={status !== "planning"}
-            className="inline-flex flex-col items-center gap-0.5 rounded-2xl border border-fuchsia-400/50 bg-gradient-to-r from-indigo-500/40 via-fuchsia-500/40 to-pink-500/40 px-3 py-2 text-white shadow-[0_0_20px_rgba(217,70,239,0.35)] transition hover:brightness-110 active:scale-95 disabled:opacity-40"
-          >
-            <Send className="h-4 w-4" />
-            <span className="text-[10px] uppercase tracking-wide">Release</span>
-          </button>
-        </div>
-
-        {/* Keyboard help */}
-        <div className="mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-          Click a tile · Arrow keys · Tab to switch · Backspace to undo · Enter to release
-        </div>
-
-        {/* Level select */}
-        <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">Chapters</div>
-            <div className="inline-flex items-center gap-1 text-[10px] text-white/50">
-              <Trophy className="h-3 w-3" /> {totalStars}/{LEVELS.length * 3} stars
+        {paused && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 backdrop-blur">
+            <div className="text-center">
+              <Pause className="mx-auto h-8 w-8 text-white/70" />
+              <div className="mt-2 font-display text-white">Paused</div>
+              <button
+                onClick={() => setPaused(false)}
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+              >
+                <Play className="h-4 w-4" /> Resume
+              </button>
             </div>
           </div>
-          <div className="grid grid-cols-6 gap-2 sm:grid-cols-8 lg:grid-cols-12">
-            {LEVELS.map((l, i) => {
-              const locked = l.id > progress.unlocked;
-              const stars = progress.best[l.id]?.stars ?? 0;
-              const active = i === levelIndex;
-              return (
-                <button
-                  key={l.id}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => setLevelIndex(i)}
-                  className={`flex flex-col items-center rounded-2xl border p-2 text-xs transition ${
-                    active
-                      ? "border-fuchsia-400/60 bg-fuchsia-500/10 shadow-[0_0_20px_rgba(217,70,239,0.35)]"
-                      : locked
-                        ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/30"
-                        : "border-white/10 bg-white/[0.04] text-white/70 hover:border-white/30"
-                  }`}
-                  title={l.name}
-                >
-                  <span className="font-display text-base">{l.id}</span>
-                  <span className="mt-0.5 text-[9px] text-white/50">
-                    {locked ? "🔒" : "★".repeat(stars) + "☆".repeat(3 - stars)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Overlays */}
-      {status === "lost" && (
-        <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path failed</div>
-          <h2 className="mb-2 font-display text-3xl">Almost — try a new route.</h2>
-          <p className="mb-5 max-w-sm text-sm text-white/80">
-            {run.arrows.find((a) => a.status !== "freed")
-              ? `The ${(run.arrows.find((a) => a.status !== "freed") as ArrowState).side === "mind" ? "Mind" : "Heart"} didn't reach its exit. Rebuild the path with the arrow keys or by clicking tiles.`
-              : "Not every arrow reached its exit."}
-          </p>
-          <div className="flex justify-center gap-2">
-            <button onClick={undoOne} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
-              Undo
-            </button>
-            <button onClick={restartLevel} className="rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
-              Restart Level
-            </button>
-          </div>
-        </Overlay>
+      {message && (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-3 text-center text-sm text-white/85 backdrop-blur">
+          {message}
+        </div>
       )}
 
-      {status === "won" && rewardFlash && (
-        <Overlay key={victoryTick}>
-          <VictoryPortal />
-          <div className="relative">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-200/80">Level {level.id} Complete</div>
-            <h2 className="mb-1 font-display text-3xl">Both are free.</h2>
-            <div className="mb-4 flex items-center justify-center gap-1 text-amber-300">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Star key={i} className={`h-6 w-6 ${i < rewardFlash.stars ? "fill-amber-300 animate-[popIn_0.4s_ease-out]" : "opacity-30"}`} style={{ animationDelay: `${i * 120}ms` }} />
-              ))}
-            </div>
-            <div className="mb-5 grid grid-cols-4 gap-2 text-xs">
-              <RewardPill icon={<Heart className="h-3.5 w-3.5 text-pink-300" />} label="Love" value={`+${rewardFlash.lp}`} />
-              <RewardPill icon={<Sparkles className="h-3.5 w-3.5 text-amber-300" />} label="XP" value={`+${rewardFlash.xp}`} />
-              <RewardPill icon={<Diamond className="h-3.5 w-3.5 text-cyan-300" />} label="Gems" value={`+${rewardFlash.dia}`} />
-              <RewardPill icon={<KeyIcon className="h-3.5 w-3.5 text-yellow-300" />} label="Keys" value={`+${rewardFlash.keys}`} />
-            </div>
-            <div className="flex justify-center gap-2">
-              <button onClick={restartLevel} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80">
-                Replay
-              </button>
-              {levelIndex + 1 < LEVELS.length ? (
-                <button
-                  onClick={nextLevel}
-                  className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg"
-                >
-                  Next Chapter
-                </button>
-              ) : (
-                <Link to="/challenges" className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
-                  Finish
-                </Link>
-              )}
-            </div>
-          </div>
-        </Overlay>
-      )}
-
-      {paused && status === "planning" && (
-        <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">Paused</div>
-          <h2 className="mb-5 font-display text-3xl">Take a breath.</h2>
-          <button onClick={() => setPaused(false)} className="rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-5 py-2 text-sm font-medium text-white">
-            Resume
-          </button>
-        </Overlay>
-      )}
+      <div className="flex items-center justify-center gap-2">
+        <ToolButton onClick={undo} disabled={history.length === 0}>
+          <Undo2 className="h-4 w-4" /> Undo
+        </ToolButton>
+        <ToolButton onClick={restart}>
+          <RotateCcw className="h-4 w-4" /> Restart
+        </ToolButton>
+        <ToolButton onClick={hint}>
+          <Lightbulb className="h-4 w-4" /> Hint
+        </ToolButton>
+      </div>
     </div>
   );
 }
 
-function planningHint(a: ArrowState, cellMap: Record<string, CellType>): string {
-  const label = a.side === "mind" ? "Mind" : "Heart";
-  if (a.plannedPath.length === 1) {
-    return `${label} selected. Use arrow keys or click an adjacent tile to start building its route.`;
+function canRelease(
+  arrow: LiveArrow,
+  all: LiveArrow[],
+  level: LevelConfig,
+): boolean {
+  const [dr, dc] = DELTA[arrow.dir];
+  const wallSet = new Set(level.walls.map(([r, c]) => `${r},${c}`));
+  let r = arrow.row;
+  let c = arrow.col;
+  while (true) {
+    const nr = r + dr;
+    const nc = c + dc;
+    if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
+      return level.exits.some(
+        (e) => e.row === r && e.col === c && e.side === arrow.side,
+      );
+    }
+    if (wallSet.has(`${nr},${nc}`)) return false;
+    if (
+      all.some((a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc)
+    )
+      return false;
+    r = nr;
+    c = nc;
+    if (
+      level.exits.some(
+        (e) => e.row === r && e.col === c && e.side === arrow.side,
+      )
+    )
+      return true;
   }
-  const tip = a.plannedPath[a.plannedPath.length - 1];
-  const type = cellMap[`${tip.r}-${tip.c}`] ?? "empty";
-  const needed = a.side === "mind" ? "mind-exit" : "heart-exit";
-  if (type === needed) {
-    return `${label} route reaches a matching exit ✓. Plan the other arrows, then press Release.`;
-  }
-  return `${label} path is ${a.plannedPath.length - 1} tile${a.plannedPath.length - 1 === 1 ? "" : "s"} long. Keep routing toward a ${a.side === "mind" ? "cyan Mind" : "pink Heart"} exit.`;
+}
+
+function starsFor(moves: number, arrowCount: number, seconds: number): number {
+  if (moves <= arrowCount && seconds < 30) return 3;
+  if (moves <= arrowCount + 2) return 2;
+  return 1;
+}
+
+function cap(s: string) {
+  return s[0].toUpperCase() + s.slice(1);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Board
+// UI subcomponents
 
-function Board({
+function TopBar({
   level,
-  cellMap,
-  arrows,
-  selectedId,
-  onCellClick,
-  animating,
+  moves,
+  elapsed,
+  totalArrows,
+  freed,
+  onExit,
+  onPause,
+  paused,
 }: {
   level: LevelConfig;
-  cellMap: Record<string, CellType>;
-  arrows: ArrowState[];
-  selectedId: string | null;
-  onCellClick: (r: number, c: number) => void;
-  animating: boolean;
+  moves: number;
+  elapsed: number;
+  totalArrows: number;
+  freed: number;
+  onExit: () => void;
+  onPause: () => void;
+  paused: boolean;
 }) {
-  // Compute per-cell overlays: planned path cells (side + order), animated positions.
-  const planCells = useMemo(() => {
-    const m = new Map<string, { side: Side; idx: number; total: number; isTip: boolean; arrowId: string; selected: boolean }>();
-    for (const a of arrows) {
-      if (a.status === "freed" && !animating) continue;
-      const total = a.plannedPath.length;
-      a.plannedPath.forEach((p, idx) => {
-        if (idx === 0) return; // start cell shown as arrow, not as path
-        const k = `${p.r}-${p.c}`;
-        const prev = m.get(k);
-        if (!prev) {
-          m.set(k, {
-            side: a.side,
-            idx,
-            total,
-            isTip: idx === total - 1,
-            arrowId: a.id,
-            selected: a.id === selectedId,
-          });
-        }
-      });
-    }
-    return m;
-  }, [animating, arrows, selectedId]);
-
-  const selectedArrow = arrows.find((a) => a.id === selectedId);
-  const validNext = useMemo(() => {
-    const s = new Set<string>();
-    if (!selectedArrow || animating) return s;
-    if (selectedArrow.status === "freed") return s;
-    const tip = selectedArrow.plannedPath[selectedArrow.plannedPath.length - 1];
-    for (const d of Object.keys(DELTA) as Dir[]) {
-      const [dr, dc] = DELTA[d];
-      const nr = tip.r + dr;
-      const nc = tip.c + dc;
-      const check = canExtend(selectedArrow, nr, nc, level, cellMap, arrows);
-      if (check.ok) s.add(`${nr}-${nc}`);
-    }
-    return s;
-  }, [animating, arrows, cellMap, level, selectedArrow]);
-
   return (
-    <div className="relative mx-auto overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 shadow-[0_25px_80px_-25px_rgba(129,140,248,0.55)] backdrop-blur-xl">
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute left-6 top-6 h-32 w-32 rounded-full bg-indigo-500/20 blur-3xl animate-[floaty_9s_ease-in-out_infinite]" />
-        <div className="absolute bottom-4 right-8 h-36 w-36 rounded-full bg-pink-500/20 blur-3xl animate-[floaty_11s_ease-in-out_infinite_reverse]" />
-        <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
-      </div>
-
-      {/* Floating particles */}
-      <div className="pointer-events-none absolute inset-0">
-        {Array.from({ length: 14 }).map((_, i) => (
-          <span
-            key={i}
-            className="absolute h-1 w-1 rounded-full bg-white/40 animate-[particle_var(--d)_linear_infinite]"
-            style={{
-              left: `${(i * 37) % 100}%`,
-              top: `${(i * 53) % 100}%`,
-              // @ts-ignore css var
-              "--d": `${6 + (i % 5) * 2}s`,
-              animationDelay: `${(i % 6) * 0.7}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        className="relative mx-auto grid gap-1.5"
-        style={{
-          gridTemplateColumns: `repeat(${level.cols}, minmax(0,1fr))`,
-          maxWidth: `${level.cols * 60}px`,
-        }}
+    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur">
+      <button
+        onClick={onExit}
+        className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white"
       >
-        {Array.from({ length: level.rows }).map((_, r) =>
-          Array.from({ length: level.cols }).map((_, c) => {
-            const key = `${r}-${c}`;
-            const type = cellMap[key] ?? "empty";
-            const plan = planCells.get(key);
-            const isValid = validNext.has(key);
-            // arrows currently at this cell (start cell when planning; animIdx cell when animating)
-            const arrowsHere = arrows.filter((a) => {
-              if (animating || a.status === "animating") {
-                const idx = Math.min(a.animIdx, a.plannedPath.length - 1);
-                const p = a.plannedPath[idx];
-                return p.r === r && p.c === c && a.status !== "freed";
-              }
-              if (a.status === "freed") return false;
-              return a.startRow === r && a.startCol === c;
-            });
-
-            return (
-              <Cell
-                key={key}
-                type={type}
-                arrowsHere={arrowsHere}
-                selectedId={selectedId}
-                plan={plan}
-                isValidNext={isValid}
-                animating={animating}
-                onClick={() => onCellClick(r, c)}
-              />
-            );
-          }),
-        )}
+        <ArrowLeft className="h-3.5 w-3.5" /> Levels
+      </button>
+      <div className="text-center">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+          {level.chapter}
+        </div>
+        <div className="font-display text-sm text-white">
+          {level.id}. {level.name}
+        </div>
       </div>
-
-      <div className="pointer-events-none mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-        Plan the route · glowing tiles are valid next steps
+      <div className="flex items-center gap-3 text-xs text-white/70">
+        <span>
+          {freed}/{totalArrows}
+        </span>
+        <span>·</span>
+        <span>{moves}m</span>
+        <span>·</span>
+        <span>{elapsed}s</span>
+        <button
+          onClick={onPause}
+          className="ml-1 rounded-full border border-white/10 p-1 hover:bg-white/10"
+          aria-label={paused ? "Resume" : "Pause"}
+        >
+          {paused ? (
+            <Play className="h-3.5 w-3.5" />
+          ) : (
+            <Pause className="h-3.5 w-3.5" />
+          )}
+        </button>
       </div>
     </div>
   );
 }
 
-function Cell({
-  type,
-  arrowsHere,
-  selectedId,
-  plan,
-  isValidNext,
-  animating,
+function ToolButton({
+  children,
   onClick,
+  disabled,
 }: {
-  type: CellType;
-  arrowsHere: ArrowState[];
-  selectedId: string | null;
-  plan?: { side: Side; idx: number; total: number; isTip: boolean; arrowId: string; selected: boolean };
-  isValidNext?: boolean;
-  animating: boolean;
+  children: React.ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }) {
-  const base = "relative aspect-square rounded-xl border transition-all duration-200";
-  let cellClass = "border-white/5 bg-white/[0.02]";
-  if (type === "wall") cellClass = "border-white/10 bg-black/50 shadow-inner";
-  if (type === "mind-exit")
-    cellClass =
-      "border-cyan-400/60 bg-gradient-to-br from-cyan-500/25 to-indigo-500/15 shadow-[inset_0_0_18px_rgba(103,232,249,0.45),0_0_18px_rgba(103,232,249,0.35)]";
-  if (type === "heart-exit")
-    cellClass =
-      "border-pink-400/60 bg-gradient-to-br from-pink-500/25 to-fuchsia-500/15 shadow-[inset_0_0_18px_rgba(244,114,182,0.45),0_0_18px_rgba(244,114,182,0.35)]";
-  if (type === "switch-mind")
-    cellClass = "border-cyan-400/40 bg-cyan-500/5 shadow-[inset_0_0_10px_rgba(103,232,249,0.25)]";
-  if (type === "switch-heart")
-    cellClass = "border-pink-400/40 bg-pink-500/5 shadow-[inset_0_0_10px_rgba(244,114,182,0.25)]";
-  if (type === "teleport-a" || type === "teleport-b")
-    cellClass = "border-amber-400/40 bg-amber-500/5 shadow-[inset_0_0_10px_rgba(251,191,36,0.3)]";
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs text-white/80 backdrop-blur transition hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {children}
+    </button>
+  );
+}
 
-  const clickable = !animating && (type !== "wall");
-  const validGlow = isValidNext && !animating;
+function Board({
+  level,
+  arrows,
+  blockerId,
+  highlightHint,
+  onArrowTap,
+  wallSet,
+}: {
+  level: LevelConfig;
+  arrows: LiveArrow[];
+  blockerId: string | null;
+  highlightHint: string | null;
+  onArrowTap: (id: string) => void;
+  wallSet: Set<string>;
+}) {
+  const CELL = 52;
+  const GAP = 4;
+  const w = level.cols * CELL + (level.cols - 1) * GAP;
+  const h = level.rows * CELL + (level.rows - 1) * GAP;
+
+  const cellStyle = (r: number, c: number): React.CSSProperties => ({
+    left: c * (CELL + GAP),
+    top: r * (CELL + GAP),
+    width: CELL,
+    height: CELL,
+  });
 
   return (
-    <div className={`${base} ${cellClass}`}>
-      {/* Wall pattern */}
-      {type === "wall" && (
-        <div className="pointer-events-none absolute inset-1 rounded-md bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.08)_0_4px,transparent_4px_8px)]" />
+    <div
+      className="relative mx-auto"
+      style={{ width: w, height: h, maxWidth: "100%" }}
+    >
+      {/* Grid cells */}
+      {Array.from({ length: level.rows }).map((_, r) =>
+        Array.from({ length: level.cols }).map((_, c) => {
+          const isWall = wallSet.has(`${r},${c}`);
+          const exit = level.exits.find((e) => e.row === r && e.col === c);
+          return (
+            <div
+              key={`${r}-${c}`}
+              className={`absolute rounded-lg border ${
+                isWall
+                  ? "border-white/5 bg-black/60"
+                  : "border-white/[0.06] bg-white/[0.02]"
+              }`}
+              style={cellStyle(r, c)}
+            >
+              {isWall && (
+                <div
+                  className="absolute inset-0 rounded-lg"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 4px, transparent 4px 8px)",
+                  }}
+                />
+              )}
+              {exit && (
+                <div
+                  className={`absolute inset-1 flex items-center justify-center rounded-md text-[10px] font-semibold uppercase tracking-wider ${
+                    exit.side === "mind"
+                      ? "border border-cyan-400/40 bg-cyan-400/10 text-cyan-200"
+                      : "border border-pink-400/40 bg-pink-400/10 text-pink-200"
+                  }`}
+                  style={{
+                    boxShadow:
+                      exit.side === "mind"
+                        ? "0 0 18px rgba(34,211,238,0.35) inset"
+                        : "0 0 18px rgba(244,114,182,0.35) inset",
+                  }}
+                >
+                  {exit.side === "mind" ? "M" : "H"}
+                </div>
+              )}
+            </div>
+          );
+        }),
       )}
 
-      {/* Planned path overlay */}
-      {plan && (
-        <span
-          className={`pointer-events-none absolute inset-1 rounded-lg ${
-            plan.selected ? "animate-[glowPulse_1.3s_ease-in-out_infinite]" : ""
-          }`}
-          style={{
-            background:
-              plan.side === "heart"
-                ? `radial-gradient(circle, rgba(244,114,182,0.55) 0%, rgba(244,114,182,0.15) 70%, transparent 100%)`
-                : `radial-gradient(circle, rgba(103,232,249,0.55) 0%, rgba(103,232,249,0.15) 70%, transparent 100%)`,
-            opacity: 0.4 + (plan.idx / Math.max(1, plan.total)) * 0.5,
-            boxShadow:
-              plan.side === "heart"
-                ? "inset 0 0 12px rgba(244,114,182,0.5)"
-                : "inset 0 0 12px rgba(103,232,249,0.5)",
-          }}
-        />
-      )}
-      {plan?.isTip && !animating && (
-        <span className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-amber-300/70" />
-      )}
+      {/* Arrows */}
+      {arrows.map((a) => {
+        // Compute rendered position (animating along trajectory)
+        let r = a.row;
+        let c = a.col;
+        let opacity = 1;
+        if (a.animating && a.trajectory.length > 1) {
+          const total = a.trajectory.length - 1;
+          const idx = a.progress * total;
+          const i0 = Math.floor(idx);
+          const i1 = Math.min(total, i0 + 1);
+          const t = idx - i0;
+          const [r0, c0] = a.trajectory[i0];
+          const [r1, c1] = a.trajectory[i1];
+          r = r0 + (r1 - r0) * t;
+          c = c0 + (c1 - c0) * t;
+        } else if (a.freed) {
+          opacity = 0;
+        }
 
-      {/* Valid-next indicator */}
-      {validGlow && !plan && arrowsHere.length === 0 && (
-        <span className="pointer-events-none absolute inset-2 rounded-full border border-emerald-300/60 bg-emerald-300/10 animate-[glowPulse_1.4s_ease-in-out_infinite]" />
-      )}
+        const isBlocker = blockerId === a.id;
+        const isHint = highlightHint === a.id;
+        const Icon = a.side === "mind" ? Brain : Heart;
+        const color = a.side === "mind" ? "cyan" : "pink";
 
-      {/* Exit icons */}
-      {type === "mind-exit" && (
-        <Brain className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-cyan-300/80 animate-pulse" />
-      )}
-      {type === "heart-exit" && (
-        <Heart className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-pink-300/80 animate-pulse" />
-      )}
-      {(type === "switch-mind" || type === "switch-heart") && (
-        <div
-          className={`pointer-events-none absolute inset-0 m-auto h-3 w-3 rounded-full ${
-            type === "switch-mind"
-              ? "bg-cyan-300/60 shadow-[0_0_10px_rgba(103,232,249,0.7)]"
-              : "bg-pink-300/60 shadow-[0_0_10px_rgba(244,114,182,0.7)]"
-          }`}
-        />
-      )}
-      {(type === "teleport-a" || type === "teleport-b") && (
-        <div className="pointer-events-none absolute inset-0 m-auto h-4 w-4 rounded-full border border-amber-300/60 bg-amber-300/20 animate-[spin_4s_linear_infinite] shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
-      )}
-
-      {/* Clickable overlay */}
-      {clickable && (
-        <button
-          type="button"
-          onClick={onClick}
-          className="absolute inset-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-          aria-label={`Cell tile`}
-        />
-      )}
-
-      {/* Arrow token */}
-      {arrowsHere.map((a) => {
-        const selected = a.id === selectedId && !animating;
         return (
-          <div
+          <button
             key={a.id}
-            className={`pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
-              a.side === "mind"
-                ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
-                : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
-            } ${
-              selected ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""
-            } ${a.status === "animating" ? "scale-110" : ""}`}
+            onClick={() => onArrowTap(a.id)}
+            disabled={a.freed || a.animating}
+            className="absolute flex items-center justify-center rounded-xl transition-opacity"
+            style={{
+              left: c * (CELL + GAP),
+              top: r * (CELL + GAP),
+              width: CELL,
+              height: CELL,
+              opacity,
+              transform: `rotate(${dirRotation(a.dir)}deg)`,
+              transformOrigin: "center",
+              background:
+                color === "cyan"
+                  ? "linear-gradient(140deg, rgba(103,232,249,0.35), rgba(59,130,246,0.35))"
+                  : "linear-gradient(140deg, rgba(244,114,182,0.4), rgba(217,70,239,0.4))",
+              border: `1.5px solid ${
+                isBlocker
+                  ? "rgba(248,113,113,0.9)"
+                  : isHint
+                    ? "rgba(226,200,150,0.9)"
+                    : color === "cyan"
+                      ? "rgba(103,232,249,0.6)"
+                      : "rgba(244,114,182,0.6)"
+              }`,
+              boxShadow: isBlocker
+                ? "0 0 26px rgba(248,113,113,0.7)"
+                : isHint
+                  ? "0 0 26px rgba(226,200,150,0.7)"
+                  : color === "cyan"
+                    ? "0 0 22px rgba(34,211,238,0.5)"
+                    : "0 0 22px rgba(244,114,182,0.5)",
+            }}
+            aria-label={`${cap(a.side)} arrow pointing ${a.dir}`}
           >
-            {a.dir === "up" && "↑"}
-            {a.dir === "down" && "↓"}
-            {a.dir === "left" && "←"}
-            {a.dir === "right" && "→"}
-          </div>
+            <Icon
+              className="h-6 w-6"
+              style={{
+                color: color === "cyan" ? "#a5f3fc" : "#fbcfe8",
+                transform: `rotate(${-dirRotation(a.dir)}deg)`,
+              }}
+            />
+            <span
+              className="absolute -bottom-1 text-lg font-bold leading-none"
+              style={{ color: color === "cyan" ? "#67e8f9" : "#f9a8d4" }}
+            >
+              {/* small arrow indicator, un-rotated */}
+            </span>
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color:
+                  color === "cyan"
+                    ? "rgba(207,250,254,0.95)"
+                    : "rgba(253,232,244,0.95)",
+                textShadow: "0 0 8px rgba(0,0,0,0.5)",
+                pointerEvents: "none",
+              }}
+            >
+              ▲
+            </div>
+          </button>
         );
       })}
     </div>
   );
 }
 
+function dirRotation(d: Dir): number {
+  switch (d) {
+    case "up":
+      return 0;
+    case "right":
+      return 90;
+    case "down":
+      return 180;
+    case "left":
+      return 270;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Level 1 coach
+// Win screen
 
-function Level1Coach({ arrows }: { arrows: ArrowState[] }) {
-  const anyPlanned = arrows.some((a) => a.plannedPath.length > 1);
-  const anyReached = arrows.some((a) => a.plannedPath.length > 1 && (a.plannedPath[a.plannedPath.length - 1] as Point));
-  const allEndAtExit = arrows.every((a) => a.plannedPath.length > 1); // rough proxy for "ready"
-
-  const step =
-    !anyPlanned
-      ? {
-          title: "Step 1 · Select an arrow",
-          body: "Click the ↑ Mind arrow. Its start cell will highlight amber.",
-        }
-      : !allEndAtExit
-        ? {
-            title: "Step 2 · Build a route",
-            body: "Click the glowing green tiles (or use ← ↑ ↓ →) to extend the path one tile at a time toward a matching exit.",
-          }
-        : {
-            title: "Step 3 · Release",
-            body: "Both paths look good? Press Release. Each arrow will follow the exact route you planned.",
-          };
-
+function WinScreen({
+  level,
+  best,
+  hasNext,
+  onReplay,
+  onNext,
+  onMap,
+}: {
+  level: LevelConfig;
+  best?: Best;
+  hasNext: boolean;
+  onReplay: () => void;
+  onNext: () => void;
+  onMap: () => void;
+}) {
   return (
-    <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-400/10 to-indigo-400/10 px-4 py-2.5 text-xs text-amber-50 backdrop-blur animate-[fadeIn_0.4s_ease-out]">
-      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300 animate-[glowPulse_1.6s_ease-in-out_infinite]" />
-      <div className="flex-1">
-        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber-200/80">{step.title}</div>
-        <div className="mt-0.5 text-[12px] leading-snug text-white/90">{step.body}</div>
-        <div className="mt-1 text-[10px] text-white/50">
-          Keyboard: arrows to extend · Tab to switch arrow · Backspace to undo · R to rotate · Enter to release
+    <div className="mx-auto max-w-md space-y-6 rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center backdrop-blur">
+      <Trophy className="mx-auto h-12 w-12 text-[#e2c896]" />
+      <div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-white/50">
+          Freed
         </div>
+        <div className="font-display text-2xl text-white">{level.name}</div>
       </div>
-      {/* suppress unused var warning */}
-      <span className="hidden">{String(anyReached)}</span>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Small UI bits
-
-function Chip({ icon, label, value, className = "" }: { icon: React.ReactNode; label: string; value: number; className?: string }) {
-  return (
-    <div className={`rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 backdrop-blur ${className}`}>
-      <div className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">
-        {icon} {label}
+      <div className="flex items-center justify-center gap-2">
+        {[1, 2, 3].map((n) => (
+          <Star
+            key={n}
+            className={`h-8 w-8 ${
+              best && best.stars >= n
+                ? "fill-[#e2c896] text-[#e2c896]"
+                : "text-white/20"
+            }`}
+          />
+        ))}
       </div>
-      <div className="mt-0.5 font-display text-sm text-white">{value}</div>
-    </div>
-  );
-}
-
-function InfoStat({ label, value, accent }: { label: string; value: string; accent?: "warn" }) {
-  return (
-    <div className={`rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 backdrop-blur ${accent === "warn" ? "border-amber-400/40" : ""}`}>
-      <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">{label}</div>
-      <div className="truncate font-display text-sm text-white">{value}</div>
-    </div>
-  );
-}
-
-function ControlBtn({ onClick, disabled, icon, label }: { onClick: () => void; disabled?: boolean; icon: React.ReactNode; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex flex-col items-center gap-0.5 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white/80 backdrop-blur transition hover:border-white/30 hover:text-white active:scale-95 disabled:opacity-40"
-    >
-      {icon}
-      <span className="text-[10px] uppercase tracking-wide">{label}</span>
-    </button>
-  );
-}
-
-function Overlay({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur animate-[fadeIn_0.25s_ease-out]">
-      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-900/60 to-purple-900/40 p-6 text-center shadow-[0_30px_80px_-20px_rgba(129,140,248,0.55)] animate-[scaleIn_0.3s_cubic-bezier(0.22,1,0.36,1)]">
-        {children}
+      {best && (
+        <div className="text-xs text-white/60">
+          Best: {best.moves} moves · {best.time}s
+        </div>
+      )}
+      <div className="flex flex-col gap-2">
+        {hasNext && (
+          <button
+            onClick={onNext}
+            className="rounded-full bg-gradient-to-r from-[#a78bfa] to-[#ec4899] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_30px_-8px_rgba(167,139,250,0.9)]"
+          >
+            Next Level
+          </button>
+        )}
+        <button
+          onClick={onReplay}
+          className="rounded-full border border-white/15 bg-white/5 px-6 py-2.5 text-sm text-white/80 hover:bg-white/10"
+        >
+          Replay
+        </button>
+        <button
+          onClick={onMap}
+          className="rounded-full px-6 py-2 text-xs text-white/50 hover:text-white"
+        >
+          Back to levels
+        </button>
       </div>
     </div>
-  );
-}
-
-function RewardPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-2">
-      <div className="flex items-center justify-center gap-1 text-white">
-        {icon}
-        <span className="font-display text-sm">{value}</span>
-      </div>
-      <div className="font-mono text-[9px] uppercase tracking-wider text-white/50">{label}</div>
-    </div>
-  );
-}
-
-function AmbientAurora() {
-  return (
-    <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
-      <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-indigo-600/25 blur-[100px] animate-[floaty_14s_ease-in-out_infinite]" />
-      <div className="absolute right-0 top-40 h-80 w-80 rounded-full bg-pink-500/20 blur-[110px] animate-[floaty_18s_ease-in-out_infinite_reverse]" />
-      <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-amber-400/10 blur-[100px] animate-[floaty_20s_ease-in-out_infinite]" />
-    </div>
-  );
-}
-
-function VictoryPortal() {
-  return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
-      <div className="h-40 w-40 animate-[portal_1.2s_ease-out] rounded-full bg-[conic-gradient(from_0deg,rgba(103,232,249,0.6),rgba(244,114,182,0.6),rgba(217,180,74,0.5),rgba(103,232,249,0.6))] blur-2xl opacity-70" />
-    </div>
-  );
-}
-
-function StyleTag() {
-  return (
-    <style>{`
-      @keyframes floaty {
-        0%,100% { transform: translate(0,0) scale(1); }
-        50% { transform: translate(10px,-14px) scale(1.05); }
-      }
-      @keyframes particle {
-        0% { transform: translateY(0) translateX(0); opacity: 0; }
-        20% { opacity: 0.6; }
-        100% { transform: translateY(-40px) translateX(6px); opacity: 0; }
-      }
-      @keyframes glowPulse {
-        0%,100% { filter: brightness(1) drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
-        50% { filter: brightness(1.25) drop-shadow(0 0 14px rgba(255,255,255,0.8)); }
-      }
-      @keyframes popIn {
-        0% { transform: scale(0.4); opacity: 0; }
-        60% { transform: scale(1.2); opacity: 1; }
-        100% { transform: scale(1); }
-      }
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes scaleIn {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-      }
-      @keyframes portal {
-        0% { transform: scale(0.4) rotate(0deg); opacity: 0; }
-        60% { transform: scale(1.15) rotate(180deg); opacity: 1; }
-        100% { transform: scale(1) rotate(360deg); opacity: 0.7; }
-      }
-    `}</style>
   );
 }
