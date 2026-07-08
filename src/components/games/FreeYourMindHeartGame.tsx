@@ -23,6 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { toast } from "sonner";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -349,7 +350,402 @@ const LEVELS: LevelConfig[] = [
     tutorial:
       "Everything at once: Heart grabs the key and opens the gate. Mind breaks the cracked wall and rises to freedom.",
   },
+
+  // ─── Chapter: Reflection (11–15) ─────────────────────────────────────
+  {
+    id: 11,
+    chapter: "Reflection",
+    name: "Wide Passage",
+    rows: 6, cols: 6, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    tutorial: "Three arrows, three doors. Any order will do — take a breath.",
+  },
+  {
+    id: 12,
+    chapter: "Reflection",
+    name: "Rose Twins",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 3, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 4, col: 3, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "rose" },
+      { row: 1, col: 3, color: "rose" },
+    ],
+    switches: [{ row: 2, col: 2, color: "rose" }],
+    tutorial: "One rose switch, two rose gates.",
+  },
+  {
+    id: 13,
+    chapter: "Reflection",
+    name: "Golden Trail",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 3, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 3, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 3, col: 2, color: "gold" }],
+    tutorial: "Heart grabs the gold key to unlock the gold gate.",
+  },
+  {
+    id: 14,
+    chapter: "Reflection",
+    name: "Crack Then Rise",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    breakables: [{ row: 2, col: 1 }],
+    tutorial: "The cracked wall crumbles for whoever arrives first.",
+  },
+  {
+    id: 15,
+    chapter: "Reflection",
+    name: "Twin Portals",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 4, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 0, dir: "down", side: "heart" },
+    ],
+    portals: [
+      { id: "p1", row: 2, col: 0, pairId: "p2" },
+      { id: "p2", row: 2, col: 4, pairId: "p1" },
+    ],
+    tutorial: "Heart drops into the portal and lands on the other side.",
+  },
+
+  // ─── Chapter: Devotion (16–20) ────────────────────────────────────────
+  {
+    id: 16,
+    chapter: "Devotion",
+    name: "Two Ways",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 0, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 4, col: 4, dir: "up", side: "heart" },
+    ],
+    oneWays: [{ row: 2, col: 2, dir: "up" }],
+    tutorial: "One-way tiles only let arrows through in the arrow direction.",
+  },
+  {
+    id: 17,
+    chapter: "Devotion",
+    name: "Switch Chain",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 4, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 4, dir: "down", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    switches: [{ row: 2, col: 4, color: "blue" }],
+    tutorial: "Heart falls past the blue switch. Order still matters.",
+  },
+  {
+    id: 18,
+    chapter: "Devotion",
+    name: "Locked Twins",
+    rows: 6, cols: 6, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
+      { row: 3, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+      { id: "h2", row: 3, col: 5, dir: "left", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "blue" },
+      { row: 1, col: 4, color: "rose" },
+    ],
+    switches: [
+      { row: 2, col: 2, color: "blue" },
+      { row: 3, col: 3, color: "rose" },
+    ],
+    tutorial: "Two colors, two switches. Free both hearts before the minds rise.",
+  },
+  {
+    id: 19,
+    chapter: "Devotion",
+    name: "Twin Keys",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 3, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 4, col: 3, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "blue" },
+      { row: 1, col: 3, color: "blue" },
+    ],
+    keys: [{ row: 2, col: 2, color: "blue" }],
+    tutorial: "One blue key opens every blue gate.",
+  },
+  {
+    id: 20,
+    chapter: "Devotion",
+    name: "Portal Puzzle",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 4, side: "mind" },
+      { row: 4, col: 2, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 0, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 2, dir: "down", side: "heart" },
+    ],
+    portals: [
+      { id: "p1", row: 2, col: 0, pairId: "p2" },
+      { id: "p2", row: 2, col: 4, pairId: "p1" },
+    ],
+    tutorial: "The portal takes Mind across the board.",
+  },
+
+  // ─── Chapter: Ascent (21–25) ─────────────────────────────────────────
+  {
+    id: 21,
+    chapter: "Ascent",
+    name: "Break & Lock",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    keys: [{ row: 2, col: 2, color: "blue" }],
+    breakables: [{ row: 3, col: 2 }],
+    tutorial: "Break the wall, unlock the gate — Heart must move first.",
+  },
+  {
+    id: 22,
+    chapter: "Ascent",
+    name: "Key & One-Way",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 2, col: 4, color: "gold" }],
+    oneWays: [{ row: 3, col: 2, dir: "up" }],
+    tutorial: "Heart carries the key past the one-way tile.",
+  },
+  {
+    id: 23,
+    chapter: "Ascent",
+    name: "Chain of Three",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 2, dir: "left", side: "heart" },
+      { id: "h2", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    tutorial: "Free the front runner first, then the row clears.",
+  },
+  {
+    id: 24,
+    chapter: "Ascent",
+    name: "Portal Ordering",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 0, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    portals: [
+      { id: "p1", row: 2, col: 2, pairId: "p2" },
+      { id: "p2", row: 2, col: 0, pairId: "p1" },
+    ],
+    tutorial: "Portals are one-shot — plan who uses them.",
+  },
+  {
+    id: 25,
+    chapter: "Ascent",
+    name: "Full Puzzle",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    switches: [{ row: 2, col: 2, color: "blue" }],
+    breakables: [{ row: 3, col: 2 }],
+    tutorial: "Switch, gate, and a cracked wall stand between Mind and freedom.",
+  },
+
+  // ─── Chapter: Unveiled (26–30) ───────────────────────────────────────
+  {
+    id: 26,
+    chapter: "Unveiled",
+    name: "Twin Breakables",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 4, dir: "left", side: "heart" },
+    ],
+    breakables: [
+      { row: 2, col: 3 },
+      { row: 2, col: 1 },
+    ],
+    tutorial: "Two cracked walls in one row.",
+  },
+  {
+    id: 27,
+    chapter: "Unveiled",
+    name: "Portal & Gate",
+    rows: 6, cols: 6, walls: [],
+    exits: [
+      { row: 0, col: 4, side: "mind" },
+      { row: 5, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 0, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 5, dir: "down", side: "heart" },
+    ],
+    gates: [{ row: 2, col: 4, color: "gold" }],
+    keys: [{ row: 3, col: 0, color: "gold" }],
+    portals: [
+      { id: "p1", row: 3, col: 0, pairId: "p2" },
+      { id: "p2", row: 3, col: 4, pairId: "p1" },
+    ],
+    tutorial: "Mind grabs the key on the portal, then rises through the gate.",
+  },
+  {
+    id: 28,
+    chapter: "Unveiled",
+    name: "Rainbow Doors",
+    rows: 6, cols: 6, walls: [],
+    exits: [
+      { row: 0, col: 1, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [
+      { row: 1, col: 1, color: "blue" },
+      { row: 1, col: 4, color: "rose" },
+    ],
+    switches: [
+      { row: 2, col: 2, color: "blue" },
+      { row: 2, col: 4, color: "rose" },
+    ],
+    tutorial: "Heart passes over both switches on the way to the door.",
+  },
+  {
+    id: 29,
+    chapter: "Unveiled",
+    name: "Key via Portal",
+    rows: 5, cols: 5, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 4, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 0, col: 0, dir: "down", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "gold" }],
+    keys: [{ row: 1, col: 0, color: "gold" }],
+    portals: [
+      { id: "p1", row: 2, col: 0, pairId: "p2" },
+      { id: "p2", row: 2, col: 4, pairId: "p1" },
+    ],
+    tutorial: "Heart snatches the key, dives through the portal, and exits.",
+  },
+  {
+    id: 30,
+    chapter: "Unveiled",
+    name: "The Full Escape",
+    rows: 6, cols: 6, walls: [],
+    exits: [
+      { row: 0, col: 2, side: "mind" },
+      { row: 2, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 2, dir: "up", side: "mind" },
+      { id: "h1", row: 2, col: 0, dir: "right", side: "heart" },
+    ],
+    gates: [{ row: 1, col: 2, color: "blue" }],
+    keys: [{ row: 2, col: 3, color: "blue" }],
+    breakables: [{ row: 4, col: 2 }],
+    oneWays: [{ row: 3, col: 2, dir: "up" }],
+    tutorial: "Everything you've learned, one final rise. Set them both free.",
+  },
 ];
+
 
 const SHIP_LEVELS: LevelConfig[] = LEVELS.map((l, i) => ({ ...l, id: i + 1 }));
 
@@ -468,23 +864,24 @@ export function FreeYourMindHeartGame() {
               };
               setProgress(next);
               saveProgress(next);
-              setScreen("win");
+              const starStr = "⭐".repeat(stars);
+              const hasNext = levelIndex < SHIP_LEVELS.length - 1;
+              toast.success(`Level ${level.id} freed ${starStr}`, {
+                description: hasNext
+                  ? `Next: ${SHIP_LEVELS[levelIndex + 1].name}`
+                  : "You've unlocked every level.",
+                duration: 2200,
+              });
+              if (hasNext) {
+                setLevelIndex((i) => Math.min(SHIP_LEVELS.length - 1, i + 1));
+                // Remount PlayScreen with the new level (key on level.id handles reset)
+              } else {
+                setScreen("map");
+              }
             }}
           />
         )}
-        {screen === "win" && level && (
-          <WinScreen
-            level={level}
-            best={progress.best[level.id]}
-            hasNext={levelIndex < SHIP_LEVELS.length - 1}
-            onReplay={() => setScreen("play")}
-            onNext={() => {
-              setLevelIndex((i) => Math.min(SHIP_LEVELS.length - 1, i + 1));
-              setScreen("play");
-            }}
-            onMap={() => setScreen("map")}
-          />
-        )}
+
       </div>
     </div>
   );
