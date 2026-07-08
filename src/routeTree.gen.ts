@@ -64,7 +64,6 @@ import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesFreeYourMindHeartRouteImport } from './routes/challenges.free-your-mind-heart'
-import { Route as ChallengesCompletePictureRouteImport } from './routes/challenges.complete-picture'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -348,12 +347,6 @@ const ChallengesFreeYourMindHeartRoute =
     path: '/challenges/free-your-mind-heart',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ChallengesCompletePictureRoute =
-  ChallengesCompletePictureRouteImport.update({
-    id: '/challenges/complete-picture',
-    path: '/challenges/complete-picture',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AdminBetaRoute = AdminBetaRouteImport.update({
   id: '/beta',
   path: '/beta',
@@ -432,7 +425,6 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
@@ -496,7 +488,6 @@ export interface FileRoutesByTo {
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
@@ -561,7 +552,6 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/complete-picture': typeof ChallengesCompletePictureRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
@@ -627,7 +617,6 @@ export interface FileRouteTypes {
     | '/verify'
     | '/welcome'
     | '/admin/beta'
-    | '/challenges/complete-picture'
     | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
@@ -691,7 +680,6 @@ export interface FileRouteTypes {
     | '/verify'
     | '/welcome'
     | '/admin/beta'
-    | '/challenges/complete-picture'
     | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
@@ -755,7 +743,6 @@ export interface FileRouteTypes {
     | '/verify'
     | '/welcome'
     | '/admin/beta'
-    | '/challenges/complete-picture'
     | '/challenges/free-your-mind-heart'
     | '/checkout/return'
     | '/match/$userId'
@@ -819,7 +806,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
-  ChallengesCompletePictureRoute: typeof ChallengesCompletePictureRoute
   ChallengesFreeYourMindHeartRoute: typeof ChallengesFreeYourMindHeartRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
@@ -1225,13 +1211,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChallengesFreeYourMindHeartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/challenges/complete-picture': {
-      id: '/challenges/complete-picture'
-      path: '/challenges/complete-picture'
-      fullPath: '/challenges/complete-picture'
-      preLoaderRoute: typeof ChallengesCompletePictureRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/beta': {
       id: '/admin/beta'
       path: '/beta'
@@ -1343,7 +1322,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
-  ChallengesCompletePictureRoute: ChallengesCompletePictureRoute,
   ChallengesFreeYourMindHeartRoute: ChallengesFreeYourMindHeartRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
@@ -1364,13 +1342,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
