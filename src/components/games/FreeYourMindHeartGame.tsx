@@ -17,6 +17,7 @@ import {
   Undo2,
   Volume2,
   VolumeX,
+  Zap,
 } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
 
@@ -25,7 +26,23 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 type Dir = "up" | "down" | "left" | "right";
 type Side = "mind" | "heart";
-type CellType = "empty" | "wall" | "mind-exit" | "heart-exit";
+
+type CellType =
+  | "empty"
+  | "wall"
+  | "mind-exit"
+  | "heart-exit"
+  | "switch-mind"
+  | "switch-heart"
+  | "teleport-a"
+  | "teleport-b";
+
+interface GateDef {
+  id: string;
+  row: number;
+  col: number;
+  openBy: Side; // opened when a side's arrow triggers its matching switch
+}
 
 interface ArrowDef {
   id: string;
@@ -38,11 +55,15 @@ interface ArrowDef {
 interface LevelConfig {
   id: number;
   name: string;
+  chapter: string;
   rows: number;
   cols: number;
   walls: Array<[number, number]>;
   exits: Array<{ row: number; col: number; side: Side }>;
   arrows: ArrowDef[];
+  gates?: GateDef[];
+  switches?: Array<{ row: number; col: number; side: Side; openGates: string[] }>;
+  teleports?: Array<{ a: [number, number]; b: [number, number] }>;
   moveTarget: number;
   timeTarget: number;
   hintOrder: string[];
@@ -50,15 +71,20 @@ interface LevelConfig {
 }
 
 type ArrowStatus = "idle" | "moving" | "freed" | "lost";
+
 interface ArrowState extends ArrowDef {
   status: ArrowStatus;
   curRow: number;
   curCol: number;
+  trail: Array<{ row: number; col: number; t: number }>;
 }
 
 interface RunState {
   arrows: ArrowState[];
   moves: number;
+  openGates: string[];
+  failReason?: string;
+  collisionAt?: { row: number; col: number };
 }
 
 interface Totals {
@@ -83,7 +109,7 @@ interface Progress {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Level configs — engine-driven; add more without code changes.
+// Levels — progressive mechanics: 1–5 basic, 6–8 shared paths, 9–12 switches/teleports.
 
 const DELTA: Record<Dir, [number, number]> = {
   up: [-1, 0],
@@ -95,6 +121,7 @@ const DELTA: Record<Dir, [number, number]> = {
 const LEVELS: LevelConfig[] = [
   {
     id: 1,
+    chapter: "Awakening",
     name: "First Breath",
     rows: 5,
     cols: 5,
@@ -110,10 +137,11 @@ const LEVELS: LevelConfig[] = [
     moveTarget: 2,
     timeTarget: 20,
     hintOrder: ["m1", "h1"],
-    tutorial: "Tap an arrow to release it. Free both the Mind and the Heart.",
+    tutorial: "Tap an arrow to release its energy. Free both Mind and Heart.",
   },
   {
     id: 2,
+    chapter: "Awakening",
     name: "Cross Currents",
     rows: 5,
     cols: 6,
@@ -135,6 +163,7 @@ const LEVELS: LevelConfig[] = [
   },
   {
     id: 3,
+    chapter: "Awakening",
     name: "Blocked Paths",
     rows: 6,
     cols: 6,
@@ -158,6 +187,7 @@ const LEVELS: LevelConfig[] = [
   },
   {
     id: 4,
+    chapter: "Awakening",
     name: "Twin Flames",
     rows: 6,
     cols: 7,
@@ -184,6 +214,7 @@ const LEVELS: LevelConfig[] = [
   },
   {
     id: 5,
+    chapter: "Awakening",
     name: "Order of Release",
     rows: 7,
     cols: 7,
@@ -210,12 +241,207 @@ const LEVELS: LevelConfig[] = [
     timeTarget: 55,
     hintOrder: ["m3", "h1", "h2", "m1", "m2"],
   },
+  // ── Chapter 2: Shared Pathways ──────────────────────────────────────
+  {
+    id: 6,
+    chapter: "Entangled",
+    name: "Shared Corridor",
+    rows: 6,
+    cols: 6,
+    walls: [
+      [0, 2],
+      [1, 2],
+      [4, 3],
+      [5, 3],
+    ],
+    exits: [
+      { row: 0, col: 0, side: "mind" },
+      { row: 5, col: 5, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 3, col: 3, dir: "left", side: "mind" },
+      { id: "h1", row: 2, col: 2, dir: "right", side: "heart" },
+    ],
+    moveTarget: 2,
+    timeTarget: 25,
+    hintOrder: ["m1", "h1"],
+    tutorial: "Sometimes the Mind must clear the way first.",
+  },
+  {
+    id: 7,
+    chapter: "Entangled",
+    name: "Weave",
+    rows: 6,
+    cols: 7,
+    walls: [
+      [1, 1],
+      [1, 5],
+      [4, 3],
+    ],
+    exits: [
+      { row: 0, col: 3, side: "mind" },
+      { row: 5, col: 3, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 3, col: 0, dir: "right", side: "mind" },
+      { id: "m2", row: 3, col: 6, dir: "left", side: "mind" },
+      { id: "h1", row: 5, col: 0, dir: "right", side: "heart" },
+      { id: "h2", row: 5, col: 6, dir: "left", side: "heart" },
+    ],
+    moveTarget: 4,
+    timeTarget: 45,
+    hintOrder: ["h1", "h2", "m1", "m2"],
+  },
+  {
+    id: 8,
+    chapter: "Entangled",
+    name: "Mirror Hearts",
+    rows: 7,
+    cols: 7,
+    walls: [
+      [3, 0],
+      [3, 6],
+      [0, 3],
+      [6, 3],
+    ],
+    exits: [
+      { row: 3, col: 3, side: "mind" }, // shared center via teleport? Actually mind exit at 3,3 conflicts. Move.
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 1, dir: "up", side: "mind" },
+      { id: "m2", row: 5, col: 5, dir: "up", side: "mind" },
+      { id: "h1", row: 1, col: 1, dir: "down", side: "heart" },
+      { id: "h2", row: 1, col: 5, dir: "down", side: "heart" },
+    ],
+    moveTarget: 4,
+    timeTarget: 50,
+    hintOrder: ["m1", "h1", "m2", "h2"],
+  },
+  // ── Chapter 3: Switches & Portals ───────────────────────────────────
+  {
+    id: 9,
+    chapter: "Resonance",
+    name: "Heart Unlocks Mind",
+    rows: 6,
+    cols: 7,
+    walls: [
+      [2, 0],
+      [2, 1],
+      [2, 2],
+      [2, 4],
+      [2, 5],
+      [2, 6],
+    ],
+    exits: [
+      { row: 0, col: 3, side: "mind" },
+      { row: 5, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 4, col: 3, dir: "up", side: "mind" },
+      { id: "h1", row: 5, col: 6, dir: "left", side: "heart" },
+    ],
+    gates: [{ id: "g1", row: 2, col: 3, openBy: "heart" }],
+    switches: [{ row: 5, col: 3, side: "heart", openGates: ["g1"] }],
+    moveTarget: 2,
+    timeTarget: 30,
+    hintOrder: ["h1", "m1"],
+    tutorial: "Heart's path crosses a switch that opens the Mind's gate.",
+  },
+  {
+    id: 10,
+    chapter: "Resonance",
+    name: "Twin Portals",
+    rows: 7,
+    cols: 7,
+    walls: [
+      [3, 0],
+      [3, 1],
+      [3, 5],
+      [3, 6],
+    ],
+    exits: [
+      { row: 0, col: 0, side: "mind" },
+      { row: 6, col: 6, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 3, dir: "left", side: "mind" },
+      { id: "h1", row: 1, col: 3, dir: "right", side: "heart" },
+    ],
+    teleports: [{ a: [5, 0], b: [0, 5] }, { a: [1, 6], b: [6, 1] }],
+    moveTarget: 2,
+    timeTarget: 25,
+    hintOrder: ["m1", "h1"],
+    tutorial: "Portals link distant tiles. Step in — arrive elsewhere.",
+  },
+  {
+    id: 11,
+    chapter: "Resonance",
+    name: "Sequence of Two",
+    rows: 7,
+    cols: 8,
+    walls: [
+      [3, 2],
+      [3, 3],
+      [3, 4],
+      [3, 5],
+    ],
+    exits: [
+      { row: 0, col: 7, side: "mind" },
+      { row: 6, col: 0, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 5, col: 7, dir: "up", side: "mind" },
+      { id: "h1", row: 1, col: 0, dir: "down", side: "heart" },
+      { id: "m2", row: 5, col: 0, dir: "up", side: "mind" },
+    ],
+    gates: [
+      { id: "g1", row: 3, col: 7, openBy: "heart" },
+      { id: "g2", row: 3, col: 0, openBy: "mind" },
+    ],
+    switches: [
+      { row: 1, col: 4, side: "heart", openGates: ["g1"] },
+      { row: 5, col: 3, side: "mind", openGates: ["g2"] },
+    ],
+    moveTarget: 3,
+    timeTarget: 45,
+    hintOrder: ["h1", "m1", "m2"],
+  },
+  {
+    id: 12,
+    chapter: "Resonance",
+    name: "One Heart, One Mind",
+    rows: 8,
+    cols: 8,
+    walls: [
+      [4, 3],
+      [4, 4],
+      [3, 0],
+      [3, 7],
+    ],
+    exits: [
+      { row: 0, col: 3, side: "mind" },
+      { row: 0, col: 4, side: "mind" },
+      { row: 7, col: 3, side: "heart" },
+      { row: 7, col: 4, side: "heart" },
+    ],
+    arrows: [
+      { id: "m1", row: 6, col: 3, dir: "up", side: "mind" },
+      { id: "m2", row: 6, col: 4, dir: "up", side: "mind" },
+      { id: "h1", row: 1, col: 3, dir: "down", side: "heart" },
+      { id: "h2", row: 1, col: 4, dir: "down", side: "heart" },
+    ],
+    teleports: [{ a: [4, 0], b: [4, 7] }],
+    moveTarget: 4,
+    timeTarget: 55,
+    hintOrder: ["m1", "h1", "m2", "h2"],
+    tutorial: "Balance the crossing. Both must reach freedom together.",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistence
 
-const STORAGE_KEY = "unveil.fymh.v1";
+const STORAGE_KEY = "unveil.fymh.v2";
 
 function loadProgress(): Progress {
   if (typeof window === "undefined") return defaultProgress();
@@ -223,7 +449,12 @@ function loadProgress(): Progress {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultProgress();
     const parsed = JSON.parse(raw) as Progress;
-    return { ...defaultProgress(), ...parsed, best: parsed.best ?? {}, totals: { ...defaultProgress().totals, ...parsed.totals } };
+    return {
+      ...defaultProgress(),
+      ...parsed,
+      best: parsed.best ?? {},
+      totals: { ...defaultProgress().totals, ...parsed.totals },
+    };
   } catch {
     return defaultProgress();
   }
@@ -254,20 +485,38 @@ function bumpStreak(prev: Totals): Totals {
   return { ...prev, lastPlayed: today, streak };
 }
 
+function haptic(ms = 15) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    try { navigator.vibrate(ms); } catch { /* ignore */ }
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Engine helpers
+// Engine
 
 function buildCellMap(level: LevelConfig): Record<string, CellType> {
   const map: Record<string, CellType> = {};
   for (const [r, c] of level.walls) map[`${r}-${c}`] = "wall";
   for (const e of level.exits) map[`${e.row}-${e.col}`] = e.side === "mind" ? "mind-exit" : "heart-exit";
+  for (const s of level.switches ?? []) map[`${s.row}-${s.col}`] = s.side === "mind" ? "switch-mind" : "switch-heart";
+  for (const t of level.teleports ?? []) {
+    map[`${t.a[0]}-${t.a[1]}`] = "teleport-a";
+    map[`${t.b[0]}-${t.b[1]}`] = "teleport-b";
+  }
   return map;
 }
 
 function initialRun(level: LevelConfig): RunState {
   return {
     moves: 0,
-    arrows: level.arrows.map((a) => ({ ...a, status: "idle", curRow: a.row, curCol: a.col })),
+    openGates: [],
+    arrows: level.arrows.map((a) => ({
+      ...a,
+      status: "idle",
+      curRow: a.row,
+      curCol: a.col,
+      trail: [],
+    })),
   };
 }
 
@@ -291,17 +540,14 @@ export function FreeYourMindHeartGame() {
   const [hintId, setHintId] = useState<string | null>(null);
   const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
   const [rewardFlash, setRewardFlash] = useState<null | { lp: number; xp: number; dia: number; keys: number; stars: number }>(null);
+  const [victoryTick, setVictoryTick] = useState(0);
   const movingRef = useRef(false);
 
   const level = LEVELS[levelIndex];
   const cellMap = useMemo(() => buildCellMap(level), [level]);
 
-  // Load persisted progress once on mount
-  useEffect(() => {
-    setProgress(loadProgress());
-  }, []);
+  useEffect(() => setProgress(loadProgress()), []);
 
-  // Reset run when level changes
   useEffect(() => {
     setRun(initialRun(level));
     setHistory([]);
@@ -312,14 +558,13 @@ export function FreeYourMindHeartGame() {
     movingRef.current = false;
   }, [level]);
 
-  // Timer
   useEffect(() => {
     if (paused || status !== "playing") return;
     const t = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => window.clearInterval(t);
   }, [paused, status]);
 
-  // Occupancy lookup
+  // Occupancy: idle arrows block their cell; lost arrows block; freed do not.
   const occupancy = useMemo(() => {
     const occ: Record<string, ArrowState> = {};
     for (const a of run.arrows) {
@@ -330,17 +575,12 @@ export function FreeYourMindHeartGame() {
     return occ;
   }, [run.arrows]);
 
-  // Detect win condition
   useEffect(() => {
     if (status !== "playing") return;
-    if (run.arrows.length === 0) return;
     const allFreed = run.arrows.every((a) => a.status === "freed");
     const anyLost = run.arrows.some((a) => a.status === "lost");
-    if (allFreed) {
-      handleWin();
-    } else if (anyLost && !run.arrows.some((a) => a.status === "moving")) {
-      setStatus("lost");
-    }
+    if (allFreed && run.arrows.length > 0) handleWin();
+    else if (anyLost && !run.arrows.some((a) => a.status === "moving")) setStatus("lost");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.arrows, status]);
 
@@ -349,66 +589,162 @@ export function FreeYourMindHeartGame() {
     const arrow = run.arrows.find((a) => a.id === id);
     if (!arrow || arrow.status !== "idle") return;
 
-    // snapshot for undo
+    haptic(12);
     setHistory((h) => [...h, run]);
     setHintId(null);
     movingRef.current = true;
 
-    // Simulate flight synchronously, but animate visually via interval updates
     let cur = { r: arrow.curRow, c: arrow.curCol };
-    let localArrows = run.arrows.map((a) => (a.id === id ? { ...a, status: "moving" as ArrowStatus } : a));
-    setRun({ moves: run.moves + 1, arrows: localArrows });
+    let dir = arrow.dir;
+    let openGates = [...run.openGates];
+    let localArrows = run.arrows.map((a) =>
+      a.id === id ? { ...a, status: "moving" as ArrowStatus, trail: [] } : a,
+    );
+    setRun({ ...run, moves: run.moves + 1, arrows: localArrows, failReason: undefined, collisionAt: undefined });
 
-    const [dr, dc] = DELTA[arrow.dir];
+    const teleportMap = new Map<string, [number, number]>();
+    for (const t of level.teleports ?? []) {
+      teleportMap.set(`${t.a[0]}-${t.a[1]}`, t.b);
+      teleportMap.set(`${t.b[0]}-${t.b[1]}`, t.a);
+    }
+    const switchAt = (r: number, c: number) =>
+      (level.switches ?? []).find((s) => s.row === r && s.col === c);
+    const gateAt = (r: number, c: number) =>
+      (level.gates ?? []).find((g) => g.row === r && g.col === c);
+
+    const fail = (reason: string, blockR: number, blockC: number) => {
+      haptic(40);
+      localArrows = localArrows.map((a) =>
+        a.id === id ? { ...a, status: "lost" as ArrowStatus, curRow: cur.r, curCol: cur.c } : a,
+      );
+      setRun((prev) => ({
+        ...prev,
+        arrows: localArrows,
+        openGates,
+        failReason: reason,
+        collisionAt: { row: blockR, col: blockC },
+      }));
+      movingRef.current = false;
+    };
+
+    const succeed = (r: number, c: number) => {
+      haptic(25);
+      localArrows = localArrows.map((a) =>
+        a.id === id ? { ...a, status: "freed" as ArrowStatus, curRow: r, curCol: c } : a,
+      );
+      setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
+      movingRef.current = false;
+    };
+
     const step = () => {
+      const [dr, dc] = DELTA[dir];
       const nr = cur.r + dr;
       const nc = cur.c + dc;
-      // Off-board → lost
+
       if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) {
-        finalize("lost", cur.r, cur.c);
+        fail(`${arrow.side === "mind" ? "Mind" : "Heart"} flew off the edge with no exit.`, cur.r, cur.c);
         return;
       }
       const key = `${nr}-${nc}`;
       const cellType = cellMap[key] ?? "empty";
-      // Wall → lost
-      if (cellType === "wall") {
-        finalize("lost", cur.r, cur.c);
+
+      // Closed gate = wall
+      const gate = gateAt(nr, nc);
+      if (gate && !openGates.includes(gate.id)) {
+        fail(`A ${gate.openBy === "mind" ? "Mind" : "Heart"} switch must open this gate first.`, nr, nc);
         return;
       }
-      // Exit — matches side?
+      if (cellType === "wall") {
+        fail(`${arrow.side === "mind" ? "Mind" : "Heart"} hit an obstacle. Clear the path before releasing.`, nr, nc);
+        return;
+      }
       if (cellType === "mind-exit" || cellType === "heart-exit") {
-        const side: Side = cellType === "mind-exit" ? "mind" : "heart";
-        if (side === arrow.side) {
-          finalize("freed", nr, nc);
+        const exitSide: Side = cellType === "mind-exit" ? "mind" : "heart";
+        if (exitSide === arrow.side) {
+          // arrive at exit
+          localArrows = localArrows.map((a) =>
+            a.id === id
+              ? { ...a, curRow: nr, curCol: nc, trail: [...a.trail, { row: nr, col: nc, t: Date.now() }] }
+              : a,
+          );
+          setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
+          window.setTimeout(() => succeed(nr, nc), 120);
           return;
         }
-        finalize("lost", cur.r, cur.c);
+        fail(
+          arrow.side === "mind"
+            ? "Mind reached a Heart exit. Wrong door."
+            : "Heart reached a Mind exit. Wrong door.",
+          nr,
+          nc,
+        );
         return;
       }
-      // Collision with any occupying arrow (except self)
+      // Collision with any occupying arrow (idle/lost)
       const blocker = localArrows.find(
         (a) => a.id !== id && (a.status === "idle" || a.status === "lost") && a.curRow === nr && a.curCol === nc,
       );
       if (blocker) {
-        finalize("lost", cur.r, cur.c);
+        fail(
+          blocker.side === arrow.side
+            ? `Two ${arrow.side === "mind" ? "Minds" : "Hearts"} collided. Release the front one first.`
+            : `${arrow.side === "mind" ? "Mind" : "Heart"} was blocked by ${blocker.side === "mind" ? "Mind" : "Heart"}. Free that one before releasing this.`,
+          nr,
+          nc,
+        );
         return;
       }
+
       // Advance
       cur = { r: nr, c: nc };
-      localArrows = localArrows.map((a) => (a.id === id ? { ...a, curRow: nr, curCol: nc } : a));
-      setRun((prev) => ({ ...prev, arrows: localArrows }));
+      localArrows = localArrows.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              curRow: nr,
+              curCol: nc,
+              trail: [...a.trail, { row: nr, col: nc, t: Date.now() }].slice(-6),
+            }
+          : a,
+      );
+
+      // Switch trigger
+      if (cellType === "switch-mind" || cellType === "switch-heart") {
+        const s = switchAt(nr, nc);
+        const need: Side = cellType === "switch-mind" ? "mind" : "heart";
+        if (s && arrow.side === need) {
+          for (const gid of s.openGates) if (!openGates.includes(gid)) openGates.push(gid);
+        }
+      }
+
+      // Teleport
+      const tgt = teleportMap.get(`${nr}-${nc}`);
+      setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
+      if (tgt) {
+        window.setTimeout(() => {
+          cur = { r: tgt[0], c: tgt[1] };
+          localArrows = localArrows.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  curRow: tgt[0],
+                  curCol: tgt[1],
+                  trail: [...a.trail, { row: tgt[0], col: tgt[1], t: Date.now() }].slice(-6),
+                }
+              : a,
+          );
+          setRun((prev) => ({ ...prev, arrows: localArrows, openGates }));
+          window.setTimeout(step, 140);
+        }, 120);
+        return;
+      }
       window.setTimeout(step, 140);
     };
 
-    const finalize = (final: ArrowStatus, r: number, c: number) => {
-      localArrows = localArrows.map((a) =>
-        a.id === id ? { ...a, status: final, curRow: r, curCol: c } : a,
-      );
-      setRun((prev) => ({ ...prev, arrows: localArrows }));
-      movingRef.current = false;
-    };
-
     window.setTimeout(step, 140);
+
+    // silence unused-var lint
+    void dir;
   }
 
   function undo() {
@@ -419,6 +755,7 @@ export function FreeYourMindHeartGame() {
     setHistory((h) => h.slice(0, -1));
     setStatus("playing");
     setHintId(null);
+    haptic(10);
   }
 
   function restart() {
@@ -428,12 +765,16 @@ export function FreeYourMindHeartGame() {
     setSeconds(0);
     setStatus("playing");
     setHintId(null);
+    haptic(10);
   }
 
   function showHint() {
     if (movingRef.current) return;
     const next = level.hintOrder.find((id) => run.arrows.find((a) => a.id === id)?.status === "idle");
-    if (next) setHintId(next);
+    if (next) {
+      setHintId(next);
+      haptic(8);
+    }
   }
 
   function handleWin() {
@@ -446,7 +787,9 @@ export function FreeYourMindHeartGame() {
     const lp = baseLP + bonusLP;
 
     setStatus("won");
+    setVictoryTick((v) => v + 1);
     setRewardFlash({ lp, xp, dia, keys, stars });
+    haptic(60);
 
     setProgress((prev) => {
       const bumpedTotals = bumpStreak(prev.totals);
@@ -477,12 +820,15 @@ export function FreeYourMindHeartGame() {
   }, [levelIndex]);
 
   const best = progress.best[level.id];
+  const totalStars = Object.values(progress.best).reduce((a, b) => a + b.stars, 0);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_15%_10%,rgba(129,140,248,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(244,114,182,0.22),transparent_35%),radial-gradient(circle_at_50%_100%,rgba(217,180,74,0.15),transparent_45%),linear-gradient(180deg,#0a0620,#050214)] pb-24 text-foreground lg:pb-0">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_15%_10%,rgba(129,140,248,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(244,114,182,0.22),transparent_35%),radial-gradient(circle_at_50%_100%,rgba(217,180,74,0.15),transparent_45%),linear-gradient(180deg,#0a0620,#050214)] pb-24 text-foreground lg:pb-0">
+      <StyleTag />
+      <AmbientAurora />
       <UnveilNav />
 
-      <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 py-5 sm:px-6">
         {/* Top bar */}
         <div className="mb-4 flex items-center justify-between gap-3">
           <Link
@@ -492,7 +838,9 @@ export function FreeYourMindHeartGame() {
             <ArrowLeft className="h-3.5 w-3.5" /> Back
           </Link>
           <div className="text-center">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">UNVEIL · Signature</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">
+              UNVEIL · Signature · {level.chapter}
+            </div>
             <h1 className="bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-pink-300 bg-clip-text font-display text-2xl font-bold text-transparent sm:text-3xl">
               Free Your Mind &amp; Heart
             </h1>
@@ -523,15 +871,16 @@ export function FreeYourMindHeartGame() {
 
         {/* Level info */}
         <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <InfoStat label="Level" value={`${level.id}/${LEVELS.length}`} />
-          <InfoStat label="Moves" value={`${run.moves}/${level.moveTarget}`} />
+          <InfoStat label="Chapter" value={`${level.id} · ${level.name}`} />
+          <InfoStat label="Moves" value={`${run.moves}/${level.moveTarget}`} accent={run.moves > level.moveTarget ? "warn" : undefined} />
           <InfoStat label="Time" value={`${seconds}s`} accent={seconds > level.timeTarget ? "warn" : undefined} />
-          <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m` : "—"} />
+          <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m · ${best.time}s` : "—"} />
         </div>
 
         {level.tutorial && status === "playing" && run.moves === 0 && (
-          <div className="mb-3 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100">
-            {level.tutorial}
+          <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
+            <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
+            <span>{level.tutorial}</span>
           </div>
         )}
 
@@ -540,9 +889,11 @@ export function FreeYourMindHeartGame() {
           level={level}
           cellMap={cellMap}
           arrows={run.arrows}
+          openGates={run.openGates}
           occupancy={occupancy}
           hintId={hintId}
           paused={paused}
+          collisionAt={run.collisionAt}
           onTap={releaseArrow}
         />
 
@@ -563,11 +914,10 @@ export function FreeYourMindHeartGame() {
           <div className="mb-3 flex items-center justify-between">
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">Chapters</div>
             <div className="inline-flex items-center gap-1 text-[10px] text-white/50">
-              <Trophy className="h-3 w-3" /> {Object.values(progress.best).reduce((a, b) => a + b.stars, 0)}/
-              {LEVELS.length * 3} stars
+              <Trophy className="h-3 w-3" /> {totalStars}/{LEVELS.length * 3} stars
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-6 gap-2 sm:grid-cols-8 lg:grid-cols-12">
             {LEVELS.map((l, i) => {
               const locked = l.id > progress.unlocked;
               const stars = progress.best[l.id]?.stars ?? 0;
@@ -585,10 +935,11 @@ export function FreeYourMindHeartGame() {
                         ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/30"
                         : "border-white/10 bg-white/[0.04] text-white/70 hover:border-white/30"
                   }`}
+                  title={l.name}
                 >
                   <span className="font-display text-base">{l.id}</span>
                   <span className="mt-0.5 text-[9px] text-white/50">
-                    {locked ? "Locked" : "★".repeat(stars) + "☆".repeat(3 - stars)}
+                    {locked ? "🔒" : "★".repeat(stars) + "☆".repeat(3 - stars)}
                   </span>
                 </button>
               );
@@ -600,12 +951,10 @@ export function FreeYourMindHeartGame() {
       {/* Overlays */}
       {status === "lost" && (
         <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">Path collapsed</div>
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path collapsed</div>
           <h2 className="mb-2 font-display text-3xl">Try a different order.</h2>
-          <p className="mb-5 max-w-sm text-sm text-white/70">
-            An arrow lost its way. Undo the last move or restart and reconsider which side to release first.
-          </p>
-          <div className="flex gap-2">
+          <p className="mb-5 max-w-sm text-sm text-white/70">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
+          <div className="flex justify-center gap-2">
             <button onClick={undo} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
               Undo
             </button>
@@ -617,36 +966,39 @@ export function FreeYourMindHeartGame() {
       )}
 
       {status === "won" && rewardFlash && (
-        <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-200/80">Level {level.id} Complete</div>
-          <h2 className="mb-1 font-display text-3xl">Both are free.</h2>
-          <div className="mb-4 flex items-center justify-center gap-1 text-amber-300">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Star key={i} className={`h-6 w-6 ${i < rewardFlash.stars ? "fill-amber-300" : "opacity-30"}`} />
-            ))}
-          </div>
-          <div className="mb-5 grid grid-cols-4 gap-2 text-xs">
-            <RewardPill icon={<Heart className="h-3.5 w-3.5 text-pink-300" />} label="Love" value={`+${rewardFlash.lp}`} />
-            <RewardPill icon={<Sparkles className="h-3.5 w-3.5 text-amber-300" />} label="XP" value={`+${rewardFlash.xp}`} />
-            <RewardPill icon={<Diamond className="h-3.5 w-3.5 text-cyan-300" />} label="Gems" value={`+${rewardFlash.dia}`} />
-            <RewardPill icon={<KeyIcon className="h-3.5 w-3.5 text-yellow-300" />} label="Keys" value={`+${rewardFlash.keys}`} />
-          </div>
-          <div className="flex gap-2">
-            <button onClick={restart} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80">
-              Replay
-            </button>
-            {levelIndex + 1 < LEVELS.length ? (
-              <button
-                onClick={nextLevel}
-                className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg"
-              >
-                Next Chapter
+        <Overlay key={victoryTick}>
+          <VictoryPortal />
+          <div className="relative">
+            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-200/80">Level {level.id} Complete</div>
+            <h2 className="mb-1 font-display text-3xl">Both are free.</h2>
+            <div className="mb-4 flex items-center justify-center gap-1 text-amber-300">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Star key={i} className={`h-6 w-6 ${i < rewardFlash.stars ? "fill-amber-300 animate-[popIn_0.4s_ease-out]" : "opacity-30"}`} style={{ animationDelay: `${i * 120}ms` }} />
+              ))}
+            </div>
+            <div className="mb-5 grid grid-cols-4 gap-2 text-xs">
+              <RewardPill icon={<Heart className="h-3.5 w-3.5 text-pink-300" />} label="Love" value={`+${rewardFlash.lp}`} />
+              <RewardPill icon={<Sparkles className="h-3.5 w-3.5 text-amber-300" />} label="XP" value={`+${rewardFlash.xp}`} />
+              <RewardPill icon={<Diamond className="h-3.5 w-3.5 text-cyan-300" />} label="Gems" value={`+${rewardFlash.dia}`} />
+              <RewardPill icon={<KeyIcon className="h-3.5 w-3.5 text-yellow-300" />} label="Keys" value={`+${rewardFlash.keys}`} />
+            </div>
+            <div className="flex justify-center gap-2">
+              <button onClick={restart} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80">
+                Replay
               </button>
-            ) : (
-              <Link to="/challenges" className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
-                Finish
-              </Link>
-            )}
+              {levelIndex + 1 < LEVELS.length ? (
+                <button
+                  onClick={nextLevel}
+                  className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg"
+                >
+                  Next Chapter
+                </button>
+              ) : (
+                <Link to="/challenges" className="rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-pink-500 px-5 py-2 text-sm font-medium text-white shadow-lg">
+                  Finish
+                </Link>
+              )}
+            </div>
           </div>
         </Overlay>
       )}
@@ -671,25 +1023,71 @@ function Board({
   level,
   cellMap,
   arrows,
+  openGates,
   occupancy,
   hintId,
   paused,
+  collisionAt,
   onTap,
 }: {
   level: LevelConfig;
   cellMap: Record<string, CellType>;
   arrows: ArrowState[];
+  openGates: string[];
   occupancy: Record<string, ArrowState>;
   hintId: string | null;
   paused: boolean;
+  collisionAt?: { row: number; col: number };
   onTap: (id: string) => void;
 }) {
+  const gateMap = useMemo(() => {
+    const m: Record<string, GateDef> = {};
+    for (const g of level.gates ?? []) m[`${g.row}-${g.col}`] = g;
+    return m;
+  }, [level]);
+
+  // Build trail overlay
+  const trails = useMemo(() => {
+    const t: Array<{ row: number; col: number; side: Side; freshness: number; key: string }> = [];
+    const now = Date.now();
+    for (const a of arrows) {
+      a.trail.forEach((p, i) => {
+        t.push({
+          row: p.row,
+          col: p.col,
+          side: a.side,
+          freshness: Math.max(0, 1 - (now - p.t) / 900),
+          key: `${a.id}-${i}-${p.row}-${p.col}`,
+        });
+      });
+    }
+    return t;
+  }, [arrows]);
+
   return (
-    <div className="relative mx-auto overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3 shadow-[0_20px_60px_-30px_rgba(129,140,248,0.5)] backdrop-blur">
-      {/* Ambient particles */}
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute left-8 top-8 h-24 w-24 rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute bottom-6 right-10 h-28 w-28 rounded-full bg-pink-500/20 blur-3xl" />
+    <div className="relative mx-auto overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 shadow-[0_25px_80px_-25px_rgba(129,140,248,0.55)] backdrop-blur-xl">
+      {/* Inner ambient glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute left-6 top-6 h-32 w-32 rounded-full bg-indigo-500/20 blur-3xl animate-[floaty_9s_ease-in-out_infinite]" />
+        <div className="absolute bottom-4 right-8 h-36 w-36 rounded-full bg-pink-500/20 blur-3xl animate-[floaty_11s_ease-in-out_infinite_reverse]" />
+        <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
+      </div>
+
+      {/* Floating particles */}
+      <div className="pointer-events-none absolute inset-0">
+        {Array.from({ length: 14 }).map((_, i) => (
+          <span
+            key={i}
+            className="absolute h-1 w-1 rounded-full bg-white/40 animate-[particle_var(--d)_linear_infinite]"
+            style={{
+              left: `${(i * 37) % 100}%`,
+              top: `${(i * 53) % 100}%`,
+              // @ts-ignore -- css var
+              "--d": `${6 + (i % 5) * 2}s`,
+              animationDelay: `${(i % 6) * 0.7}s`,
+            }}
+          />
+        ))}
       </div>
 
       <div
@@ -704,6 +1102,11 @@ function Board({
             const key = `${r}-${c}`;
             const type = cellMap[key] ?? "empty";
             const occ = occupancy[key];
+            const gate = gateMap[key];
+            const gateOpen = gate ? openGates.includes(gate.id) : false;
+            const collided = collisionAt && collisionAt.row === r && collisionAt.col === c;
+            const trailHere = trails.filter((t) => t.row === r && t.col === c);
+
             return (
               <Cell
                 key={key}
@@ -711,24 +1114,20 @@ function Board({
                 arrow={occ}
                 hint={occ?.id === hintId}
                 disabled={paused}
+                gate={gate}
+                gateOpen={gateOpen}
+                collided={!!collided}
+                trails={trailHere}
                 onTap={onTap}
               />
             );
           }),
         )}
+      </div>
 
-        {/* Freed / lost arrows shown as ghosts near their exit */}
-        {arrows
-          .filter((a) => a.status === "freed" || a.status === "lost")
-          .map((a) => (
-            <span
-              key={`ghost-${a.id}`}
-              className={`pointer-events-none absolute -z-0 h-1 w-1 ${
-                a.status === "freed" ? "" : ""
-              }`}
-              aria-hidden
-            />
-          ))}
+      {/* Board hint text */}
+      <div className="pointer-events-none mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
+        Tap an arrow to release its energy
       </div>
     </div>
   );
@@ -739,44 +1138,94 @@ function Cell({
   arrow,
   hint,
   disabled,
+  gate,
+  gateOpen,
+  collided,
+  trails,
   onTap,
 }: {
   type: CellType;
   arrow?: ArrowState;
   hint?: boolean;
   disabled?: boolean;
+  gate?: GateDef;
+  gateOpen?: boolean;
+  collided?: boolean;
+  trails: Array<{ side: Side; freshness: number; key: string }>;
   onTap: (id: string) => void;
 }) {
-  const base = "relative aspect-square rounded-lg border transition-all duration-200";
+  const base = "relative aspect-square rounded-xl border transition-all duration-200";
   let cellClass = "border-white/5 bg-white/[0.02]";
-  if (type === "wall") cellClass = "border-white/10 bg-black/40";
+  if (type === "wall") cellClass = "border-white/10 bg-black/50 shadow-inner";
   if (type === "mind-exit")
     cellClass =
-      "border-cyan-400/50 bg-cyan-500/10 shadow-[inset_0_0_12px_rgba(103,232,249,0.35)]";
+      "border-cyan-400/60 bg-gradient-to-br from-cyan-500/25 to-indigo-500/15 shadow-[inset_0_0_18px_rgba(103,232,249,0.45),0_0_18px_rgba(103,232,249,0.35)]";
   if (type === "heart-exit")
     cellClass =
-      "border-pink-400/50 bg-pink-500/10 shadow-[inset_0_0_12px_rgba(244,114,182,0.35)]";
+      "border-pink-400/60 bg-gradient-to-br from-pink-500/25 to-fuchsia-500/15 shadow-[inset_0_0_18px_rgba(244,114,182,0.45),0_0_18px_rgba(244,114,182,0.35)]";
+  if (type === "switch-mind")
+    cellClass = "border-cyan-400/40 bg-cyan-500/5 shadow-[inset_0_0_10px_rgba(103,232,249,0.25)]";
+  if (type === "switch-heart")
+    cellClass = "border-pink-400/40 bg-pink-500/5 shadow-[inset_0_0_10px_rgba(244,114,182,0.25)]";
+  if (type === "teleport-a" || type === "teleport-b")
+    cellClass = "border-amber-400/40 bg-amber-500/5 shadow-[inset_0_0_10px_rgba(251,191,36,0.3)]";
+
+  if (gate) {
+    cellClass = gateOpen
+      ? "border-emerald-400/40 bg-emerald-500/5"
+      : "border-white/15 bg-black/50 shadow-inner";
+  }
 
   return (
-    <div className={`${base} ${cellClass}`}>
+    <div className={`${base} ${cellClass} ${collided ? "animate-[shake_0.35s_ease-in-out] ring-2 ring-rose-400/70" : ""}`}>
+      {/* Trails */}
+      {trails.map((t) => (
+        <span
+          key={t.key}
+          className={`pointer-events-none absolute inset-1 rounded-lg blur-[2px] ${
+            t.side === "mind" ? "bg-cyan-400/40" : "bg-pink-400/40"
+          }`}
+          style={{ opacity: 0.15 + t.freshness * 0.65 }}
+        />
+      ))}
+
+      {/* Icons for special cells */}
       {type === "mind-exit" && (
-        <Brain className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-cyan-300/70" />
+        <Brain className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-cyan-300/80 animate-pulse" />
       )}
       {type === "heart-exit" && (
-        <Heart className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-pink-300/70" />
+        <Heart className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-pink-300/80 animate-pulse" />
       )}
+      {(type === "switch-mind" || type === "switch-heart") && (
+        <div
+          className={`pointer-events-none absolute inset-0 m-auto flex h-3 w-3 items-center justify-center rounded-full ${
+            type === "switch-mind" ? "bg-cyan-300/60 shadow-[0_0_10px_rgba(103,232,249,0.7)]" : "bg-pink-300/60 shadow-[0_0_10px_rgba(244,114,182,0.7)]"
+          }`}
+        />
+      )}
+      {(type === "teleport-a" || type === "teleport-b") && (
+        <div className="pointer-events-none absolute inset-0 m-auto h-4 w-4 rounded-full border border-amber-300/60 bg-amber-300/20 animate-[spin_4s_linear_infinite] shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
+      )}
+      {gate && !gateOpen && (
+        <div className="pointer-events-none absolute inset-1 rounded-md border border-white/20 bg-[repeating-linear-gradient(45deg,transparent_0_4px,rgba(255,255,255,0.06)_4px_8px)]" />
+      )}
+      {gate && gateOpen && (
+        <div className="pointer-events-none absolute inset-0 m-auto h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
+      )}
+
+      {/* Arrow */}
       {arrow && arrow.status !== "freed" && (
         <button
           type="button"
           disabled={disabled || arrow.status !== "idle"}
           onClick={() => onTap(arrow.id)}
-          className={`absolute inset-0 flex items-center justify-center rounded-lg text-xl transition-transform duration-150 ${
+          className={`absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
             arrow.side === "mind"
-              ? "bg-gradient-to-br from-indigo-400/80 to-cyan-400/70 text-white shadow-[0_0_18px_rgba(103,232,249,0.55)]"
-              : "bg-gradient-to-br from-fuchsia-400/80 to-pink-400/70 text-white shadow-[0_0_18px_rgba(244,114,182,0.55)]"
-          } ${arrow.status === "moving" ? "scale-110 animate-pulse" : ""} ${
-            arrow.status === "lost" ? "opacity-40 grayscale" : ""
-          } ${hint ? "ring-2 ring-amber-300 ring-offset-1 ring-offset-transparent" : ""}`}
+              ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
+              : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
+          } ${arrow.status === "moving" ? "scale-110 animate-[glowPulse_0.6s_ease-in-out_infinite]" : "hover:scale-105 active:scale-95"} ${
+            arrow.status === "lost" ? "opacity-30 grayscale animate-[shake_0.35s_ease-in-out]" : ""
+          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""}`}
           aria-label={`Release ${arrow.side} arrow ${arrow.dir}`}
         >
           {arrow.dir === "up" && "↑"}
@@ -792,17 +1241,7 @@ function Cell({
 // ─────────────────────────────────────────────────────────────────────────────
 // Small UI bits
 
-function Chip({
-  icon,
-  label,
-  value,
-  className = "",
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  className?: string;
-}) {
+function Chip({ icon, label, value, className = "" }: { icon: React.ReactNode; label: string; value: number; className?: string }) {
   return (
     <div className={`rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 backdrop-blur ${className}`}>
       <div className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">
@@ -815,34 +1254,20 @@ function Chip({
 
 function InfoStat({ label, value, accent }: { label: string; value: string; accent?: "warn" }) {
   return (
-    <div
-      className={`rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 backdrop-blur ${
-        accent === "warn" ? "border-amber-400/40" : ""
-      }`}
-    >
+    <div className={`rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 backdrop-blur ${accent === "warn" ? "border-amber-400/40" : ""}`}>
       <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">{label}</div>
-      <div className="font-display text-sm text-white">{value}</div>
+      <div className="truncate font-display text-sm text-white">{value}</div>
     </div>
   );
 }
 
-function ControlBtn({
-  onClick,
-  disabled,
-  icon,
-  label,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  icon: React.ReactNode;
-  label: string;
-}) {
+function ControlBtn({ onClick, disabled, icon, label }: { onClick: () => void; disabled?: boolean; icon: React.ReactNode; label: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex flex-col items-center gap-0.5 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white/80 backdrop-blur transition hover:border-white/30 hover:text-white disabled:opacity-40"
+      className="inline-flex flex-col items-center gap-0.5 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white/80 backdrop-blur transition hover:border-white/30 hover:text-white active:scale-95 disabled:opacity-40"
     >
       {icon}
       <span className="text-[10px] uppercase tracking-wide">{label}</span>
@@ -852,8 +1277,8 @@ function ControlBtn({
 
 function Overlay({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur">
-      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-900/60 to-purple-900/40 p-6 text-center shadow-[0_30px_80px_-20px_rgba(129,140,248,0.5)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur animate-[fadeIn_0.25s_ease-out]">
+      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-900/60 to-purple-900/40 p-6 text-center shadow-[0_30px_80px_-20px_rgba(129,140,248,0.55)] animate-[scaleIn_0.3s_cubic-bezier(0.22,1,0.36,1)]">
         {children}
       </div>
     </div>
@@ -863,8 +1288,71 @@ function Overlay({ children }: { children: React.ReactNode }) {
 function RewardPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-2">
-      <div className="flex items-center justify-center gap-1 text-white">{icon}<span className="font-display text-sm">{value}</span></div>
+      <div className="flex items-center justify-center gap-1 text-white">
+        {icon}
+        <span className="font-display text-sm">{value}</span>
+      </div>
       <div className="font-mono text-[9px] uppercase tracking-wider text-white/50">{label}</div>
     </div>
+  );
+}
+
+function AmbientAurora() {
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+      <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-indigo-600/25 blur-[100px] animate-[floaty_14s_ease-in-out_infinite]" />
+      <div className="absolute right-0 top-40 h-80 w-80 rounded-full bg-pink-500/20 blur-[110px] animate-[floaty_18s_ease-in-out_infinite_reverse]" />
+      <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-amber-400/10 blur-[100px] animate-[floaty_20s_ease-in-out_infinite]" />
+    </div>
+  );
+}
+
+function VictoryPortal() {
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+      <div className="h-40 w-40 animate-[portal_1.2s_ease-out] rounded-full bg-[conic-gradient(from_0deg,rgba(103,232,249,0.6),rgba(244,114,182,0.6),rgba(217,180,74,0.5),rgba(103,232,249,0.6))] blur-2xl opacity-70" />
+    </div>
+  );
+}
+
+function StyleTag() {
+  return (
+    <style>{`
+      @keyframes floaty {
+        0%,100% { transform: translate(0,0) scale(1); }
+        50% { transform: translate(10px,-14px) scale(1.05); }
+      }
+      @keyframes particle {
+        0% { transform: translateY(0) translateX(0); opacity: 0; }
+        20% { opacity: 0.6; }
+        100% { transform: translateY(-40px) translateX(6px); opacity: 0; }
+      }
+      @keyframes glowPulse {
+        0%,100% { filter: brightness(1) drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
+        50% { filter: brightness(1.25) drop-shadow(0 0 14px rgba(255,255,255,0.8)); }
+      }
+      @keyframes shake {
+        0%,100% { transform: translateX(0); }
+        20% { transform: translateX(-3px); }
+        40% { transform: translateX(3px); }
+        60% { transform: translateX(-2px); }
+        80% { transform: translateX(2px); }
+      }
+      @keyframes popIn {
+        0% { transform: scale(0.4); opacity: 0; }
+        60% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(1); }
+      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes portal {
+        0% { transform: scale(0); opacity: 0; }
+        50% { opacity: 0.8; }
+        100% { transform: scale(2.5); opacity: 0; }
+      }
+    `}</style>
   );
 }
