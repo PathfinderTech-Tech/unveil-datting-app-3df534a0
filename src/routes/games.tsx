@@ -29,6 +29,14 @@ const FEATURED_GAMES: {
   to: string; title: string; tagline: string; icon: any; hue: string; badge?: string;
 }[] = [
   {
+    to: "/journey",
+    title: "UNVEIL Journey",
+    tagline: "Walk the world. Together.",
+    icon: Globe,
+    hue: "from-indigo-500/40 to-pink-500/10",
+    badge: "NEW",
+  },
+  {
     to: "/love-tiles",
     title: "UNVEIL Love Tiles",
     tagline: "Piece by piece, love comes into focus.",
