@@ -144,6 +144,7 @@ function Onboarding() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeCommunity, setAgreeCommunity] = useState(false);
+  const [healthConsent, setHealthConsent] = useState(false);
 
   // Step 2
   const [name, setName] = useState("");
@@ -228,7 +229,7 @@ function Onboarding() {
       try {
         const [{ data: prof }, { data: onb }] = await withTimeout(Promise.all([
           supabase.from("profiles")
-            .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete")
+            .select("first_name, age, gender, country, country_code, state_region, city, intention, relationship_intent, interested_in, bio, interests, photo_url, profile_photo_url, avatar_url, avatar_style, onboarding_complete, journey_health_consent")
             .eq("id", user.id).maybeSingle(),
           supabase.from("onboarding_answers")
             .select("answers").eq("user_id", user.id).maybeSingle(),
@@ -255,6 +256,9 @@ function Onboarding() {
         if (Array.isArray(prof?.interests)) setInterests(prof.interests as string[]);
         const sel = prof?.profile_photo_url || prof?.photo_url;
         if (sel) setPhotoUrl(sel);
+        if (typeof (prof as { journey_health_consent?: boolean } | null)?.journey_health_consent === "boolean") {
+          setHealthConsent(!!(prof as { journey_health_consent?: boolean }).journey_health_consent);
+        }
         // avatar_url / avatar_style ignored — Photo Studio replaces AI avatars.
 
         const a = (onb?.answers as Answers | null) ?? null;
@@ -372,8 +376,16 @@ function Onboarding() {
     } else if (step === 3) {
       const discovery_mode = appearance === "real" ? "photo" : "avatar";
       ok = await persist({}, { discovery_mode });
+    } else if (step === 1) {
+      ok = await persist({}, {
+        journey_health_consent: healthConsent,
+        journey_health_consent_at: healthConsent ? new Date().toISOString() : null,
+      });
+      if (ok && healthConsent && typeof window !== "undefined") {
+        try { window.localStorage.setItem("unveil.health.requestOnLogin", "1"); } catch { /* ignore */ }
+      }
     } else {
-      // Steps 1, 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
+      // Steps 4 (voice prompts — saved by VoiceRecorder itself), 6, 7, 8
       ok = await persist();
     }
     if (!ok) return; // stay on this step so the user can retry instead of being silently bounced later
@@ -564,6 +576,16 @@ function Onboarding() {
               <Agree v={agreeTerms} onChange={setAgreeTerms} label={<>I accept the <a href="/terms" target="_blank" className="text-primary underline">Terms of Service</a>.</>} />
               <Agree v={agreePrivacy} onChange={setAgreePrivacy} label={<>I've read the <a href="/privacy" target="_blank" className="text-primary underline">Privacy Policy</a>.</>} />
               <Agree v={agreeCommunity} onChange={setAgreeCommunity} label={<>I'll follow the <a href="/community-guidelines" target="_blank" className="text-primary underline">Community Guidelines</a>.</>} />
+              <div className="mt-2 border-t border-border pt-3">
+                <Agree
+                  v={healthConsent}
+                  onChange={setHealthConsent}
+                  label={<>I allow UNVEIL to use my steps and walking distance to power <strong>Journey</strong>. <span className="text-muted-foreground">(Optional)</span></>}
+                />
+                <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+                  UNVEIL uses movement data only to update your Journey progress. Your exact location is never tracked. You can change this anytime in Settings → Privacy.
+                </p>
+              </div>
             </div>
           </div>
         )}

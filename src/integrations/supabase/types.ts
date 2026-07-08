@@ -1504,6 +1504,8 @@ export type Database = {
           intention: string | null
           interested_in: string | null
           interests: string[] | null
+          journey_health_consent: boolean
+          journey_health_consent_at: string | null
           lat_approx: number | null
           lng_approx: number | null
           location_enabled: boolean
@@ -1580,6 +1582,8 @@ export type Database = {
           intention?: string | null
           interested_in?: string | null
           interests?: string[] | null
+          journey_health_consent?: boolean
+          journey_health_consent_at?: string | null
           lat_approx?: number | null
           lng_approx?: number | null
           location_enabled?: boolean
@@ -1656,6 +1660,8 @@ export type Database = {
           intention?: string | null
           interested_in?: string | null
           interests?: string[] | null
+          journey_health_consent?: boolean
+          journey_health_consent_at?: string | null
           lat_approx?: number | null
           lng_approx?: number | null
           location_enabled?: boolean
