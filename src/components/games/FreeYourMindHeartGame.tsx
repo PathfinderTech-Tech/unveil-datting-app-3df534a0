@@ -1472,6 +1472,15 @@ function Board({
       className="relative mx-auto"
       style={{ width: w, height: h, maxWidth: "100%" }}
     >
+      {/* Neon pathway backdrop under all cells */}
+      <div
+        className="pointer-events-none absolute -inset-2 rounded-2xl opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle at 20% 30%, rgba(103,232,249,0.15), transparent 55%), radial-gradient(circle at 80% 70%, rgba(244,114,182,0.18), transparent 55%)",
+        }}
+      />
+
       {/* Grid cells */}
       {Array.from({ length: level.rows }).map((_, r) =>
         Array.from({ length: level.cols }).map((_, c) => {
@@ -1480,39 +1489,28 @@ function Board({
           return (
             <div
               key={`${r}-${c}`}
-              className={`absolute rounded-lg border ${
+              className={`absolute rounded-xl ${
                 isWall
-                  ? "border-white/5 bg-black/60"
-                  : "border-white/[0.06] bg-white/[0.02]"
+                  ? "border border-fuchsia-500/20 bg-[#160a2c]/90"
+                  : "border border-white/[0.06] bg-white/[0.015]"
               }`}
-              style={cellStyle(r, c)}
+              style={{
+                ...cellStyle(r, c),
+                boxShadow: isWall
+                  ? "inset 0 0 12px rgba(217,70,239,0.25)"
+                  : "inset 0 0 6px rgba(167,139,250,0.08)",
+              }}
             >
               {isWall && (
                 <div
-                  className="absolute inset-0 rounded-lg"
+                  className="absolute inset-0 rounded-xl"
                   style={{
                     background:
-                      "repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 4px, transparent 4px 8px)",
+                      "repeating-linear-gradient(45deg, rgba(217,70,239,0.15) 0 4px, transparent 4px 9px)",
                   }}
                 />
               )}
-              {exit && (
-                <div
-                  className={`absolute inset-1 flex items-center justify-center rounded-md text-[10px] font-semibold uppercase tracking-wider ${
-                    exit.side === "mind"
-                      ? "border border-cyan-400/40 bg-cyan-400/10 text-cyan-200"
-                      : "border border-pink-400/40 bg-pink-400/10 text-pink-200"
-                  }`}
-                  style={{
-                    boxShadow:
-                      exit.side === "mind"
-                        ? "0 0 18px rgba(34,211,238,0.35) inset"
-                        : "0 0 18px rgba(244,114,182,0.35) inset",
-                  }}
-                >
-                  {exit.side === "mind" ? "M" : "H"}
-                </div>
-              )}
+              {exit && <DoorExit side={exit.side} />}
             </div>
           );
         }),
@@ -1540,80 +1538,129 @@ function Board({
 
         const isBlocker = blockerId === a.id;
         const isHint = highlightHint === a.id;
-        const Icon = a.side === "mind" ? Brain : Heart;
-        const color = a.side === "mind" ? "cyan" : "pink";
+        const isMind = a.side === "mind";
+        const Icon = isMind ? Brain : Heart;
+        const glow = isBlocker
+          ? "0 0 30px 4px rgba(248,113,113,0.85)"
+          : isHint
+            ? "0 0 30px 4px rgba(251,191,36,0.85)"
+            : isMind
+              ? "0 0 24px 2px rgba(34,211,238,0.7), 0 0 60px rgba(59,130,246,0.35)"
+              : "0 0 24px 2px rgba(244,114,182,0.7), 0 0 60px rgba(217,70,239,0.35)";
+        const border = isBlocker
+          ? "rgba(248,113,113,0.9)"
+          : isHint
+            ? "rgba(251,191,36,0.9)"
+            : isMind
+              ? "rgba(103,232,249,0.75)"
+              : "rgba(244,114,182,0.8)";
+        const bg = isMind
+          ? "linear-gradient(140deg, rgba(103,232,249,0.35), rgba(59,130,246,0.5))"
+          : "linear-gradient(140deg, rgba(244,114,182,0.4), rgba(217,70,239,0.55))";
 
         return (
           <button
             key={a.id}
             onClick={() => onArrowTap(a.id)}
             disabled={a.freed || a.animating}
-            className="absolute flex items-center justify-center rounded-xl transition-opacity"
+            className="absolute flex items-center justify-center rounded-2xl transition-all"
             style={{
               left: c * (CELL + GAP),
               top: r * (CELL + GAP),
               width: CELL,
               height: CELL,
               opacity,
-              transform: `rotate(${dirRotation(a.dir)}deg)`,
-              transformOrigin: "center",
-              background:
-                color === "cyan"
-                  ? "linear-gradient(140deg, rgba(103,232,249,0.35), rgba(59,130,246,0.35))"
-                  : "linear-gradient(140deg, rgba(244,114,182,0.4), rgba(217,70,239,0.4))",
-              border: `1.5px solid ${
-                isBlocker
-                  ? "rgba(248,113,113,0.9)"
-                  : isHint
-                    ? "rgba(226,200,150,0.9)"
-                    : color === "cyan"
-                      ? "rgba(103,232,249,0.6)"
-                      : "rgba(244,114,182,0.6)"
-              }`,
-              boxShadow: isBlocker
-                ? "0 0 26px rgba(248,113,113,0.7)"
-                : isHint
-                  ? "0 0 26px rgba(226,200,150,0.7)"
-                  : color === "cyan"
-                    ? "0 0 22px rgba(34,211,238,0.5)"
-                    : "0 0 22px rgba(244,114,182,0.5)",
+              background: bg,
+              border: `1.5px solid ${border}`,
+              boxShadow: glow,
+              animation:
+                !a.animating && !a.freed
+                  ? "fymhIdle 2.6s ease-in-out infinite"
+                  : undefined,
+              backdropFilter: "blur(6px)",
             }}
             aria-label={`${cap(a.side)} arrow pointing ${a.dir}`}
           >
-            <Icon
-              className="h-6 w-6"
+            {/* inner ring */}
+            <span
+              className="absolute inset-1 rounded-xl"
               style={{
-                color: color === "cyan" ? "#a5f3fc" : "#fbcfe8",
-                transform: `rotate(${-dirRotation(a.dir)}deg)`,
+                background:
+                  "linear-gradient(180deg,rgba(255,255,255,0.14),transparent 55%)",
               }}
             />
+            {/* icon (small, top-left) */}
+            <Icon
+              className="absolute left-1 top-1 h-3 w-3 opacity-90"
+              style={{ color: isMind ? "#a5f3fc" : "#fbcfe8" }}
+            />
+            {/* Directional arrow indicator */}
             <span
-              className="absolute -bottom-1 text-lg font-bold leading-none"
-              style={{ color: color === "cyan" ? "#67e8f9" : "#f9a8d4" }}
-            >
-              {/* small arrow indicator, un-rotated */}
-            </span>
-            <div
-              className="absolute inset-0 flex items-center justify-center"
+              className="relative text-2xl font-black leading-none"
               style={{
-                fontSize: 22,
-                fontWeight: 700,
-                color:
-                  color === "cyan"
-                    ? "rgba(207,250,254,0.95)"
-                    : "rgba(253,232,244,0.95)",
-                textShadow: "0 0 8px rgba(0,0,0,0.5)",
-                pointerEvents: "none",
+                color: isMind
+                  ? "rgba(207,250,254,0.98)"
+                  : "rgba(253,232,244,0.98)",
+                textShadow: `0 0 10px ${isMind ? "rgba(34,211,238,0.9)" : "rgba(244,114,182,0.9)"}, 0 1px 2px rgba(0,0,0,0.6)`,
+                transform: `rotate(${dirRotation(a.dir)}deg)`,
+                display: "inline-block",
               }}
             >
               ▲
-            </div>
+            </span>
+            {/* trailing sparkle when animating */}
+            {a.animating && (
+              <span
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  boxShadow: `0 0 40px 8px ${isMind ? "rgba(34,211,238,0.6)" : "rgba(244,114,182,0.6)"}`,
+                  animation: "fymhPulse 0.6s ease-in-out infinite",
+                }}
+              />
+            )}
           </button>
         );
       })}
     </div>
   );
 }
+
+function DoorExit({ side }: { side: Side }) {
+  const isMind = side === "mind";
+  const glow = isMind
+    ? "rgba(34,211,238,0.9)"
+    : "rgba(244,114,182,0.9)";
+  const grad = isMind
+    ? "linear-gradient(180deg,#0ea5e9,#1e3a8a 70%,#0b1e3a)"
+    : "linear-gradient(180deg,#ec4899,#831843 70%,#3b0a24)";
+  const Icon = isMind ? Brain : Heart;
+  return (
+    <div className="absolute inset-1 overflow-hidden rounded-xl">
+      {/* arch */}
+      <div
+        className="absolute inset-x-1 top-1 bottom-0 rounded-t-full"
+        style={{
+          background: grad,
+          boxShadow: `inset 0 0 14px ${glow}, 0 0 18px ${glow}`,
+        }}
+      />
+      {/* inner light */}
+      <div
+        className="absolute left-1/2 top-1/2 h-3/4 w-2/3 -translate-x-1/2 -translate-y-1/2 rounded-t-full"
+        style={{
+          background: `radial-gradient(circle at 50% 70%, ${glow}, transparent 70%)`,
+          animation: "fymhPulse 2.4s ease-in-out infinite",
+        }}
+      />
+      {/* icon */}
+      <Icon
+        className={`absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 ${isMind ? "text-cyan-100" : "text-pink-100 fill-pink-200"}`}
+        style={{ filter: `drop-shadow(0 0 6px ${glow})` }}
+      />
+    </div>
+  );
+}
+
 
 function dirRotation(d: Dir): number {
   switch (d) {
