@@ -85,6 +85,15 @@ interface RunState {
   openGates: string[];
   failReason?: string;
   collisionAt?: { row: number; col: number };
+  blockerId?: string;
+}
+
+type PathOutcome = "exit" | "wrong-exit" | "wall" | "edge" | "arrow" | "gate";
+interface PathPreview {
+  cells: Array<{ r: number; c: number }>;
+  outcome: PathOutcome;
+  blockerId?: string;
+  blockCell?: { r: number; c: number };
 }
 
 interface Totals {
@@ -527,6 +536,73 @@ function starsFor(moves: number, time: number, level: LevelConfig): number {
   return 1;
 }
 
+// Simulates the arrow travel without mutating state — used for preview + hints.
+function computePath(
+  arrow: ArrowState,
+  run: RunState,
+  level: LevelConfig,
+  cellMap: Record<string, CellType>,
+): PathPreview {
+  const cells: Array<{ r: number; c: number }> = [];
+  const dir = arrow.dir;
+  const [dr, dc] = DELTA[dir];
+  let r = arrow.curRow;
+  let c = arrow.curCol;
+  const openGates = [...run.openGates];
+  const teleMap = new Map<string, [number, number]>();
+  for (const t of level.teleports ?? []) {
+    teleMap.set(`${t.a[0]}-${t.a[1]}`, t.b);
+    teleMap.set(`${t.b[0]}-${t.b[1]}`, t.a);
+  }
+  for (let i = 0; i < 200; i++) {
+    const nr = r + dr;
+    const nc = c + dc;
+    if (nr < 0 || nc < 0 || nr >= level.rows || nc >= level.cols) {
+      return { cells, outcome: "edge", blockCell: { r, c } };
+    }
+    const key = `${nr}-${nc}`;
+    const type = cellMap[key] ?? "empty";
+    const gate = (level.gates ?? []).find((g) => g.row === nr && g.col === nc);
+    if (gate && !openGates.includes(gate.id)) {
+      return { cells, outcome: "gate", blockCell: { r: nr, c: nc } };
+    }
+    if (type === "wall") return { cells, outcome: "wall", blockCell: { r: nr, c: nc } };
+    if (type === "mind-exit" || type === "heart-exit") {
+      const exitSide: Side = type === "mind-exit" ? "mind" : "heart";
+      cells.push({ r: nr, c: nc });
+      if (exitSide === arrow.side) return { cells, outcome: "exit" };
+      return { cells, outcome: "wrong-exit", blockCell: { r: nr, c: nc } };
+    }
+    const blocker = run.arrows.find(
+      (a) =>
+        a.id !== arrow.id &&
+        (a.status === "idle" || a.status === "lost") &&
+        a.curRow === nr &&
+        a.curCol === nc,
+    );
+    if (blocker) {
+      return { cells, outcome: "arrow", blockerId: blocker.id, blockCell: { r: nr, c: nc } };
+    }
+    cells.push({ r: nr, c: nc });
+    if (type === "switch-mind" || type === "switch-heart") {
+      const s = (level.switches ?? []).find((s) => s.row === nr && s.col === nc);
+      const need: Side = type === "switch-mind" ? "mind" : "heart";
+      if (s && arrow.side === need) {
+        for (const gid of s.openGates) if (!openGates.includes(gid)) openGates.push(gid);
+      }
+    }
+    const tgt = teleMap.get(`${nr}-${nc}`);
+    if (tgt) {
+      r = tgt[0];
+      c = tgt[1];
+      continue;
+    }
+    r = nr;
+    c = nc;
+  }
+  return { cells, outcome: "edge" };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 
@@ -542,6 +618,8 @@ export function FreeYourMindHeartGame() {
   const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
   const [rewardFlash, setRewardFlash] = useState<null | { lp: number; xp: number; dia: number; keys: number; stars: number }>(null);
   const [victoryTick, setVictoryTick] = useState(0);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [tutorialStep, setTutorialStep] = useState(0);
   const movingRef = useRef(false);
 
   const level = LEVELS[levelIndex];
@@ -556,6 +634,8 @@ export function FreeYourMindHeartGame() {
     setStatus("playing");
     setHintId(null);
     setRewardFlash(null);
+    setPreviewId(null);
+    setTutorialStep(0);
     movingRef.current = false;
   }, [level]);
 
@@ -585,6 +665,21 @@ export function FreeYourMindHeartGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.arrows, status]);
 
+  // Live preview of the currently hovered / focused idle arrow's route.
+  const preview = useMemo<PathPreview | null>(() => {
+    if (!previewId) return null;
+    const a = run.arrows.find((x) => x.id === previewId);
+    if (!a || a.status !== "idle") return null;
+    return computePath(a, run, level, cellMap);
+  }, [previewId, run, level, cellMap]);
+
+  // Level 1 tutorial: always highlight the next expected arrow.
+  const tutorialHintId =
+    level.id === 1 && status === "playing"
+      ? level.hintOrder.find((id) => run.arrows.find((a) => a.id === id)?.status === "idle") ?? null
+      : null;
+  const effectiveHintId = hintId ?? tutorialHintId;
+
   function releaseArrow(id: string) {
     if (status !== "playing" || paused || movingRef.current) return;
     const arrow = run.arrows.find((a) => a.id === id);
@@ -593,6 +688,7 @@ export function FreeYourMindHeartGame() {
     haptic(12);
     setHistory((h) => [...h, run]);
     setHintId(null);
+    setPreviewId(null);
     movingRef.current = true;
 
     let cur = { r: arrow.curRow, c: arrow.curCol };
@@ -601,7 +697,14 @@ export function FreeYourMindHeartGame() {
     let localArrows = run.arrows.map((a) =>
       a.id === id ? { ...a, status: "moving" as ArrowStatus, trail: [] } : a,
     );
-    setRun({ ...run, moves: run.moves + 1, arrows: localArrows, failReason: undefined, collisionAt: undefined });
+    setRun({
+      ...run,
+      moves: run.moves + 1,
+      arrows: localArrows,
+      failReason: undefined,
+      collisionAt: undefined,
+      blockerId: undefined,
+    });
 
     const teleportMap = new Map<string, [number, number]>();
     for (const t of level.teleports ?? []) {
@@ -613,7 +716,7 @@ export function FreeYourMindHeartGame() {
     const gateAt = (r: number, c: number) =>
       (level.gates ?? []).find((g) => g.row === r && g.col === c);
 
-    const fail = (reason: string, blockR: number, blockC: number) => {
+    const fail = (reason: string, blockR: number, blockC: number, blockerId?: string) => {
       haptic(40);
       localArrows = localArrows.map((a) =>
         a.id === id ? { ...a, status: "lost" as ArrowStatus, curRow: cur.r, curCol: cur.c } : a,
@@ -624,6 +727,7 @@ export function FreeYourMindHeartGame() {
         openGates,
         failReason: reason,
         collisionAt: { row: blockR, col: blockC },
+        blockerId,
       }));
       movingRef.current = false;
     };
@@ -686,12 +790,15 @@ export function FreeYourMindHeartGame() {
         (a) => a.id !== id && (a.status === "idle" || a.status === "lost") && a.curRow === nr && a.curCol === nc,
       );
       if (blocker) {
+        const meLabel = arrow.side === "mind" ? "Mind" : "Heart";
+        const themLabel = blocker.side === "mind" ? "Mind" : "Heart";
         fail(
           blocker.side === arrow.side
-            ? `Two ${arrow.side === "mind" ? "Minds" : "Hearts"} collided. Release the front one first.`
-            : `${arrow.side === "mind" ? "Mind" : "Heart"} was blocked by ${blocker.side === "mind" ? "Mind" : "Heart"}. Free that one before releasing this.`,
+            ? `Blocked: another ${meLabel} arrow is in the way. Release it first — see the pulsing highlight.`
+            : `${meLabel} is blocked by a ${themLabel} arrow. Free the highlighted ${themLabel} first, then try again.`,
           nr,
           nc,
+          blocker.id,
         );
         return;
       }
@@ -878,11 +985,18 @@ export function FreeYourMindHeartGame() {
           <InfoStat label="Best" value={best ? `${"★".repeat(best.stars)} · ${best.moves}m · ${best.time}s` : "—"} />
         </div>
 
-        {level.tutorial && status === "playing" && run.moves === 0 && (
-          <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
-            <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
-            <span>{level.tutorial}</span>
-          </div>
+        {level.id === 1 && status === "playing" ? (
+          <Level1Coach
+            freedCount={run.arrows.filter((a) => a.status === "freed").length}
+            hasMoved={run.moves > 0}
+          />
+        ) : (
+          level.tutorial && status === "playing" && run.moves === 0 && (
+            <div className="mb-3 flex items-start gap-2 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-xs text-indigo-100 backdrop-blur">
+              <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" />
+              <span>{level.tutorial}</span>
+            </div>
+          )
         )}
 
         {/* Board */}
@@ -892,11 +1006,24 @@ export function FreeYourMindHeartGame() {
           arrows={run.arrows}
           openGates={run.openGates}
           occupancy={occupancy}
-          hintId={hintId}
+          hintId={effectiveHintId}
           paused={paused}
           collisionAt={run.collisionAt}
+          blockerId={run.blockerId}
+          preview={preview}
+          previewSide={previewId ? run.arrows.find((a) => a.id === previewId)?.side : undefined}
           onTap={releaseArrow}
+          onPreview={setPreviewId}
         />
+
+        {/* Live status line explaining last outcome / next action */}
+        <StatusLine
+          run={run}
+          preview={preview}
+          previewArrow={previewId ? run.arrows.find((a) => a.id === previewId) ?? null : null}
+          status={status}
+        />
+
 
         {/* Bottom controls */}
         <div className="mt-4 grid grid-cols-4 gap-2">
@@ -952,9 +1079,9 @@ export function FreeYourMindHeartGame() {
       {/* Overlays */}
       {status === "lost" && (
         <Overlay>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path collapsed</div>
-          <h2 className="mb-2 font-display text-3xl">Try a different order.</h2>
-          <p className="mb-5 max-w-sm text-sm text-white/70">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-rose-200/80">Path blocked</div>
+          <h2 className="mb-2 font-display text-3xl">Here's what happened.</h2>
+          <p className="mb-5 max-w-sm text-sm text-white/80">{run.failReason ?? "An arrow lost its way. Undo and reconsider which side to release first."}</p>
           <div className="flex justify-center gap-2">
             <button onClick={undo} disabled={!history.length} className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 disabled:opacity-40">
               Undo
@@ -1029,7 +1156,11 @@ function Board({
   hintId,
   paused,
   collisionAt,
+  blockerId,
+  preview,
+  previewSide,
   onTap,
+  onPreview,
 }: {
   level: LevelConfig;
   cellMap: Record<string, CellType>;
@@ -1039,7 +1170,11 @@ function Board({
   hintId: string | null;
   paused: boolean;
   collisionAt?: { row: number; col: number };
+  blockerId?: string;
+  preview: PathPreview | null;
+  previewSide?: Side;
   onTap: (id: string) => void;
+  onPreview: (id: string | null) => void;
 }) {
   const gateMap = useMemo(() => {
     const m: Record<string, GateDef> = {};
@@ -1107,6 +1242,12 @@ function Board({
             const gateOpen = gate ? openGates.includes(gate.id) : false;
             const collided = collisionAt && collisionAt.row === r && collisionAt.col === c;
             const trailHere = trails.filter((t) => t.row === r && t.col === c);
+            const previewIdx = preview
+              ? preview.cells.findIndex((p) => p.r === r && p.c === c)
+              : -1;
+            const isPreviewBlock =
+              preview?.blockCell && preview.blockCell.r === r && preview.blockCell.c === c;
+            const isBlocker = !!(blockerId && occ && occ.id === blockerId);
 
             return (
               <Cell
@@ -1119,7 +1260,14 @@ function Board({
                 gateOpen={gateOpen}
                 collided={!!collided}
                 trails={trailHere}
+                previewIndex={previewIdx}
+                previewLength={preview?.cells.length ?? 0}
+                previewSide={previewSide}
+                previewBlock={!!isPreviewBlock}
+                previewBad={!!preview && preview.outcome !== "exit"}
+                isBlocker={isBlocker}
                 onTap={onTap}
+                onPreview={onPreview}
               />
             );
           }),
@@ -1128,7 +1276,7 @@ function Board({
 
       {/* Board hint text */}
       <div className="pointer-events-none mt-3 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-        Tap an arrow to release its energy
+        Hover or focus an arrow to preview its path · tap to release
       </div>
     </div>
   );
@@ -1143,7 +1291,14 @@ function Cell({
   gateOpen,
   collided,
   trails,
+  previewIndex,
+  previewLength,
+  previewSide,
+  previewBlock,
+  previewBad,
+  isBlocker,
   onTap,
+  onPreview,
 }: {
   type: CellType;
   arrow?: ArrowState;
@@ -1153,7 +1308,14 @@ function Cell({
   gateOpen?: boolean;
   collided?: boolean;
   trails: Array<{ side: Side; freshness: number; key: string }>;
+  previewIndex?: number;
+  previewLength?: number;
+  previewSide?: Side;
+  previewBlock?: boolean;
+  previewBad?: boolean;
+  isBlocker?: boolean;
   onTap: (id: string) => void;
+  onPreview?: (id: string | null) => void;
 }) {
   const base = "relative aspect-square rounded-xl border transition-all duration-200";
   let cellClass = "border-white/5 bg-white/[0.02]";
@@ -1177,8 +1339,33 @@ function Cell({
       : "border-white/15 bg-black/50 shadow-inner";
   }
 
+  const showPreview = (previewIndex ?? -1) >= 0;
+  const previewColor = previewSide === "heart" ? "rgba(244,114,182,0.55)" : "rgba(103,232,249,0.55)";
+  const previewOpacity = showPreview
+    ? Math.max(0.25, 1 - (previewIndex! / Math.max(1, (previewLength ?? 1))) * 0.6)
+    : 0;
+
   return (
     <div className={`${base} ${cellClass} ${collided ? "animate-[shake_0.35s_ease-in-out] ring-2 ring-rose-400/70" : ""}`}>
+      {/* Path preview overlay */}
+      {showPreview && (
+        <span
+          className="pointer-events-none absolute inset-1 rounded-lg animate-[glowPulse_1.4s_ease-in-out_infinite]"
+          style={{
+            background: `radial-gradient(circle, ${previewColor} 0%, transparent 75%)`,
+            opacity: previewOpacity,
+            boxShadow: `inset 0 0 12px ${previewColor}`,
+          }}
+        />
+      )}
+      {previewBlock && (
+        <span
+          className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ${
+            previewBad ? "ring-rose-400/80 animate-[glowPulse_0.9s_ease-in-out_infinite]" : "ring-emerald-300/70"
+          }`}
+        />
+      )}
+
       {/* Trails */}
       {trails.map((t) => (
         <span
@@ -1207,6 +1394,9 @@ function Cell({
       {(type === "teleport-a" || type === "teleport-b") && (
         <div className="pointer-events-none absolute inset-0 m-auto h-4 w-4 rounded-full border border-amber-300/60 bg-amber-300/20 animate-[spin_4s_linear_infinite] shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
       )}
+      {type === "wall" && (
+        <div className="pointer-events-none absolute inset-1 rounded-md bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.05)_0_4px,transparent_4px_8px)]" />
+      )}
       {gate && !gateOpen && (
         <div className="pointer-events-none absolute inset-1 rounded-md border border-white/20 bg-[repeating-linear-gradient(45deg,transparent_0_4px,rgba(255,255,255,0.06)_4px_8px)]" />
       )}
@@ -1220,13 +1410,19 @@ function Cell({
           type="button"
           disabled={disabled || arrow.status !== "idle"}
           onClick={() => onTap(arrow.id)}
+          onMouseEnter={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
+          onMouseLeave={() => onPreview && onPreview(null)}
+          onFocus={() => onPreview && arrow.status === "idle" && onPreview(arrow.id)}
+          onBlur={() => onPreview && onPreview(null)}
           className={`absolute inset-0 flex items-center justify-center rounded-xl text-xl font-bold transition-all duration-150 ${
             arrow.side === "mind"
               ? "bg-gradient-to-br from-indigo-400 to-cyan-400 text-white shadow-[0_0_22px_rgba(103,232,249,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
               : "bg-gradient-to-br from-fuchsia-400 to-pink-400 text-white shadow-[0_0_22px_rgba(244,114,182,0.65),inset_0_1px_0_rgba(255,255,255,0.4)]"
           } ${arrow.status === "moving" ? "scale-110 animate-[glowPulse_0.6s_ease-in-out_infinite]" : "hover:scale-105 active:scale-95"} ${
             arrow.status === "lost" ? "opacity-30 grayscale animate-[shake_0.35s_ease-in-out]" : ""
-          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""}`}
+          } ${hint ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent animate-[glowPulse_1s_ease-in-out_infinite]" : ""} ${
+            isBlocker ? "ring-4 ring-rose-400 ring-offset-2 ring-offset-transparent animate-[glowPulse_0.7s_ease-in-out_infinite]" : ""
+          }`}
           aria-label={`Release ${arrow.side} arrow ${arrow.dir}`}
         >
           {arrow.dir === "up" && "↑"}
@@ -1249,6 +1445,92 @@ function Chip({ icon, label, value, className = "" }: { icon: React.ReactNode; l
         {icon} {label}
       </div>
       <div className="mt-0.5 font-display text-sm text-white">{value}</div>
+    </div>
+  );
+}
+
+function Level1Coach({ freedCount, hasMoved }: { freedCount: number; hasMoved: boolean }) {
+  const steps = [
+    {
+      title: "Step 1 · Release the Mind",
+      body: "Tap the glowing ↑ Mind arrow. Watch it travel to the cyan Mind exit and clear itself from the maze.",
+    },
+    {
+      title: "Step 2 · Free the Heart",
+      body: "Now tap the ↓ Heart arrow. It flows down through the opened path into the pink Heart exit.",
+    },
+    {
+      title: "Almost there…",
+      body: "One arrow to go. Every tap opens more of the path — that's what 'clear the path' means.",
+    },
+  ];
+  const idx = Math.min(freedCount, steps.length - 1);
+  const s = steps[idx];
+  return (
+    <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-400/10 to-indigo-400/10 px-4 py-2.5 text-xs text-amber-50 backdrop-blur animate-[fadeIn_0.4s_ease-out]">
+      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300 animate-[glowPulse_1.6s_ease-in-out_infinite]" />
+      <div className="flex-1">
+        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber-200/80">{s.title}</div>
+        <div className="mt-0.5 text-[12px] leading-snug text-white/90">{s.body}</div>
+        {!hasMoved && idx === 0 && (
+          <div className="mt-1 text-[10px] text-white/50">Hint: hover any arrow to preview its route before tapping.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatusLine({
+  run,
+  preview,
+  previewArrow,
+  status,
+}: {
+  run: RunState;
+  preview: PathPreview | null;
+  previewArrow: ArrowState | null;
+  status: "playing" | "won" | "lost";
+}) {
+  if (status !== "playing") return null;
+  let text: string | null = null;
+  let tone: "info" | "warn" | "good" = "info";
+
+  if (preview && previewArrow) {
+    const label = previewArrow.side === "mind" ? "Mind" : "Heart";
+    if (preview.outcome === "exit") {
+      text = `${label} will reach its exit — clearing ${preview.cells.length} tile${preview.cells.length === 1 ? "" : "s"} on the way.`;
+      tone = "good";
+    } else if (preview.outcome === "arrow") {
+      text = `${label} will be blocked by another arrow (highlighted). Free it first.`;
+      tone = "warn";
+    } else if (preview.outcome === "wall") {
+      text = `${label} will hit an obstacle. This path is closed.`;
+      tone = "warn";
+    } else if (preview.outcome === "gate") {
+      text = `${label} will hit a closed gate. Trigger the matching switch first.`;
+      tone = "warn";
+    } else if (preview.outcome === "wrong-exit") {
+      text = `${label} would arrive at the wrong exit door.`;
+      tone = "warn";
+    } else if (preview.outcome === "edge") {
+      text = `${label} would fly off the board.`;
+      tone = "warn";
+    }
+  } else if (run.failReason) {
+    text = run.failReason;
+    tone = "warn";
+  }
+
+  if (!text) return null;
+  const color =
+    tone === "warn"
+      ? "border-rose-400/40 bg-rose-500/10 text-rose-100"
+      : tone === "good"
+        ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
+        : "border-white/10 bg-white/5 text-white/80";
+  return (
+    <div className={`mt-3 rounded-2xl border px-4 py-2 text-xs backdrop-blur ${color}`}>
+      {text}
     </div>
   );
 }
