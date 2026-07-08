@@ -1502,37 +1502,233 @@ function starsPreview(moves: number, arrowCount: number, seconds: number) {
   return starsFor(moves, arrowCount, seconds);
 }
 
-function canRelease(
+interface TraceState {
+  wallSet: Set<string>;
+  openGates: Set<string>;
+  brokenWalls: Set<string>;
+  collectedKeys: Set<string>;
+  usedPortals: Set<string>;
+  triggeredSwitches: Set<string>;
+}
+
+interface TraceResult {
+  escaped: boolean;
+  reason?: string;
+  blockerId?: string;
+  blockerCell?: string;
+  trajectory: Array<[number, number]>;
+  opens: string[]; // gate colors newly opened
+  breaks: string[]; // "r,c" breakables destroyed
+  collects: string[]; // key colors collected
+  portals: string[]; // portal ids consumed
+  switches: string[]; // switch "r,c" triggered
+}
+
+function traceArrow(
   arrow: LiveArrow,
   all: LiveArrow[],
   level: LevelConfig,
-): boolean {
-  const [dr, dc] = DELTA[arrow.dir];
-  const wallSet = new Set(level.walls.map(([r, c]) => `${r},${c}`));
+  state: TraceState,
+): TraceResult {
+  const [dr0, dc0] = DELTA[arrow.dir];
+  let dr = dr0;
+  let dc = dc0;
+  const trajectory: Array<[number, number]> = [[arrow.row, arrow.col]];
+  const opens: string[] = [];
+  const breaks: string[] = [];
+  const collects: string[] = [];
+  const portalsConsumed: string[] = [];
+  const switchesHit: string[] = [];
+
+  // Running unlocked colors (base + newly collected keys / triggered switches).
+  const runningOpen = new Set<string>([
+    ...state.openGates,
+    ...state.collectedKeys,
+  ]);
+
   let r = arrow.row;
   let c = arrow.col;
-  while (true) {
+  const maxSteps = level.rows * level.cols * 4;
+  let steps = 0;
+
+  while (steps++ < maxSteps) {
     const nr = r + dr;
     const nc = c + dc;
+
+    // Off-grid
     if (nr < 0 || nr >= level.rows || nc < 0 || nc >= level.cols) {
-      return level.exits.some(
+      const matches = level.exits.some(
         (e) => e.row === r && e.col === c && e.side === arrow.side,
       );
+      if (matches) {
+        return {
+          escaped: true,
+          trajectory,
+          opens,
+          breaks,
+          collects,
+          portals: portalsConsumed,
+          switches: switchesHit,
+        };
+      }
+      const wrongDoor = level.exits.find((e) => e.row === r && e.col === c);
+      const reason = wrongDoor
+        ? `That door is for ${cap(wrongDoor.side)}, not ${cap(arrow.side)}. Try a different arrow.`
+        : `${cap(arrow.side)} flew off the edge with no matching door.`;
+      return {
+        escaped: false,
+        reason,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
     }
-    if (wallSet.has(`${nr},${nc}`)) return false;
-    if (
-      all.some((a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc)
-    )
-      return false;
+
+    const key = `${nr},${nc}`;
+
+    // Static wall
+    if (state.wallSet.has(key)) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} hit a stone wall. Try a different arrow.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Breakable
+    const breakable = level.breakables?.find((b) => b.row === nr && b.col === nc);
+    const alreadyBroken =
+      breakable && (state.brokenWalls.has(key) || breaks.includes(key));
+    if (breakable && !alreadyBroken) {
+      // Break it and pass through.
+      breaks.push(key);
+    }
+
+    // Gate
+    const gate = level.gates?.find((g) => g.row === nr && g.col === nc);
+    if (gate && !runningOpen.has(gate.color)) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} cannot pass the ${gate.color} gate. Find the ${gate.color} switch or key first.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // One-way
+    const ow = level.oneWays?.find((o) => o.row === nr && o.col === nc);
+    if (ow && ow.dir !== arrow.dir) {
+      return {
+        escaped: false,
+        reason: `A one-way tile blocks ${cap(arrow.side)} — it only lets arrows through going ${ow.dir}.`,
+        blockerCell: key,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Other arrow (unfreed) — but arrow can pass onto a matching exit occupied by nothing.
+    const other = all.find(
+      (a) => !a.freed && a.id !== arrow.id && a.row === nr && a.col === nc,
+    );
+    if (other) {
+      return {
+        escaped: false,
+        reason: `${cap(arrow.side)} is blocked by the highlighted ${cap(other.side)} arrow. Free it first.`,
+        blockerId: other.id,
+        trajectory,
+        opens,
+        breaks,
+        collects,
+        portals: portalsConsumed,
+        switches: switchesHit,
+      };
+    }
+
+    // Enter cell
+    trajectory.push([nr, nc]);
     r = nr;
     c = nc;
+
+    // Pick up features on the tile
+    const sw = level.switches?.find((s) => s.row === r && s.col === c);
+    if (sw && !runningOpen.has(sw.color)) {
+      runningOpen.add(sw.color);
+      opens.push(sw.color);
+      switchesHit.push(`${r},${c}`);
+    }
+    const k = level.keys?.find((kk) => kk.row === r && kk.col === c);
+    if (k && !state.collectedKeys.has(k.color) && !collects.includes(k.color)) {
+      runningOpen.add(k.color);
+      collects.push(k.color);
+    }
+
+    // Portal
+    const portal = level.portals?.find((p) => p.row === r && p.col === c);
     if (
-      level.exits.some(
-        (e) => e.row === r && e.col === c && e.side === arrow.side,
-      )
-    )
-      return true;
+      portal &&
+      !state.usedPortals.has(portal.id) &&
+      !portalsConsumed.includes(portal.id)
+    ) {
+      const pair = level.portals?.find((p) => p.id === portal.pairId);
+      if (pair) {
+        portalsConsumed.push(portal.id, pair.id);
+        r = pair.row;
+        c = pair.col;
+        trajectory.push([r, c]);
+      }
+    }
+
+    // Matching exit
+    if (
+      level.exits.some((e) => e.row === r && e.col === c && e.side === arrow.side)
+    ) {
+      // Continue: exits are only valid when the arrow actually leaves the grid on next step.
+      // If exit is on an edge and the next step goes off-grid, we escape then; otherwise keep going.
+      const nnr = r + dr;
+      const nnc = c + dc;
+      if (nnr < 0 || nnr >= level.rows || nnc < 0 || nnc >= level.cols) {
+        return {
+          escaped: true,
+          trajectory,
+          opens,
+          breaks,
+          collects,
+          portals: portalsConsumed,
+          switches: switchesHit,
+        };
+      }
+    }
   }
+
+  return {
+    escaped: false,
+    reason: "This arrow has nowhere to go.",
+    trajectory,
+    opens,
+    breaks,
+    collects,
+    portals: portalsConsumed,
+    switches: switchesHit,
+  };
 }
 
 function starsFor(moves: number, arrowCount: number, seconds: number): number {
@@ -1544,6 +1740,7 @@ function starsFor(moves: number, arrowCount: number, seconds: number): number {
 function cap(s: string) {
   return s[0].toUpperCase() + s.slice(1);
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UI subcomponents
