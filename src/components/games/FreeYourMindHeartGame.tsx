@@ -468,23 +468,24 @@ export function FreeYourMindHeartGame() {
               };
               setProgress(next);
               saveProgress(next);
-              setScreen("win");
+              const starStr = "⭐".repeat(stars);
+              const hasNext = levelIndex < SHIP_LEVELS.length - 1;
+              toast.success(`Level ${level.id} freed ${starStr}`, {
+                description: hasNext
+                  ? `Next: ${SHIP_LEVELS[levelIndex + 1].name}`
+                  : "You've unlocked every level.",
+                duration: 2200,
+              });
+              if (hasNext) {
+                setLevelIndex((i) => Math.min(SHIP_LEVELS.length - 1, i + 1));
+                // Remount PlayScreen with the new level (key on level.id handles reset)
+              } else {
+                setScreen("map");
+              }
             }}
           />
         )}
-        {screen === "win" && level && (
-          <WinScreen
-            level={level}
-            best={progress.best[level.id]}
-            hasNext={levelIndex < SHIP_LEVELS.length - 1}
-            onReplay={() => setScreen("play")}
-            onNext={() => {
-              setLevelIndex((i) => Math.min(SHIP_LEVELS.length - 1, i + 1));
-              setScreen("play");
-            }}
-            onMap={() => setScreen("map")}
-          />
-        )}
+
       </div>
     </div>
   );
