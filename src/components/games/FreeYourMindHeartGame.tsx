@@ -1508,6 +1508,21 @@ function PlayScreen({
   };
 
 
+  // Stuck detection: no arrow has a valid escape path and none can be undone.
+  const stuck = useMemo(() => {
+    const anyAnimating = arrows.some((a) => a.animating);
+    if (anyAnimating) return false;
+    const remaining = arrows.filter((a) => !a.freed);
+    if (remaining.length === 0) return false;
+    const state = { wallSet, openGates, brokenWalls, collectedKeys, usedPortals, triggeredSwitches };
+    const solvable = remaining.some((a) => traceArrow(a, arrows, level, state).escaped);
+    return !solvable && history.length === 0;
+  }, [arrows, wallSet, openGates, brokenWalls, collectedKeys, usedPortals, triggeredSwitches, history.length, level]);
+
+  useEffect(() => {
+    if (stuck && !stuckDismissed) setStuckOpen(true);
+    if (!stuck) setStuckDismissed(false);
+  }, [stuck, stuckDismissed]);
 
   const best = undefined; // best comes from parent progress; kept optional
   const freezes = 1;
