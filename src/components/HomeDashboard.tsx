@@ -188,7 +188,7 @@ export function HomeDashboard({ user }: { user: User }) {
         </div>
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs text-muted-foreground">2 min</span>
-          <Link to="/challenges" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+          <Link to="/games" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
             Start <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>

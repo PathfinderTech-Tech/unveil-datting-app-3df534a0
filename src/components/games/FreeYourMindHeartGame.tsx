@@ -1068,7 +1068,7 @@ function Header({
   return (
     <div className="mb-4 flex items-center justify-between gap-2">
       <Link
-        to="/challenges"
+        to="/games"
         className="group inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/80 backdrop-blur-xl transition hover:border-fuchsia-400/60 hover:bg-white/[0.08]"
         aria-label="Back"
       >

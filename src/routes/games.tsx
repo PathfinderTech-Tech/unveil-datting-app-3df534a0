@@ -1,11 +1,19 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { CoupleChallengesSection } from "@/components/CoupleChallengesSection";
 import {
   Sparkles, Brain, Heart, Compass, Globe, MessageCircle, Calendar,
   Users, Swords, Play, ArrowRight, Clock,
 } from "lucide-react";
 
+type SearchParams = { cat?: string; u?: string };
+
 export const Route = createFileRoute("/games")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    cat: typeof s.cat === "string" ? s.cat : undefined,
+    u: typeof s.u === "string" ? s.u : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Play First. Connect Deeper. — UNVEIL" },
@@ -13,6 +21,7 @@ export const Route = createFileRoute("/games")({
     ],
   }),
   component: GamesHub,
+
 });
 
 type Card = {
@@ -42,9 +51,9 @@ const SOLO: Card[] = [
 ];
 
 const COUPLE: Card[] = [
-  { to: "/challenges", title: "Couple Challenges", emoji: "❤️", desc: "Would-you-rather, values, future goals — for matched pairs.", icon: Swords, hue: "from-rose-500/40 to-pink-500/10", difficulty: "Medium", reward: "Badges", cta: "Play" },
   { to: "/journey", title: "Walk the World (Couple)", emoji: "🌍", desc: "Combine steps with your match to cross continents together.", icon: Users, hue: "from-emerald-500/30 to-teal-500/10", difficulty: "Easy", reward: "Shared miles", cta: "Play" },
 ];
+
 
 const COMMUNITY: Card[] = [
   { to: "/insights-ai", title: "Community Reflections", emoji: "🌎", desc: "See how your answers compare with the wider UNVEIL community.", icon: Sparkles, hue: "from-fuchsia-500/30 to-purple-500/10", difficulty: "Easy", reward: "Perspective", cta: "Open" },
@@ -120,6 +129,15 @@ function GameCard({ card }: { card: Card }) {
 }
 
 function GamesHub() {
+  const search = useRouterState({ select: (s) => s.location.search }) as SearchParams;
+  const coupleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (search.cat && coupleRef.current) {
+      coupleRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [search.cat]);
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
@@ -137,9 +155,18 @@ function GamesHub() {
         <Section label="Featured" cards={FEATURED} />
         <Section label="Solo" cards={SOLO} />
         <Section label="With your match" cards={COUPLE} />
+
+        <section ref={coupleRef} className="mb-10 scroll-mt-24">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Couple Reflection Games</div>
+          </div>
+          <CoupleChallengesSection initialCategory={search.cat} initialPartner={search.u} />
+        </section>
+
         <Section label="Daily & community" cards={COMMUNITY} />
         <Section label="Coming soon" cards={SOON} />
       </div>
     </div>
   );
 }
+

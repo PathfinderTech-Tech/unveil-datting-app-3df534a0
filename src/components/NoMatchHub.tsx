@@ -20,7 +20,7 @@ export function NoMatchHub({ title = "No matches yet — keep building" }: { tit
       desc: "Define your communication, attachment, conflict, leadership and relationship styles.",
     },
     {
-      to: "/challenges",
+      to: "/games",
       icon: Flame,
       title: "Daily challenge",
       desc: "A small action that compounds into great relationships.",

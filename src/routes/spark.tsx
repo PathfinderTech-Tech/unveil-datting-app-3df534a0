@@ -307,7 +307,7 @@ function SparkPage() {
                   className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
                   <RefreshCcw className="h-3 w-3" /> Review & edit
                 </button>
-                <Link to="/challenges"
+                <Link to="/games"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
                   I'm happy — go to Challenges <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -415,7 +415,7 @@ function SparkPage() {
           <Link to="/puzzles" className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground">
             <ChevronLeft className="h-3 w-3" /> Back: Puzzles
           </Link>
-          <Link to="/challenges" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
+          <Link to="/games" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow">
             Next: Challenges <ChevronRight className="h-4 w-4" />
           </Link>
         </div>

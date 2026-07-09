@@ -52,7 +52,7 @@ function SoloMindGamesHub() {
 
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <Link
-          to="/challenges"
+          to="/games"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 text-xs text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
