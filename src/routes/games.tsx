@@ -51,9 +51,9 @@ const SOLO: Card[] = [
 ];
 
 const COUPLE: Card[] = [
-  { to: "/challenges", title: "Couple Challenges", emoji: "❤️", desc: "Would-you-rather, values, future goals — for matched pairs.", icon: Swords, hue: "from-rose-500/40 to-pink-500/10", difficulty: "Medium", reward: "Badges", cta: "Play" },
   { to: "/journey", title: "Walk the World (Couple)", emoji: "🌍", desc: "Combine steps with your match to cross continents together.", icon: Users, hue: "from-emerald-500/30 to-teal-500/10", difficulty: "Easy", reward: "Shared miles", cta: "Play" },
 ];
+
 
 const COMMUNITY: Card[] = [
   { to: "/insights-ai", title: "Community Reflections", emoji: "🌎", desc: "See how your answers compare with the wider UNVEIL community.", icon: Sparkles, hue: "from-fuchsia-500/30 to-purple-500/10", difficulty: "Easy", reward: "Perspective", cta: "Open" },
