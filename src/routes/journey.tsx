@@ -9,6 +9,7 @@ import {
   Heart, Brain, MapPin, Award, Star, Footprints,
   Flame, Clock, Share2, Sparkles, Plus, BookMarked, Trophy,
   User, Compass, Loader2, ArrowRight, Check, X, Users, ChevronLeft,
+  Search, BadgeCheck, Circle,
 } from "lucide-react";
 import {
   listMyJourneys, getJourney, createSoloJourney, createCoupleJourney,
@@ -224,34 +225,13 @@ function StartJourneyPanel({ onCreated }: { onCreated: (id: string) => void }) {
             </div>
           </div>
           <div>
-            <div className="mb-1 text-xs uppercase tracking-widest text-white/60">Invite a match</div>
-            {matches.isLoading ? (
-              <div className="text-xs text-white/50">Loading matches…</div>
-            ) : (matches.data?.matches?.length ?? 0) === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/60">
-                You don't have any mutual matches yet. Match with someone in Discover, then invite them here.
-              </div>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {matches.data!.matches.map((m: any) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setPartnerId(m.id)}
-                    className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${
-                      partnerId === m.id ? "border-pink-400 bg-pink-500/10" : "border-white/10 bg-white/[0.02] hover:border-white/25"
-                    }`}
-                  >
-                    <div className="h-10 w-10 overflow-hidden rounded-full bg-white/10">
-                      {m.photo_url ? <img src={m.photo_url} alt={m.first_name ?? "match"} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm">{(m.first_name ?? "?")[0]}</div>}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="truncate text-sm">{m.first_name ?? "Match"}</div>
-                      <div className="truncate text-[11px] text-white/50">{m.city ?? m.country ?? ""}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="mb-2 text-xs uppercase tracking-widest text-white/60">Choose your journey partner</div>
+            <PartnerGrid
+              loading={matches.isLoading}
+              matches={matches.data?.matches ?? []}
+              partnerId={partnerId}
+              onPick={setPartnerId}
+            />
           </div>
         </div>
       )}
@@ -522,6 +502,17 @@ function JourneyDetail({ journeyId, onLeft }: { journeyId: string; onLeft: () =>
                 </div>
               </div>
             ))}
+            {journey.mode === "solo" && (
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-pink-400/40 bg-pink-500/5 p-2">
+                <div className="grid h-10 w-10 place-items-center rounded-full border border-pink-400/50 bg-white/[0.03] text-pink-300 shadow-[0_0_18px_-4px_rgba(236,72,153,0.7)]">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm text-white/90">Invite a match anytime</div>
+                  <div className="text-[11px] text-white/55">Turn this into a shared walk later.</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -843,5 +834,163 @@ function HealthNote() {
         )}
       </div>
     </section>
+  );
+}
+
+/* ============ Partner Grid ============ */
+type MatchRow = {
+  id: string;
+  first_name: string | null;
+  age: number | null;
+  city: string | null;
+  country: string | null;
+  verified: boolean;
+  bio: string | null;
+  photo_url: string | null;
+};
+
+const FILTERS = [
+  { id: "all",      label: "All matches" },
+  { id: "verified", label: "Verified" },
+  { id: "nearby",   label: "Nearby" },
+  { id: "photo",    label: "With photo" },
+] as const;
+type FilterId = typeof FILTERS[number]["id"];
+
+function PartnerGrid({
+  loading, matches, partnerId, onPick,
+}: {
+  loading: boolean;
+  matches: MatchRow[];
+  partnerId: string | null;
+  onPick: (id: string | null) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<FilterId>("all");
+  const [myCity, setMyCity] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: prof } = await supabase.from("profiles").select("city").eq("id", data.user.id).maybeSingle();
+      if (alive) setMyCity((prof as any)?.city ?? null);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return matches.filter((m) => {
+      if (q && !(`${m.first_name ?? ""} ${m.city ?? ""} ${m.country ?? ""}`.toLowerCase().includes(q))) return false;
+      if (filter === "verified" && !m.verified) return false;
+      if (filter === "photo" && !m.photo_url) return false;
+      if (filter === "nearby" && !(myCity && m.city && m.city.toLowerCase() === myCity.toLowerCase())) return false;
+      return true;
+    });
+  }, [matches, query, filter, myCity]);
+
+  if (loading) {
+    return <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-xs text-white/50">Loading your matches…</div>;
+  }
+  if (matches.length === 0) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/60">
+        You don't have any mutual matches yet. Match with someone in Discover, then invite them here.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search matches…"
+            className="w-full rounded-full border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/40 focus:border-pink-400/50 focus:outline-none"
+          />
+        </div>
+      </div>
+      <div className="-mx-1 flex gap-1.5 overflow-x-auto pb-1">
+        {FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs transition ${
+              filter === f.id ? "border-pink-400 bg-pink-500/15 text-pink-100" : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/25"
+            }`}
+          >{f.label}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/15 p-4 text-center text-xs text-white/50">
+          No matches fit that filter.
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {filtered.map((m) => (
+            <PartnerCard
+              key={m.id}
+              m={m}
+              selected={partnerId === m.id}
+              onPick={() => onPick(partnerId === m.id ? null : m.id)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PartnerCard({ m, selected, onPick }: { m: MatchRow; selected: boolean; onPick: () => void }) {
+  const initial = (m.first_name ?? "?")[0]?.toUpperCase() ?? "?";
+  return (
+    <div
+      className={`rounded-2xl border transition ${
+        selected ? "border-pink-400 bg-pink-500/10 shadow-[0_0_24px_-8px_rgba(236,72,153,0.6)]" : "border-white/10 bg-white/[0.03] hover:border-white/25"
+      }`}
+    >
+      <button onClick={onPick} className="flex w-full items-center gap-3 p-3 text-left">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white/10">
+          {m.photo_url
+            ? <img src={m.photo_url} alt={m.first_name ?? "match"} className="h-full w-full object-cover" />
+            : <div className="grid h-full w-full place-items-center text-lg font-medium">{initial}</div>}
+          {m.verified && (
+            <span className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full border-2 border-[#141221] bg-cyan-400 text-[#0b0715]" title="Verified">
+              <BadgeCheck className="h-3 w-3" />
+            </span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="truncate font-medium text-white">{m.first_name ?? "Match"}</span>
+            {m.age != null && <span className="text-white/60">, {m.age}</span>}
+          </div>
+          <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-white/60">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{[m.city, m.country].filter(Boolean).join(", ") || "Location private"}</span>
+          </div>
+        </div>
+        <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium ${
+          selected ? "bg-white text-[#0b0715]" : "bg-white/10 text-white"
+        }`}>{selected ? "Selected" : "Invite"}</span>
+      </button>
+      {selected && (
+        <div className="border-t border-white/10 px-4 py-3">
+          {m.bio ? (
+            <p className="text-xs leading-relaxed text-white/75 line-clamp-3">{m.bio}</p>
+          ) : (
+            <p className="text-xs text-white/50">No bio yet. Start the journey — walking together tells its own story.</p>
+          )}
+          <div className="mt-2 flex items-center gap-1 text-[11px] text-white/50">
+            <Circle className="h-2 w-2 fill-emerald-400 text-emerald-400" /> Ready to walk
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
