@@ -2638,3 +2638,106 @@ function WinScreen({
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Menu + dialogs (in-game overlays)
+
+function Overlay({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#141221] p-5 text-white shadow-2xl"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PlayMenu({
+  open, onClose, muted, onToggleMute, onRestart, onHowTo, onExit,
+}: {
+  open: boolean; onClose: () => void; muted: boolean;
+  onToggleMute: () => void; onRestart: () => void; onHowTo: () => void; onExit: () => void;
+}) {
+  if (!open) return null;
+  const Item = ({ icon, label, onClick, danger }: { icon: React.ReactNode; label: string; onClick: () => void; danger?: boolean }) => (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm transition hover:bg-white/[0.08] ${danger ? "text-pink-300" : "text-white"}`}
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/[0.06]">{icon}</span>
+      {label}
+    </button>
+  );
+  return (
+    <Overlay onClose={onClose}>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="font-display text-lg">Menu</div>
+        <button onClick={onClose} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/10">Close</button>
+      </div>
+      <div className="space-y-2">
+        <Item icon={<RotateCcw className="h-4 w-4 text-white/80" />} label="Restart Level" onClick={onRestart} />
+        <Item icon={<Lightbulb className="h-4 w-4 text-amber-300" />} label="How to Play" onClick={onHowTo} />
+        <Item
+          icon={muted ? <VolumeX className="h-4 w-4 text-white/70" /> : <Volume2 className="h-4 w-4 text-cyan-300" />}
+          label={muted ? "Sound: Off" : "Sound: On"}
+          onClick={onToggleMute}
+        />
+        <Item icon={<ArrowLeft className="h-4 w-4 text-pink-300" />} label="Exit Game" onClick={onExit} danger />
+      </div>
+    </Overlay>
+  );
+}
+
+function ConfirmRestart({ open, onCancel, onConfirm }: { open: boolean; onCancel: () => void; onConfirm: () => void }) {
+  if (!open) return null;
+  return (
+    <Overlay onClose={onCancel}>
+      <div className="font-display text-lg">Restart this level?</div>
+      <p className="mt-2 text-sm text-white/70">Your current progress on this puzzle will be lost.</p>
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onCancel} className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/80 hover:bg-white/10">Cancel</button>
+        <button onClick={onConfirm} className="rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 px-4 py-2 text-sm font-medium text-white">Restart</button>
+      </div>
+    </Overlay>
+  );
+}
+
+function HowToPlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <Overlay onClose={onClose}>
+      <div className="font-display text-lg">How to Play</div>
+      <ul className="mt-3 space-y-2 text-sm text-white/80">
+        <li>· Tap an arrow to release it in its facing direction.</li>
+        <li>· Guide both the Mind and Heart arrows off the board.</li>
+        <li>· Collect keys to open matching gates, and step on switches to shift paths.</li>
+        <li>· Use <span className="text-amber-300">Hint</span> if you're stuck and <span className="text-fuchsia-300">Undo</span> to take back a move.</li>
+      </ul>
+      <div className="mt-5 flex justify-end">
+        <button onClick={onClose} className="rounded-full bg-white/10 px-4 py-2 text-sm hover:bg-white/20">Got it</button>
+      </div>
+    </Overlay>
+  );
+}
+
+function StuckDialog({ open, onRestart, onExit }: { open: boolean; onRestart: () => void; onExit: () => void }) {
+  if (!open) return null;
+  return (
+    <Overlay onClose={onExit}>
+      <div className="font-display text-lg">No more moves available.</div>
+      <p className="mt-2 text-sm text-white/70">Every remaining arrow is blocked. Restart the level to try a different order.</p>
+      <div className="mt-5 flex flex-wrap justify-end gap-2">
+        <button onClick={onExit} className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/80 hover:bg-white/10">Back to Games</button>
+        <button onClick={onRestart} className="rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 px-4 py-2 text-sm font-medium text-white">Restart Level</button>
+      </div>
+    </Overlay>
+  );
+}
