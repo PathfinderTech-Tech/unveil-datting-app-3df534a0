@@ -863,7 +863,7 @@ function PartnerGrid({
   loading: boolean;
   matches: MatchRow[];
   partnerId: string | null;
-  onPick: (id: string) => void;
+  onPick: (id: string | null) => void;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
