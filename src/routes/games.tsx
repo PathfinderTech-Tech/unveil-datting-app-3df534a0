@@ -85,11 +85,7 @@ function GameCard({ card }: { card: Card }) {
             <Icon className="h-5 w-5" />
           </div>
           {card.badge && (
-            <span className={`rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] ${
-              card.badge === "SOON"
-                ? "border border-border bg-surface text-muted-foreground"
-                : "bg-gradient-hero text-primary-foreground"
-            }`}>
+            <span className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] bg-gradient-hero text-primary-foreground">
               {card.badge}
             </span>
           )}
@@ -110,21 +106,16 @@ function GameCard({ card }: { card: Card }) {
 
         <div className="mt-5 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-primary">
-            {card.soon ? <><Clock className="h-3 w-3" /> Coming soon</> : <><Play className="h-3 w-3 fill-current" /> {card.cta ?? "Play"}</>}
+            <Play className="h-3 w-3 fill-current" /> {card.cta ?? "Play"}
           </span>
-          {!card.soon && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </>
   );
 
-  const className = `group relative overflow-hidden rounded-3xl border bg-card p-6 text-left transition-all ${
-    card.soon
-      ? "border-dashed border-border opacity-70"
-      : "border-border hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow"
-  }`;
+  const className = "group relative overflow-hidden rounded-3xl border border-border bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow";
 
-  if (card.soon) return <div className={className}>{content}</div>;
   return <Link to={card.to} className={className}>{content}</Link>;
 }
 
