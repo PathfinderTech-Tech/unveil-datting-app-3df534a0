@@ -129,6 +129,15 @@ function GameCard({ card }: { card: Card }) {
 }
 
 function GamesHub() {
+  const search = useRouterState({ select: (s) => s.location.search }) as SearchParams;
+  const coupleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (search.cat && coupleRef.current) {
+      coupleRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [search.cat]);
+
   return (
     <div className="min-h-screen">
       <UnveilNav />
@@ -146,9 +155,18 @@ function GamesHub() {
         <Section label="Featured" cards={FEATURED} />
         <Section label="Solo" cards={SOLO} />
         <Section label="With your match" cards={COUPLE} />
+
+        <section ref={coupleRef} className="mb-10 scroll-mt-24">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Couple Reflection Games</div>
+          </div>
+          <CoupleChallengesSection initialCategory={search.cat} initialPartner={search.u} />
+        </section>
+
         <Section label="Daily & community" cards={COMMUNITY} />
         <Section label="Coming soon" cards={SOON} />
       </div>
     </div>
   );
 }
+
