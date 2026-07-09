@@ -299,7 +299,13 @@ export const listInvitableMatches = createServerFn({ method: "GET" })
     const { data: profs } = await supabase.rpc("get_public_match_profiles", { _targets: partnerIds });
     return {
       matches: (profs ?? []).map((p: any) => ({
-        id: p.id, first_name: p.first_name, city: p.city, country: p.country,
+        id: p.id,
+        first_name: p.first_name,
+        age: p.age ?? null,
+        city: p.city,
+        country: p.country,
+        verified: !!p.verified,
+        bio: p.bio ?? null,
         photo_url: p.photo_url ?? p.profile_photo_url ?? p.avatar_url ?? null,
       })),
     };
