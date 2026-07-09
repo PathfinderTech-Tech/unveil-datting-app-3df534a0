@@ -1279,6 +1279,11 @@ function PlayScreen({
   const [blockerId, setBlockerId] = useState<string | null>(null);
   const [blockerCell, setBlockerCell] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmRestart, setConfirmRestart] = useState(false);
+  const [howToOpen, setHowToOpen] = useState(false);
+  const [stuckOpen, setStuckOpen] = useState(false);
+  const [stuckDismissed, setStuckDismissed] = useState(false);
   const audioCtx = useRef<AudioContext | null>(null);
 
   const playTone = useCallback(
