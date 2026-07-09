@@ -1591,6 +1591,11 @@ function PlayScreen({
             badge={freezes}
             onClick={() => setPaused((p) => !p)}
           />
+          <ToolPill
+            icon={<Menu className="h-5 w-5 text-white/80" />}
+            label="Menu"
+            onClick={() => setMenuOpen(true)}
+          />
         </div>
 
         <div className="relative flex-1">
