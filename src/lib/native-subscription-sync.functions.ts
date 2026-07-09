@@ -38,8 +38,15 @@ export const syncNativeEntitlements = createServerFn({ method: "POST" })
       ? (data.activePassUntil ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())
       : null;
 
-    const profilePatch: Record<string, unknown> = {
-      subscription_tier: data.premium ? "premium" : "free",
+    const tier: "free" | "unveil_plus" = data.premium ? "unveil_plus" : "free";
+    const profilePatch: {
+      subscription_tier: "free" | "unveil_plus";
+      premium_until: string | null;
+      message_pass_until: string | null;
+      updated_at: string;
+      badge_paid?: boolean;
+    } = {
+      subscription_tier: tier,
       premium_until: premiumUntil,
       message_pass_until: messagePassUntil,
       updated_at: now,
@@ -59,7 +66,7 @@ export const syncNativeEntitlements = createServerFn({ method: "POST" })
       .upsert(
         {
           user_id: context.userId,
-          tier: data.premium ? "premium" : "free",
+          tier,
           status: data.premium ? "active" : "canceled",
           product_id: data.premium ? "revenuecat:unveil_premium" : null,
           price_id: data.premium ? "revenuecat" : null,
