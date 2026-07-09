@@ -71,26 +71,17 @@ function Challenges() {
       <UnveilNav />
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">
-          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Challenges</div>
+          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Couple Challenges</div>
           <h1 className="mt-2 font-display text-5xl font-bold">Reflect first. Connect deeper.</h1>
-          <p className="mt-3 max-w-xl text-muted-foreground">Public prompts for everyone. Couple challenges unlock once you have a mutual match.</p>
+          <p className="mt-3 max-w-xl text-muted-foreground">Prompts that surface values, chemistry and future goals. Unlocks the moment you have a mutual match.</p>
+          <div className="mt-4">
+            <Link to="/games" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+              ← Back to Games Hub
+            </Link>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6 inline-flex rounded-full border border-border bg-card p-1">
-          <button
-            onClick={() => { setTab("public"); setActive(null); }}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "public" ? "bg-gradient-hero text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
-          ><Sparkles className="h-3.5 w-3.5" /> Public</button>
-          <button
-            onClick={() => { setTab("match"); setActive(null); }}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === "match" ? "bg-gradient-aura text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
-          >{hasMatch ? <Users className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />} Match Challenges</button>
-        </div>
-
-        {tab === "public" ? (
-          <PublicChallenges />
-        ) : !hasMatch ? (
+        {!hasMatch ? (
           <MatchLockedEmpty />
         ) : (
           <>
@@ -125,6 +116,7 @@ function Challenges() {
     </div>
   );
 }
+
 
 function PublicChallenges() {
   const tiles = [
