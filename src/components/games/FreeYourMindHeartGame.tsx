@@ -836,6 +836,7 @@ export function FreeYourMindHeartGame() {
             key={level.id}
             level={level}
             muted={muted}
+            onToggleMute={() => setMuted((m) => !m)}
             onExit={() => setScreen("map")}
             onWin={(stars, moves, time) => {
               const next: Progress = {
