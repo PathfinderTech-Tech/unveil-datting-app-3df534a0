@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { CoupleChallengesSection } from "@/components/CoupleChallengesSection";
 import {
   Sparkles, Brain, Heart, Compass, Globe, MessageCircle, Calendar,
-  Users, Swords, Play, ArrowRight, Clock,
+  Users, Play, ArrowRight,
 } from "lucide-react";
 
 type SearchParams = { cat?: string; u?: string };
