@@ -225,34 +225,13 @@ function StartJourneyPanel({ onCreated }: { onCreated: (id: string) => void }) {
             </div>
           </div>
           <div>
-            <div className="mb-1 text-xs uppercase tracking-widest text-white/60">Invite a match</div>
-            {matches.isLoading ? (
-              <div className="text-xs text-white/50">Loading matches…</div>
-            ) : (matches.data?.matches?.length ?? 0) === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/60">
-                You don't have any mutual matches yet. Match with someone in Discover, then invite them here.
-              </div>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {matches.data!.matches.map((m: any) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setPartnerId(m.id)}
-                    className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${
-                      partnerId === m.id ? "border-pink-400 bg-pink-500/10" : "border-white/10 bg-white/[0.02] hover:border-white/25"
-                    }`}
-                  >
-                    <div className="h-10 w-10 overflow-hidden rounded-full bg-white/10">
-                      {m.photo_url ? <img src={m.photo_url} alt={m.first_name ?? "match"} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm">{(m.first_name ?? "?")[0]}</div>}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="truncate text-sm">{m.first_name ?? "Match"}</div>
-                      <div className="truncate text-[11px] text-white/50">{m.city ?? m.country ?? ""}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="mb-2 text-xs uppercase tracking-widest text-white/60">Choose your journey partner</div>
+            <PartnerGrid
+              loading={matches.isLoading}
+              matches={matches.data?.matches ?? []}
+              partnerId={partnerId}
+              onPick={setPartnerId}
+            />
           </div>
         </div>
       )}
