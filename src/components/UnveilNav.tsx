@@ -13,7 +13,7 @@ import { ReviewerBadge } from "./ReviewerBadge";
 const PRIMARY = [
   { to: "/discover", label: "Discover" },
   { to: "/insights-ai", label: "AI Insights" },
-  { to: "/challenges", label: "Challenges" },
+  { to: "/games", label: "Games" },
   { to: "/matches", label: "Matches" },
   { to: "/messages", label: "Messages" },
   { to: "/gifts", label: "Gifts" },
@@ -41,7 +41,7 @@ const SECTIONS: {
       { to: "/passport", label: "Passport" },
       { to: "/insights-ai", label: "AI Insights" },
       { to: "/gifts", label: "Gifts" },
-      { to: "/challenges", label: "Challenges" },
+      { to: "/games", label: "Games" },
     ],
   },
 
