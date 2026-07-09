@@ -1684,9 +1684,9 @@ function PlayScreen({
           compact
         />
         <ToolPill
-          icon={<RotateCcw className="h-4 w-4 text-white/80" />}
-          label="Reset"
-          onClick={restart}
+          icon={<Menu className="h-4 w-4 text-white/80" />}
+          label="Menu"
+          onClick={() => setMenuOpen(true)}
           compact
         />
       </div>
