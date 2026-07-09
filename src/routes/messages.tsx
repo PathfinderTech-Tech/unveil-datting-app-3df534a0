@@ -218,13 +218,14 @@ function MessagesPage() {
     }
 
     let alive = true;
+    const uid = user.id;
 
     async function loadSuggestedProfiles() {
       try {
         const { data: matches } = await supabase
           .from("matches")
           .select("user_id, matched_user_id, mutual_interest, created_at")
-          .or(`user_id.eq.${user.id},matched_user_id.eq.${user.id}`)
+          .or(`user_id.eq.${uid},matched_user_id.eq.${uid}`)
           .eq("mutual_interest", true)
           .order("created_at", { ascending: false })
           .limit(24);
@@ -232,7 +233,7 @@ function MessagesPage() {
         const peerIds = Array.from(
           new Set(
             (matches ?? [])
-              .map((m: any) => (m.user_id === user.id ? m.matched_user_id : m.user_id))
+              .map((m: any) => (m.user_id === uid ? m.matched_user_id : m.user_id))
               .filter((id: unknown): id is string => typeof id === "string"),
           ),
         ).slice(0, 6);
