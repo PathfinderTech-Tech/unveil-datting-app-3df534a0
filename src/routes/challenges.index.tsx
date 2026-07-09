@@ -1,7 +1,7 @@
 import { createFileRoute, useRouterState, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
-import { Swords, Sparkles, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, MessageCircle, Heart, Calendar, Lock, Users } from "lucide-react";
+import { Swords, MapPin, Coffee, ArrowRight, ArrowLeft, Loader2, Lock } from "lucide-react";
 import { saveChallengeResult, useUserId, awardBadge } from "@/lib/games-api";
 import { loadDailyChallenges, markCompleted, CHALLENGE_CATEGORIES, type ChallengeRow } from "@/lib/content-api";
 import { PartnerPicker, usePartner } from "@/components/PartnerPicker";
@@ -42,8 +42,8 @@ function Challenges() {
 
   const [active, setActive] = useState<string | null>(search.cat ?? null);
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [tab, setTab] = useState<"public" | "match">(search.tab ?? "public");
   const [valuesOnly, setValuesOnly] = useState(false);
+
 
   useEffect(() => {
     supabase.from("challenges").select("category").eq("active", true).then(({ data }) => {
