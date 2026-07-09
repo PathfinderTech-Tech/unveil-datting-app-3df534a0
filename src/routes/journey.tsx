@@ -937,7 +937,7 @@ function PartnerGrid({
               key={m.id}
               m={m}
               selected={partnerId === m.id}
-              onPick={() => onPick(partnerId === m.id ? "" : m.id)}
+              onPick={() => onPick(partnerId === m.id ? null : m.id)}
             />
           ))}
         </div>
