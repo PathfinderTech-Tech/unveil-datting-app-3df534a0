@@ -1,11 +1,19 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { CoupleChallengesSection } from "@/components/CoupleChallengesSection";
 import {
   Sparkles, Brain, Heart, Compass, Globe, MessageCircle, Calendar,
   Users, Swords, Play, ArrowRight, Clock,
 } from "lucide-react";
 
+type SearchParams = { cat?: string; u?: string };
+
 export const Route = createFileRoute("/games")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    cat: typeof s.cat === "string" ? s.cat : undefined,
+    u: typeof s.u === "string" ? s.u : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Play First. Connect Deeper. — UNVEIL" },
@@ -13,6 +21,7 @@ export const Route = createFileRoute("/games")({
     ],
   }),
   component: GamesHub,
+
 });
 
 type Card = {
