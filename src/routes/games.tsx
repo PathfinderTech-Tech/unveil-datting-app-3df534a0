@@ -155,7 +155,7 @@ function GamesHub() {
         </section>
 
         <Section label="Daily & community" cards={COMMUNITY} />
-        <Section label="Coming soon" cards={SOON} />
+        {SHOW_UPCOMING_GAMES && null}
       </div>
     </div>
   );
