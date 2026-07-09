@@ -58,9 +58,10 @@ const COMMUNITY: Card[] = [
   { to: "/insights-ai", title: "Community Reflections", emoji: "🌎", desc: "See how your answers compare with the wider UNVEIL community.", icon: Sparkles, hue: "from-fuchsia-500/30 to-purple-500/10", difficulty: "Easy", reward: "Perspective", cta: "Open" },
 ];
 
-const SOON: Card[] = [
-  { to: "/games", title: "Seasonal Events", emoji: "✨", desc: "Limited-time story games and holiday quests.", icon: Sparkles, hue: "from-slate-500/20 to-slate-400/5", badge: "SOON", soon: true },
-];
+// Seasonal Events and other unfinished experiences are gated behind this flag.
+// Keep it OFF in production until the feature is fully implemented and polished.
+const SHOW_UPCOMING_GAMES = false;
+
 
 function Section({ label, cards }: { label: string; cards: Card[] }) {
   return (
