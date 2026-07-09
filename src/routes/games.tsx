@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 import { CoupleChallengesSection } from "@/components/CoupleChallengesSection";
 import {
   Sparkles, Brain, Heart, Compass, Globe, MessageCircle, Calendar,
-  Users, Swords, Play, ArrowRight, Clock,
+  Users, Play, ArrowRight,
 } from "lucide-react";
 
 type SearchParams = { cat?: string; u?: string };
@@ -33,9 +33,8 @@ type Card = {
   hue: string;
   difficulty?: "Easy" | "Medium" | "Deep";
   reward?: string;
-  badge?: "NEW" | "LIVE" | "SOON";
+  badge?: "NEW" | "LIVE";
   cta?: "Play" | "Continue" | "Open";
-  soon?: boolean;
 };
 
 const FEATURED: Card[] = [
@@ -59,9 +58,10 @@ const COMMUNITY: Card[] = [
   { to: "/insights-ai", title: "Community Reflections", emoji: "🌎", desc: "See how your answers compare with the wider UNVEIL community.", icon: Sparkles, hue: "from-fuchsia-500/30 to-purple-500/10", difficulty: "Easy", reward: "Perspective", cta: "Open" },
 ];
 
-const SOON: Card[] = [
-  { to: "/games", title: "Seasonal Events", emoji: "✨", desc: "Limited-time story games and holiday quests.", icon: Sparkles, hue: "from-slate-500/20 to-slate-400/5", badge: "SOON", soon: true },
-];
+// Seasonal Events and other unfinished experiences are gated behind this flag.
+// Keep it OFF in production until the feature is fully implemented and polished.
+const SHOW_UPCOMING_GAMES = false;
+
 
 function Section({ label, cards }: { label: string; cards: Card[] }) {
   return (
@@ -85,11 +85,7 @@ function GameCard({ card }: { card: Card }) {
             <Icon className="h-5 w-5" />
           </div>
           {card.badge && (
-            <span className={`rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] ${
-              card.badge === "SOON"
-                ? "border border-border bg-surface text-muted-foreground"
-                : "bg-gradient-hero text-primary-foreground"
-            }`}>
+            <span className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] bg-gradient-hero text-primary-foreground">
               {card.badge}
             </span>
           )}
@@ -110,21 +106,16 @@ function GameCard({ card }: { card: Card }) {
 
         <div className="mt-5 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-primary">
-            {card.soon ? <><Clock className="h-3 w-3" /> Coming soon</> : <><Play className="h-3 w-3 fill-current" /> {card.cta ?? "Play"}</>}
+            <Play className="h-3 w-3 fill-current" /> {card.cta ?? "Play"}
           </span>
-          {!card.soon && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </>
   );
 
-  const className = `group relative overflow-hidden rounded-3xl border bg-card p-6 text-left transition-all ${
-    card.soon
-      ? "border-dashed border-border opacity-70"
-      : "border-border hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow"
-  }`;
+  const className = "group relative overflow-hidden rounded-3xl border border-border bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow";
 
-  if (card.soon) return <div className={className}>{content}</div>;
   return <Link to={card.to} className={className}>{content}</Link>;
 }
 
@@ -164,7 +155,7 @@ function GamesHub() {
         </section>
 
         <Section label="Daily & community" cards={COMMUNITY} />
-        <Section label="Coming soon" cards={SOON} />
+        {SHOW_UPCOMING_GAMES && null}
       </div>
     </div>
   );
