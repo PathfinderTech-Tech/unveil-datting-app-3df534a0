@@ -33,9 +33,8 @@ type Card = {
   hue: string;
   difficulty?: "Easy" | "Medium" | "Deep";
   reward?: string;
-  badge?: "NEW" | "LIVE" | "SOON";
+  badge?: "NEW" | "LIVE";
   cta?: "Play" | "Continue" | "Open";
-  soon?: boolean;
 };
 
 const FEATURED: Card[] = [
