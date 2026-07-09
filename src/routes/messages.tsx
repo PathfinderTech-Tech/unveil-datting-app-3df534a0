@@ -5,12 +5,14 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useMyLocationTrust, LocationTrustBadge } from "@/components/LocationTrustBadge";
-import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
+import { AppStateScreen, LoadingScreen, LoadingTimeoutScreen } from "@/components/AppStateScreen";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({
@@ -19,6 +21,13 @@ export const Route = createFileRoute("/messages")({
       { name: "description", content: "Your conversations on UNVEIL — slow, voice-first dating." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Messages are temporarily unavailable"
+      message="Conversation data failed on this screen only. The rest of UNVEIL should still work."
+      error={error}
+    />
+  ),
   component: MessagesPage,
 });
 
@@ -37,13 +46,24 @@ type Row = {
   unread: number;
 };
 
+type SuggestedProfile = {
+  id: string;
+  name: string;
+  photo: string | null;
+  avatar: string | null;
+  discoveryMode: "avatar" | "photo" | null;
+  verified: boolean;
+};
+
 function MessagesPage() {
   useRequireOnboarding();
   const { user, loading } = useAuth();
+  const loadingTimedOut = useLoadingTimeout(loading, 8000);
   
 
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
+  const [suggestedProfiles, setSuggestedProfiles] = useState<SuggestedProfile[]>([]);
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -191,14 +211,95 @@ function MessagesPage() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user || rows.length > 0) {
+      if (rows.length > 0) setSuggestedProfiles([]);
+      return;
+    }
+
+    let alive = true;
+
+    async function loadSuggestedProfiles() {
+      try {
+        const { data: matches } = await supabase
+          .from("matches")
+          .select("user_id, matched_user_id, mutual_interest, created_at")
+          .or(`user_id.eq.${user.id},matched_user_id.eq.${user.id}`)
+          .eq("mutual_interest", true)
+          .order("created_at", { ascending: false })
+          .limit(24);
+
+        const peerIds = Array.from(
+          new Set(
+            (matches ?? [])
+              .map((m: any) => (m.user_id === user.id ? m.matched_user_id : m.user_id))
+              .filter((id: unknown): id is string => typeof id === "string"),
+          ),
+        ).slice(0, 6);
+
+        if (!peerIds.length) {
+          if (alive) setSuggestedProfiles([]);
+          return;
+        }
+
+        const [{ data: profs }, mediaRows] = await Promise.all([
+          (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds }),
+          getPrimaryProfileMedia({ data: { userIds: peerIds } }),
+        ]);
+
+        const profMap = new Map<string, any>((profs ?? []).map((p: any) => [p.id, p]));
+        const mediaMap = new Map(mediaRows.map((m) => [m.id, m]));
+
+        const suggestions: SuggestedProfile[] = peerIds
+          .map((peerId) => {
+            const peer = profMap.get(peerId);
+            const media = mediaMap.get(peerId);
+            return {
+              id: peerId,
+              name: media?.firstName ?? peer?.first_name?.trim() ?? "Potential match",
+              photo: media?.photoUrl ?? peer?.profile_photo_url ?? peer?.photo_url ?? null,
+              avatar: media?.avatarUrl ?? peer?.avatar_url ?? null,
+              discoveryMode: media?.hasUploadedPhoto ? "photo" : ((peer?.discovery_mode as "avatar" | "photo" | null) ?? null),
+              verified: !!peer?.verified,
+            };
+          })
+          .filter((item) => !!item.id);
+
+        if (alive) setSuggestedProfiles(suggestions);
+      } catch (error) {
+        console.error("[messages] suggested profiles load failed", {
+          route: window.location.pathname,
+          error,
+        });
+        if (alive) setSuggestedProfiles([]);
+      }
+    }
+
+    void loadSuggestedProfiles();
+
+    return () => {
+      alive = false;
+    };
+  }, [user, rows]);
+
   const filtered = rows.filter((r) => {
     if (!q) return true;
     const hay = `${r.peer_name ?? ""} ${r.last_text ?? ""}`.toLowerCase();
     return hay.includes(q.toLowerCase());
   });
   const totalUnread = rows.reduce((sum, r) => sum + (r.unread || 0), 0);
-
   if (loading) {
+    if (loadingTimedOut) {
+      return (
+        <div className="min-h-screen bg-background pb-24 lg:pb-0">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Messages are taking longer than expected"
+            message="UNVEIL did not finish loading conversations in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background pb-24 lg:pb-0">
         <UnveilNav />
@@ -265,6 +366,60 @@ function MessagesPage() {
           />
         </div>
 
+        {rows.length === 0 && (
+          <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Inbox</div>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight">No conversations yet</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Start a conversation from your matches. You can always return here from the Messages tab.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                to="/matches"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+              >
+                Start a conversation <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/discover"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-surface/80"
+              >
+                Discover people
+              </Link>
+            </div>
+
+            {suggestedProfiles.length > 0 && (
+              <div className="mt-6">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Suggested matches</div>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {suggestedProfiles.map((profile) => (
+                    <li key={profile.id}>
+                      <Link
+                        to="/match/$userId"
+                        params={{ userId: profile.id }}
+                        className="flex items-center gap-3 rounded-xl border border-border bg-surface/30 px-3 py-2.5 transition hover:bg-surface"
+                      >
+                        <ProfileAvatar
+                          userId={profile.id}
+                          name={profile.name}
+                          discoveryMode={profile.discoveryMode}
+                          avatarUrl={profile.avatar}
+                          photoUrl={profile.photo}
+                          size={40}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium">{profile.name}</div>
+                          <div className="text-xs text-muted-foreground">Open profile</div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
 
         {filtered.length > 0 && (
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">

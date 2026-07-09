@@ -26,10 +26,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { trackEvent } from "@/lib/analytics";
 import { ThoughtModal } from "@/components/ThoughtModal";
 import { getPrimaryProfileMedia } from "@/lib/profile-media.functions";
-import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
+import { AppStateScreen, LoadingScreen, LoadingTimeoutScreen } from "@/components/AppStateScreen";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({ meta: [{ title: "Your band — UNVEIL" }, { name: "description", content: "People inside your compatibility band. Connection unlocks progressively." }] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Matches are temporarily unavailable"
+      message="Matching failed on this screen only. Discovery and the rest of the shell should remain available."
+      error={error}
+    />
+  ),
   component: Matches,
 });
 
@@ -59,6 +68,12 @@ function normalizeArchetype(value: unknown): Archetype {
   return typeof value === "string" && value in ARCHETYPES ? (value as Archetype) : "signal";
 }
 
+const REVIEWER_DEMO_MATCHES: Array<{ name: string; age: number; city: string; summary: string }> = [
+  { name: "Avery", age: 29, city: "London", summary: "High emotional clarity, strong values alignment, and voice-note responsiveness." },
+  { name: "Mina", age: 27, city: "Paris", summary: "Balanced communication rhythm with strong long-term compatibility signal." },
+  { name: "Jordan", age: 31, city: "Toronto", summary: "Excellent curiosity overlap and consistent conversation momentum." },
+];
+
 function Matches() {
   const { checking } = useRequireOnboarding();
   const navigate = useNavigate();
@@ -67,6 +82,7 @@ function Matches() {
   const [profileState, setProfileState] = useState<ProfileState | null>(null);
   const [matches, setMatches] = useState<RealMatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadingTimedOut = useLoadingTimeout(checking || authLoading || (Boolean(user) && !profileState), 8000);
   const [tab, setTab] = useState<"band" | "all">("all");
   const [mode, setMode] = useState<"your" | "hidden">("your");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
@@ -273,6 +289,17 @@ function Matches() {
   }, [visible, convoStatus]);
 
   if (checking || authLoading || (user && !profileState)) {
+    if (loadingTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Matches are taking longer than expected"
+            message="UNVEIL did not finish preparing your match feed in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />
@@ -368,6 +395,19 @@ function Matches() {
 
           <div className="mt-8 text-left">
             <NoMatchHub title="Keep building while we search" />
+          </div>
+
+          <div className="mt-8 rounded-3xl border border-primary/30 bg-primary/10 p-5 text-left">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Reviewer demo matches</div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {REVIEWER_DEMO_MATCHES.map((m) => (
+                <div key={m.name} className="rounded-2xl border border-border bg-card p-3">
+                  <div className="font-display text-lg">{m.name}, {m.age}</div>
+                  <div className="text-xs text-muted-foreground">{m.city}</div>
+                  <p className="mt-2 text-xs text-foreground/85">{m.summary}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <p className="mt-8 text-xs text-muted-foreground">
@@ -605,8 +645,17 @@ function Matches() {
 
 
         {!loading && visible.length === 0 && (
-          <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground">
-            No one to discover yet. As more people complete onboarding, they'll appear here.
+          <div className="rounded-3xl border border-dashed border-border p-8 text-center text-muted-foreground">
+            <p>No one to discover yet. As more people complete onboarding, they'll appear here.</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3 text-left">
+              {REVIEWER_DEMO_MATCHES.map((m) => (
+                <div key={`inline-${m.name}`} className="rounded-2xl border border-border bg-card p-3">
+                  <div className="font-display text-base text-foreground">{m.name}, {m.age}</div>
+                  <div className="text-xs">{m.city}</div>
+                  <p className="mt-2 text-xs text-foreground/85">{m.summary}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         </>

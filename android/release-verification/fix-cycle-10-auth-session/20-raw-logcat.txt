@@ -1,0 +1,1358 @@
+--------- beginning of main
+07-06 22:42:39.209  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:am force-stop tech.pathfinder.unveil'
+--------- beginning of system
+07-06 22:42:39.294   637   724 I ActivityManager: Force stopping tech.pathfinder.unveil appid=10235 user=0: from pid 21902
+07-06 22:42:39.307   637   724 I ActivityManager: Killing 21284:tech.pathfinder.unveil/u0a235 (adj 900): stop tech.pathfinder.unveil due to from pid 21902
+07-06 22:42:39.330   637   724 D ActivityManager: sync unfroze 21324 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 5
+07-06 22:42:39.339   637   724 W ActivityTaskManager: Force removing ActivityRecord{19564170 u0 tech.pathfinder.unveil/.MainActivity t92 f}}: app died, no saved state
+07-06 22:42:39.339   637   724 E TransitionChain: Can't collect into a chain with no transition
+07-06 22:42:39.339   637   724 E TransitionChain: Can't collect into a chain with no transition
+07-06 22:42:39.350   637   725 W UsageStatsService: Unexpected activity event reported! (tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity event : 23 instanceId : 177228056)
+07-06 22:42:39.380   637   724 I ActivityManager: Killing 21324:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a235i102 (adj 0): isolated not needed
+07-06 22:42:39.387  1081  1209 V ShellTaskOrganizer: Task vanished taskId=92
+07-06 22:42:39.387  1081  1209 V ShellTaskOrganizer: Fullscreen Task Vanished: #92
+07-06 22:42:39.387  1081  1209 V ShellDesktopMode: Task Vanished: #92 closed=true
+07-06 22:42:39.388   637   724 I AppsFilter: interaction: PackageSetting{596f414 best.unveil.app/10231} -> PackageSetting{aad2ff8 tech.pathfinder.unveil/10235} BLOCKED
+07-06 22:42:39.388  1081  1209 D ShellPackageUpdate: PackageUpdateController: Removing handlePackageUpdate for task: 92
+07-06 22:42:39.389   637  2039 E WindowOrganizerController: Attempting to externally change a non-organized container: Task{cd584fb #92 type=standard A=10235:tech.pathfinder.unveil}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@7837071
+07-06 22:42:39.390  1081  1209 V RecentTasksController: Notify recent tasks changed
+07-06 22:42:39.390  1385  1385 D RecentsView: onTaskRemoved: 92, not handling task stack changes
+07-06 22:42:39.391  1081  1209 D ShellDesktopMode: AppToWebRepository: Task 92 is vanishing. Removing task data from repository
+07-06 22:42:39.392  1385  1385 D RecentsView: onTaskRemoved: 92, not handling task stack changes
+07-06 22:42:39.397  1081  1209 V AppCompat: SingleSurfaceLetterboxController: []
+07-06 22:42:39.397  1081  1209 V AppCompat: MultiSurfaceLetterboxController: []
+07-06 22:42:39.397  1081  1209 V AppCompat: LetterboxInputController: []
+07-06 22:42:39.397  1081  1209 V AppCompat: RoundedCornersLetterboxController: {}
+07-06 22:42:39.409  1385  1385 D RecentTasksList: invalidateLoadedTasks - previous requestLoadId: -1
+07-06 22:42:39.463  1215  1215 D CarrierSvcBindHelper: onHandleForceStop: [tech.pathfinder.unveil]
+07-06 22:42:39.490  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:monkey -p tech.pathfinder.unveil -c android.intent.category.LAUNCHER 1'
+07-06 22:42:39.492   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:39.492   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:39.538  1215  1215 D CarrierSvcBindHelper: No carrier app for: 0
+07-06 22:42:39.659   637   724 V ActivityManager: Got obituary of 21284:tech.pathfinder.unveil
+07-06 22:42:39.677   637   659 W ActivityManager: setHasOverlayUi called on unknown pid: 21284
+07-06 22:42:39.678  6278  6278 W InputChannel-JNI: Channel already disposed.
+07-06 22:42:39.678   438   438 I Zygote  : Process 21284 exited due to signal 9 (Killed)
+07-06 22:42:39.680   637   988 D ConnectivityService: releasing NetworkRequest [ REQUEST id=46042, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ] (release request)
+07-06 22:42:39.681   637   667 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10235/pid_21284
+07-06 22:42:39.682   637   667 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_99102/pid_21324
+07-06 22:42:39.683   637   667 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_99102
+07-06 22:42:39.684 22285 22285 I Zygote  : Process 21324 exited due to signal 9 (Killed)
+07-06 22:42:39.693   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:39.693   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:39.888 21905 21905 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+07-06 22:42:39.900 21905 21905 I AndroidRuntime: Using default boot image
+07-06 22:42:39.900 21905 21905 I AndroidRuntime: Leaving lock profiling enabled
+07-06 22:42:39.903 21905 21905 I app_process: Core platform API enforcement enabled from the hiddenapi_platform_enforcement flag and the device API level
+07-06 22:42:39.904 21905 21905 I app_process: Using generational CollectorTypeCMC GC.
+07-06 22:42:40.055 21905 21905 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:40.087 21905 21905 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:40.088 21905 21905 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/10/icu") succeeded. 
+07-06 22:42:40.088 21905 21905 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt78l.dat
+07-06 22:42:40.092 21905 21905 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:40.094 21905 21905 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:40.096 21905 21905 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+07-06 22:42:40.294 21905 21905 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 22:42:40.298 21905 21905 D AndroidRuntime: Calling main entry com.android.commands.monkey.Monkey
+07-06 22:42:40.301 21905 21905 D nativeloader: Load /system/lib64/libmonkey_jni.so using ns default for caller /system/framework/monkey.jar in same partition (is_bridged=0): ok
+07-06 22:42:40.305 21905 21905 W Monkey  : args: [-p, tech.pathfinder.unveil, -c, android.intent.category.LAUNCHER, 1]
+07-06 22:42:40.314 21905 21905 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+07-06 22:42:40.315 21905 21905 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+07-06 22:42:40.315 21905 21905 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+07-06 22:42:40.315 21905 21905 I AconfigPackage: com.google.android.widevine.flags is mapped to com.google.android.widevine
+07-06 22:42:40.315 21905 21905 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+07-06 22:42:40.315 21905 21905 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.uprobestats.flags is mapped to com.android.uprobestats
+07-06 22:42:40.316 21905 21905 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+07-06 22:42:40.316 21905 21905 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+07-06 22:42:40.316 21905 21905 I AconfigPackage: com.android.libcore is mapped to com.android.art
+07-06 22:42:40.317 21905 21905 I AconfigPackage: android.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.internal.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.media.metrics.flags is mapped to com.android.media
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+07-06 22:42:40.318 21905 21905 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+07-06 22:42:40.319 21905 21905 I AconfigPackage: com.android.nfc.module.nonexported.flags is mapped to com.android.nfcservices
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.bluetooth.beta.flags is mapped to com.android.bt
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+07-06 22:42:40.320 21905 21905 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+07-06 22:42:40.320 21905 21905 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+07-06 22:42:40.320 21905 21905 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+07-06 22:42:40.321 21905 21905 I AconfigPackage: com.android.webapp.flags is mapped to com.android.webapp
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.cellbroadcastreceiver.flags is mapped to com.android.cellbroadcast
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:40.322 21905 21905 I AconfigPackage: android.app.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+07-06 22:42:40.322 21905 21905 I AconfigPackage: com.android.npumanager is mapped to com.android.npumanager
+07-06 22:42:40.323 21905 21905 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+07-06 22:42:40.323 21905 21905 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: android.net.http is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.tethering.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+07-06 22:42:40.323 21905 21905 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+07-06 22:42:40.323 21905 21905 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "-p"
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "tech.pathfinder.unveil"
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "-c"
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "android.intent.category.LAUNCHER"
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "1"
+07-06 22:42:40.352 21905 21905 W Monkey  : data="tech.pathfinder.unveil"
+07-06 22:42:40.352 21905 21905 W Monkey  : data="android.intent.category.LAUNCHER"
+07-06 22:42:40.374   637   748 D EventHub: No input device configuration file found for device 'Monkey touch'.
+07-06 22:42:40.384   637   748 I EventHub: usingClockIoctl=true
+07-06 22:42:40.384   637   748 I EventHub: New device: id=37, fd=583, path='/dev/input/event13', name='Monkey touch', classes=TOUCH | TOUCH_MT, configuration='', keyLayout='', keyCharacterMap='', builtinKeyboard=false, 
+07-06 22:42:40.409   637   748 I InputReader: Device reconfigured: id=37, name='Monkey touch', size 1080x2424, orientation Rotation0, mode DIRECT, display id 0
+07-06 22:42:40.409   637   748 I InputReader: Device added: id=37, eventHubId=37, name='Monkey touch', descriptor='e1fe28b90f915c7d1febbd52c1ef84b3c4cbed9f',sources=TOUCHSCREEN
+07-06 22:42:40.417   637  1159 W ActivityManager: registerReceiverWithFeature: no app for null
+07-06 22:42:40.442   637  1159 W ActivityTaskManager: callingPackage for (uid=2000, pid=21905) has no WPC
+07-06 22:42:40.450   637  1159 V GrammaticalInflectionUtils: AttributionSource: android.content.AttributionSource@bd495363 does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+07-06 22:42:40.460  1385  1385 D RecentsView: onTaskDisplayChanged: 93, new displayId = 0
+07-06 22:42:40.466   491   622 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for binder (0xb4007c406405f890) with descriptor: '(not cached)'
+07-06 22:42:40.468   637  1159 D CorePackageUpdate: onRecentTaskRemoved Removing task: 92
+07-06 22:42:40.468   637  1159 D CorePackageUpdate: Couldn't find a persistent state for task= 92
+07-06 22:42:40.470   637  1159 V ActivityTaskManager: TaskLaunchParamsModifier: phase=3 task=Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil} activity=ActivityRecord{227449257 u0 tech.pathfinder.unveil/.MainActivity t-1} display-from-task=0 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@82498956 inherit-from-task=fullscreen non-freeform-task-display-area display-area=DefaultTaskDisplayArea@82498956 skip-bounds-fullscreen
+07-06 22:42:40.470   637  1159 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity} with LAUNCH_SINGLE_TASK from uid 2000 (com.android.shell) (BAL_ALLOW_PERMISSION) result code=0
+07-06 22:42:40.478   637   659 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:40.478  1081  1209 V WindowManagerShell: Transition requested (#252): android.os.BinderProxy@34691da TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=93 effectiveUid=10235 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity } baseActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} topActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} origActivity=null realActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} realActivityIsAppLockEnabled=false numActivities=1 lastActiveTime=443050751 supportsMultiWindow=true supportsMultiWindowWithoutConstraints=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.os.BinderProxy@e18b60b} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{f7f0ce8 tech.pathfinder.unveil.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isInteractive=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=null leafTaskBoundsFromOptions= false capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransitionInfo = null, displayChanges = null, requestedLocation = null, userChange = null, windowingLayerChange = null, fullscreenRequestChange = null, flags = 0, debugId = 252 }
+07-06 22:42:40.486  1081  1209 W DisconnectHandler: No disconnect change found in the transition, not handling request.
+07-06 22:42:40.487 21905 21905 I Monkey  : Events injected: 1
+07-06 22:42:40.493  1081  1209 V ShellDesktopMode: DesktopTasksController: skipping handleRequest reason=triggerTask's display doesn't support desktop mode
+07-06 22:42:40.493  1081  1209 D ShellSplitScreen: logExit: no-op, mLoggerSessionId is null
+07-06 22:42:40.504   637   659 V GrammaticalInflectionUtils: AttributionSource: android.content.AttributionSource@bd495363 does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+07-06 22:42:40.526  1081  1209 V ShellDesktopMode: DesktopDisplayModeController: canDesktopFirstModeBeEnabledOnDefaultDisplay: isDefaultDisplayDesktopEligible=false
+07-06 22:42:40.539   637  1159 W InputChannel-JNI: Channel already disposed.
+07-06 22:42:40.540  1081  1209 V WindowManagerShell: Directly starting a new transition type=CHANGE wct=WindowContainerTransaction { changes= {android.os.BinderProxy@d8ae4ce={isTaskMoveAllowed:false,}} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null } handler=null
+07-06 22:42:40.566   637  2016 V WindowManager: Queueing transition: TransitionRecord{23ed4e1 id=-1 type=CHANGE flags=0x0 parallelCollectType=NONE recentsDisplayId=-1}
+07-06 22:42:40.568  1081  1209 V RecentTasksController: Notify recent tasks changed
+07-06 22:42:40.569  1385  1385 D RecentTasksList: invalidateLoadedTasks - previous requestLoadId: -1
+07-06 22:42:40.571  1081  1209 D ShellDesktopMode: DesktopRepository(0): Removes freeform task: taskId=92
+07-06 22:42:40.575  6278  6278 W NotificationCenter: NotificationCenter$NotificationQueue.notifyPendingNotificationsOnExecutor():877 Heavy notify work detected on UI thread: [nfl->nvd, nfl->nvd, nfl->htn, nfl->nvd, nfl->iwh, nfl->htn, nfl->nvd] takes 24ms
+07-06 22:42:40.576  6278  6278 I PkDeviceHelper: PkDeviceHelper.refreshDevices():87 refreshing devices
+07-06 22:42:40.577  6278  6278 I PkDeviceHelper: PkDeviceHelper.addDevice():125 device qwerty2 added
+07-06 22:42:40.579  1081  1209 W ShellDesktopMode: DesktopRepository(0): No display id found for task: taskId=92
+07-06 22:42:40.579  1081  1209 V RecentTasksController: Notify recent tasks changed
+07-06 22:42:40.580   637   659 I DisplayDeviceRepository: Display device changed render timings: "Built-in Screen", renderFrameRate=60.000004, presentationDeadlineNanos=16666666, appVsyncOffsetNanos=1000000, frameRateOverrides=[]
+07-06 22:42:40.581  1385  1385 D RecentTasksList: invalidateLoadedTasks - previous requestLoadId: -1
+07-06 22:42:40.606  4559  4559 I cr_VideoPersist: Attempted picture-in-picture with result: failure
+07-06 22:42:40.610  6278  6278 W NotificationCenter: NotificationCenter$NotificationQueue.notifyPendingNotificationsOnExecutor():877 Heavy notify work detected on UI thread: [nfl->kwl, nfl->pdr, kxw->ibu, kxw->gau] takes 34ms
+07-06 22:42:40.611   637  1159 D WindowManager: setClientSurface Surface(name=VRI-Splash Screen tech.pathfinder.unveil#2492)/@0xa36206 for 4700eb Splash Screen tech.pathfinder.unveil
+07-06 22:42:40.617   637   666 W ActivityManager: Slow operation: 112ms so far, now at startProcess: asking zygote to start proc
+07-06 22:42:40.691  1081  1276 I Surface : Creating surface for consumer unnamed-1081-103 with slotExpansion=1 for 64 slots
+07-06 22:42:40.703  1081  1276 I Surface : Creating surface for consumer VRI[unveil]#85(BLAST Consumer)85 with slotExpansion=1 for 64 slots
+07-06 22:42:40.747  1285  1285 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS 
+07-06 22:42:40.813 21905 21905 I Monkey  : ## Network stats: elapsed time=66ms (0ms mobile, 0ms wifi, 66ms not connected)
+07-06 22:42:40.818  1910  1910 I adbd    : adbd service requested 'shell,v2,raw:dumpsys package com.google.android.gms'
+07-06 22:42:40.821 21905 21905 I app_process: System.exit called, status: 0
+07-06 22:42:40.821 21905 21905 I AndroidRuntime: VM exiting with result code 0.
+07-06 22:42:40.848   525  8316 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:40.848   525  8316 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:40.883   637   748 I EventHub: Removing device Monkey touch due to epoll hang-up event.
+07-06 22:42:40.883   637   748 I EventHub: Removed device: path=/dev/input/event13 name=Monkey touch id=37 fd=583 classes=TOUCH | TOUCH_MT
+07-06 22:42:40.891   438   438 D Zygote  : Forked child process 21921
+07-06 22:42:40.903   637   666 W ActivityManager: Slow operation: 399ms so far, now at startProcess: returned from zygote!
+07-06 22:42:40.920   637   666 W ActivityManager: Slow operation: 416ms so far, now at startProcess: done updating battery stats
+07-06 22:42:40.920   637   666 W ActivityManager: Slow operation: 416ms so far, now at startProcess: building log message
+07-06 22:42:40.920   637   666 I ActivityManager: Start proc 21921:tech.pathfinder.unveil/u0a235 for next-top-activity {tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}
+07-06 22:42:40.920   637   666 W ActivityManager: Slow operation: 416ms so far, now at startProcess: starting to update pids map
+07-06 22:42:40.921   637   748 I InputReader: Device removed: id=37, eventHubId=37, name='Monkey touch', descriptor='e1fe28b90f915c7d1febbd52c1ef84b3c4cbed9f', sources=TOUCHSCREEN
+07-06 22:42:40.922   637   666 W ActivityManager: Slow operation: 418ms so far, now at startProcess: done updating pids map
+07-06 22:42:40.963   637   748 I EventHub: Removing device '/dev/input/event13' due to inotify event
+07-06 22:42:40.963  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:input tap 539 2276'
+07-06 22:42:40.966   637   659 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}
+07-06 22:42:40.967 21921 21921 I libprocessgroup: Created cgroup /sys/fs/cgroup/apps/uid_10235/pid_21921
+07-06 22:42:40.971   637   659 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:40.971  1081  1209 V ShellDesktopMode: DesktopDisplayModeController: canDesktopFirstModeBeEnabledOnDefaultDisplay: isDefaultDisplayDesktopEligible=false
+07-06 22:42:40.973   637   659 W ActivityTaskManager: Activity pause timeout for ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}
+07-06 22:42:40.975  1081  1209 V WindowManagerShell: Directly starting a new transition type=CHANGE wct=WindowContainerTransaction { changes= {android.os.BinderProxy@d8ae4ce={isTaskMoveAllowed:false,}} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null } handler=null
+07-06 22:42:40.985  6278  6278 I PkDeviceHelper: PkDeviceHelper.refreshDevices():87 refreshing devices
+07-06 22:42:40.986 21921 21921 I Zygote  : Process 21921 created for tech.pathfinder.unveil
+07-06 22:42:40.987 21921 21921 I thfinder.unveil: Using generational CollectorTypeCMC GC.
+07-06 22:42:40.994  6278  6278 I PkDeviceHelper: PkDeviceHelper.addDevice():125 device qwerty2 added
+07-06 22:42:40.999   637   659 I AppsFilter: interaction: PackageSetting{596f414 best.unveil.app/10231} -> PackageSetting{6817e60 tech.pathfinder.unveil/10235} BLOCKED
+07-06 22:42:41.016   637   982 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+07-06 22:42:41.019   637   747 I InputDispatcher: Not sending touch event to bac005e com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity because it is paused
+07-06 22:42:41.036  1081  1081 D NavigationModeController: getCurrentUserContext: contextUser=0 currentUser=0
+07-06 22:42:41.050   776   803 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/oat/arm64/base.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+07-06 22:42:41.052  1910  1910 I adbd    : adbd service requested 'exec:screencap '-p''
+07-06 22:42:41.053   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_AdsDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.055   776   803 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/oat/arm64/split_CronetDynamite_installtime.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+07-06 22:42:41.057   637  2009 V WindowManager: Queueing transition: TransitionRecord{846f04b id=-1 type=CHANGE flags=0x0 parallelCollectType=NONE recentsDisplayId=-1}
+07-06 22:42:41.059   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteLoader_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.060   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteModulesA_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.062   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteModulesC_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.080   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_GoogleCertificates_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.090   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_MapsDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.091 21921 21921 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 22:42:41.092   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_MeasurementDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.095   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_all_locale_splits.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.096   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000013/dl-PlayCloudSearch.optional_262334100000.apk has no usable artifacts
+07-06 22:42:41.096   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000001/CronetDynamite.apk has no usable artifacts
+07-06 22:42:41.098   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000014/dl-IdentityCredentialsPlatform.optional_262334100400.apk has no usable artifacts
+07-06 22:42:41.100   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000002/DynamiteLoader.apk has no usable artifacts
+07-06 22:42:41.102   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000005/GoogleCertificates.apk has no usable artifacts
+07-06 22:42:41.124   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000e/dl-VisionOcr.optional_261136100000.apk has no usable artifacts
+07-06 22:42:41.133   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000b/dl-Appsearch.optional_261136100400.apk has no usable artifacts
+07-06 22:42:41.135   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000a/dl-IdentityCredentialsPlatform.optional_261136100400.apk has no usable artifacts
+07-06 22:42:41.138   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000015/dl-VisionOcr.optional_262334100000.apk has no usable artifacts
+07-06 22:42:41.140   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000010/dl-MlkitOcrCommon.optional_262334100400.apk has no usable artifacts
+07-06 22:42:41.143   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000d/dl-MlkitOcrCommon.optional_261136100400.apk has no usable artifacts
+07-06 22:42:41.145   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000012/dl-TfliteDynamiteDynamite.integ_252130102100400.apk has no usable artifacts
+07-06 22:42:41.153   637   659 W PermissionService: getPermissionFlags: Unknown user -1
+07-06 22:42:41.156   776   803 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/574CF0A3144EB354068F133F674AB38CCBB02976/oat/arm64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.157   637   659 W PermissionService: getPermissionFlags: Unknown user -1
+07-06 22:42:41.158   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000016/dl-Appsearch.optional_262334100400.apk has no usable artifacts
+07-06 22:42:41.164   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000011/dl-MlkitBarcodeUi.optional_262334100400.apk has no usable artifacts
+07-06 22:42:41.167   776   803 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/7C26F94942E0B3DC400FC8F3A2AF71B87FD5F04D/oat/arm64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:41.171   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000007/MeasurementDynamite.apk has no usable artifacts
+07-06 22:42:41.210  1081  1209 V RecentTasksController: Notify recent tasks changed
+07-06 22:42:41.211  1385  1385 D RecentTasksList: invalidateLoadedTasks - previous requestLoadId: -1
+07-06 22:42:41.237  1081  1209 V RecentTasksController: generateList(getRecentTasks)
+07-06 22:42:41.239  1081  1209 V RecentTasksController: initializeDesksMap - allDeskIds: []
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Task 93 is not an active desktop task
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Added fullscreen task: 93
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Task 15 is not an active desktop task
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Added fullscreen task: 15
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Task 16 is not an active desktop task
+07-06 22:42:41.239  1081  1209 V RecentTasksController: Added fullscreen task: 16
+07-06 22:42:41.239  1081  1209 V RecentTasksController: generateList - complete
+07-06 22:42:41.242  1385  1440 D PreloadThumbnailUseCase: Preloading thumbnails for task ids: [[id=16 windowingMode=1 user=0 lastActiveTime=5567218] null, [id=15 windowingMode=1 user=0 lastActiveTime=443050746] null, [id=93 windowingMode=1 user=0 lastActiveTime=443050751] null]
+07-06 22:42:41.273 21921 21921 D nativeloader: Configuring clns-9 for other apk /data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/lib/arm64:/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/tech.pathfinder.unveil
+07-06 22:42:41.293 21921 21921 V GraphicsEnvironment: Currently set values for:
+07-06 22:42:41.293 21921 21921 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+07-06 22:42:41.293 21921 21921 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+07-06 22:42:41.293 21921 21921 V GraphicsEnvironment: tech.pathfinder.unveil is not listed in per-application setting
+07-06 22:42:41.294 21921 21921 V GraphicsEnvironment: No special selections for ANGLE, returning default driver choice
+07-06 22:42:41.303 21921 21921 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+07-06 22:42:41.378 21921 21921 W FirebaseApp: Default FirebaseApp failed to initialize because no default options were found. This usually means that com.google.gms:google-services was not applied to your gradle project.
+07-06 22:42:41.378 21921 21921 I FirebaseInitProvider: FirebaseApp initialization unsuccessful
+07-06 22:42:41.785   637   637 W Looper  : Slow dispatch took 412ms main app=system_server main=true group=FOREGROUND h=com.android.server.notification.NotificationManagerService$WorkerHandler c=com.android.server.notification.NotificationManagerService$PostNotificationRunnable@eda66be m=0
+07-06 22:42:41.795   637  2009 D CorePackageUpdate: Couldn't find a persistent state for task= 93
+07-06 22:42:41.829 21921 21945 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+07-06 22:42:41.853 21939 21939 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+07-06 22:42:41.855 21939 21939 W libbinder.BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+07-06 22:42:41.856 21939 21939 W libbinder.ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+07-06 22:42:41.922   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.923   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.923   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.923   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.928  1081  1429 V WindowManagerShell: onTransitionReady(transaction=2735894185839)
+07-06 22:42:41.928  1081  1209 V WindowManagerShell: onTransitionReady (#252) android.os.BinderProxy@34691da: {id=252 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+07-06 22:42:41.928  1081  1209 V WindowManagerShell:         {m=OPEN f=MOVE_TO_TOP|FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=93#2489)/@0xbd215eb sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0},
+07-06 22:42:41.928  1081  1209 V WindowManagerShell:         {m=TO_BACK f=FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=15#505)/@0x9e31f48 sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0}
+07-06 22:42:41.928  1081  1209 V WindowManagerShell:     ]}
+07-06 22:42:41.930  3040  3639 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+07-06 22:42:41.930  3040  3639 I AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+07-06 22:42:41.930  1081  1209 V WindowManagerShell: Playing animation for (#252) android.os.BinderProxy@34691da@0
+07-06 22:42:41.931  1081  1209 D ShellSplitScreen: startAnimation: transition=252 isSplitActive=false
+07-06 22:42:41.931  1081  1209 V ShellRecents: RecentsTransitionHandler.startAnimation: no controller found
+07-06 22:42:41.931  1081  1209 V ShellDesktopMode: DesktopMixedTransitionHandler: No pending desktop transition
+07-06 22:42:41.931  1081  1209 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=252 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=OPEN f=MOVE_TO_TOP|FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=93#2489)/@0xbd215eb sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0},{m=TO_BACK f=FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=15#505)/@0x9e31f48 sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0}]}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0 notFlags=0x0 checks=[{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null taskFragmentToken=android.os.BinderProxy@4a2f7ab windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@a1bbe08, appThread = android.app.IApplicationThread$Stub$Proxy@3e689a1, debugName = overlayBackTransition, filter = {types=[] flags=0x0 notFlags=0x0 checks=[{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null taskFragmentToken=android.os.BinderProxy@4a2f7ab windowingMode=undefined isCrossDisplayMove=false}]} }}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0 notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@a9dd7c6, appThread = android.app.IApplicationThread$Stub$Proxy@6176387, debugName = LauncherToDream, filter = {types=[] flags=0x0 notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false}]} }}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0 notFlags=0x0 checks=[{atype=standard independent=false modes=[CHANGE] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=true}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@9b2b2b4, appThread = android.app.IApplicationThread$Stub$Proxy@ec11edd, debugName = QuickstepDisplayMove, filter = {types=[] flags=0x0 notFlags=0x0 checks=[{atype=standard independent=false modes=[CHANGE] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=true}]} }}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0 notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@b8faa52, appThread = android.app.IApplicationThread$Stub$Proxy@f7cb123, debugName = QuickstepLaunchHome, filter = {types=[] flags=0x0 notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true windowingMode=undefined isCrossDisplayMove=false}]} }}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Checking filter Pair{{types=[OPEN,TO_FRONT] flags=0x0 notFlags=0x0 checks=[{atype=standard independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null windowingMode=freeform isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@ef28abc, appThread = null, debugName = DesktopWindowLimitUnminimize, filter = {types=[OPEN,TO_FRONT] flags=0x0 notFlags=0x0 checks=[{atype=standard independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null windowingMode=freeform isCrossDisplayMove=false}]} }}
+07-06 22:42:41.932  1081  1209 V WindowManagerShell:  Delegate animation for (#252) to null
+07-06 22:42:41.932  1081  1209 V WindowManagerShell: start default transition animation, info = {id=252 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=OPEN f=MOVE_TO_TOP|FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=93#2489)/@0xbd215eb sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0},{m=TO_BACK f=FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=15#505)/@0x9e31f48 sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0}]}
+07-06 22:42:41.935  1081  1209 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@e653b06 animAttr=0x9 type=OPEN isEntrance=false
+07-06 22:42:41.949   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.949   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:41.987 21939 21946 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:41.990   637   656 V WindowManager: Sent Transition (#252) createdAt=07-06 22:42:40.451 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=93 effectiveUid=10235 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity } baseActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} topActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} origActivity=null realActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} realActivityIsAppLockEnabled=false numActivities=1 lastActiveTime=443050751 supportsMultiWindow=true supportsMultiWindowWithoutConstraints=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{aca8f96 Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{4030717 tech.pathfinder.unveil.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isInteractive=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=null leafTaskBoundsFromOptions= false capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransitionInfo = null, displayChanges = null, requestedLocation = null, userChange = null, windowingLayerChange = null, fullscreenRequestChange = null, flags = 0, debugId = 252 }
+07-06 22:42:41.993   637   656 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null }
+07-06 22:42:41.993   637   656 V WindowManager:     info={id=252 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+07-06 22:42:41.993   637   656 V WindowManager:         {WCT{RemoteToken{aca8f96 Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil}}} m=OPEN f=MOVE_TO_TOP|FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=93#2489)/@0x85230ca sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0},
+07-06 22:42:41.993   637   656 V WindowManager:         {WCT{RemoteToken{a185b61 Task{544c6b9 #15 type=standard A=10165:com.android.chrome}}} m=TO_BACK f=FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=15#505)/@0x1ad70dc sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0}
+07-06 22:42:41.993   637   656 V WindowManager:     ]}
+07-06 22:42:41.997 21921 21921 D DesktopExperienceFlags: Toggle override initialized to: false
+07-06 22:42:41.999 21921 21921 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+07-06 22:42:42.003  1081  1209 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@85030ea animAttr=0x8 type=OPEN isEntrance=true
+07-06 22:42:42.046   637   659 V WindowManager: deferTransitionReady deferReadyDepth=1 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:717 com.android.server.wm.WindowOrganizerController.applyTransaction:641 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:388 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+07-06 22:42:42.046   637   659 V WindowManager: continueTransitionReady deferReadyDepth=0 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:864 com.android.server.wm.WindowOrganizerController.applyTransaction:641 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:388 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+07-06 22:42:42.088   637   656 V WindowManager: Sent Transition (#253) createdAt=07-06 22:42:40.541
+07-06 22:42:42.097   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.098   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.099   637   656 V WindowManager:     startWCT=WindowContainerTransaction { changes= {RemoteToken{e3e5a11 DefaultTaskDisplayArea@82498956}={isTaskMoveAllowed:false,}} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null }
+07-06 22:42:42.099   637   656 V WindowManager:     info={id=253 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+07-06 22:42:42.119 21921 21945 I GFXSTREAM: [eglDisplay.cpp(297)] Opening libGLESv1_CM_emulation.so
+07-06 22:42:42.119 21921 21945 I GFXSTREAM: [eglDisplay.cpp(297)] Opening libGLESv2_emulation.so
+07-06 22:42:42.120 21921 21945 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:42.125   637   659 V WindowManager: deferTransitionReady deferReadyDepth=1 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:717 com.android.server.wm.WindowOrganizerController.applyTransaction:641 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:388 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+07-06 22:42:42.125   637   659 V WindowManager: continueTransitionReady deferReadyDepth=0 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:864 com.android.server.wm.WindowOrganizerController.applyTransaction:641 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:388 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+07-06 22:42:42.131  1081  1209 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@107fa3e
+07-06 22:42:42.132 21921 21945 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+07-06 22:42:42.132 21921 21945 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+07-06 22:42:42.132 21921 21921 D CompatChangeReporter: Compat change id reported: 377864165; UID 10235; state: ENABLED
+07-06 22:42:42.133  1081  1209 V ShellTaskOrganizer: Task appeared taskId=93 listener=FullscreenTaskListener
+07-06 22:42:42.133  1081  1209 V ShellTaskOrganizer: Fullscreen Task Appeared: #93
+07-06 22:42:42.133  1081  1209 D ShellPackageUpdate: PackageUpdateController: Setting handlePackageUpdate for task: 93
+07-06 22:42:42.140  1081  1418 V WindowManagerShell: onTransitionReady(transaction=2735894185852)
+07-06 22:42:42.162   637  1199 E TransitionChain: Can't collect into a chain with no transition
+07-06 22:42:42.164   491   557 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for binder (0xb4007c4064042460) with descriptor: '(not cached)'
+07-06 22:42:42.164   491   622 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for binder (0xb4007c4064042460) with descriptor: '(not cached)'
+07-06 22:42:42.164   637   656 V WindowManager: Sent Transition (#254) createdAt=07-06 22:42:41.057
+07-06 22:42:42.164   637   656 V WindowManager:     startWCT=WindowContainerTransaction { changes= {RemoteToken{e3e5a11 DefaultTaskDisplayArea@82498956}={isTaskMoveAllowed:false,}} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null }
+07-06 22:42:42.164   637   656 V WindowManager:     info={id=254 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+07-06 22:42:42.166  1081  1209 V RecentTasksController: Notify recent tasks changed
+07-06 22:42:42.167  1081  1209 V WindowManagerShell: onTransitionReady (#253) android.os.BinderProxy@3f58f7e: {id=253 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+07-06 22:42:42.167  1081  1209 I ShellTransitions: Transition might be ready out-of-order 1 for (#253) android.os.BinderProxy@3f58f7e@0. This is ok if it's on a different track.
+07-06 22:42:42.167  1081  1209 V WindowManagerShell: No transition roots in (#253) android.os.BinderProxy@3f58f7e@0 so abort
+07-06 22:42:42.167  1081  1209 V WindowManagerShell: Transition was merged: (#253) android.os.BinderProxy@3f58f7e@0 into (#252) android.os.BinderProxy@34691da@0
+07-06 22:42:42.168  1385  1385 D RecentTasksList: invalidateLoadedTasks - previous requestLoadId: -1
+07-06 22:42:42.208   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.208   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.213 21921 21921 I WebViewFactory: Loading com.google.android.webview version 149.0.7827.159 (code 782715903)
+07-06 22:42:42.218  1081  2278 V WindowManagerShell: onTransitionReady(transaction=2735894185877)
+07-06 22:42:42.221   453   591 I RanchuHwc: logCompositionFallbackIfChanged: layer 455 CompositionType fallback from 3 to 1
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.223   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.232 21921 21921 V ResourcesManager: The following library key has been added: ResourcesKey{ mHash=26ecd4d1 mResDir=null mSplitDirs=[] mOverlayDirs=[] mLibDirs=[/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk,/system/framework/android.test.base.jar,/system_ext/framework/androidx.window.extensions.jar] mDisplayId=0 mOverrideConfig=v37 mCompatInfo={420dpi always-compat} mLoaders=[]}
+07-06 22:42:42.232  1081  1209 V WindowManagerShell: onTransitionReady (#254) android.os.BinderProxy@de3a30: {id=254 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+07-06 22:42:42.233  1081  1209 I ShellTransitions: Transition might be ready out-of-order 1 for (#254) android.os.BinderProxy@de3a30@0. This is ok if it's on a different track.
+07-06 22:42:42.233  1081  1209 V WindowManagerShell: No transition roots in (#254) android.os.BinderProxy@de3a30@0 so abort
+07-06 22:42:42.233  1081  1209 V WindowManagerShell: Transition was merged: (#254) android.os.BinderProxy@de3a30@0 into (#252) android.os.BinderProxy@34691da@0
+07-06 22:42:42.255   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.256   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.284 21921 21921 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+07-06 22:42:42.284 21921 21921 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.288   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.307 21921 21921 D nativeloader: Configuring clns-10 for other apk /data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/lib/arm64:/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand
+07-06 22:42:42.308   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.323   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.355   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.373   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.443   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.443   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.443   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.443   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.443   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.456   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.471   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.471   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.471   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.471   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.471   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.487   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.487   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.488   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.488   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.488   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.488 21921 21921 I cr_WVCFactoryProvider: version=149.0.7827.159 (782715903) minSdkVersion=29 multiprocess=true packageId=2 splits=<none>
+07-06 22:42:42.501 21921 21921 D nativeloader: Load /data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk!/lib/arm64-v8a/libwebviewchromium.so using class loader ns clns-10 (caller=/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk): ok
+07-06 22:42:42.504   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.504   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.504   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.504   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.504   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.506 21921 21921 D nativeloader: Load /system/lib64/libwebviewchromium_plat_support.so using class loader ns clns-10 (caller=/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk): ok
+07-06 22:42:42.511 21921 21954 E chromium: [0706/224242.509826:ERROR:android_webview/browser/variations/variations_seed_loader.cc:39] Seed missing signature.
+07-06 22:42:42.512 21921 21954 I chromium: [0706/224242.511943:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-06 22:42:42.521   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.521   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.521   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.521   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.521   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.538   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.538   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.538   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.538   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.538   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.541 21921 21921 I cr_LibraryLoader: Successfully loaded native library
+07-06 22:42:42.548 21921 21921 I cr_CachingUmaRecorder: Flushed 47 samples from 22 histograms, 0 samples were dropped.
+07-06 22:42:42.551 21921 21921 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+07-06 22:42:42.554 21921 21921 I cr_CombinedPProvider: #registerProvider() provider:WV.wk@34d224b isPolicyCacheEnabled:false policyProvidersSize:0
+07-06 22:42:42.554 21921 21921 I cr_PolicyProvider: #setManagerAndSource() 0
+07-06 22:42:42.555   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.555   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.555   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.555   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.555   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.559 21921 21954 I cr_policy: registerReceiver succeeded after 4ms
+07-06 22:42:42.564   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.565 21921 21921 I cr_DisplayManager: Is Display Topology available: false
+07-06 22:42:42.571   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.571   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.571   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.571   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.571   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.588   637  2009 V GrammaticalInflectionUtils: AttributionSource: android.content.AttributionSource@1c574ebf does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+07-06 22:42:42.588   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.588   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.588   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.588   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.588   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.605   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.605   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.606   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.606   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.606   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.626 21921 21921 I cr_CombinedPProvider: #linkNativeInternal() 1
+07-06 22:42:42.627 21921 21921 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+07-06 22:42:42.627 21921 21921 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-06 22:42:42.627 21921 21921 I cr_CombinedPProvider: #onSettingsAvailable() 0
+07-06 22:42:42.627 21921 21921 I cr_CombinedPProvider: #flushPolicies()
+07-06 22:42:42.638   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.638   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.638   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.638   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.638   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.656   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.656   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.656   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.656   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.656   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.672   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.672   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.672   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.672   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.672   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.690   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.707   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.707   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.707   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.707   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.707   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.740  1081  1209 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#252) android.os.BinderProxy@34691da@0
+07-06 22:42:42.754  4559  4559 D VRI[ChromeTabbedActivity]: visibilityChanged oldVisibility=true newVisibility=false
+07-06 22:42:42.772 22285 22285 D Zygote  : Forked child process 21969
+07-06 22:42:42.792   637   666 I libprocessgroup: Created cgroup /sys/fs/cgroup/apps/uid_99103
+07-06 22:42:42.794  4559  4559 E cr_CompositorSurfaceMgr: surfaceDestroyed format : 4
+07-06 22:42:42.795   637   656 V WindowManager: Finish Transition (#252): created at 07-06 22:42:40.451 collect-started=0.103ms request-sent=17.607ms started=64.778ms ready=1361.496ms sent=1454.23ms commit=180.631ms finished=2299.209ms
+07-06 22:42:42.820   637   666 I libprocessgroup: Created cgroup /sys/fs/cgroup/apps/uid_99103/pid_21969
+07-06 22:42:42.830 21921 21921 W chromium: [WARNING:android_webview/browser/network_service/net_helpers.cc:137] HTTP Cache size is: 20971520
+07-06 22:42:42.846 21969 21969 E libc    : SetHeapTaggingLevel: re-enabling tagging after it was disabled is not supported
+07-06 22:42:42.856   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.870 21969 21969 I Zygote  : Process 21969 created for com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+07-06 22:42:42.873 21969 21969 I ocessService0:0: Using generational CollectorTypeCMC GC.
+07-06 22:42:42.891   637   656 V WindowManager: Finish Transition (#253): created at 07-06 22:42:40.541 collect-started=1449.687ms started=1460.998ms ready=1505.951ms sent=1539.673ms commit=721.758ms finished=2344.374ms
+07-06 22:42:42.892   637   666 W ActivityManager: Slow operation: 304ms so far, now at startProcess: returned from zygote!
+07-06 22:42:42.893   637   666 W ActivityManager: Slow operation: 305ms so far, now at startProcess: done updating battery stats
+07-06 22:42:42.893   637   666 W ActivityManager: Slow operation: 305ms so far, now at startProcess: building log message
+07-06 22:42:42.893   637   666 I ActivityManager: Start proc 21969:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i103 for bound-service {tech.pathfinder.unveil/org.chromium.content.app.SandboxedProcessService0:0}
+07-06 22:42:42.894   637   666 W ActivityManager: Slow operation: 305ms so far, now at startProcess: starting to update pids map
+07-06 22:42:42.907   637   656 V WindowManager: Finish Transition (#254): created at 07-06 22:42:41.057 collect-started=1027.48ms started=1066.317ms ready=1067.816ms sent=1077.274ms commit=622.673ms finished=1848.631ms
+07-06 22:42:42.910  1081  1209 V WindowManagerShell: Track 0 became idle
+07-06 22:42:42.911   637   666 W ActivityManager: Slow operation: 322ms so far, now at startProcess: done updating pids map
+07-06 22:42:42.937 21969 21969 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 22:42:42.956   637  1063 I Surface : Creating surface for consumer unnamed-637-98 with slotExpansion=1 for 64 slots
+07-06 22:42:42.956   637  1063 I Surface : Creating surface for consumer ImageReader-864x1939f1m1-637-96 with slotExpansion=1 for 64 slots
+07-06 22:42:42.970   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.971   637  1063 W ImageReader_JNI: Unable to acquire a buffer item, very likely client tried to acquire more than maxImages buffers
+07-06 22:42:43.057   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.090 21969 21969 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+07-06 22:42:43.090 21969 21969 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+07-06 22:42:43.097   637  1063 E ConsumerBase: [ImageReader-864x1939f1m1-637-96] abandonLocked: ConsumerBase is abandoned!
+07-06 22:42:43.097 21969 21969 E ActivityThread: ConnectivityService is null in handleBindApplication!
+07-06 22:42:43.099 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:43.108 21969 21969 I cr_WebViewApkApp: version=149.0.7827.159 (782715903) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+07-06 22:42:43.114 21969 21969 I cr_ChildProcessService: Creating new ChildProcessService pid=21969
+07-06 22:42:43.114 26917 26917 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.safetynet.service.START xflg=0x4 pkg=com.google.android.gms }
+07-06 22:42:43.114 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.safetynet.service.START xflg=0x4 pkg=com.google.android.gms }
+07-06 22:42:43.134   637   723 D ConnectivityService: requestNetwork for uid/pid:10235/21921 activeRequest: null callbackRequest: 46108 [NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC|LP
+07-06 22:42:43.139   637   982 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   988 D ConnectivityService: NetReassign [46109 : null → 104] [c 1] [a 2] [i 1]
+07-06 22:42:43.139   637   982 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   982 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   982 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.140   637   988 D ConnectivityService: NetReassign [no changes] [c 0] [a 0] [i 0]
+07-06 22:42:43.158   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.166 21921 21921 D Capacitor: Starting BridgeActivity
+07-06 22:42:43.167  1215  1381 D SatelliteController: isInCarrierRoamingNbIotNtn: satellite is disabled
+07-06 22:42:43.167  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Checking connect type from PLMN config for subId: 1
+07-06 22:42:43.167  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.168  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.168  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:43.170  1215  1381 D SatelliteController: getSatellitePerPlmnConfiguration: invalid subId or not supported via carrier.
+07-06 22:42:43.170  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: config: null
+07-06 22:42:43.170  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.170  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.170  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectTypeViaConfigUpdater: return null (satelliteConfig is null)
+07-06 22:42:43.170  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+07-06 22:42:43.170  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.170  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.170  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:43.170  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Checking connect type from PLMN config for subId: 1
+07-06 22:42:43.170  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.170  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.170  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:43.171  1215  1381 D SatelliteController: getSatellitePerPlmnConfiguration: invalid subId or not supported via carrier.
+07-06 22:42:43.171  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: config: null
+07-06 22:42:43.171  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.171  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.171  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectTypeViaConfigUpdater: return null (satelliteConfig is null)
+07-06 22:42:43.171  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+07-06 22:42:43.171  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:43.171  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:43.171  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:43.207 21921 21964 W cr_media: BLUETOOTH_CONNECT permission is missing.
+07-06 22:42:43.207 21921 21964 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+07-06 22:42:43.207 21921 21964 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+07-06 22:42:43.210 21921 21964 D AudioSystem: onNewService: media.audio_policy service obtained 0xb4007f0ede0e8500
+07-06 22:42:43.212 21969 21985 I cr_LibraryLoader: Successfully loaded native library
+07-06 22:42:43.213 21969 21985 I cr_CachingUmaRecorder: Flushed 2 samples from 2 histograms, 0 samples were dropped.
+07-06 22:42:43.213 21921 21964 D AudioSystem: getService: IAudioPolicyService retrieved: 0xb4007f0ede0e8500  cached: 0xb4007f0ede0e8500
+07-06 22:42:43.214  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:uiautomator dump /sdcard/window_dump.xml'
+07-06 22:42:43.214 21969 21985 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.log"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.log.level"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.log.prefix"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.gallium.print.options"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.log.file.auto"
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.log.file"
+07-06 22:42:43.216 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.216 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.216 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.225 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.225 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.230 21921 21988 D vulkan  : searching for layers in '/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/lib/arm64'
+07-06 22:42:43.232 21921 21988 D vulkan  : searching for layers in '/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk!/lib/arm64-v8a'
+07-06 22:42:43.233 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.233 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.233 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.233 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.233 21921 21921 W HWUI    : Unknown dataspace 0
+07-06 22:42:43.234 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.234 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.234 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.234 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.235 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.235 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.trace"
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.trace.per.submit"
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.trace.frame"
+07-06 22:42:43.235 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.trace.trigger"
+07-06 22:42:43.240 21921 21997 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.242 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.wsi.debug"
+07-06 22:42:43.242 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.242 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.242 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.242 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.244 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.wsi.present.mode"
+07-06 22:42:43.244 21921 21988 W libc    : Access denied finding property "vendor.mesa.vk.wsi.headless.swapchain"
+07-06 22:42:43.245 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.245 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.245 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.245 21921 21988 E MESA    : Failed to open rendernode: No such file or directory
+07-06 22:42:43.246 21969 22002 I chromium: [INFO:third_party/skia/src/ports/SkFontMgr_android_parser.cpp:724] [SkFontMgr Android Parser] '/product/etc/fonts_customization.xml' could not be opened
+07-06 22:42:43.246 21969 22002 I chromium: 
+07-06 22:42:43.246 21921 21988 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:43.247 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:546] Fenced frames cannot be enabled in this configuration. Use --enable-features=FencedFrames instead.
+07-06 22:42:43.247   637  2021 W InputChannel-JNI: Channel already disposed.
+07-06 22:42:43.249 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:571] Topics cannot be enabled in this configuration. Use --enable-features=BrowsingTopics in addition.
+07-06 22:42:43.249 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:592] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+07-06 22:42:43.268   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.270 21921 21921 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+07-06 22:42:43.270 21921 21921 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-06 22:42:43.270 21921 21921 I cr_CombinedPProvider: #onSettingsAvailable() 0
+07-06 22:42:43.270 21921 21921 I cr_CombinedPProvider: #flushPolicies()
+07-06 22:42:43.278 21921 21921 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@2906f46
+07-06 22:42:43.278 21921 21921 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@a55d634
+07-06 22:42:43.278   637  2009 D CoreBackPreview: Window{c34c2ea u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ec63824, mPriority=-1, mIsAnimationCallback=false, mOverrideBehavior=0}
+07-06 22:42:43.279   637  2009 D CoreBackPreview: Window{c34c2ea u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@f590f8d, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+07-06 22:42:43.279 21921 21921 D VRI[MainActivity]: WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+07-06 22:42:43.287   637  2009 D WindowManager: setClientSurface Surface(name=VRI-tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity#2499)/@0xd541789 for c34c2ea tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity
+07-06 22:42:43.294 21921 21921 I Surface : Creating surface for consumer unnamed-21921-0 with slotExpansion=1 for 64 slots
+07-06 22:42:43.299 21921 21921 I Surface : Creating surface for consumer VRI[MainActivity]#0(BLAST Consumer)0 with slotExpansion=1 for 64 slots
+07-06 22:42:43.343 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.346 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.361 13401 13444 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.361 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.364 21921 22006 I CameraManagerGlobal: Connecting to camera service
+07-06 22:42:43.371 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.375   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.396 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.396 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.400 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.403 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.405 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.405 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.417 13401 13444 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.417 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.419 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.429 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.429 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.430 13401 13409 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.430 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.431 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.432   637  3724 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+07-06 22:42:43.435 13401 21758 I SQLiteConnectionPool: The connection pool for /data/user/0/com.google.android.gms/databases/metadata.db has been closed but there are still 1 connections in use.  They will be closed as they are released back to the pool.
+07-06 22:42:43.437 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.437 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.438 13401 13409 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.438 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.444 13401 21388 W FontLog : Error updating last accessed time for {Google Sans, wdth 100.0, wght 400, ital 0.0, bestEffort false}, isVf false}. [CONTEXT service_id=132 ]
+07-06 22:42:43.444 13401 21388 W FontLog : java.lang.IllegalStateException: Cannot perform this operation because the connection pool has been closed.
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.throwIfClosedLocked(SQLiteConnectionPool.java:1112)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.waitForConnection(SQLiteConnectionPool.java:803)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.acquireConnection(SQLiteConnectionPool.java:402)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteSession.acquireConnection(SQLiteSession.java:931)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteSession.executeForChangedRowCount(SQLiteSession.java:789)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteStatement.executeUpdateDelete(SQLiteStatement.java:67)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2233)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2209)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdej.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):57)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blkd.c(:com.google.android.gms@262334035@26.23.34 (260400-933906539):50)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blkd.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):66)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blpw.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):8)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.lang.Thread.run(Thread.java:1572)
+07-06 22:42:43.444 13401 21388 W FontLog : Caused by: java.lang.Exception: SQLiteConnectionPool.close()
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.dispose(SQLiteConnectionPool.java:270)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.close(SQLiteConnectionPool.java:250)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.dispose(SQLiteDatabase.java:559)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.onAllReferencesReleased(SQLiteDatabase.java:536)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteClosable.releaseReference(SQLiteClosable.java:92)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteClosable.close(SQLiteClosable.java:124)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdei.c(:com.google.android.gms@262334035@26.23.34 (260400-933906539):3)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdej.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):62)
+07-06 22:42:43.444 13401 21388 W FontLog : 	... 6 more
+07-06 22:42:43.445 13401 13410 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.474   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.498 21992 21992 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+07-06 22:42:43.507 21992 21992 I AndroidRuntime: Using default boot image
+07-06 22:42:43.507 21992 21992 I AndroidRuntime: Leaving lock profiling enabled
+07-06 22:42:43.512 21992 21992 I app_process: Core platform API enforcement enabled from the hiddenapi_platform_enforcement flag and the device API level
+07-06 22:42:43.513 21992 21992 I app_process: Using generational CollectorTypeCMC GC.
+07-06 22:42:43.605 21992 21992 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:43.617 21992 21992 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:43.617 21992 21992 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/10/icu") succeeded. 
+07-06 22:42:43.617 21992 21992 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt78l.dat
+07-06 22:42:43.618 21992 21992 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:43.619 21992 21992 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:43.620 21992 21992 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+07-06 22:42:43.622 21992 21992 W app_process: ClassLoaderContext shared library size mismatch. Expected=2, found=0 (PCL[]{PCL[/system/framework/android.test.base.jar*736588042]#PCL[/system/framework/android.test.mock.jar*4008448454]} | PCL[])
+07-06 22:42:43.623 21992 21992 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[]{PCL[/system/framework/android.test.runner.jar*805256125]{PCL[/system/framework/android.test.base.jar*736588042]#PCL[/system/framework/android.test.mock.jar*4008448454]}#PCL[/system/framework/android.test.base.jar*736588042]} | PCL[/system/framework/android.test.runner.jar*805256125])
+07-06 22:42:43.644 21992 21992 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 22:42:43.646 21992 21992 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+07-06 22:42:43.653 21992 21992 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+07-06 22:42:43.653 21992 21992 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+07-06 22:42:43.653 21992 21992 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+07-06 22:42:43.653 21992 21992 I AconfigPackage: com.google.android.widevine.flags is mapped to com.google.android.widevine
+07-06 22:42:43.653 21992 21992 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+07-06 22:42:43.653 21992 21992 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.uprobestats.flags is mapped to com.android.uprobestats
+07-06 22:42:43.654 21992 21992 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+07-06 22:42:43.654 21992 21992 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.libcore is mapped to com.android.art
+07-06 22:42:43.654 21992 21992 I AconfigPackage: android.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.internal.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.media.metrics.flags is mapped to com.android.media
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+07-06 22:42:43.654 21992 21992 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.nfc.module.nonexported.flags is mapped to com.android.nfcservices
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.bluetooth.beta.flags is mapped to com.android.bt
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+07-06 22:42:43.655 21992 21992 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+07-06 22:42:43.655 21992 21992 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.webapp.flags is mapped to com.android.webapp
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.cellbroadcastreceiver.flags is mapped to com.android.cellbroadcast
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+07-06 22:42:43.655 21992 21992 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:43.655 21992 21992 I AconfigPackage: android.app.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.npumanager is mapped to com.android.npumanager
+07-06 22:42:43.656 21992 21992 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+07-06 22:42:43.656 21992 21992 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: android.net.http is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.tethering.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+07-06 22:42:43.656 21992 21992 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+07-06 22:42:43.656 21992 21992 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+07-06 22:42:43.657 21992 21992 D UiAutomationConnection: Created on user UserHandle{0}
+07-06 22:42:43.657 21992 21992 I UiAutomation: Initialized for user 0 on display 0
+07-06 22:42:43.657 21992 21992 W UiAutomation: Created with deprecatead constructor, assumes DEFAULT_DISPLAY
+07-06 22:42:43.658   637  2009 D AccessibilityManagerService: changeCurrentUserForTestAutomationIfNeededLocked(0): ignoring because device doesn't support visible background users
+07-06 22:42:43.658   637  2009 I UiAutomationManager: Registering UiTestAutomationService (id=com.android.server.accessibility/UiAutomation, flags=0x0) when called by user 0
+07-06 22:42:43.659   637  2009 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:43.661   637  2009 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:43.661  3040  3868 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.666   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.667   637   723 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:43.667   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:43.668   637   723 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:43.668   637   723 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:43.668  3040  3868 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:43.669   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.669   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.670  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.670  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.670  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.670  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.683   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.684  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.685  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.685  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.685   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.685   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.685  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:43.685   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.685   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.685   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.686   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:43.687   637   637 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-06 22:42:43.701  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:43.701  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:43.701  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:43.702  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:43.705  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:43.710  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:43.710  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:43.710  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:43.710  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:43.710  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:43.710  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:43.710  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:43.715   637  2039 D AccessibilityManagerService: .getAccessibilityShortcutTargets {shortcutType=32, userId=0}
+07-06 22:42:43.739 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.740 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.740 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.743 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.744 21921 22027 I HWUI    : Using FreeType backend (prop=Auto)
+07-06 22:42:43.749 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.772   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:43.916   637   656 I ActivityTaskManager: Displayed tech.pathfinder.unveil/.MainActivity for user 0: +3s474ms
+07-06 22:42:44.004   525  8316 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:44.012   525  8316 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:44.032   637   756 I ImeTracker: tech.pathfinder.unveil:cfc99018: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false userId 0 displayId 0
+07-06 22:42:44.033   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.033   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.068   637   982 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+07-06 22:42:44.075   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.096  1175  1409 D IpClient/wlan0: interfaceLinkStateChanged: ifindex 16 up
+07-06 22:42:44.103  1175  1409 D IpClient/wlan0: interfaceLinkStateChanged: ifindex 16 up
+07-06 22:42:44.105 21921 21921 I cr_A11yState: Enabled accessibility services list updated. []
+07-06 22:42:44.108 21921 21921 I cr_A11yState: Informing listeners of changes.
+07-06 22:42:44.108 21921 21921 I cr_A11yState: New AccessibilityState: State{isComplexUserInteractionServiceEnabled=false, isTouchExplorationEnabled=false, isPerformGesturesEnabled=false, isAnyAccessibilityServiceEnabled=false, isAccessibilityToolPresent=false, isTextShowPasswordEnabled=true, isOnlyAutofillRunning=false, isOnlyPasswordManagersEnabled=false, isKnownScreenReaderEnabled=false}
+07-06 22:42:44.109  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2259 
+07-06 22:42:44.115  6278  6278 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 0, locked = false
+07-06 22:42:44.116 21921 21921 D InsetsController: hide(ime())
+07-06 22:42:44.116 21921 21921 I ImeTracker: tech.pathfinder.unveil:cfc99018: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+07-06 22:42:44.119  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1446 onStartInput(EditorInfo{EditorInfo{packageName=tech.pathfinder.unveil, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=12000000, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+07-06 22:42:44.119  6278  6278 I AndroidIME: LatinIMEBase.updateInputViewCoverNavigation():322 Update input view padding, isNavbarOverInputWindow=true, bottom inset=63
+07-06 22:42:44.121  4559  4559 I ImeTracker: com.android.chrome:802723f9: onRequestHide at ORIGIN_CLIENT reason HIDE_WINDOW_LOST_FOCUS fromUser false userId 0 displayId 0
+07-06 22:42:44.121  4559  4559 D InsetsController: hide(ime())
+07-06 22:42:44.121  4559  4559 I ImeTracker: com.android.chrome:802723f9: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+07-06 22:42:44.136   637  2016 D InputMethodManagerService: Attach new input but force hide
+07-06 22:42:44.136   637  2016 I ImeTracker: tech.pathfinder.unveil:98e5985b: onRequestHide at ORIGIN_SERVER reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+07-06 22:42:44.136   637  2016 I ImeTracker: tech.pathfinder.unveil:98e5985b: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-06 22:42:44.136   637  2016 W InputChannel-JNI: Channel already disposed.
+07-06 22:42:44.137  6278  6278 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 1, locked = false
+07-06 22:42:44.159   637   723 I ImeTracker: system_server:c3a18169: onRequestHide at ORIGIN_SERVER reason IME_REQUESTED_CHANGED_LISTENER fromUser false displayId 0
+07-06 22:42:44.160  4559 11846 I cr_BindingManager: onTrimMemory: level=20, size=2
+07-06 22:42:44.169   637   659 I ImeTracker: system_server:c3a18169: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-06 22:42:44.203  6278  6278 W NotificationCenter: NotificationCenter$NotificationQueue.notifyPendingNotificationsOnExecutor():877 Heavy notify work detected on UI thread: [nky->mey] takes 65ms
+07-06 22:42:44.237   637  1199 W PackageConfigPersister: App-specific configuration not found for packageName: tech.pathfinder.unveil and userId: 0
+07-06 22:42:44.238   525  4987 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:44.238   525  4987 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:44.263   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.362   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.402  4559  4572 W System  : A resource failed to call close. 
+07-06 22:42:44.466   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:44.565  1081  1105 W System  : A resource failed to call release. 
+07-06 22:42:45.093   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:45.208   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:45.307   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:45.503 21992 21992 W AccessibilityNodeInfoDumper: Fetch time: 16ms
+07-06 22:42:45.509   637  2039 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:45.514   637  2039 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:45.514   637  2039 D AccessibilityManagerService: restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring because device doesn't support visible background users
+07-06 22:42:45.515   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.515   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.515   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.517   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518  3040  3868 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.518   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:45.519   637   637 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-06 22:42:45.521  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:45.521  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:45.521  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:45.521  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:45.521 21992 22024 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:45.522 21992 22023 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:45.522 21992 22030 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:45.522  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:45.523  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:45.524  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:45.524  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:45.524  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:45.525  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:45.527  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:45.527 21992 21992 D AndroidRuntime: Shutting down VM
+07-06 22:42:45.528  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:45.528  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:45.528  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:45.529  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:45.531  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:45.533  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:45.533  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:45.534  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:45.546   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:45.645   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:46.520  1910  1910 I adbd    : adbd service requested 'sync:'
+07-06 22:42:46.588  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:input tap 971 2276'
+07-06 22:42:47.111   637  1012 I AdbWifiNetworkMonitor: Wi-Fi network available
+07-06 22:42:47.129   637  1012 I AdbWifiNetworkMonitor: Received the same Wi-Fi SSID. Ignoring.
+07-06 22:42:47.163   637   982 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+07-06 22:42:47.175   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:47.181   637   988 E libbinder.IPCThreadState: Binder transaction failure. id: 52366741, cmd: BR_FAILED_REPLY (29201), error: -28 (No space left on device - Binder buffer full. Too many or too large transactions.)
+07-06 22:42:47.181   637   988 W ActivityManager: pid 637 system sent binder code 1 with flags 1 and got error -2147483646
+07-06 22:42:47.181   637   988 E JavaBinder: !!! FAILED BINDER TRANSACTION !!!  (parcel size = 1188)
+07-06 22:42:47.181   637   988 E ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ TRACK_DEFAULT id=45092, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10161 RequestorUid: 10161 RequestorPkg: com.google.android.googlequicksearchbox UnderlyingNetworks: Null] ]
+07-06 22:42:47.181   637   988 E libbinder.IPCThreadState: Binder transaction failure. id: 52366742, cmd: BR_FAILED_REPLY (29201), error: -28 (No space left on device - Binder buffer full. Too many or too large transactions.)
+07-06 22:42:47.181   637   988 W ActivityManager: pid 637 system sent binder code 1 with flags 1 and got error -2147483646
+07-06 22:42:47.181   637   988 D ActivityManager: Too many transaction errors, throttling transaction error callback.
+07-06 22:42:47.181   637   988 E JavaBinder: !!! FAILED BINDER TRANSACTION !!!  (parcel size = 1176)
+07-06 22:42:47.181   637   988 E ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ LISTEN id=45094, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10161 RequestorUid: 10161 RequestorPkg: com.google.android.googlequicksearchbox UnderlyingNetworks: Null] ]
+07-06 22:42:47.181   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:47.181   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:47.182   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:47.232   637   988 D ConnectivityService: NetReassign [no changes] [c 0] [a 11] [i 1]
+07-06 22:42:47.235 13401 13409 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:47.239 13401 13409 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:47.240 13401 18288 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:47.241 13401 18288 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:47.242   637   737 W ActivityManager: pid 9370 has 784 free async space, killing
+07-06 22:42:47.244   637   737 I ActivityManager: binder error: kill 9370 Async binder space running out while frozen
+07-06 22:42:47.263   637   665 I ActivityManager: Killing 9370:com.google.android.googlequicksearchbox:googleapp/u0a161 (adj 935): Async binder space running out while frozen
+07-06 22:42:47.265 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:47.726 13401 18288 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 22:42:47.955   637   988 D QuicConnectionCloser: Close QUIC socket for QuicConnectionCloseInfo{uid: 10161, netId: 104, cookie: 117016, src: /10.0.2.16:45774, dst: /216.239.34.223:443, payload length: 72}, destroySocket=false
+07-06 22:42:47.981   637  1160 E AppOps  : Bad call made by uid 1000. Package "com.google.android.googlequicksearchbox" does not belong to uid 1000.
+07-06 22:42:47.982   637   988 D ConnectivityService: releasing NetworkRequest [ REQUEST id=45093, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10161 RequestorUid: 10161 RequestorPkg: com.google.android.googlequicksearchbox UnderlyingNetworks: Null] ] (release request)
+07-06 22:42:47.986   637   988 D ConnectivityService: releasing NetworkRequest [ REQUEST id=45800, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10161 RequestorUid: 10161 RequestorPkg: com.google.android.googlequicksearchbox UnderlyingNetworks: Null] ] (release request)
+07-06 22:42:47.988 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.clearcut.sampler.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+07-06 22:42:47.989   637  1160 W BinderNative: Uncaught exception from death notification
+07-06 22:42:47.989   637  1160 W BinderNative: java.lang.SecurityException: Specified package "com.google.android.googlequicksearchbox" under uid 1000 but it is not
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:5210)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:5007)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:4996)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.stopWatchingAsyncNoted(AppOpsService.java:3859)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.lambda$startWatchingAsyncNoted$8(AppOpsService.java:3835)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.$r8$lambda$8-LvphSu5hQo1Pm8R22O3seI00E(AppOpsService.java:0)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService$$ExternalSyntheticLambda2.onInterfaceDied(R8$$SyntheticClass:0)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at android.os.RemoteCallbackList$Builder$1.onCallbackDied(RemoteCallbackList.java:337)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at android.os.RemoteCallbackList$Interface.binderDied(RemoteCallbackList.java:229)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at android.os.IBinder$DeathRecipient.binderDied(IBinder.java:341)
+07-06 22:42:47.989   637  1160 W BinderNative: 	at android.os.BinderProxy.sendDeathNotice(BinderProxy.java:850)
+07-06 22:42:47.992   637   667 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10161/pid_9370
+07-06 22:42:47.996   438   438 I Zygote  : Process 9370 exited due to signal 9 (Killed)
+07-06 22:42:48.631  1285  1285 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS 
+07-06 22:42:48.920   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:48.932 21921 22009 I HWUI    : Davey! duration=2987ms; Flags=0, FrameTimelineVsyncId=3381188, IntendedVsync=443056203072248, Vsync=443056203072248, InputEventId=0, HandleInputStart=443056203824089, AnimationStart=443056203828381, PerformTraversalsStart=443056204487964, DrawStart=443056207311839, FrameDeadline=443056219738914, FrameStartTime=443056203814922, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443056203072248, SyncQueued=443056208975672, SyncStart=443056209055297, IssueDrawCommandsStart=443056209600714, SwapBuffers=443059126988424, FrameCompleted=443059190503007, DequeueBufferDuration=10792, QueueBufferDuration=813041, GpuCompleted=443059190503007, SwapBuffersCompleted=443059130684215, DisplayPresentTime=0, CommandSubmissionCompleted=443059126988424, 
+07-06 22:42:48.942   637   747 I InputDispatcher: c34c2ea tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity spent 2142ms processing MotionEvent
+07-06 22:42:48.943 21921 21921 I Choreographer: Skipped 179 frames!  The application may be doing too much work on its main thread.
+07-06 22:42:49.086   637   988 D InetDiagMessage: Destroyed 2 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+07-06 22:42:49.087   637   988 D InetDiagMessage: Destroyed 1 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+07-06 22:42:49.087   637   988 D InetDiagMessage: Destroyed live tcp sockets for uids={10165} in 43ms
+07-06 22:42:49.087   637   988 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+07-06 22:42:49.087   637   988 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+07-06 22:42:49.087   637   988 D InetDiagMessage: Destroyed live tcp sockets for uids={20165} in 1ms
+07-06 22:42:49.087   637  1199 W libbinder.Binder: Binder transaction to android.hardware.input.IInputManager, function: UNKNOWN_FUNCTION_NAME, code: 1598246212, took 2296ms. Data bytes: 172 Reply bytes: 4 Flags: 16
+07-06 22:42:49.096   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.176 21921 22051 D ProfileInstaller: Skipping profile installation for tech.pathfinder.unveil
+07-06 22:42:49.191  1910  1910 I adbd    : adbd service requested 'exec:screencap '-p''
+07-06 22:42:49.194 21921 22009 I HWUI    : Davey! duration=3232ms; Flags=0, FrameTimelineVsyncId=3381202, IntendedVsync=443056236405580, Vsync=443059219738794, InputEventId=-733518561, HandleInputStart=443059239101549, AnimationStart=443059239108340, PerformTraversalsStart=443059265164257, DrawStart=443059265480632, FrameDeadline=443059353072122, FrameStartTime=443059226413132, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443059219738794, SyncQueued=443059281916757, SyncStart=443059285814590, IssueDrawCommandsStart=443059285915507, SwapBuffers=443059399349507, FrameCompleted=443059473221340, DequeueBufferDuration=3125, QueueBufferDuration=220042, GpuCompleted=443059473221340, SwapBuffersCompleted=443059441699174, DisplayPresentTime=0, CommandSubmissionCompleted=443059399349507, 
+07-06 22:42:49.195   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.368   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.467   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.591   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.728 22054 22054 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+07-06 22:42:49.741 22054 22054 W libbinder.BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+07-06 22:42:49.742 22054 22054 W libbinder.ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+07-06 22:42:49.892   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.892   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.892   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:49.979 22054 22056 W libc    : Access denied finding property "vendor.mesa.virtgpu.kumquat"
+07-06 22:42:50.153   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.154 21921 22009 I HWUI    : Davey! duration=723ms; Flags=0, FrameTimelineVsyncId=3381258, IntendedVsync=443059619738778, Vsync=443059703072108, InputEventId=0, HandleInputStart=443059713006424, AnimationStart=443059713008216, PerformTraversalsStart=443059713907007, DrawStart=443059714245424, FrameDeadline=443059853084197, FrameStartTime=443059713003174, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443059703072108, SyncQueued=443059714478882, SyncStart=443059794219257, IssueDrawCommandsStart=443059797813216, SwapBuffers=443060353604549, FrameCompleted=443060422589674, DequeueBufferDuration=57500, QueueBufferDuration=652834, GpuCompleted=443060422589674, SwapBuffersCompleted=443060411548549, DisplayPresentTime=0, CommandSubmissionCompleted=443060353604549, 
+07-06 22:42:50.170 21921 21921 I Choreographer: Skipped 37 frames!  The application may be doing too much work on its main thread.
+07-06 22:42:50.278   637   982 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+07-06 22:42:50.287   637  1012 I AdbWifiNetworkMonitor: Wi-Fi network available
+07-06 22:42:50.290   637  1012 I AdbWifiNetworkMonitor: Received the same Wi-Fi SSID. Ignoring.
+07-06 22:42:50.322   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.350 13401 13521 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:50.353 13401 13521 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:50.357   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:50.366   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:50.366   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:50.366   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:50.369   637   988 D ConnectivityService: NetReassign [no changes] [c 0] [a 1] [i 0]
+07-06 22:42:50.373 13401 13525 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:50.373 13401 13525 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:50.485 21921 22009 I HWUI    : Davey! duration=812ms; Flags=0, FrameTimelineVsyncId=3381274, IntendedVsync=443059819738770, Vsync=443060436405412, InputEventId=0, HandleInputStart=443060455437591, AnimationStart=443060455440341, PerformTraversalsStart=443060458446841, DrawStart=443060469339091, FrameDeadline=443060603072072, FrameStartTime=443060452855549, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443060436405412, SyncQueued=443060486300383, SyncStart=443060580511258, IssueDrawCommandsStart=443060580994591, SwapBuffers=443060701561966, FrameCompleted=443060726753258, DequeueBufferDuration=2208, QueueBufferDuration=228583, GpuCompleted=443060726753258, SwapBuffersCompleted=443060702880591, DisplayPresentTime=0, CommandSubmissionCompleted=443060701561966, 
+07-06 22:42:50.531   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.662   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.759   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.822  1910  1910 I adbd    : adbd service requested 'shell,v2,raw:dumpsys package com.google.android.gms'
+07-06 22:42:50.861   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:50.917 13401 13525 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 22:42:51.247   776   781 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/oat/arm64/base.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+07-06 22:42:51.259   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_AdsDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.261   776   803 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/oat/arm64/split_CronetDynamite_installtime.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+07-06 22:42:51.264   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteLoader_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.270   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteModulesA_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.272   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_DynamiteModulesC_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.278   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_GoogleCertificates_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.281   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_MapsDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.284   776   781 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_MeasurementDynamite_installtime.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.286   776   803 I artd    : GetBestInfo: dm (/data/app/~~RMhMkQ2OgjwCzJJGIh32CA==/com.google.android.gms-tQ7ypCsqn36EvzC7XD-Svg==/split_all_locale_splits.dm) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.298   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000013/dl-PlayCloudSearch.optional_262334100000.apk has no usable artifacts
+07-06 22:42:51.299   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000001/CronetDynamite.apk has no usable artifacts
+07-06 22:42:51.305   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000014/dl-IdentityCredentialsPlatform.optional_262334100400.apk has no usable artifacts
+07-06 22:42:51.307   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000002/DynamiteLoader.apk has no usable artifacts
+07-06 22:42:51.307   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000005/GoogleCertificates.apk has no usable artifacts
+07-06 22:42:51.312   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000e/dl-VisionOcr.optional_261136100000.apk has no usable artifacts
+07-06 22:42:51.334   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000b/dl-Appsearch.optional_261136100400.apk has no usable artifacts
+07-06 22:42:51.342   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000a/dl-IdentityCredentialsPlatform.optional_261136100400.apk has no usable artifacts
+07-06 22:42:51.346   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000015/dl-VisionOcr.optional_262334100000.apk has no usable artifacts
+07-06 22:42:51.350   776   803 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000010/dl-MlkitOcrCommon.optional_262334100400.apk has no usable artifacts
+07-06 22:42:51.352   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000d/dl-MlkitOcrCommon.optional_261136100400.apk has no usable artifacts
+07-06 22:42:51.360   776   782 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000012/dl-TfliteDynamiteDynamite.integ_252130102100400.apk has no usable artifacts
+07-06 22:42:51.366   776   781 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/574CF0A3144EB354068F133F674AB38CCBB02976/oat/arm64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.371   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000016/dl-Appsearch.optional_262334100400.apk has no usable artifacts
+07-06 22:42:51.376   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000011/dl-MlkitBarcodeUi.optional_262334100400.apk has no usable artifacts
+07-06 22:42:51.395   776   782 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/7C26F94942E0B3DC400FC8F3A2AF71B87FD5F04D/oat/arm64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+07-06 22:42:51.400   776   781 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000007/MeasurementDynamite.apk has no usable artifacts
+07-06 22:42:51.616 21921 21921 I Choreographer: Skipped 64 frames!  The application may be doing too much work on its main thread.
+07-06 22:42:51.619 21921 22009 I HWUI    : Davey! duration=1211ms; Flags=0, FrameTimelineVsyncId=3381304, IntendedVsync=443060619738738, Vsync=443060703072068, InputEventId=0, HandleInputStart=443060708718508, AnimationStart=443060708720674, PerformTraversalsStart=443060709222966, DrawStart=443060709253466, FrameDeadline=443060786405398, FrameStartTime=443060708715091, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443060703072068, SyncQueued=443060709738674, SyncStart=443060769169633, IssueDrawCommandsStart=443060769215049, SwapBuffers=443061876425133, FrameCompleted=443061890807717, DequeueBufferDuration=27417, QueueBufferDuration=1673666, GpuCompleted=443061890807717, SwapBuffersCompleted=443061879341092, DisplayPresentTime=0, CommandSubmissionCompleted=443061876425133, 
+07-06 22:42:51.620   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:51.806  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:uiautomator dump /sdcard/window_dump.xml'
+07-06 22:42:51.861   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.028 22064 22064 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+07-06 22:42:52.035 22064 22064 I AndroidRuntime: Using default boot image
+07-06 22:42:52.035 22064 22064 I AndroidRuntime: Leaving lock profiling enabled
+07-06 22:42:52.039 22064 22064 I app_process: Core platform API enforcement enabled from the hiddenapi_platform_enforcement flag and the device API level
+07-06 22:42:52.039 22064 22064 I app_process: Using generational CollectorTypeCMC GC.
+07-06 22:42:52.115 22064 22064 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:52.128 22064 22064 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:52.128 22064 22064 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/10/icu") succeeded. 
+07-06 22:42:52.128 22064 22064 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt78l.dat
+07-06 22:42:52.129 22064 22064 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:52.130 22064 22064 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+07-06 22:42:52.131 22064 22064 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+07-06 22:42:52.135 22064 22064 W app_process: ClassLoaderContext shared library size mismatch. Expected=2, found=0 (PCL[]{PCL[/system/framework/android.test.base.jar*736588042]#PCL[/system/framework/android.test.mock.jar*4008448454]} | PCL[])
+07-06 22:42:52.136 22064 22064 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[]{PCL[/system/framework/android.test.runner.jar*805256125]{PCL[/system/framework/android.test.base.jar*736588042]#PCL[/system/framework/android.test.mock.jar*4008448454]}#PCL[/system/framework/android.test.base.jar*736588042]} | PCL[/system/framework/android.test.runner.jar*805256125])
+07-06 22:42:52.196 22064 22064 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 22:42:52.203 22064 22064 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+07-06 22:42:52.209   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.211 22064 22064 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.google.android.widevine.flags is mapped to com.google.android.widevine
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.uprobestats.flags is mapped to com.android.uprobestats
+07-06 22:42:52.212 22064 22064 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+07-06 22:42:52.212 22064 22064 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.libcore is mapped to com.android.art
+07-06 22:42:52.212 22064 22064 I AconfigPackage: android.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.internal.telecom.flags is mapped to com.android.telephonycore
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.media.metrics.flags is mapped to com.android.media
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+07-06 22:42:52.212 22064 22064 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+07-06 22:42:52.213 22064 22064 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+07-06 22:42:52.213 22064 22064 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+07-06 22:42:52.216 22064 22064 I AconfigPackage: com.android.nfc.module.nonexported.flags is mapped to com.android.nfcservices
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.bluetooth.beta.flags is mapped to com.android.bt
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.webapp.flags is mapped to com.android.webapp
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.cellbroadcastreceiver.flags is mapped to com.android.cellbroadcast
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.app.sdksandbox.flags is mapped to com.android.adservices
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.npumanager is mapped to com.android.npumanager
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.net.http is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.tethering.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+07-06 22:42:52.217 22064 22064 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+07-06 22:42:52.218 22064 22064 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+07-06 22:42:52.226 22064 22064 D UiAutomationConnection: Created on user UserHandle{0}
+07-06 22:42:52.226 22064 22064 I UiAutomation: Initialized for user 0 on display 0
+07-06 22:42:52.226 22064 22064 W UiAutomation: Created with deprecatead constructor, assumes DEFAULT_DISPLAY
+07-06 22:42:52.233   637  1160 D AccessibilityManagerService: changeCurrentUserForTestAutomationIfNeededLocked(0): ignoring because device doesn't support visible background users
+07-06 22:42:52.233   637  1160 I UiAutomationManager: Registering UiTestAutomationService (id=com.android.server.accessibility/UiAutomation, flags=0x0) when called by user 0
+07-06 22:42:52.235   637  1160 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:52.246   637  1160 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:52.252  3040  3868 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:52.261   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.262   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.262   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.264   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.264   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.265   637   637 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-06 22:42:52.270  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.270  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.270  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.270  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.271  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.272  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.272  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.272  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.272  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.272  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.272  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.272  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.272  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.272  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.272  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.274  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:52.277  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:52.278  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:52.289  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:52.307   637  1160 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:52.308   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:52.308   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:52.308   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:52.308   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:52.308   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:52.309   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:52.309   637  1160 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:52.309   637  1160 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:52.309  3040  3146 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:52.309   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.309   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.309   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.309   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.309   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.309  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.310   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.310   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.310  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.310  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.310  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.310   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.310   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.310   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:52.310  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.310  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.310  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.310  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.310  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.311  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.312  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:52.312  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:52.312  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:52.312  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:52.313  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:52.314  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:52.314  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:52.315  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:52.315  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:52.316   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.321   637  1376 D AccessibilityManagerService: .getAccessibilityShortcutTargets {shortcutType=32, userId=0}
+07-06 22:42:52.372 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:52.417   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.503   637  1376 V AutofillSession: Primary service component name: ComponentInfo{com.google.android.gms/com.google.android.gms.autofill.service.AutofillService}, secondary service component name: ComponentInfo{com.android.credentialmanager/com.android.credentialmanager.autofill.CredentialAutofillService}
+07-06 22:42:52.503   637  1376 V SecondaryProviderHandler: Creating a secondary provider handler with component name, ComponentInfo{com.android.credentialmanager/com.android.credentialmanager.autofill.CredentialAutofillService}
+07-06 22:42:52.507   637  1376 D PresentationStatsEventLogger: Started new PresentationStatsEvent
+07-06 22:42:52.507   637  1376 W FillRequestEventLogger: Couldn't find packageName: com.google.android.inputmethod.latin
+07-06 22:42:52.542 21921 21921 I AssistStructure: Flattened final assist data: 5436 bytes, containing 1 windows, 6 views
+07-06 22:42:52.545   637  1376 D AutofillSession: createPendingIntent for request 854
+07-06 22:42:52.545   637  1376 D ContentCapturePerUserService: Notified activity assist data for activity: Token{abac6cf ActivityRecord{227449257 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 22:42:52.546 21921 21933 I thfinder.unveil: NativeAlloc concurrent mark compact GC freed 5678KB AllocSpace bytes, 34(1712KB) LOS objects, 49% free, 3722KB/7445KB, paused 159us,6.297ms total 56.155ms
+07-06 22:42:52.583   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.746   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:52.916   637  1376 W WindowManager: Failed looking up window session=Session{896aff9 12060:u0a10165} callers=com.android.server.wm.WindowManagerService.removeClientToken:2319 com.android.server.wm.Session.remove:281 android.view.IWindowSession$Stub.onTransact:637 
+07-06 22:42:52.917   637  1376 W WindowManager: Failed looking up window session=Session{896aff9 12060:u0a10165} callers=com.android.server.wm.WindowManagerService.removeClientToken:2319 com.android.server.wm.Session.remove:281 android.view.IWindowSession$Stub.onTransact:637 
+07-06 22:42:52.924   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:53.165  1215  1381 D SatelliteController: isInCarrierRoamingNbIotNtn: satellite is disabled
+07-06 22:42:53.166  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Checking connect type from PLMN config for subId: 1
+07-06 22:42:53.166  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.166  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.166  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:53.177  1215  1381 D SatelliteController: getSatellitePerPlmnConfiguration: invalid subId or not supported via carrier.
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: config: null
+07-06 22:42:53.177  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.177  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectTypeViaConfigUpdater: return null (satelliteConfig is null)
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+07-06 22:42:53.177  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.177  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.177  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Checking connect type from PLMN config for subId: 1
+07-06 22:42:53.177  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.177  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.177  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:53.177  1215  1381 D SatelliteController: getSatellitePerPlmnConfiguration: invalid subId or not supported via carrier.
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: config: null
+07-06 22:42:53.177  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.177  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectTypeViaConfigUpdater: return null (satelliteConfig is null)
+07-06 22:42:53.177  1215  1381 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+07-06 22:42:53.177  1215  1381 D TelephonyConfigUpdateInstallReceiver: getConfigParser: domain=satellite
+07-06 22:42:53.177  1215  1381 V SatelliteController: satelliteConfigParser is not ready
+07-06 22:42:53.177  1215  1381 D SatelliteController: isSatelliteAttachSupportedViaConfigupdater: return null (satelliteConfig is null)
+07-06 22:42:53.242   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:53.298   637  1012 I AdbWifiNetworkMonitor: Wi-Fi network available
+07-06 22:42:53.298   637  1012 I AdbWifiNetworkMonitor: Received the same Wi-Fi SSID. Ignoring.
+07-06 22:42:53.303   637   982 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+07-06 22:42:53.316   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.321   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.321   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.322   637   988 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.339 13401 13410 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:53.339 13401 13410 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:53.349   637   988 D ConnectivityService: NetReassign [no changes] [c 0] [a 10] [i 1]
+07-06 22:42:53.351 13401 18288 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:53.351 13401 18288 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:53.354 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:53.593 22064 22064 W AccessibilityNodeInfoDumper: Fetch time: 25ms
+07-06 22:42:53.596   637   724 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_top_row_key_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 V AccessibilityUserState: updateShortcutTargets: type:accessibility_quick_access_targets, current:{}, new:{}
+07-06 22:42:53.600   637   724 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+07-06 22:42:53.600   637   724 D AccessibilityManagerService: restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring because device doesn't support visible background users
+07-06 22:42:53.600   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.602 22064 22074 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:53.602  3040  3146 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+07-06 22:42:53.602 22064 22078 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:53.602   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.603   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.603 22064 22064 D AndroidRuntime: Shutting down VM
+07-06 22:42:53.603   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.604   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.606   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.606 22064 22073 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+07-06 22:42:53.607   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.607   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.607   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.607   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.607   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.609   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.609   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.609   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.609   637   637 W libbinder.IPCThreadState: Sending oneway calls to frozen process.
+07-06 22:42:53.609   637   637 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: EchoTargets: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: Filtered by AiAi flag check: 
+07-06 22:42:53.612  3040  3340 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-06 22:42:53.612  3040  3340 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-06 22:42:53.617  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-06 22:42:53.618  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface ambientcue with targets# 0 (types=[])
+07-06 22:42:53.618  3040  3340 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+07-06 22:42:53.619  1081  1294 I AmbientCueRepository: Receiving SmartSpace targets # 0
+07-06 22:42:53.625   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:53.726   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:53.843 13401 18288 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 22:42:53.904   637   649 W System  : A resource failed to call close. 
+07-06 22:42:53.973  4559 11846 I cr_BindingManager: Release visible connections: 2
+07-06 22:42:54.508  1910  1910 I adbd    : adbd service requested 'sync:'
+07-06 22:42:54.540  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d''

@@ -8,6 +8,7 @@ import { FeedbackForm } from "@/components/FeedbackForm";
 import { useTranslation } from "react-i18next";
 import { useMessageQuota, formatRemainingTime } from "@/hooks/use-message-quota";
 import { useRequireOnboarding } from "@/hooks/use-require-onboarding";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { deleteAccount } from "@/lib/account.functions";
@@ -18,9 +19,18 @@ import {
   Mail, Phone as PhoneIcon, Key, LogIn, BadgeCheck, FlagOff, RefreshCw, Download, FileText,
 } from "lucide-react";
 import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { LoadingTimeoutScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — UNVEIL" }] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Settings are temporarily unavailable"
+      message="A settings panel failed on this screen only. Retry or go home while it recovers."
+      error={error}
+    />
+  ),
   component: Settings,
 });
 
@@ -35,6 +45,7 @@ const SECTIONS = [
 
 function Settings() {
   const { checking } = useRequireOnboarding();
+  const checkingTimedOut = useLoadingTimeout(checking, 8000);
   const { t } = useTranslation();
   const { quota } = useMessageQuota();
   const { user } = useAuth();
@@ -77,6 +88,17 @@ function Settings() {
   }
 
   if (checking) {
+    if (checkingTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Settings are taking longer than expected"
+            message="UNVEIL did not finish loading your settings in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />
@@ -195,8 +217,8 @@ function Settings() {
                     {quota.remaining} of {quota.dailyLimit} free messages remaining today. Resets {quota.resetsAt ? new Date(quota.resetsAt).toLocaleTimeString() : "in 24h"}.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Link to="/checkout" search={{ product: "message_pass" } as never} className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-xs text-accent hover:bg-accent/20">
-                      <Zap className="h-3 w-3" /> Daily Pass · $1.99
+                    <Link to="/premium" className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-xs text-accent hover:bg-accent/20">
+                      <Zap className="h-3 w-3" /> Daily Pass
                     </Link>
                     <Link to="/premium" className="inline-flex items-center gap-1 rounded-full bg-gradient-hero px-4 py-1.5 text-xs text-primary-foreground shadow-glow">
                       <Crown className="h-3 w-3" /> Go Premium

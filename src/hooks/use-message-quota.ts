@@ -44,7 +44,10 @@ export function useMessageQuota() {
         setQuota({ ...DEFAULT, loading: false });
         return;
       }
-      const { data } = await withTimeout<{ data: any }>((supabase as any).rpc("get_message_quota", { _uid: user.id }), QUOTA_TIMEOUT_MS);
+      const { data } = await withTimeout<{ data: any }>(
+        (supabase as any).rpc("get_message_quota", { _uid: user.id }),
+        QUOTA_TIMEOUT_MS,
+      );
       const row = Array.isArray(data) ? data[0] : data;
       if (row) {
         setQuota({

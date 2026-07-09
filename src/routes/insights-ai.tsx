@@ -11,7 +11,9 @@ import robotMascot from "@/assets/ai-insights-robot.png";
 
 import { InsightsHubTabs } from "@/components/InsightsHubTabs";
 import { AiQuotaStatus } from "@/components/AiQuotaStatus";
-import { PageBackButton } from "@/components/PageBackButton";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { LoadingScreen, LoadingTimeoutScreen } from "@/components/AppStateScreen";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 
 export const Route = createFileRoute("/insights-ai")({
   head: () => ({
@@ -20,6 +22,13 @@ export const Route = createFileRoute("/insights-ai")({
       { name: "description", content: "Premium AI compatibility analysis, relationship journey progress, and date ideas across your matches." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="AI Insights are temporarily unavailable"
+      message="AI analysis failed on this screen only. The app shell should continue working normally."
+      error={error}
+    />
+  ),
   component: InsightsAiPage,
 });
 
@@ -34,6 +43,8 @@ function InsightsAiPage() {
   const [rows, setRows] = useState<MatchRow[]>([]);
   const [top, setTop] = useState<{ bestOverall: CompatibilityInsight | null; bestRomantic: CompatibilityInsight | null; bestFriendship: CompatibilityInsight | null } | null>(null);
   const [loadingList, setLoadingList] = useState(true);
+  const entLoadingTimedOut = useLoadingTimeout(entLoading, 8000);
+  const matchesLoadingTimedOut = useLoadingTimeout(loadingList, 8000);
 
   // Load mutual matches list
   useEffect(() => {
@@ -86,7 +97,19 @@ function InsightsAiPage() {
 
 
   if (entLoading) {
-    return <div className="min-h-screen bg-background"><UnveilNav /><div className="p-12 text-center text-muted-foreground">…</div></div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <UnveilNav />
+        {entLoadingTimedOut ? (
+          <LoadingTimeoutScreen
+            title="Insights are taking longer than expected"
+            message="UNVEIL did not finish loading your AI access state in time."
+          />
+        ) : (
+          <LoadingScreen label="Loading insights" />
+        )}
+      </div>
+    );
   }
 
   if (!entitlements.premium) {
@@ -141,7 +164,6 @@ function InsightsAiPage() {
     <div className="min-h-screen bg-background">
       <UnveilNav />
       <div className="mx-auto max-w-5xl px-6 py-10">
-        <div className="mb-4"><PageBackButton fallback="/matches" /></div>
         <HeroBlock premium />
 
         <div className="mt-4"><AiQuotaStatus /></div>
@@ -170,9 +192,32 @@ function InsightsAiPage() {
         <div className="rounded-3xl border border-border bg-card p-4 sm:p-6">
           <h2 className="mb-3 font-display text-lg font-bold">Your mutual matches</h2>
           {loadingList ? (
-            <div className="text-sm text-muted-foreground">Loading matches…</div>
+            matchesLoadingTimedOut ? (
+              <LoadingTimeoutScreen
+                title="Insights match list is taking longer than expected"
+                message="UNVEIL did not finish loading mutual matches in time."
+              />
+            ) : (
+              <div className="text-sm text-muted-foreground">Loading matches…</div>
+            )
           ) : rows.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No mutual matches yet.</div>
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground">No mutual matches yet. Demo insights are shown for review.</div>
+              {["Avery", "Jordan", "Mina"].map((name, idx) => (
+                <div key={name} className="rounded-2xl border border-border bg-surface/40 p-4">
+                  <div className="font-display text-base font-semibold">{name}</div>
+                  <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                    <Chip>Demo profile</Chip>
+                    <Chip>Overall {88 - idx * 4}%</Chip>
+                    <Chip>Romance {84 - idx * 3}%</Chip>
+                    <Chip>Friendship {91 - idx * 2}%</Chip>
+                  </div>
+                  <p className="mt-3 text-sm text-foreground/90">
+                    Reviewer demo: warm communication style, aligned long-term values, and high conversation momentum.
+                  </p>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="space-y-3">
               {rows.map((r) => (

@@ -1,0 +1,69 @@
+07-06 23:02:26.113 13401 13446 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 23:02:26.113 13401 13446 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 23:02:26.148 13401 21762 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 23:02:26.148 13401 21762 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 23:02:26.176 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 23:02:26.605 13401 21762 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 23:02:26.985   637  2009 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6fbf091 ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 23:02:29.403  1910  1910 I adbd    : adbd service requested 'sync:'
+07-06 23:02:29.875   637  1158 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6fbf091 ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 23:02:30.403 23465 23465 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-06 23:02:31.201 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 23:02:32.208 13401 13439 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 23:02:32.208 13401 13439 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 23:02:32.219 13401 21762 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 23:02:32.219 13401 21762 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 23:02:32.225 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 23:02:32.719 13401 21762 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 23:02:32.763 13401 13447 I WifiScanner: onFullResults
+07-06 23:02:33.320   637   709 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6fbf091 ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 23:02:33.796 13401 13465 I ActivityScheduler: nextTriggerTime: 444482177, in 238099ms, detectorType: 39, FULL_TYPE alarmWindowMillis: 80000
+07-06 23:02:36.048 23207 23207 I ImeTracker: tech.pathfinder.unveil:59d376a: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false userId 0 displayId 0
+07-06 23:02:36.069   637   651 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6fbf091 ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 23:02:36.125  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1446 onStartInput(EditorInfo{EditorInfo{packageName=tech.pathfinder.unveil, inputType=2040a1, inputTypeString=WebEditText[CapSentences], enableLearning=false, autoCorrection=false, autoComplete=true, imeOptions=12000003, privateImeOptions=null, actionName=SEARCH, actionLabel=null, initialSelStart=0, initialSelEnd=0, initialCapsMode=0, label=null, fieldId=2131230921, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, true)
+07-06 23:02:36.178   637   651 W PackageConfigPersister: App-specific configuration not found for packageName: tech.pathfinder.unveil and userId: 0
+07-06 23:02:36.188  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onStartInputView():1532 onStartInputView(EditorInfo{EditorInfo{packageName=tech.pathfinder.unveil, inputType=2040a1, inputTypeString=WebEditText[CapSentences], enableLearning=false, autoCorrection=false, autoComplete=true, imeOptions=12000003, privateImeOptions=null, actionName=SEARCH, actionLabel=null, initialSelStart=0, initialSelEnd=0, initialCapsMode=0, label=null, fieldId=2131230921, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+07-06 23:02:36.300  6278  6278 I AndroidIME: AbstractIme.onActivate():95 LatinIme.onActivate() : EditorInfo = EditorInfo{packageName=tech.pathfinder.unveil, inputType=2040a1, inputTypeString=WebEditText[CapSentences], enableLearning=false, autoCorrection=false, autoComplete=true, imeOptions=12000003, privateImeOptions=null, actionName=SEARCH, actionLabel=null, initialSelStart=0, initialSelEnd=0, initialCapsMode=0, label=null, fieldId=2131230921, fieldName=null, extras=null, hintText=null, hintLocales=[]}, IncognitoMode = false, DeviceLocked = false
+07-06 23:02:36.409 23207 23207 I ImeTracker: tech.pathfinder.unveil:4e3a9a0e: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+07-06 23:02:36.457 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.mdd.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.GmsApiService }
+07-06 23:02:36.510   637  2010 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6fbf091 ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 23:02:36.589 13401 13416 I .gms.persistent: Waiting for a blocking GC ProfileSaver
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: Autofill fill future failed [CONTEXT service_id=177 ]
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: java.util.concurrent.CancellationException: Task was cancelled.
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpdd.j(:com.google.android.gms@262334035@26.23.34 (260400-933906539):31)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpdm.t(:com.google.android.gms@262334035@26.23.34 (260400-933906539):24)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpdd.get(:com.google.android.gms@262334035@26.23.34 (260400-933906539):1)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hphs.a(:com.google.android.gms@262334035@26.23.34 (260400-933906539):2)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpfw.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):32)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpfd.execute(:com.google.android.gms@262334035@26.23.34 (260400-933906539):1)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpdd.f(:com.google.android.gms@262334035@26.23.34 (260400-933906539):1)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpdd.hz(:com.google.android.gms@262334035@26.23.34 (260400-933906539):38)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at hpgi.u(:com.google.android.gms@262334035@26.23.34 (260400-933906539):9)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.google.android.gms.autofill.service.AutofillChimeraService.onFillRequest(:com.google.android.gms@262334035@26.23.34 (260400-933906539):1225)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.service.autofill.AutofillService$1$$ExternalSyntheticLambda3.accept(D8$$SyntheticClass:0)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.doInvoke(PooledLambdaImpl.java:310)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.invoke(PooledLambdaImpl.java:204)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.android.internal.util.function.pooled.OmniFunction.run(OmniFunction.java:87)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.os.Handler.handleCallback(Handler.java:1095)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.os.Handler.dispatchMessageImpl(Handler.java:135)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.os.Handler.dispatchMessage(Handler.java:125)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.os.Looper.loopOnce(Looper.java:296)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.os.Looper.loop(Looper.java:397)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at android.app.ActivityThread.main(ActivityThread.java:9523)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at java.lang.reflect.Method.invoke(Native Method)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)
+07-06 23:02:36.622 13401 13401 E AutofillChimeraService: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)
+07-06 23:02:36.625  6278  6278 D ImeBackCallbackSender: Register OnBackInvokedCallback with priority=-1 at app window (packageName=tech.pathfinder.unveil)
+07-06 23:02:36.633 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.wallet.service.BIND xflg=0x4 pkg=com.google.android.gms }
+07-06 23:02:36.634 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.firebase.dynamiclinks.service.START xflg=0x4 pkg=com.google.android.gms }
+07-06 23:02:36.652 13401 13416 I .gms.persistent: WaitForGcToComplete blocked ProfileSaver on Background for 62.631ms
+07-06 23:02:36.716 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS xflg=0x4 pkg=com.google.android.gms }
+07-06 23:02:36.777 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 23:02:36.871   637   709 D ImeInsetsSourceProvider: showImePostLayout aborted, serverVisible: false, frozen: false, mWin is: non-null, isDrawn: false, mGivenInsetsPending: false, imeLayeringTarget: Window{b630889 u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}, controlTarget: Window{b630889 u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}
+07-06 23:02:36.872   637   709 I ImeTracker: tech.pathfinder.unveil:59d376a: onFailed at PHASE_SERVER_ABORT_SHOW_IME_POST_LAYOUT
+07-06 23:02:36.883  6278  6278 D ImeBackCallbackSender: Unregister OnBackInvokedCallback at app window (packageName=tech.pathfinder.unveil)
+07-06 23:02:36.883  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1446 onStartInput(EditorInfo{EditorInfo{packageName=tech.pathfinder.unveil, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=12000000, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, true)
+07-06 23:02:36.885   637  2040 W PackageConfigPersister: App-specific configuration not found for packageName: tech.pathfinder.unveil and userId: 0
+07-06 23:02:37.084   637  1160 D CoreBackPreview: Window{b630889 u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@9044e48, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+07-06 23:02:37.085   637  1160 D CoreBackPreview: Window{b630889 u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@a5f74e1, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+07-06 23:02:37.229 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }

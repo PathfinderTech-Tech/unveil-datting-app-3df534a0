@@ -1,0 +1,1 @@
+    topResumedActivity=ActivityRecord{108521493 u0 tech.pathfinder.unveil/.MainActivity t93}

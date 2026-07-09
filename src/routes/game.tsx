@@ -8,8 +8,7 @@ export const Route = createFileRoute("/game")({
       { title: "Solo Mind Games — UNVEIL" },
       {
         name: "description",
-        content:
-          "Play Free Your Mind & Heart, UNVEIL Love Tiles, and more single-player challenges.",
+        content: "Play Free Your Mind & Heart and more single-player challenges.",
       },
     ],
   }),
@@ -29,10 +28,9 @@ const SOLO_GAMES: SoloGameTile[] = [
   {
     to: "/challenges/free-your-mind-heart",
     title: "Free Your Mind & Heart",
-    subtitle: "Maze Challenge",
-    description:
-      "Clear both paths and guide the arrows to open both doors. Beat all 5 levels.",
-    badge: "LIVE",
+    subtitle: "New Maze Challenge",
+    description: "Clear the paths. Free your heart and mind.",
+    badge: "NEW",
     icon: Sparkles,
   },
   {
@@ -45,14 +43,14 @@ const SOLO_GAMES: SoloGameTile[] = [
   },
 ];
 
-function SoloMindGamesHub() {
+export function SoloMindGamesHub() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_20%_8%,rgba(59,130,246,0.16),transparent_35%),radial-gradient(circle_at_85%_16%,rgba(236,72,153,0.15),transparent_30%),linear-gradient(180deg,rgba(11,11,20,0.98),rgba(8,8,16,1))] pb-24 lg:pb-0">
       <UnveilNav />
 
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <Link
-          to="/games"
+          to="/challenges"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 text-xs text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -68,7 +66,7 @@ function SoloMindGamesHub() {
             <span className="ml-2 bg-gradient-hero bg-clip-text text-transparent">Play with purpose.</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Free Your Mind & Heart and UNVEIL Love Tiles are ready to play.
+            Enter the maze, clear both paths, and sharpen how you move through pressure and choice.
           </p>
         </section>
 

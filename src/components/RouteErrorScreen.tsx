@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Home, RefreshCw } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { useEffect } from "react";
 
 export function RouteErrorScreen({
   title,
@@ -13,6 +14,16 @@ export function RouteErrorScreen({
   homeTo?: string;
   error: Error;
 }) {
+  useEffect(() => {
+    console.error("[route-error]", {
+      route: window.location.pathname,
+      title,
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+    });
+  }, [error, title]);
+
   return (
     <div className="min-h-screen">
       <UnveilNav />

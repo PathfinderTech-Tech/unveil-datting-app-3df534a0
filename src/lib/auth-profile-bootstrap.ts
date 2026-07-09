@@ -61,7 +61,7 @@ export async function ensureProfileForUser(user: User): Promise<void> {
     return;
   }
 
-  const patch: Record<string, string> = {};
+  const patch: Record<string, string | null> = {};
   if (!row.first_name && firstName) patch.first_name = firstName;
   if (!row.phone_number && phone) patch.phone_number = phone;
   if (!row.verified_phone && phone) {

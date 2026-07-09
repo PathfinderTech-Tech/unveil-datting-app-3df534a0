@@ -1,14 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { LogoMark } from "@/components/LogoHeader";
 import { HomeDashboard } from "@/components/HomeDashboard";
 import { useAuth } from "@/hooks/use-auth";
 import { AppStateScreen, LoadingScreen, OfflineScreen } from "@/components/AppStateScreen";
 import { ArrowRight, Eye, MessageCircle, Heart, Waves } from "lucide-react";
-import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
+import logoMarkUrl from "@/assets/unveil-logo-mark.svg";
 
-const homeShareImage = logoAsset.url.startsWith("http") ? logoAsset.url : `https://unveil.best${logoAsset.url}`;
+const homeShareImage = `https://unveil.best${logoMarkUrl}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,17 +32,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { user, loading, error } = useAuth();
   const navigate = useNavigate();
-  const [isOffline, setIsOffline] = useState(false);
-  useEffect(() => {
-    const update = () => setIsOffline(typeof navigator !== "undefined" && navigator.onLine === false);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+  const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
 
   // First-time visitors (no auth, no welcome seen) → /welcome
   useEffect(() => {

@@ -1078,7 +1078,7 @@ function Chat() {
                     messagesRemaining={quota.unlimited ? 99 : quota.remaining}
                     onBack={() => {
                       setActive(null);
-                      navigate({ to: "/chat", search: {}, replace: true });
+                      navigate({ to: "/chat", search: { c: undefined }, replace: true });
                     }}
                     onReport={openReport}
                     onMenu={() => setShowMenu((v) => !v)}

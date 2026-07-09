@@ -1,6 +1,6 @@
 # Location Trust Visibility Pass + Pre-TestFlight Audit
 
-_Last updated: 2026-06-11_
+_Last updated: 2026-07-08_
 
 ---
 
@@ -186,4 +186,86 @@ Scoring legend: ✅ PASS · ⚠️ WARNING · ❌ FAIL
 - **App Store Review (full release):** 1–2 days after operator checklist + on-device QA.
 - **Google Play:** N/A this milestone (iOS-first per `TESTFLIGHT_CHECKLIST.md`).
 
-**Final recommendation: READY FOR TESTFLIGHT** — conditional on the 6 operator/dashboard items. No code changes are required to ship the build.
+**Final recommendation (superseded by Part C payment audit): NOT READY FOR NATIVE PAYMENT SIGN-OFF** until Android native Stripe guards and RevenueCat-to-Supabase sync are verified.
+
+---
+
+## Part C — Focused Payment Audit (RevenueCat vs Stripe)
+
+Scoring legend: PASS · FAIL · PARTIAL
+
+### Payment Audit Status: PARTIAL
+
+RevenueCat is integrated and native purchase calls exist, but this repository still has native-path Stripe exposure and no RevenueCat-to-Supabase server sync route visible in source. Real iOS/Android device purchase testing is still required.
+
+### Requirement-by-requirement verification
+
+1. Confirm RevenueCat is the active native subscription provider on iOS and Android.
+	- RESULT: PASS (code wiring present)
+	- Evidence: `src/lib/purchases.ts` routes native calls through `@revenuecat/purchases-capacitor` and blocks `purchase()` on web.
+
+2. Confirm Apple Sign In is fully wired and works on iOS.
+	- RESULT: PARTIAL
+	- Evidence: Apple OAuth button and provider wiring exist in `src/components/OAuthButtons.tsx`.
+	- Gap: no executable on-device proof in this environment; iOS project capability wiring is not verifiable from source alone.
+
+3. Confirm Stripe is disabled/hidden on native iOS and Android subscription flows.
+	- RESULT: FAIL
+	- Evidence: multiple native-accessible routes/components still link to `/checkout`.
+	- iOS note: `/checkout` redirects iOS to `/premium`, but Stripe CTAs are still shown before redirect.
+	- Android note: `/checkout` has an iOS-only guard; Android can still reach Stripe checkout.
+
+4. Stripe must remain web-only.
+	- RESULT: FAIL
+	- Evidence: Android-native guard is missing in checkout and CTA surfaces.
+
+5. Confirm StoreKit products are mapped through RevenueCat.
+	- RESULT: PARTIAL
+	- Evidence: iOS native purchase path uses RevenueCat offerings/package identifiers (`src/lib/purchases.ts`).
+	- Gap: cannot verify live RevenueCat dashboard offering attachments from code-only audit.
+
+6. Confirm Google Play Billing products are mapped through RevenueCat.
+	- RESULT: PARTIAL
+	- Evidence: Android native path uses RevenueCat SDK and product identifiers in `src/lib/purchases.ts`.
+	- Gap: cannot verify live Google Play + RevenueCat dashboard mapping from this environment.
+
+7. Confirm Restore Purchases exists and works.
+	- RESULT: PARTIAL
+	- Evidence: restore UI and handler exist (`src/components/RestorePurchasesButton.tsx`, `src/lib/purchases.ts`).
+	- Gap: no real-device execution proof in this environment.
+
+8. Confirm subscription status syncs back to Supabase user profile/membership.
+	- RESULT: FAIL (for native RevenueCat purchases)
+	- Evidence: Stripe webhook updates `subscriptions` and `profiles` (`src/routes/api/public/payments/webhook.ts`).
+	- Gap: no `src/routes/api/public/revenuecat/webhook.ts` route (or equivalent native sync worker) found in source.
+
+9. Stripe usage search terms audited.
+	- Terms checked: stripe, checkout, StripeCheckout, createCheckoutSession, payments/webhook, subscription.tsx, checkout.tsx.
+
+10. Stripe reference classification
+
+| Reference | Classification | Notes |
+|---|---|---|
+| `src/routes/checkout.tsx` | NATIVE BLOCKER | iOS-only guard; Android still reaches Stripe checkout. |
+| `src/routes/premium.tsx` | NATIVE BLOCKER | Direct `/checkout` navigation from membership cards on native paths. |
+| `src/routes/settings.tsx` | NATIVE BLOCKER | Daily pass CTA links to `/checkout` without native platform guard. |
+| `src/routes/match.$userId.tsx` | NATIVE BLOCKER | Inline daily pass link points to `/checkout` without Android/native guard. |
+| `src/routes/manage-subscription.tsx` | NATIVE BLOCKER | Upgrade CTA links to `/checkout`; Stripe portal assumptions in manage flow. |
+| `src/components/MessagePaywallModal.tsx` | NATIVE BLOCKER | Uses native purchase button only on iOS; Android falls through to `/checkout`. |
+| `src/components/StripeEmbeddedCheckout.tsx` | WEB ONLY | Stripe embedded checkout component; acceptable when web-only guarded. |
+| `src/lib/stripe.ts` | WEB ONLY | Client Stripe key loader for web checkout. |
+| `src/lib/payments.functions.ts` (`createCheckoutSession`, `createPortalSession`) | WEB ONLY | Server actions for web Stripe checkout/portal. |
+| `src/routes/checkout.return.tsx` | WEB ONLY | Web checkout return/confirmation route. |
+| `src/routes/subscription.tsx` | WEB ONLY | Messaging copy about billing source; no direct Stripe purchase execution. |
+| `src/routes/api/public/payments/webhook.ts` | SERVER WEBHOOK | Valid Stripe webhook sink; currently updates Supabase for Stripe events only. |
+| `src/lib/stripe.server.ts` | SERVER WEBHOOK | Stripe server client + webhook signature verification utilities. |
+
+### Final outcome for this focused payment audit
+
+- Status: PARTIAL
+- Do not mark READY yet.
+- Blocking items to resolve before PASS:
+  1. Enforce native guard for Android (and ideally all native) on every `/checkout` entry point.
+  2. Ensure native UI hides Stripe checkout CTAs on iOS/Android.
+  3. Add/verify RevenueCat server sync path to Supabase (webhook or equivalent) for native purchase state persistence.
+  4. Execute full purchase + restore tests on real iOS and Android devices.

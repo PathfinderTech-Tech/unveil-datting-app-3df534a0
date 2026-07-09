@@ -5,8 +5,11 @@ import { PageBackButton } from "@/components/PageBackButton";
 import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { useAuth } from "@/hooks/use-auth";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 import { getManageSubscriptionUrl } from "@/lib/purchases";
 import { isIOS, getPlatform } from "@/lib/platform";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { LoadingTimeoutScreen, LoadingScreen } from "@/components/AppStateScreen";
 
 export const Route = createFileRoute("/subscription")({
   head: () => ({
@@ -15,6 +18,13 @@ export const Route = createFileRoute("/subscription")({
       { name: "description", content: "View your active Unveil Premium entitlement, manage subscriptions, and restore purchases." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Subscription is temporarily unavailable"
+      message="Billing details failed on this screen only. Retry or return home while this view recovers."
+      error={error}
+    />
+  ),
   component: SubscriptionStatus,
 });
 
@@ -40,15 +50,28 @@ function Row({ icon, label, value, active }: { icon: React.ReactNode; label: str
 function SubscriptionStatus() {
   const { user, loading: authLoading } = useAuth();
   const { entitlements, loading } = useEntitlements();
+  const loadingTimedOut = useLoadingTimeout(authLoading || loading, 8000);
   const platform = getPlatform();
   const manageUrl = getManageSubscriptionUrl();
 
   if (authLoading || loading) {
+    if (loadingTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
+          <LoadingTimeoutScreen
+            title="Subscription status is taking longer than expected"
+            message="UNVEIL could not finish loading your billing state."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />
       <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6"><PageBackButton /></div>
-        <div className="flex items-center justify-center py-20 text-muted-foreground">Loading…</div>
+        <LoadingScreen label="Loading subscription" />
       </div>
     );
   }

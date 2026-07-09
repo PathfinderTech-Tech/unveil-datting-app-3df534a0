@@ -64,37 +64,6 @@ export async function loadSparkAnswers() {
   return data ?? [];
 }
 
-/* ---------- Puzzles ---------- */
-export async function savePuzzleScore(puzzleId: string, score: number) {
-  const uid = await getUserId();
-  if (!uid) return { error: "not-signed-in" as const };
-  // Upsert keeps best score by checking existing.
-  const { data: existing } = await supabase
-    .from("puzzle_scores")
-    .select("score")
-    .eq("user_id", uid)
-    .eq("puzzle_id", puzzleId)
-    .maybeSingle();
-  if (existing && existing.score >= score) return { error: null };
-  const { error } = await supabase.from("puzzle_scores").upsert(
-    { user_id: uid, puzzle_id: puzzleId, score, updated_at: new Date().toISOString() },
-    { onConflict: "user_id,puzzle_id" },
-  );
-  return { error: error?.message ?? null };
-}
-
-export async function loadPuzzleScores(): Promise<Record<string, number>> {
-  const uid = await getUserId();
-  if (!uid) return {};
-  const { data } = await supabase
-    .from("puzzle_scores")
-    .select("puzzle_id, score")
-    .eq("user_id", uid);
-  const out: Record<string, number> = {};
-  (data ?? []).forEach((r) => (out[r.puzzle_id] = r.score));
-  return out;
-}
-
 /* ---------- Challenges ---------- */
 export async function saveChallengeResult(input: {
   picks: ("a" | "b" | null)[];

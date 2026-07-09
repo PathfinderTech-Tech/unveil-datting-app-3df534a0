@@ -45,6 +45,7 @@ export interface PurchaseOffer {
 export interface Entitlements {
   premium: boolean;
   activePass: boolean;
+  activePassUntil?: string | null;
   verificationBadge: boolean;
   premiumUntil?: string | null;
 }
@@ -194,6 +195,7 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
   return {
     premium: !!premiumEnt,
     activePass: !!passEnt,
+    activePassUntil: passEnt?.expirationDate ?? null,
     verificationBadge: ownsBadge,
     premiumUntil: premiumEnt?.expirationDate ?? null,
   };

@@ -1,8 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { RestorePurchasesButton } from "@/components/RestorePurchasesButton";
 import { Check, Sparkles, Heart, Shield, Zap, Clock } from "lucide-react";
+import { isNative } from "@/lib/platform";
+import { purchase, type ProductId } from "@/lib/purchases";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({
@@ -49,9 +54,44 @@ const PLANS: { key: PlanKey; label: string; price: string; cadence: string; sub?
 function Membership() {
   const navigate = useNavigate();
   const { returnTo } = Route.useSearch();
+  const [busyProduct, setBusyProduct] = useState<ProductId | null>(null);
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
-  const goPremium = (key: PlanKey) =>
+
+  async function buyNative(productId: ProductId) {
+    if (!isNative()) return;
+    setBusyProduct(productId);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate({ to: "/login", search: { redirect: "/premium" } as any });
+        return;
+      }
+      await purchase(productId, user.id);
+      toast.success("Purchase complete.");
+      if (rt) {
+        window.location.assign(rt);
+        return;
+      }
+      navigate({ to: "/subscription" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Purchase failed");
+    } finally {
+      setBusyProduct(null);
+    }
+  }
+
+  const goPremium = (key: PlanKey) => {
+    if (isNative()) {
+      const productId: Record<PlanKey, ProductId> = {
+        premium: "premium_monthly",
+        premium_quarterly: "premium_quarterly",
+        premium_annual: "premium_annual",
+      };
+      void buyNative(productId[key]);
+      return;
+    }
     navigate({ to: "/checkout", search: { product: key, ...(rt ? { returnTo: rt } : {}) } as any });
+  };
 
   return (
     <div className="min-h-screen">
@@ -88,13 +128,24 @@ function Membership() {
                   <div className="font-display text-3xl font-semibold text-foreground">$9.99</div>
                   <div className="text-[11px] font-medium uppercase tracking-luxury text-foreground/70">One-time purchase</div>
                 </div>
-                <Link
-                  to="/checkout"
-                  search={{ product: "message_pass_2w", ...(rt ? { returnTo: rt } : {}) } as any}
-                  className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
-                >
-                  Get 2-Week Pass
-                </Link>
+                {isNative() ? (
+                  <button
+                    type="button"
+                    onClick={() => void buyNative("pass_2w")}
+                    disabled={busyProduct === "pass_2w"}
+                    className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-60"
+                  >
+                    {busyProduct === "pass_2w" ? "Processing..." : "Get 2-Week Pass"}
+                  </button>
+                ) : (
+                  <Link
+                    to="/checkout"
+                    search={{ product: "message_pass_2w", ...(rt ? { returnTo: rt } : {}) } as any}
+                    className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
+                  >
+                    Get 2-Week Pass
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -116,13 +167,24 @@ function Membership() {
                   <div className="font-display text-3xl font-semibold text-foreground">$1.99</div>
                   <div className="text-[11px] font-medium uppercase tracking-luxury text-foreground/70">One-time purchase</div>
                 </div>
-                <Link
-                  to="/checkout"
-                  search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
-                  className="inline-flex items-center justify-center rounded-full border-2 border-accent bg-accent/20 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/30"
-                >
-                  Get 24-Hour Pass
-                </Link>
+                {isNative() ? (
+                  <button
+                    type="button"
+                    onClick={() => void buyNative("pass_24h")}
+                    disabled={busyProduct === "pass_24h"}
+                    className="inline-flex items-center justify-center rounded-full border-2 border-accent bg-accent/20 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/30 disabled:opacity-60"
+                  >
+                    {busyProduct === "pass_24h" ? "Processing..." : "Get 24-Hour Pass"}
+                  </button>
+                ) : (
+                  <Link
+                    to="/checkout"
+                    search={{ product: "message_pass", ...(rt ? { returnTo: rt } : {}) } as any}
+                    className="inline-flex items-center justify-center rounded-full border-2 border-accent bg-accent/20 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/30"
+                  >
+                    Get 24-Hour Pass
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -168,9 +230,20 @@ function Membership() {
               {p.sub && <div className="mt-1 text-sm font-medium text-foreground/75">{p.sub}</div>}
               <button
                 onClick={() => goPremium(p.key)}
+                disabled={
+                  (p.key === "premium" && busyProduct === "premium_monthly") ||
+                  (p.key === "premium_quarterly" && busyProduct === "premium_quarterly") ||
+                  (p.key === "premium_annual" && busyProduct === "premium_annual")
+                }
                 className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold ${p.featured ? "bg-gradient-hero text-primary-foreground shadow-glow" : "border-2 border-border bg-surface text-foreground hover:bg-surface-2"}`}
               >
-                Choose {p.label}
+                {(
+                  (p.key === "premium" && busyProduct === "premium_monthly") ||
+                  (p.key === "premium_quarterly" && busyProduct === "premium_quarterly") ||
+                  (p.key === "premium_annual" && busyProduct === "premium_annual")
+                )
+                  ? "Processing..."
+                  : `Choose ${p.label}`}
               </button>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AlertTriangle, Loader2, WifiOff } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Tone = "neutral" | "warning" | "error";
 
@@ -75,11 +76,44 @@ export function AppStateScreen({
 
 export function LoadingScreen({ label = "Loading" }: { label?: string }) {
   return (
+    <div className="min-h-[60vh] px-4 py-10">
+      <div className="mx-auto max-w-xl rounded-3xl border border-border bg-card p-6">
+        <div className="mb-4 flex items-center justify-center">
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/60">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        </div>
+        <p className="mb-4 text-center text-sm text-muted-foreground">{label}</p>
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-2/3 mx-auto" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-10 w-40 mx-auto rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function LoadingTimeoutScreen({
+  title = "This is taking longer than expected",
+  message = "UNVEIL is still responsive. Please retry this screen.",
+  onRetry,
+}: {
+  title?: string;
+  message?: string;
+  onRetry?: () => void;
+}) {
+  return (
     <AppStateScreen
-      title={label}
-      message="Please wait while we prepare your UNVEIL experience."
-      icon={<Loader2 className="h-5 w-5 animate-spin" />}
-      tone="neutral"
+      title={title}
+      message={message}
+      tone="warning"
+      primaryLabel="Retry"
+      onPrimary={onRetry ?? (() => window.location.reload())}
+      secondaryLabel="Go home"
+      secondaryTo="/"
     />
   );
 }

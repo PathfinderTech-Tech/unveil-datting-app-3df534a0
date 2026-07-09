@@ -65,6 +65,7 @@ import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as ChallengesSoloMindGamesRouteImport } from './routes/challenges.solo-mind-games'
 import { Route as ChallengesFreeYourMindHeartRouteImport } from './routes/challenges.free-your-mind-heart'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
@@ -353,6 +354,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const ChallengesSoloMindGamesRoute = ChallengesSoloMindGamesRouteImport.update({
+  id: '/challenges/solo-mind-games',
+  path: '/challenges/solo-mind-games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChallengesFreeYourMindHeartRoute =
   ChallengesFreeYourMindHeartRouteImport.update({
     id: '/challenges/free-your-mind-heart',
@@ -440,6 +446,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
+  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -505,6 +512,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
+  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -571,6 +579,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
+  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -638,6 +647,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
+    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -703,6 +713,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
+    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -768,6 +779,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
+    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -833,6 +845,7 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
   ChallengesFreeYourMindHeartRoute: typeof ChallengesFreeYourMindHeartRoute
+  ChallengesSoloMindGamesRoute: typeof ChallengesSoloMindGamesRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
   PlayEscapeRoute: typeof PlayEscapeRoute
@@ -1244,6 +1257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/challenges/solo-mind-games': {
+      id: '/challenges/solo-mind-games'
+      path: '/challenges/solo-mind-games'
+      fullPath: '/challenges/solo-mind-games'
+      preLoaderRoute: typeof ChallengesSoloMindGamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/challenges/free-your-mind-heart': {
       id: '/challenges/free-your-mind-heart'
       path: '/challenges/free-your-mind-heart'
@@ -1365,6 +1385,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
   ChallengesFreeYourMindHeartRoute: ChallengesFreeYourMindHeartRoute,
+  ChallengesSoloMindGamesRoute: ChallengesSoloMindGamesRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
   PlayEscapeRoute: PlayEscapeRoute,
@@ -1384,3 +1405,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

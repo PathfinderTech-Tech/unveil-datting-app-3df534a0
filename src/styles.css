@@ -3,7 +3,7 @@
 @import "tw-animate-css";
 /* unveil-global.css disabled: its broad [class*="…"] !important selectors
    hijacked shadcn buttons/cards/dialogs and broke Daily Personality, Match
-   Games, Complete the Picture, and button contrast. The token-based design
+  Games, UNVEIL Love Tiles, and button contrast. The token-based design
    in this file already provides the luxury indigo/purple/gold styling. */
 /* @import "./styles/unveil-global.css"; */
 
@@ -125,7 +125,10 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { font-family: var(--font-sans); }
+  html {
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
   body {
     background: var(--color-background);
     color: var(--color-foreground);
@@ -137,6 +140,7 @@
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
+    overflow-x: hidden;
   }
   body > * { position: relative; z-index: 1; }
 

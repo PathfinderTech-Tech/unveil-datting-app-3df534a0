@@ -4,7 +4,7 @@ import { UnveilNav } from "@/components/UnveilNav";
 
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isStripeConfigured } from "@/lib/stripe";
-import { isIOS } from "@/lib/platform";
+import { getPlatform, isNative } from "@/lib/platform";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Lock, ArrowLeft } from "lucide-react";
@@ -63,8 +63,9 @@ function Checkout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (isIOS()) {
-      toast.error("Use Apple In-App Purchase from the membership screen on iOS.");
+    if (isNative()) {
+      const platform = getPlatform() === "ios" ? "Apple" : "Google Play";
+      toast.error(`Use ${platform} in-app purchase from the membership screen.`);
       navigate({ to: "/premium" });
       return;
     }

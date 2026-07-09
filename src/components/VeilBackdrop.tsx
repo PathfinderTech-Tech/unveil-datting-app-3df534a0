@@ -1,7 +1,7 @@
 // VeilBackdrop — site-wide ambient watermark using the transparent UNVEIL logo.
 // Renders a fixed, very low-opacity logo behind all content with a radial
 // veil-pattern halo. Pointer-events disabled so it never interferes with UI.
-import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
+import logoMarkUrl from "@/assets/unveil-logo-mark.svg";
 
 type Variant = "center" | "corner" | "edge";
 
@@ -53,7 +53,7 @@ export function VeilBackdrop({
       />
       {/* The watermark itself */}
       <img
-        src={logoAsset.url}
+        src={logoMarkUrl}
         alt=""
         aria-hidden
         className="absolute select-none"
@@ -86,7 +86,7 @@ export function VeilPulse({ size = 64 }: { size?: number }) {
       style={{ width: size, height: size }}
     >
       <img
-        src={logoAsset.url}
+        src={logoMarkUrl}
         alt=""
         aria-hidden
         className="object-contain animate-float"

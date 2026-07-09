@@ -1,0 +1,171 @@
+07-06 22:42:39.209  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:am force-stop tech.pathfinder.unveil'
+07-06 22:42:39.294   637   724 I ActivityManager: Force stopping tech.pathfinder.unveil appid=10235 user=0: from pid 21902
+07-06 22:42:39.307   637   724 I ActivityManager: Killing 21284:tech.pathfinder.unveil/u0a235 (adj 900): stop tech.pathfinder.unveil due to from pid 21902
+07-06 22:42:39.330   637   724 D ActivityManager: sync unfroze 21324 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 5
+07-06 22:42:39.339   637   724 W ActivityTaskManager: Force removing ActivityRecord{19564170 u0 tech.pathfinder.unveil/.MainActivity t92 f}}: app died, no saved state
+07-06 22:42:39.350   637   725 W UsageStatsService: Unexpected activity event reported! (tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity event : 23 instanceId : 177228056)
+07-06 22:42:39.380   637   724 I ActivityManager: Killing 21324:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a235i102 (adj 0): isolated not needed
+07-06 22:42:39.388   637   724 I AppsFilter: interaction: PackageSetting{596f414 best.unveil.app/10231} -> PackageSetting{aad2ff8 tech.pathfinder.unveil/10235} BLOCKED
+07-06 22:42:39.389   637  2039 E WindowOrganizerController: Attempting to externally change a non-organized container: Task{cd584fb #92 type=standard A=10235:tech.pathfinder.unveil}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@7837071
+07-06 22:42:39.463  1215  1215 D CarrierSvcBindHelper: onHandleForceStop: [tech.pathfinder.unveil]
+07-06 22:42:39.490  1910  1910 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:monkey -p tech.pathfinder.unveil -c android.intent.category.LAUNCHER 1'
+07-06 22:42:39.659   637   724 V ActivityManager: Got obituary of 21284:tech.pathfinder.unveil
+07-06 22:42:39.680   637   988 D ConnectivityService: releasing NetworkRequest [ REQUEST id=46042, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ] (release request)
+07-06 22:42:40.055 21905 21905 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:40.305 21905 21905 W Monkey  : args: [-p, tech.pathfinder.unveil, -c, android.intent.category.LAUNCHER, 1]
+07-06 22:42:40.352 21905 21905 W Monkey  :  arg: "tech.pathfinder.unveil"
+07-06 22:42:40.352 21905 21905 W Monkey  : data="tech.pathfinder.unveil"
+07-06 22:42:40.470   637  1159 V ActivityTaskManager: TaskLaunchParamsModifier: phase=3 task=Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil} activity=ActivityRecord{227449257 u0 tech.pathfinder.unveil/.MainActivity t-1} display-from-task=0 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@82498956 inherit-from-task=fullscreen non-freeform-task-display-area display-area=DefaultTaskDisplayArea@82498956 skip-bounds-fullscreen
+07-06 22:42:40.470   637  1159 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity} with LAUNCH_SINGLE_TASK from uid 2000 (com.android.shell) (BAL_ALLOW_PERMISSION) result code=0
+07-06 22:42:40.478  1081  1209 V WindowManagerShell: Transition requested (#252): android.os.BinderProxy@34691da TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=93 effectiveUid=10235 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity } baseActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} topActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} origActivity=null realActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} realActivityIsAppLockEnabled=false numActivities=1 lastActiveTime=443050751 supportsMultiWindow=true supportsMultiWindowWithoutConstraints=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.os.BinderProxy@e18b60b} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{f7f0ce8 tech.pathfinder.unveil.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isInteractive=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=null leafTaskBoundsFromOptions= false capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransitionInfo = null, displayChanges = null, requestedLocation = null, userChange = null, windowingLayerChange = null, fullscreenRequestChange = null, flags = 0, debugId = 252 }
+07-06 22:42:40.611   637  1159 D WindowManager: setClientSurface Surface(name=VRI-Splash Screen tech.pathfinder.unveil#2492)/@0xa36206 for 4700eb Splash Screen tech.pathfinder.unveil
+07-06 22:42:40.920   637   666 I ActivityManager: Start proc 21921:tech.pathfinder.unveil/u0a235 for next-top-activity {tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}
+07-06 22:42:40.966   637   659 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}
+07-06 22:42:40.973   637   659 W ActivityTaskManager: Activity pause timeout for ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}
+07-06 22:42:40.986 21921 21921 I Zygote  : Process 21921 created for tech.pathfinder.unveil
+07-06 22:42:40.999   637   659 I AppsFilter: interaction: PackageSetting{596f414 best.unveil.app/10231} -> PackageSetting{6817e60 tech.pathfinder.unveil/10235} BLOCKED
+07-06 22:42:41.019   637   747 I InputDispatcher: Not sending touch event to bac005e com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity because it is paused
+07-06 22:42:41.242  1385  1440 D PreloadThumbnailUseCase: Preloading thumbnails for task ids: [[id=16 windowingMode=1 user=0 lastActiveTime=5567218] null, [id=15 windowingMode=1 user=0 lastActiveTime=443050746] null, [id=93 windowingMode=1 user=0 lastActiveTime=443050751] null]
+07-06 22:42:41.273 21921 21921 D nativeloader: Configuring clns-9 for other apk /data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/lib/arm64:/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/tech.pathfinder.unveil
+07-06 22:42:41.293 21921 21921 V GraphicsEnvironment: tech.pathfinder.unveil is not listed in per-application setting
+07-06 22:42:41.990   637   656 V WindowManager: Sent Transition (#252) createdAt=07-06 22:42:40.451 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=93 effectiveUid=10235 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=tech.pathfinder.unveil/.MainActivity } baseActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} topActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} origActivity=null realActivity=ComponentInfo{tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity} realActivityIsAppLockEnabled=false numActivities=1 lastActiveTime=443050751 supportsMultiWindow=true supportsMultiWindowWithoutConstraints=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{aca8f96 Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{4030717 tech.pathfinder.unveil.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isInteractive=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=null leafTaskBoundsFromOptions= false capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransitionInfo = null, displayChanges = null, requestedLocation = null, userChange = null, windowingLayerChange = null, fullscreenRequestChange = null, flags = 0, debugId = 252 }
+07-06 22:42:41.993   637   656 V WindowManager:         {WCT{RemoteToken{aca8f96 Task{a3f1b2e #93 type=standard A=10235:tech.pathfinder.unveil}}} m=OPEN f=MOVE_TO_TOP|FLAG_CHANGED_INTERACTIVE leash=Surface(name=Task=93#2489)/@0x85230ca sb=Rect(0, 0 - 1080, 2424) eb=Rect(0, 0 - 1080, 2424) epz=Point(1080, 2424) d=0 taskParent=-1 winMode=1 userId=0},
+07-06 22:42:42.213 21921 21921 I WebViewFactory: Loading com.google.android.webview version 149.0.7827.159 (code 782715903)
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.403   491   576 W skia    : AGTM parsing failed flags.readFromStream(s) at 159
+07-06 22:42:42.501 21921 21921 D nativeloader: Load /data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk!/lib/arm64-v8a/libwebviewchromium.so using class loader ns clns-10 (caller=/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk): ok
+07-06 22:42:42.506 21921 21921 D nativeloader: Load /system/lib64/libwebviewchromium_plat_support.so using class loader ns clns-10 (caller=/data/app/~~peUgpNZ9G1EEFWonXbGjZQ==/com.google.android.webview-_7C-lgmmp2YrolwBpS7b9w==/base.apk): ok
+07-06 22:42:42.511 21921 21954 E chromium: [0706/224242.509826:ERROR:android_webview/browser/variations/variations_seed_loader.cc:39] Seed missing signature.
+07-06 22:42:42.512 21921 21954 I chromium: [0706/224242.511943:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-06 22:42:42.554 21921 21921 I cr_CombinedPProvider: #registerProvider() provider:WV.wk@34d224b isPolicyCacheEnabled:false policyProvidersSize:0
+07-06 22:42:42.554 21921 21921 I cr_PolicyProvider: #setManagerAndSource() 0
+07-06 22:42:42.559 21921 21954 I cr_policy: registerReceiver succeeded after 4ms
+07-06 22:42:42.627 21921 21921 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-06 22:42:42.830 21921 21921 W chromium: [WARNING:android_webview/browser/network_service/net_helpers.cc:137] HTTP Cache size is: 20971520
+07-06 22:42:42.870 21969 21969 I Zygote  : Process 21969 created for com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+07-06 22:42:42.893   637   666 I ActivityManager: Start proc 21969:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i103 for bound-service {tech.pathfinder.unveil/org.chromium.content.app.SandboxedProcessService0:0}
+07-06 22:42:43.099 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:43.108 21969 21969 I cr_WebViewApkApp: version=149.0.7827.159 (782715903) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+07-06 22:42:43.114 26917 26917 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.safetynet.service.START xflg=0x4 pkg=com.google.android.gms }
+07-06 22:42:43.134   637   723 D ConnectivityService: requestNetwork for uid/pid:10235/21921 activeRequest: null callbackRequest: 46108 [NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC|LP
+07-06 22:42:43.139   637   982 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   982 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   982 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.139   637   982 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=46109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10235 RequestorUid: 10235 RequestorPkg: tech.pathfinder.unveil UnderlyingNetworks: Null] ]
+07-06 22:42:43.166 21921 21921 D Capacitor: Starting BridgeActivity
+07-06 22:42:43.210 21921 21964 D AudioSystem: onNewService: media.audio_policy service obtained 0xb4007f0ede0e8500
+07-06 22:42:43.213 21921 21964 D AudioSystem: getService: IAudioPolicyService retrieved: 0xb4007f0ede0e8500  cached: 0xb4007f0ede0e8500
+07-06 22:42:43.214 21969 21985 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-06 22:42:43.230 21921 21988 D vulkan  : searching for layers in '/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/lib/arm64'
+07-06 22:42:43.232 21921 21988 D vulkan  : searching for layers in '/data/app/~~lshIvjwb66c4Wy2aWPerTQ==/tech.pathfinder.unveil-j5Cs74-W__mPPOu-rxixrA==/base.apk!/lib/arm64-v8a'
+07-06 22:42:43.246 21969 22002 I chromium: [INFO:third_party/skia/src/ports/SkFontMgr_android_parser.cpp:724] [SkFontMgr Android Parser] '/product/etc/fonts_customization.xml' could not be opened
+07-06 22:42:43.246 21969 22002 I chromium: 
+07-06 22:42:43.247 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:546] Fenced frames cannot be enabled in this configuration. Use --enable-features=FencedFrames instead.
+07-06 22:42:43.249 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:571] Topics cannot be enabled in this configuration. Use --enable-features=BrowsingTopics in addition.
+07-06 22:42:43.249 21969 21985 W chromium: [WARNING:content/child/runtime_features.cc:592] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+07-06 22:42:43.270 21921 21921 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-06 22:42:43.278   637  2009 D CoreBackPreview: Window{c34c2ea u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ec63824, mPriority=-1, mIsAnimationCallback=false, mOverrideBehavior=0}
+07-06 22:42:43.279   637  2009 D CoreBackPreview: Window{c34c2ea u0 tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@f590f8d, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+07-06 22:42:43.287   637  2009 D WindowManager: setClientSurface Surface(name=VRI-tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity#2499)/@0xd541789 for c34c2ea tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity
+07-06 22:42:43.343 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.346 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.361 13401 13444 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.361 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.371 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.396 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.396 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.400 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.403 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.405 13401 13444 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.405 13401 13444 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.417 13401 13444 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.417 13401 13444 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.419 13401 13444 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.429 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.429 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.430 13401 13409 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.430 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.431 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.435 13401 21758 I SQLiteConnectionPool: The connection pool for /data/user/0/com.google.android.gms/databases/metadata.db has been closed but there are still 1 connections in use.  They will be closed as they are released back to the pool.
+07-06 22:42:43.437 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.437 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.438 13401 13409 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-06 22:42:43.438 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.444 13401 21388 W FontLog : Error updating last accessed time for {Google Sans, wdth 100.0, wght 400, ital 0.0, bestEffort false}, isVf false}. [CONTEXT service_id=132 ]
+07-06 22:42:43.444 13401 21388 W FontLog : java.lang.IllegalStateException: Cannot perform this operation because the connection pool has been closed.
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.throwIfClosedLocked(SQLiteConnectionPool.java:1112)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.waitForConnection(SQLiteConnectionPool.java:803)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.acquireConnection(SQLiteConnectionPool.java:402)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteSession.acquireConnection(SQLiteSession.java:931)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteSession.executeForChangedRowCount(SQLiteSession.java:789)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteStatement.executeUpdateDelete(SQLiteStatement.java:67)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2233)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2209)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdej.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):57)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blkd.c(:com.google.android.gms@262334035@26.23.34 (260400-933906539):50)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blkd.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):66)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at blpw.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):8)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at java.lang.Thread.run(Thread.java:1572)
+07-06 22:42:43.444 13401 21388 W FontLog : Caused by: java.lang.Exception: SQLiteConnectionPool.close()
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.dispose(SQLiteConnectionPool.java:270)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteConnectionPool.close(SQLiteConnectionPool.java:250)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.dispose(SQLiteDatabase.java:559)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteDatabase.onAllReferencesReleased(SQLiteDatabase.java:536)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteClosable.releaseReference(SQLiteClosable.java:92)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at android.database.sqlite.SQLiteClosable.close(SQLiteClosable.java:124)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdei.c(:com.google.android.gms@262334035@26.23.34 (260400-933906539):3)
+07-06 22:42:43.444 13401 21388 W FontLog : 	at cdej.run(:com.google.android.gms@262334035@26.23.34 (260400-933906539):62)
+07-06 22:42:43.444 13401 21388 W FontLog : 	... 6 more
+07-06 22:42:43.445 13401 13410 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.605 21992 21992 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:43.687   637   637 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-06 22:42:43.739 13401 13409 I FontLog : (REDACTED) Received query %s, URI %s
+07-06 22:42:43.740 13401 13409 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-06 22:42:43.740 13401 13409 I FontLog : (REDACTED) Fetch %s end status %s
+07-06 22:42:43.743 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.749 13401 13409 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-06 22:42:43.916   637   656 I ActivityTaskManager: Displayed tech.pathfinder.unveil/.MainActivity for user 0: +3s474ms
+07-06 22:42:44.032   637   756 I ImeTracker: tech.pathfinder.unveil:cfc99018: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false userId 0 displayId 0
+07-06 22:42:44.116 21921 21921 I ImeTracker: tech.pathfinder.unveil:cfc99018: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+07-06 22:42:44.119  6278  6278 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1446 onStartInput(EditorInfo{EditorInfo{packageName=tech.pathfinder.unveil, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=12000000, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+07-06 22:42:44.136   637  2016 I ImeTracker: tech.pathfinder.unveil:98e5985b: onRequestHide at ORIGIN_SERVER reason HIDE_SOFT_INPUT fromUser false userId 0 displayId 0
+07-06 22:42:44.136   637  2016 I ImeTracker: tech.pathfinder.unveil:98e5985b: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-06 22:42:44.237   637  1199 W PackageConfigPersister: App-specific configuration not found for packageName: tech.pathfinder.unveil and userId: 0
+07-06 22:42:45.503 21992 21992 W AccessibilityNodeInfoDumper: Fetch time: 16ms
+07-06 22:42:45.519   637   637 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-06 22:42:47.235 13401 13409 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:47.239 13401 13409 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:47.240 13401 18288 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:47.241 13401 18288 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:47.265 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:47.726 13401 18288 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 22:42:47.988 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.clearcut.sampler.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+07-06 22:42:47.989   637  1160 W BinderNative: 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:5007)
+07-06 22:42:48.942   637   747 I InputDispatcher: c34c2ea tech.pathfinder.unveil/tech.pathfinder.unveil.MainActivity spent 2142ms processing MotionEvent
+07-06 22:42:49.176 21921 22051 D ProfileInstaller: Skipping profile installation for tech.pathfinder.unveil
+07-06 22:42:50.154 21921 22009 I HWUI    : Davey! duration=723ms; Flags=0, FrameTimelineVsyncId=3381258, IntendedVsync=443059619738778, Vsync=443059703072108, InputEventId=0, HandleInputStart=443059713006424, AnimationStart=443059713008216, PerformTraversalsStart=443059713907007, DrawStart=443059714245424, FrameDeadline=443059853084197, FrameStartTime=443059713003174, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443059703072108, SyncQueued=443059714478882, SyncStart=443059794219257, IssueDrawCommandsStart=443059797813216, SwapBuffers=443060353604549, FrameCompleted=443060422589674, DequeueBufferDuration=57500, QueueBufferDuration=652834, GpuCompleted=443060422589674, SwapBuffersCompleted=443060411548549, DisplayPresentTime=0, CommandSubmissionCompleted=443060353604549, 
+07-06 22:42:50.350 13401 13521 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:50.353 13401 13521 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:50.373 13401 13525 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:50.373 13401 13525 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:50.485 21921 22009 I HWUI    : Davey! duration=812ms; Flags=0, FrameTimelineVsyncId=3381274, IntendedVsync=443059819738770, Vsync=443060436405412, InputEventId=0, HandleInputStart=443060455437591, AnimationStart=443060455440341, PerformTraversalsStart=443060458446841, DrawStart=443060469339091, FrameDeadline=443060603072072, FrameStartTime=443060452855549, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=443060436405412, SyncQueued=443060486300383, SyncStart=443060580511258, IssueDrawCommandsStart=443060580994591, SwapBuffers=443060701561966, FrameCompleted=443060726753258, DequeueBufferDuration=2208, QueueBufferDuration=228583, GpuCompleted=443060726753258, SwapBuffersCompleted=443060702880591, DisplayPresentTime=0, CommandSubmissionCompleted=443060701561966, 
+07-06 22:42:50.917 13401 13525 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)
+07-06 22:42:52.115 22064 22064 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+07-06 22:42:52.265   637   637 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-06 22:42:52.372 13401 13401 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:52.545   637  1376 D ContentCapturePerUserService: Notified activity assist data for activity: Token{abac6cf ActivityRecord{227449257 u0 tech.pathfinder.unveil/.MainActivity t93}} without a session Id
+07-06 22:42:53.339 13401 13410 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+07-06 22:42:53.339 13401 13410 W libbinder.Binder: Large reply transaction of 1056768 bytes, interface descriptor , function: UNKNOWN_FUNCTION_NAME, code: 1, flags: 17
+07-06 22:42:53.351 13401 18288 I NearbyMediums: Wifi changed new SSID: "AndroidWifi"
+07-06 22:42:53.351 13401 18288 I NearbyMediums: WifiLanConnectivityInfo is not changed, skip notify.
+07-06 22:42:53.354 13401 13401 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-06 22:42:53.593 22064 22064 W AccessibilityNodeInfoDumper: Fetch time: 25ms
+07-06 22:42:53.609   637   637 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-06 22:42:53.843 13401 18288 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=false, isWifiConnected=true)

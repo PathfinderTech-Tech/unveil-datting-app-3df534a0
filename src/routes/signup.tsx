@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMark, LogoWordmark } from "@/components/LogoHeader";
 import { OAuthButtons, OrDivider } from "@/components/OAuthButtons";
@@ -7,9 +7,28 @@ import { PhoneAuthForm } from "@/components/PhoneAuthForm";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 import { OfflineScreen } from "@/components/AppStateScreen";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+
+const AUTH_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("Signup timed out. Please try again.")), ms);
+    }),
+  ]);
+}
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Join UNVEIL" }, { name: "description", content: "Create your UNVEIL account." }] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Sign up is temporarily unavailable"
+      message="This sign-up screen failed to render. Retry or return home while it recovers."
+      error={error}
+    />
+  ),
   component: Signup,
 });
 
@@ -19,17 +38,7 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  const [isOffline, setIsOffline] = useState(false);
-  useEffect(() => {
-    const update = () => setIsOffline(typeof navigator !== "undefined" && navigator.onLine === false);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+  const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,11 +53,14 @@ function Signup() {
     }
     let error: { message: string } | null = null;
     try {
-      const res = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
-      });
+      const res = await withTimeout(
+        supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+        }),
+        AUTH_TIMEOUT_MS,
+      );
       error = res.error;
     } catch {
       error = { message: "Supabase error: account creation failed." };

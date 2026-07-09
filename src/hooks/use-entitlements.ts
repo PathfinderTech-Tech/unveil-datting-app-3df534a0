@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { getEntitlements, type Entitlements } from "@/lib/purchases";
+import { syncNativeEntitlements } from "@/lib/native-subscription-sync.functions";
 import { isNative } from "@/lib/platform";
 
 /**
@@ -36,6 +37,19 @@ export function useEntitlements(): { entitlements: Entitlements; loading: boolea
           setRc(e);
           setLoading(false);
         }
+        // Persist native RevenueCat entitlement state to Supabase so
+        // server-side membership gates (quota, profile flags) stay in sync.
+        syncNativeEntitlements({
+          data: {
+            premium: e.premium,
+            activePass: e.activePass,
+            verificationBadge: e.verificationBadge,
+            premiumUntil: e.premiumUntil ?? null,
+            activePassUntil: e.activePassUntil ?? null,
+          },
+        }).catch((error) => {
+          console.warn("[entitlements] native sync failed", error);
+        });
       })
       .catch(() => {
         if (alive) {

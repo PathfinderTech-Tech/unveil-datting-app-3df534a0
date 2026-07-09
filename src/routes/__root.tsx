@@ -18,10 +18,30 @@ import { CooldownGuard } from "@/components/CooldownGuard";
 import { PresenceProvider } from "@/hooks/use-presence";
 import { useAppLifecycle } from "@/hooks/use-app-lifecycle";
 
-import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
+import logoMarkUrl from "@/assets/unveil-logo-mark.svg";
 import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { GlobalBackButton } from "@/components/GlobalBackButton";
 import { useRouterState } from "@tanstack/react-router";
+
+function devErrorCode(error: Error) {
+  return `${error.name || "Error"}:${error.message || "unknown"}`;
+}
+
+function clearSessionAndRestart(reset?: () => void) {
+  try {
+    window.sessionStorage.clear();
+    window.localStorage.removeItem("unveil-tile-match-progress-v1");
+    window.localStorage.removeItem("unveil-discover-v1");
+  } catch {
+    /* noop */
+  }
+
+  if (reset) {
+    reset();
+  }
+
+  window.location.assign("/");
+}
 
 
 function NotFoundComponent() {
@@ -51,29 +71,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   return (
-    <FatalAppScreen
-      title="Something went wrong"
-      message="Something went wrong. Please restart UNVEIL."
+    <RouteRecoveryScreen
+      title="This route hit an error"
+      message="UNVEIL recovered safely. Use navigation below to continue while this page reloads."
       primaryAction={
         <button
           onClick={() => {
             router.invalidate();
             reset();
-            window.location.reload();
           }}
           className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
         >
-          Retry
+          Retry this route
         </button>
       }
-      secondaryAction={
-        <a
-          href="/"
-          className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-        >
-          Go home
-        </a>
-      }
+      devCode={devErrorCode(error)}
     />
   );
 }
@@ -83,22 +95,29 @@ function FatalAppScreen({
   message,
   primaryAction,
   secondaryAction,
+  devCode,
 }: {
   title: string;
   message: string;
   primaryAction: React.ReactNode;
   secondaryAction?: React.ReactNode;
+  devCode?: string;
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#09070d] px-4 text-foreground">
       <div className="w-full max-w-md rounded-3xl border border-primary/20 bg-card/95 p-8 text-center shadow-glow backdrop-blur">
-        <img src={logoAsset.url} alt="UNVEIL" className="mx-auto h-16 w-16 rounded-2xl" />
+        <img src={logoMarkUrl} alt="UNVEIL" className="mx-auto h-16 w-16 rounded-2xl" />
         <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">{title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           {primaryAction}
           {secondaryAction}
         </div>
+        {import.meta.env.DEV && devCode && (
+          <div className="mt-4 rounded-2xl border border-border bg-background/40 px-3 py-2 font-mono text-xs text-muted-foreground">
+            {devCode}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -108,7 +127,7 @@ function LaunchOverlay({ timedOut }: { timedOut: boolean }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#09070d] px-6 text-foreground">
       <div className="w-full max-w-sm rounded-3xl border border-primary/20 bg-card/95 p-8 text-center shadow-glow backdrop-blur">
-        <img src={logoAsset.url} alt="UNVEIL" className="mx-auto h-20 w-20 rounded-[1.75rem] shadow-glow" />
+        <img src={logoMarkUrl} alt="UNVEIL" className="mx-auto h-20 w-20 rounded-[1.75rem] shadow-glow" />
         <h1 className="mt-5 font-display text-3xl font-light">UNVEIL</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {timedOut ? "UNVEIL is taking longer than expected to open." : "Preparing your experience…"}
@@ -140,31 +159,18 @@ function useLaunchState() {
 
   useEffect(() => {
     let active = true;
-    let painted = false;
-    let minimumDelayDone = false;
-
-    const maybeReady = () => {
-      if (!active || !painted || !minimumDelayDone) return;
+    const markReady = () => {
+      if (!active) return;
       setReady(true);
       setTimedOut(false);
     };
 
-    const minimumDelay = window.setTimeout(() => {
-      minimumDelayDone = true;
-      maybeReady();
-    }, 900);
+    const minimumDelay = window.setTimeout(markReady, 900);
 
     const timeout = window.setTimeout(() => {
       if (!active) return;
       setTimedOut(true);
     }, 8000);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        painted = true;
-        maybeReady();
-      });
-    });
 
     void (async () => {
       try {
@@ -191,23 +197,22 @@ function useLaunchState() {
 }
 
 function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
-  const [fatalError, setFatalError] = useState<Error | null>(null);
-
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
-      console.error(event.error ?? event.message);
-      setFatalError(event.error instanceof Error ? event.error : new Error(event.message || "Unexpected runtime error"));
+      console.error("[runtime:error]", {
+        route: window.location.pathname,
+        source: event.filename,
+        line: event.lineno,
+        column: event.colno,
+        error: event.error ?? event.message,
+      });
     };
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.error(event.reason);
-      const message =
-        event.reason instanceof Error
-          ? event.reason.message
-          : typeof event.reason === "string"
-            ? event.reason
-            : "Unexpected async runtime error";
-      setFatalError(event.reason instanceof Error ? event.reason : new Error(message));
+      console.error("[runtime:unhandledrejection]", {
+        route: window.location.pathname,
+        reason: event.reason,
+      });
     };
 
     window.addEventListener("error", onError);
@@ -219,25 +224,74 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  if (fatalError) {
-    return (
-      <FatalAppScreen
-        title="Something went wrong"
-        message="Something went wrong. Please restart UNVEIL."
-        primaryAction={
+  return <>{children}</>;
+}
+
+function RouteRecoveryScreen({
+  title,
+  message,
+  primaryAction,
+  devCode,
+}: {
+  title: string;
+  message: string;
+  primaryAction: React.ReactNode;
+  devCode?: string;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#09070d] px-4 text-foreground">
+      <div className="w-full max-w-xl rounded-3xl border border-primary/20 bg-card/95 p-8 text-center shadow-glow backdrop-blur">
+        <img src={logoMarkUrl} alt="UNVEIL" className="mx-auto h-16 w-16 rounded-2xl" />
+        <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">{title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          {primaryAction}
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Home
+          </a>
+          <a
+            href="/discover"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Discover
+          </a>
+          <a
+            href="/matches"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Matches
+          </a>
+          <a
+            href="/messages"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Messages
+          </a>
+          <a
+            href="/profile"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Profile
+          </a>
           <button
             type="button"
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+            onClick={() => clearSessionAndRestart()}
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
           >
-            Retry
+            Clear Session
           </button>
-        }
-      />
-    );
-  }
-
-  return <>{children}</>;
+        </div>
+        {import.meta.env.DEV && devCode && (
+          <div className="mt-4 rounded-2xl border border-border bg-background/40 px-3 py-2 font-mono text-xs text-muted-foreground">
+            {devCode}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function AppBootLayer() {
@@ -306,8 +360,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: logoAsset.url },
-      { rel: "apple-touch-icon", href: logoAsset.url },
+      { rel: "icon", type: "image/svg+xml", href: logoMarkUrl },
+      { rel: "apple-touch-icon", href: logoMarkUrl },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" },
@@ -322,7 +376,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "UNVEIL",
           url: "https://unveil.best",
-          logo: logoAsset.url,
+          logo: `https://unveil.best${logoMarkUrl}`,
           email: "support@unveil.best",
           description: "Compatibility-first dating platform where meaningful connections form before appearance becomes central.",
         }),

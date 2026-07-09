@@ -17,11 +17,21 @@ import "@/styles/unveil-onboarding.css";
 import { LocationPicker } from "@/components/LocationPicker";
 import { COUNTRY_BY_CODE, codeForName, detectCountryFromTimezone } from "@/lib/countries";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { LoadingTimeoutScreen } from "@/components/AppStateScreen";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 
 
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Welcome to UNVEIL" }, { name: "description", content: "Set up your UNVEIL profile in a few guided steps." }] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Onboarding is temporarily unavailable"
+      message="A setup component failed, but the rest of UNVEIL should remain available."
+      error={error}
+    />
+  ),
   component: Onboarding,
 });
 
@@ -114,7 +124,7 @@ const VOICE_INTRO_PROMPT_TEXTS = VOICE_INTRO_PROMPTS.map((p) => p.prompt);
 
 const TOTAL = STEPS.length;
 
-const ONBOARDING_HYDRATE_TIMEOUT_MS = 10000;
+const ONBOARDING_HYDRATE_TIMEOUT_MS = 8000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -135,6 +145,7 @@ function Onboarding() {
 
   const [step, setStep] = useState(1);
   const [hydrated, setHydrated] = useState(false);
+  const hydrationTimedOut = useLoadingTimeout(authLoading || (Boolean(user) && !hydrated), 8000);
   const [resumed, setResumed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -502,6 +513,17 @@ function Onboarding() {
 
   // ---------- Render ----------
   if (authLoading || (user && !hydrated)) {
+    if (hydrationTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Onboarding is taking longer than expected"
+            message="UNVEIL could not finish loading your setup data in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />

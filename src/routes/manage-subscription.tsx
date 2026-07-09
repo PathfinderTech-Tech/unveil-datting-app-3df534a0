@@ -144,8 +144,7 @@ function Manage() {
               Unlimited messaging, deeper insights, and priority discovery — $15.99 / month. Cancel anytime.
             </p>
             <Link
-              to="/checkout"
-              search={{ product: "premium" } as any}
+              to="/premium"
               className="mt-5 inline-flex rounded-full bg-gradient-hero px-5 py-2.5 text-xs font-medium text-primary-foreground shadow-glow"
             >
               Upgrade · $15.99/mo

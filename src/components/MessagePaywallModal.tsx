@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { X, Zap, Clock, Crown, Sparkles, Star } from "lucide-react";
-import { isIOS } from "@/lib/platform";
+import { isNative } from "@/lib/platform";
 import { toast } from "sonner";
 import { purchase, type ProductId } from "@/lib/purchases";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,7 +96,7 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
   const rt = returnTo && returnTo.startsWith("/") ? returnTo : undefined;
   const limit = dailyLimit ?? 15;
 
-  async function handleIOSPurchase(productId: ProductId) {
+  async function handleNativePurchase(productId: ProductId) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -151,12 +151,12 @@ export function MessagePaywallModal({ open, onClose, dailyLimit, isPremium, retu
         : "border-border bg-surface/60 hover:bg-surface"
     }`;
 
-    if (isIOS()) {
+    if (isNative()) {
       return (
         <button
           key={opt.product}
           type="button"
-          onClick={() => handleIOSPurchase(opt.product)}
+          onClick={() => handleNativePurchase(opt.product)}
           className={`${className} w-full text-left`}
         >
           {content}

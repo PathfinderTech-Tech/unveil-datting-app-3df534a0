@@ -1,0 +1,2 @@
+    topResumedActivity=ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}
+  ResumedActivity: ActivityRecord{213311616 u0 com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity t15}

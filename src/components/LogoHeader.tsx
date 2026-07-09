@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoAsset from "@/assets/unveil-logo-v3.png.asset.json";
+import logoMarkUrl from "@/assets/unveil-logo-mark.svg";
 
 export function LogoMark({
   size = 36,
@@ -19,7 +19,7 @@ export function LogoMark({
       : "drop-shadow(0 0 14px color-mix(in oklch, var(--logo-magenta) 50%, transparent)) drop-shadow(0 0 10px color-mix(in oklch, var(--logo-gold) 34%, transparent))";
   return (
     <img
-      src={logoAsset.url}
+      src={logoMarkUrl}
       alt="UNVEIL"
       width={size}
       height={size}

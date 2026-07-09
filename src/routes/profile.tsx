@@ -14,7 +14,9 @@ import { SignedImage } from "@/components/SignedImage";
 
 import { Play, Pause, Pencil, Mic, Award, Settings as SettingsIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { AppStateScreen, LoadingScreen } from "@/components/AppStateScreen";
+import { AppStateScreen, LoadingScreen, LoadingTimeoutScreen } from "@/components/AppStateScreen";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -23,6 +25,13 @@ export const Route = createFileRoute("/profile")({
       { name: "description", content: "Your UNVEIL dating profile — who you are." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Profile is temporarily unavailable"
+      message="Profile data failed on this screen only. The rest of UNVEIL should remain accessible."
+      error={error}
+    />
+  ),
   component: ProfilePage,
 });
 
@@ -104,6 +113,7 @@ function missingSections(p: ProfileRow | null, voiceCount: number): string[] {
 function ProfilePage() {
   const { checking } = useRequireOnboarding();
   const { user, loading } = useAuth();
+  const loadingTimedOut = useLoadingTimeout(checking || loading, 8000);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [voices, setVoices] = useState<VoiceRow[]>([]);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -145,6 +155,17 @@ function ProfilePage() {
   }, [user]);
 
   if (checking) {
+    if (loadingTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Profile is taking longer than expected"
+            message="UNVEIL did not finish loading profile state in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />
@@ -154,6 +175,17 @@ function ProfilePage() {
   }
 
   if (loading) {
+    if (loadingTimedOut) {
+      return (
+        <div className="min-h-screen">
+          <UnveilNav />
+          <LoadingTimeoutScreen
+            title="Profile is taking longer than expected"
+            message="UNVEIL did not finish loading profile state in time."
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <UnveilNav />

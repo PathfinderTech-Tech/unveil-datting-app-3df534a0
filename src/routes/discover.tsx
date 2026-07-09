@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
 import { DISCOVER_SECTIONS, type DiscoverAnswers } from "@/lib/discover-sections";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ArrowRight, SkipForward, Check, Sparkles } from "lucide-react";
@@ -11,6 +12,13 @@ export const Route = createFileRoute("/discover")({
     { title: "Discover Yourself — UNVEIL" },
     { name: "description", content: "A guided psychology-driven journey that builds your Compatibility Profile." },
   ] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Discover is temporarily unavailable"
+      message="The app shell is still healthy. Reload or go home while this screen is recovering."
+      error={error}
+    />
+  ),
   component: Discover,
 });
 

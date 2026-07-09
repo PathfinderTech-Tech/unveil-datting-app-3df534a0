@@ -8,9 +8,28 @@ import { ArrowRight } from "lucide-react";
 import { getEmailCooldown, cooldownMessage, logDeletionAttempt } from "@/lib/cooldown";
 import { PasswordInput } from "@/components/ui/password-input";
 import { OfflineScreen } from "@/components/AppStateScreen";
+import { RouteErrorScreen } from "@/components/RouteErrorScreen";
+
+const AUTH_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("Authentication timed out. Please try again.")), ms);
+    }),
+  ]);
+}
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "UNVEIL — Sign in" }] }),
+  errorComponent: ({ error }) => (
+    <RouteErrorScreen
+      title="Sign in is temporarily unavailable"
+      message="This sign-in screen failed to render. Retry or return home while it recovers."
+      error={error}
+    />
+  ),
   component: Login,
 });
 
@@ -21,17 +40,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [cooldownBanner, setCooldownBanner] = useState<string | null>(null);
-  const [isOffline, setIsOffline] = useState(false);
-  useEffect(() => {
-    const update = () => setIsOffline(typeof navigator !== "undefined" && navigator.onLine === false);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+  const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,7 +62,7 @@ function Login() {
     }
     let error: { message: string } | null = null;
     try {
-      const res = await supabase.auth.signInWithPassword({ email, password });
+      const res = await withTimeout(supabase.auth.signInWithPassword({ email, password }), AUTH_TIMEOUT_MS);
       error = res.error;
     } catch {
       error = { message: "Supabase error: failed to connect. Please try again." };
@@ -67,9 +76,12 @@ function Login() {
     if (!email) { setErr("Enter your email first"); return; }
     let error: { message: string } | null = null;
     try {
-      const res = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const res = await withTimeout(
+        supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }),
+        AUTH_TIMEOUT_MS,
+      );
       error = res.error;
     } catch {
       error = { message: "Supabase error: failed to send reset email." };

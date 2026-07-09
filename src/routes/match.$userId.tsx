@@ -418,7 +418,7 @@ function MatchExperience() {
               {!quota.loading && !quota.unlimited && (
                 <div className="mb-1.5 px-1 text-center text-[10px] text-muted-foreground">
                   {quota.remaining} of {quota.dailyLimit} interactions remaining ·{" "}
-                  <Link to="/checkout" search={{ product: "message_pass", returnTo: `/match/${userId}` } as never} className="text-accent underline">Daily Pass $1.99</Link>
+                  <Link to="/premium" search={{ returnTo: `/match/${userId}` } as never} className="text-accent underline">Daily Pass</Link>
                 </div>
               )}
               <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
