@@ -1236,11 +1236,13 @@ function LevelMap({
 function PlayScreen({
   level,
   muted,
+  onToggleMute,
   onExit,
   onWin,
 }: {
   level: LevelConfig;
   muted: boolean;
+  onToggleMute: () => void;
   onExit: () => void;
   onWin: (stars: number, moves: number, time: number) => void;
 }) {
