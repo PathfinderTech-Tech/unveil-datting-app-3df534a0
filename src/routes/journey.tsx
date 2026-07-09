@@ -9,6 +9,7 @@ import {
   Heart, Brain, MapPin, Award, Star, Footprints,
   Flame, Clock, Share2, Sparkles, Plus, BookMarked, Trophy,
   User, Compass, Loader2, ArrowRight, Check, X, Users, ChevronLeft,
+  Search, BadgeCheck, Circle,
 } from "lucide-react";
 import {
   listMyJourneys, getJourney, createSoloJourney, createCoupleJourney,
