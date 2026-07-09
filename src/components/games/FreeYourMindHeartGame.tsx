@@ -1709,30 +1709,33 @@ function PlayScreen({
         </div>
       )}
 
-      {/* Subtitle + Skip Level button */}
-      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-        <p className="text-center text-xs text-white/70 sm:text-left">
-          Clear the confusion, release what holds you back, and open the doors
-          to <span className="text-pink-300">love</span> and{" "}
-          <span className="text-cyan-300">clarity</span>.
-        </p>
-        <button
-          onClick={restart}
-          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold text-white"
-          style={{
-            background:
-              "linear-gradient(90deg,#a78bfa,#ec4899,#f59e0b,#ec4899,#a78bfa)",
-            backgroundSize: "200% 100%",
-            animation: "fymhFlow 6s linear infinite",
-            boxShadow: "0 0 24px -6px rgba(236,72,153,0.7)",
-          }}
-        >
-          Reset Level{" "}
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/30 px-2 py-0.5 text-xs">
-            <Gem className="h-3 w-3 text-amber-200" /> 50
-          </span>
-        </button>
-      </div>
+      {/* Subtitle — reset lives in the menu now */}
+      <p className="px-1 text-center text-xs leading-relaxed text-white/70">
+        Clear the confusion, release what holds you back, and open the doors
+        to <span className="text-pink-300">love</span> and{" "}
+        <span className="text-cyan-300">clarity</span>.
+      </p>
+
+      <PlayMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        muted={muted}
+        onToggleMute={onToggleMute}
+        onRestart={() => { setMenuOpen(false); setConfirmRestart(true); }}
+        onHowTo={() => { setMenuOpen(false); setHowToOpen(true); }}
+        onExit={() => { setMenuOpen(false); onExit(); }}
+      />
+      <ConfirmRestart
+        open={confirmRestart}
+        onCancel={() => setConfirmRestart(false)}
+        onConfirm={() => { restart(); setConfirmRestart(false); setStuckDismissed(true); }}
+      />
+      <HowToPlay open={howToOpen} onClose={() => setHowToOpen(false)} />
+      <StuckDialog
+        open={stuckOpen}
+        onRestart={() => { restart(); setStuckOpen(false); setStuckDismissed(true); }}
+        onExit={() => { setStuckOpen(false); setStuckDismissed(true); onExit(); }}
+      />
     </div>
   );
 }
