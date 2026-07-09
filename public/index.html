@@ -10,55 +10,33 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#09070d" />
     <title>UNVEIL</title>
-
-    <!-- Warm the TLS + HTTP/3 connection to production BEFORE the redirect lands. -->
-    <link rel="preconnect" href="https://unveil.best" crossorigin />
-    <link rel="preconnect" href="https://www.unveil.best" crossorigin />
-    <link rel="dns-prefetch" href="https://unveil.best" />
-    <link rel="dns-prefetch" href="https://odisvcroittzdmulhlyh.supabase.co" />
-    <link rel="preconnect" href="https://odisvcroittzdmulhlyh.supabase.co" crossorigin />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-
+    <!--
+      This file exists only as a passive fallback inside the native Capacitor
+      bundle. In production the Capacitor WebView loads server.url
+      (https://unveil.best) directly, so this HTML is never rendered. It must
+      NEVER perform a top-level navigation — on Android WebView, a
+      window.location.replace to an external https origin is treated as an
+      external-intent navigation and hands the user off to Chrome, ejecting
+      them from MainActivity. That was the App Store / Play Store rejection.
+    -->
     <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: #09070d;
-        color: #f5f3ff;
+      html, body {
+        margin: 0; padding: 0; height: 100%;
+        background: #09070d; color: #f5f3ff;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        overflow: hidden;
-        -webkit-user-select: none;
-        user-select: none;
+        overflow: hidden; -webkit-user-select: none; user-select: none;
       }
       #splash {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 24px;
-        background: radial-gradient(
-          ellipse at center,
-          rgba(139, 92, 246, 0.15) 0%,
-          #09070d 60%
-        );
+        position: fixed; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 24px;
+        background: radial-gradient(ellipse at center, rgba(139,92,246,0.15) 0%, #09070d 60%);
       }
       #splash h1 {
-        font-size: 28px;
-        font-weight: 600;
-        letter-spacing: 0.4em;
-        margin: 0;
-        opacity: 0.92;
+        font-size: 28px; font-weight: 600; letter-spacing: 0.4em; margin: 0; opacity: 0.92;
       }
       #splash .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #8b5cf6;
+        width: 6px; height: 6px; border-radius: 50%; background: #8b5cf6;
         animation: pulse 1.2s ease-in-out infinite;
       }
       @keyframes pulse {
@@ -72,22 +50,6 @@
       <h1>UNVEIL</h1>
       <div class="dot"></div>
     </div>
-
-    <script>
-      // Single hard navigation at app launch. After this, TanStack Router
-      // handles in-app <Link> clicks as client-side SPA transitions — no
-      // more per-tap redirects through this shell.
-      (function () {
-        var target = "https://unveil.best/";
-
-        // Best-effort: warm the document HTML so the redirect feels instant.
-        try {
-          fetch(target, { mode: "no-cors", credentials: "include" }).catch(function () {});
-        } catch (_) {}
-
-        // Replace so back-button never returns to this shell.
-        window.location.replace(target);
-      })();
-    </script>
+    <!-- No JS. No redirect. Capacitor server.url owns navigation. -->
   </body>
 </html>
