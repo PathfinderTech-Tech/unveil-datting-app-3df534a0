@@ -502,6 +502,17 @@ function JourneyDetail({ journeyId, onLeft }: { journeyId: string; onLeft: () =>
                 </div>
               </div>
             ))}
+            {journey.mode === "solo" && (
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-pink-400/40 bg-pink-500/5 p-2">
+                <div className="grid h-10 w-10 place-items-center rounded-full border border-pink-400/50 bg-white/[0.03] text-pink-300 shadow-[0_0_18px_-4px_rgba(236,72,153,0.7)]">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm text-white/90">Invite a match anytime</div>
+                  <div className="text-[11px] text-white/55">Turn this into a shared walk later.</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
