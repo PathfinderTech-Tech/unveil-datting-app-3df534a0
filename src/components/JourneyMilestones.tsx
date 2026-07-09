@@ -49,7 +49,7 @@ export function JourneyMilestones() {
         <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
           <Trophy className="h-3.5 w-3.5" /> Your journey
         </div>
-        <Link to="/challenges" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+        <Link to="/games" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
           Continue <ArrowRight className="h-3 w-3" />
         </Link>
       </div>

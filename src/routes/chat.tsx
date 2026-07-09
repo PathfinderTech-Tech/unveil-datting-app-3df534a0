@@ -1288,7 +1288,7 @@ function Chat() {
                   void voiceRecorderRef.current?.start();
                 }}
                 onGift={() => setGiftOpen(true)}
-                onChallenges={() => { window.location.href = "/challenges"; }}
+                onChallenges={() => { window.location.href = "/games"; }}
                 onAi={() => { setPanelTab("ai"); setPanelOpen(true); }}
                 onJournal={() => setJournalOpen(true)}
               />

@@ -119,7 +119,7 @@ function Passport() {
         </div>
 
         <div className="text-center">
-          <Link to="/challenges" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
+          <Link to="/games" className="inline-flex items-center gap-2 rounded-full bg-gradient-hero px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow">
             Earn more in Challenges →
           </Link>
         </div>
