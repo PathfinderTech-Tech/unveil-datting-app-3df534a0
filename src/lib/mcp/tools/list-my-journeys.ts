@@ -46,9 +46,9 @@ export default defineTool({
     }
     const { data, error } = await supabase
       .from("journeys")
-      .select("id, route_id, mode, status, total_steps, started_at, completed_at")
+      .select("id, mode, status, from_city, to_city, total_miles, total_km, created_at, completed_at")
       .in("id", ids)
-      .order("started_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(limit ?? 20);
     if (error) {
       return { content: [{ type: "text", text: error.message }], isError: true };
