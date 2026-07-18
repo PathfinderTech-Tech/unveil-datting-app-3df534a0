@@ -30,6 +30,7 @@ import { Route as PlayfulRouteImport } from './routes/playful'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoveTilesRouteImport } from './routes/love-tiles'
@@ -68,7 +69,11 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ChallengesSoloMindGamesRouteImport } from './routes/challenges.solo-mind-games'
 import { Route as ChallengesFreeYourMindHeartRouteImport } from './routes/challenges.free-your-mind-heart'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicPassportOgRouteImport } from './routes/api/public/passport-og'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -177,6 +182,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -370,9 +380,32 @@ const AdminBetaRoute = AdminBetaRouteImport.update({
   path: '/beta',
   getParentRoute: () => AdminRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPassportOgRoute = ApiPublicPassportOgRouteImport.update({
   id: '/api/public/passport-og',
   path: '/api/public/passport-og',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailQueueProcessRoute =
@@ -423,6 +456,7 @@ export interface FileRoutesByFullPath {
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -444,6 +478,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
@@ -458,6 +494,8 @@ export interface FileRoutesByFullPath {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -489,6 +527,7 @@ export interface FileRoutesByTo {
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -510,6 +549,8 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
@@ -524,6 +565,8 @@ export interface FileRoutesByTo {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges': typeof ChallengesIndexRoute
   '/play': typeof PlayIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -556,6 +599,7 @@ export interface FileRoutesById {
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
   '/matches': typeof MatchesRoute
+  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/onboarding': typeof OnboardingRoute
   '/passport': typeof PassportRoute
@@ -577,6 +621,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
   '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
   '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
@@ -591,6 +637,8 @@ export interface FileRoutesById {
   '/play/this-or-that': typeof PlayThisOrThatRoute
   '/challenges/': typeof ChallengesIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/passport-og': typeof ApiPublicPassportOgRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -624,6 +672,7 @@ export interface FileRouteTypes {
     | '/love-tiles'
     | '/manage-subscription'
     | '/matches'
+    | '/mcp'
     | '/messages'
     | '/onboarding'
     | '/passport'
@@ -645,6 +694,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
     | '/challenges/solo-mind-games'
@@ -659,6 +710,8 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -690,6 +743,7 @@ export interface FileRouteTypes {
     | '/love-tiles'
     | '/manage-subscription'
     | '/matches'
+    | '/mcp'
     | '/messages'
     | '/onboarding'
     | '/passport'
@@ -711,6 +765,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
     | '/challenges/solo-mind-games'
@@ -725,6 +781,8 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges'
     | '/play'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -756,6 +814,7 @@ export interface FileRouteTypes {
     | '/love-tiles'
     | '/manage-subscription'
     | '/matches'
+    | '/mcp'
     | '/messages'
     | '/onboarding'
     | '/passport'
@@ -777,6 +836,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
     | '/challenges/free-your-mind-heart'
     | '/challenges/solo-mind-games'
@@ -791,6 +852,8 @@ export interface FileRouteTypes {
     | '/play/this-or-that'
     | '/challenges/'
     | '/play/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/passport-og'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -823,6 +886,7 @@ export interface RootRouteChildren {
   LoveTilesRoute: typeof LoveTilesRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
   MatchesRoute: typeof MatchesRoute
+  McpRoute: typeof McpRoute
   MessagesRoute: typeof MessagesRoute
   OnboardingRoute: typeof OnboardingRoute
   PassportRoute: typeof PassportRoute
@@ -844,6 +908,8 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ChallengesFreeYourMindHeartRoute: typeof ChallengesFreeYourMindHeartRoute
   ChallengesSoloMindGamesRoute: typeof ChallengesSoloMindGamesRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
@@ -856,6 +922,8 @@ export interface RootRouteChildren {
   PlayThisOrThatRoute: typeof PlayThisOrThatRoute
   ChallengesIndexRoute: typeof ChallengesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicPassportOgRoute: typeof ApiPublicPassportOgRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1010,6 +1078,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -1278,11 +1353,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBetaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/passport-og': {
       id: '/api/public/passport-og'
       path: '/api/public/passport-og'
       fullPath: '/api/public/passport-og'
       preLoaderRoute: typeof ApiPublicPassportOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
@@ -1363,6 +1466,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoveTilesRoute: LoveTilesRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
   MatchesRoute: MatchesRoute,
+  McpRoute: McpRoute,
   MessagesRoute: MessagesRoute,
   OnboardingRoute: OnboardingRoute,
   PassportRoute: PassportRoute,
@@ -1384,6 +1488,9 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ChallengesFreeYourMindHeartRoute: ChallengesFreeYourMindHeartRoute,
   ChallengesSoloMindGamesRoute: ChallengesSoloMindGamesRoute,
   MatchUserIdRoute: MatchUserIdRoute,
@@ -1396,6 +1503,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlayThisOrThatRoute: PlayThisOrThatRoute,
   ChallengesIndexRoute: ChallengesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicPassportOgRoute: ApiPublicPassportOgRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
