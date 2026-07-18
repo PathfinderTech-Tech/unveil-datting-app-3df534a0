@@ -33,6 +33,8 @@ const STARTUP_FALLBACK_SCRIPT = `
 (function () {
   var errors = [];
   window.__UNVEIL_STARTUP_ERRORS__ = errors;
+  window.process = window.process || { env: {} };
+  window.process.env = window.process.env || {};
 
   function asText(value) {
     if (!value) return "Unknown startup error";

@@ -12,7 +12,8 @@ public class MainActivity extends BridgeActivity {
             .setAllowNavigation(new String[] {
                 "unveil.best",
                 "www.unveil.best",
-                "*.unveil.best"
+                "*.unveil.best",
+                "*.supabase.co"
             })
             .setAndroidScheme("https")
             .setBackgroundColor("#09070d")
