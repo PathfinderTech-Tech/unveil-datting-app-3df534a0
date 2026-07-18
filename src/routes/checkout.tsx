@@ -12,7 +12,7 @@ import { Lock, ArrowLeft } from "lucide-react";
 type Product = "premium" | "premium_monthly" | "premium_quarterly" | "premium_annual" | "premium_yearly" | "message_pass" | "message_pass_24h" | "message_pass_2w" | "pass_24h" | "pass_2w";
 type Search = { product?: Product; returnTo?: string };
 
-const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_monthly", "premium_quarterly", "premium_annual", "premium_yearly", "message_pass", "message_pass_24h", "message_pass_2w", "pass_24h", "pass_2w"];
+export const ALLOWED_PRODUCTS: Product[] = ["premium", "premium_monthly", "premium_quarterly", "premium_annual", "premium_yearly", "message_pass", "message_pass_24h", "message_pass_2w", "pass_24h", "pass_2w"];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — UNVEIL" }] }),

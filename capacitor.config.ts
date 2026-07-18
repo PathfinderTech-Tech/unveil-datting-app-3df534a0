@@ -46,6 +46,7 @@ const config: CapacitorConfig = {
   // the native shell (this was the App Store / Play Store rejection cause).
   server: {
     url: process.env.CAPACITOR_LIVE_URL ?? "https://unveil.best",
+    errorPath: "native-error.html",
     allowNavigation: [
       "unveil.best",
       "www.unveil.best",
