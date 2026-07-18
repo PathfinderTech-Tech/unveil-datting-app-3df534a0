@@ -23,6 +23,57 @@ import { VeilBackdrop } from "@/components/VeilBackdrop";
 import { GlobalBackButton } from "@/components/GlobalBackButton";
 import { useRouterState } from "@tanstack/react-router";
 
+declare global {
+  interface Window {
+    __UNVEIL_STARTUP_ERRORS__?: unknown[];
+  }
+}
+
+const STARTUP_FALLBACK_SCRIPT = `
+(function () {
+  var errors = [];
+  window.__UNVEIL_STARTUP_ERRORS__ = errors;
+
+  function asText(value) {
+    if (!value) return "Unknown startup error";
+    if (typeof value === "string") return value;
+    if (value.message) return value.message;
+    try { return JSON.stringify(value); } catch (_) { return String(value); }
+  }
+
+  function showFallback(reason) {
+    if (document.documentElement.getAttribute("data-unveil-ready") === "1") return;
+    if (!document.body || document.getElementById("unveil-startup-fallback")) return;
+    var panel = document.createElement("div");
+    panel.id = "unveil-startup-fallback";
+    panel.setAttribute("role", "alert");
+    panel.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#09070d;color:#f8f4ff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;";
+    panel.innerHTML = '<div style="max-width:420px;width:100%;text-align:center;border:1px solid rgba(216,180,254,.35);border-radius:28px;background:rgba(24,16,32,.96);padding:32px;box-shadow:0 0 80px rgba(168,85,247,.24)"><div style="font-size:28px;letter-spacing:.28em;margin-bottom:14px">UNVEIL</div><h1 style="font-size:20px;margin:0 0 10px">UNVEIL could not finish opening</h1><p style="margin:0;color:rgba(248,244,255,.72);line-height:1.5">' + asText(reason).replace(/[<>&]/g, function (c) { return ({"<":"&lt;",">":"&gt;","&":"&amp;"})[c]; }) + '</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px"><button type="button" onclick="window.location.reload()" style="border:0;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#8b5cf6,#ec4899,#f59e0b);color:white;font-weight:700">Retry</button><button type="button" onclick="window.location.href=\'/\'" style="border:1px solid rgba(216,180,254,.35);border-radius:999px;padding:12px 18px;background:rgba(255,255,255,.06);color:#f8f4ff;font-weight:700">Home</button></div></div>';
+    document.body.appendChild(panel);
+  }
+
+  window.addEventListener("error", function (event) {
+    var target = event.target;
+    var asset = target && target !== window ? (target.src || target.href || target.currentSrc) : "";
+    var entry = { type: "error", message: event.message || asset || "Asset failed to load", source: event.filename || asset || "unknown", at: Date.now() };
+    errors.push(entry);
+    if ((target && target.tagName === "SCRIPT") || event.error) showFallback(entry.message);
+  }, true);
+
+  window.addEventListener("unhandledrejection", function (event) {
+    var entry = { type: "unhandledrejection", message: asText(event.reason), at: Date.now() };
+    errors.push(entry);
+    showFallback(entry.message);
+  });
+
+  window.setTimeout(function () {
+    if (document.documentElement.getAttribute("data-unveil-ready") !== "1") {
+      showFallback("Startup took longer than expected. Please retry.");
+    }
+  }, 12000);
+})();
+`;
+
 function devErrorCode(error: Error) {
   return `${error.name || "Error"}:${error.message || "unknown"}`;
 }
@@ -67,8 +118,11 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
+
+  useEffect(() => {
+    console.error("[route:error]", error);
+  }, [error]);
 
   return (
     <RouteRecoveryScreen
@@ -197,7 +251,16 @@ function useLaunchState() {
 }
 
 function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
+  const [fatalError, setFatalError] = useState<unknown | null>(null);
+
   useEffect(() => {
+    document.documentElement.setAttribute("data-unveil-ready", "1");
+    console.info("[startup:ready]", {
+      route: window.location.pathname,
+      userAgent: window.navigator.userAgent,
+      storedStartupErrors: window.__UNVEIL_STARTUP_ERRORS__?.length ?? 0,
+    });
+
     const onError = (event: ErrorEvent) => {
       console.error("[runtime:error]", {
         route: window.location.pathname,
@@ -206,6 +269,7 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
         column: event.colno,
         error: event.error ?? event.message,
       });
+      if (event.error) setFatalError(event.error);
     };
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
@@ -213,6 +277,7 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
         route: window.location.pathname,
         reason: event.reason,
       });
+      setFatalError(event.reason ?? new Error("Unhandled startup rejection"));
     };
 
     window.addEventListener("error", onError);
@@ -223,6 +288,34 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
       window.removeEventListener("unhandledrejection", onUnhandledRejection);
     };
   }, []);
+
+  if (fatalError) {
+    const error = fatalError instanceof Error ? fatalError : new Error(String(fatalError));
+    return (
+      <FatalAppScreen
+        title="UNVEIL recovered from a startup error"
+        message="The app did not open cleanly, so this safety screen is shown instead of a blank page. Retry or return home."
+        primaryAction={
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center rounded-md bg-gradient-hero px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+          >
+            Retry
+          </button>
+        }
+        secondaryAction={
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-primary/35 bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+          >
+            Home
+          </a>
+        }
+        devCode={devErrorCode(error)}
+      />
+    );
+  }
 
   return <>{children}</>;
 }
@@ -393,6 +486,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: STARTUP_FALLBACK_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
