@@ -13,7 +13,9 @@ public class MainActivity extends BridgeActivity {
                 "unveil.best",
                 "www.unveil.best",
                 "*.unveil.best",
-                "*.supabase.co"
+                "*.supabase.co",
+                "*.stripe.com",
+                "*.revenuecat.com"
             })
             .setAndroidScheme("https")
             .setBackgroundColor("#09070d")

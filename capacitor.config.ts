@@ -52,6 +52,8 @@ const config: CapacitorConfig = {
       "www.unveil.best",
       "*.unveil.best",
       "*.supabase.co",
+      "*.stripe.com",
+      "*.revenuecat.com",
     ],
     androidScheme: "https",
     iosScheme: "https",
