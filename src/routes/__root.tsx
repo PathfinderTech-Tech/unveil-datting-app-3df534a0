@@ -26,6 +26,12 @@ import { useRouterState } from "@tanstack/react-router";
 declare global {
   interface Window {
     __UNVEIL_STARTUP_ERRORS__?: unknown[];
+    __UNVEIL_NATIVE_START__?: {
+      href: string;
+      userAgent: string;
+      startedAt: number;
+      readyAt?: number;
+    };
   }
 }
 
@@ -33,6 +39,11 @@ const STARTUP_FALLBACK_SCRIPT = `
 (function () {
   var errors = [];
   window.__UNVEIL_STARTUP_ERRORS__ = errors;
+  window.__UNVEIL_NATIVE_START__ = {
+    href: window.location.href,
+    userAgent: window.navigator.userAgent,
+    startedAt: Date.now()
+  };
   window.process = window.process || { env: {} };
   window.process.env = window.process.env || {};
 
@@ -45,7 +56,11 @@ const STARTUP_FALLBACK_SCRIPT = `
 
   function showFallback(reason) {
     if (document.documentElement.getAttribute("data-unveil-ready") === "1") return;
-    if (!document.body || document.getElementById("unveil-startup-fallback")) return;
+    if (!document.body) {
+      window.addEventListener("DOMContentLoaded", function () { showFallback(reason); }, { once: true });
+      return;
+    }
+    if (document.getElementById("unveil-startup-fallback")) return;
     var panel = document.createElement("div");
     panel.id = "unveil-startup-fallback";
     panel.setAttribute("role", "alert");
@@ -54,17 +69,31 @@ const STARTUP_FALLBACK_SCRIPT = `
     document.body.appendChild(panel);
   }
 
+  function persist(entry) {
+    try {
+      var stored = JSON.parse(window.localStorage.getItem("unveil:startup-errors") || "[]");
+      stored.push(entry);
+      window.localStorage.setItem("unveil:startup-errors", JSON.stringify(stored.slice(-20)));
+    } catch (_) {}
+  }
+
+  function record(entry) {
+    errors.push(entry);
+    persist(entry);
+    try { console.error("[startup:captured]", entry); } catch (_) {}
+  }
+
   window.addEventListener("error", function (event) {
     var target = event.target;
     var asset = target && target !== window ? (target.src || target.href || target.currentSrc) : "";
     var entry = { type: "error", message: event.message || asset || "Asset failed to load", source: event.filename || asset || "unknown", at: Date.now() };
-    errors.push(entry);
+    record(entry);
     if ((target && target.tagName === "SCRIPT") || event.error) showFallback(entry.message);
   }, true);
 
   window.addEventListener("unhandledrejection", function (event) {
     var entry = { type: "unhandledrejection", message: asText(event.reason), at: Date.now() };
-    errors.push(entry);
+    record(entry);
     showFallback(entry.message);
   });
 
@@ -257,11 +286,23 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-unveil-ready", "1");
+    if (window.__UNVEIL_NATIVE_START__) {
+      window.__UNVEIL_NATIVE_START__.readyAt = Date.now();
+    }
     console.info("[startup:ready]", {
       route: window.location.pathname,
       userAgent: window.navigator.userAgent,
       storedStartupErrors: window.__UNVEIL_STARTUP_ERRORS__?.length ?? 0,
+      nativeStart: window.__UNVEIL_NATIVE_START__,
     });
+    try {
+      const previousStartupErrors = window.localStorage.getItem("unveil:startup-errors");
+      if (previousStartupErrors) {
+        console.info("[startup:previous-errors]", JSON.parse(previousStartupErrors));
+      }
+    } catch {
+      /* noop */
+    }
 
     const onError = (event: ErrorEvent) => {
       console.error("[runtime:error]", {
