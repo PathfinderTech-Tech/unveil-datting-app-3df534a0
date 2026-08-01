@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles, Heart, Users, Crown, RefreshCw, ArrowLeft, Trophy, ChevronRight, Lock, Calendar, Activity, Shield, MessageCircle, Gem } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
