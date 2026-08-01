@@ -1,6 +1,6 @@
 import { auth, defineMcp } from "@lovable.dev/mcp-js";
 import getMyProfileTool from "./tools/get-my-profile";
-import listMyJourneysTool from "./tools/list-my-journeys";
+
 
 // Direct Supabase issuer (never the `.lovable.cloud` proxy) — inlined at build
 // time by Vite. Fallback keeps the URL well-formed during the throwaway
