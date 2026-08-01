@@ -81,6 +81,9 @@ function InsightsAiPage() {
   }, [entitlements.premium, fetchTop]);
 
   async function generateFor(peerId: string, force = false) {
+    // Guard against double submission (rapid Analyze/Refresh taps).
+    if (inFlight.current.has(peerId)) return;
+    inFlight.current.add(peerId);
     setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined, errorCode: undefined } : r));
     try {
       const res = await fetchInsight({ data: { peerId, force } });
