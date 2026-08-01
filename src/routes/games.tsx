@@ -47,34 +47,14 @@ type Tile = {
 const TILES: Tile[] = [
   // Solo / signature
   {
-    to: "/challenges/free-your-mind-heart",
-    title: "Free Your Mind & Heart",
-    desc: "UNVEIL's flagship maze. Clear both paths to free the arrows.",
-    icon: Sparkles,
-    badge: "SIGNATURE",
-    section: "solo",
-  },
-  {
     to: "/love-tiles",
     title: "UNVEIL Love Tiles",
     desc: "Match the symbols of love. Earn chemistry for your Passport.",
     icon: Heart,
+    badge: "SIGNATURE",
     section: "solo",
   },
-  {
-    to: "/game",
-    title: "Solo Mind Games Hub",
-    desc: "Enter every solo challenge from one focused hub.",
-    icon: Brain,
-    section: "solo",
-  },
-  {
-    to: "/journey",
-    title: "UNVEIL Journey",
-    desc: "Walk the world together. Solo or with a match.",
-    icon: MapIcon,
-    section: "solo",
-  },
+
 
   // Match / multiplayer
   {
