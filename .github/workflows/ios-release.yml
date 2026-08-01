@@ -1,0 +1,53 @@
+name: iOS Release Archive
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archive-ios:
+    name: Archive iOS app (cap sync enforced)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install JS dependencies
+        run: bun install
+
+      # MANDATORY: builds the web bundle and runs `npx cap sync ios`.
+      # The archive step below must never run without it.
+      - name: Pre-archive (build + cap sync ios)
+        run: bash scripts/ios-prearchive.sh
+
+      - name: Assert cap sync artifacts present
+        run: |
+          test -f ios/App/App/capacitor.config.json
+          test -f ios/App/App/UnveilBridgeViewController.swift
+          grep -q 'UnveilBridgeViewController' ios/App/App/Base.lproj/Main.storyboard
+
+      - name: Archive (unsigned validation build)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/Unveil.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            archive 2>&1 | tail -n 60
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unveil-xcarchive
+          path: ${{ runner.temp }}/Unveil.xcarchive

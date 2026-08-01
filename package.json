@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "preview": "npm run build && npx nitro preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "ios:prearchive": "bash scripts/ios-prearchive.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
