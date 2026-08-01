@@ -80,6 +80,8 @@ function InsightsAiPage() {
     }).catch(() => { /* noop */ });
   }, [entitlements.premium, fetchTop]);
 
+  const inFlight = useRef<Set<string>>(new Set());
+
   async function generateFor(peerId: string, force = false) {
     // Guard against double submission (rapid Analyze/Refresh taps).
     if (inFlight.current.has(peerId)) return;
