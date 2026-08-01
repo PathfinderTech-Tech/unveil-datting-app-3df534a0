@@ -18,12 +18,19 @@ if [ -d .output/public ]; then
   cp -r .output/public/. dist/client/
 fi
 test -f dist/client/index.html
+test -f dist/client/native-error.html
 
 echo "==> npx cap sync ios"
 npx cap sync ios
 
 echo "==> Verifying generated native config"
-test -f ios/App/App/capacitor.config.json
-grep -q '"url"' ios/App/App/capacitor.config.json
+CONFIG=ios/App/App/capacitor.config.json
+test -f "$CONFIG"
+grep -q '"url"' "$CONFIG"
+# The archive must never ship pointing at a preview/localhost origin.
+grep -q 'https://unveil.best' "$CONFIG"
+grep -q '"errorPath"' "$CONFIG"
+test -f ios/App/App/public/index.html
+test -f ios/App/App/public/native-error.html
 grep -q 'UnveilBridgeViewController' ios/App/App/Base.lproj/Main.storyboard
 echo "==> Pre-archive checks passed"

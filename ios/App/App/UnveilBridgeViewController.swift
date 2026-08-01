@@ -19,8 +19,8 @@ import Capacitor
 ///      while the webview is mid-navigation, and skip for non-app URLs
 ///      (Stripe / Supabase / RevenueCat redirects).
 ///
-/// Auth state lives in localStorage (Supabase persistSession) and survives a
-/// reload, so recovery does not sign the user out.
+/// This controller does NOT take over Capacitor's navigation delegate: the
+/// original delegate is retained and every callback is forwarded to it.
 final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDelegate {
 
     private enum Log {
@@ -29,33 +29,56 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         }
     }
 
-    /// Set by the WKNavigationDelegate termination callback.
+    /// Set by the WKNavigationDelegate termination callback. Cleared only once
+    /// a first-party page has loaded AND passed the JS health probe.
     private var webContentProcessTerminated = false
     private var isNavigating = false
     private var recoveryInFlight = false
     private var recoveryAttempts = 0
     private var lastRecoveryAt: Date?
+    private var observerRegistered = false
+
+    /// Capacitor's own navigation delegate — preserved and forwarded to.
+    private weak var capacitorNavigationDelegate: WKNavigationDelegate?
 
     private let maxRecoveryAttempts = 3
     private let minSecondsBetweenRecoveries: TimeInterval = 10
     private let probeTimeout: TimeInterval = 2.0
+    /// A slow-but-healthy page must not be judged blank on a single timeout.
+    private let slowProbeTimeout: TimeInterval = 6.0
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        if let existing = webView?.navigationDelegate, !(existing === self) {
+            capacitorNavigationDelegate = existing
+        }
         webView?.navigationDelegate = self
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appDidBecomeActive),
-            name: UIApplication.didBecomeActiveNotification,
-            object: nil
-        )
+
+        if !observerRegistered {
+            observerRegistered = true
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(appDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification,
+                object: nil
+            )
+        }
         Log.event("controller_loaded", "url=\(describeURL(webView?.url))")
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+
     deinit {
-        NotificationCenter.default.removeObserver(self)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     // MARK: - Foreground check
@@ -122,15 +145,38 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         }
     }
 
-    /// Lightweight JS probe: a live JS context with a rendered body answers.
-    /// A terminated / blank webview either never calls back or reports no content.
+    /// Lightweight JS probe, executed ONLY against the first-party origin.
+    /// A live JS context with a rendered body answers. A timeout is retried
+    /// once with a longer budget so a slow page is never called blank.
     private func probeWebViewHealth(_ completion: @escaping (Bool) -> Void) {
-        guard let webView = self.webView else { return completion(false) }
+        guard let webView = self.webView, isOwnedURL(webView.url) else {
+            Log.event("probe_skipped", "reason=not_first_party")
+            return completion(true)
+        }
+        runProbe(on: webView, timeout: probeTimeout) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .healthy:
+                completion(true)
+            case .unhealthy:
+                completion(false)
+            case .timedOut:
+                Log.event("probe_retry", "timeout=\(self.slowProbeTimeout)")
+                self.runProbe(on: webView, timeout: self.slowProbeTimeout) { retry in
+                    completion(retry == .healthy)
+                }
+            }
+        }
+    }
+
+    private enum ProbeResult { case healthy, unhealthy, timedOut }
+
+    private func runProbe(on webView: WKWebView, timeout: TimeInterval, _ completion: @escaping (ProbeResult) -> Void) {
         var settled = false
-        let finish: (Bool) -> Void = { healthy in
+        let finish: (ProbeResult) -> Void = { result in
             guard !settled else { return }
             settled = true
-            completion(healthy)
+            completion(result)
         }
 
         let js = "(function(){try{return document.readyState==='complete'||document.readyState==='interactive' ? (document.body && document.body.childElementCount > 0 ? 'ok' : 'empty') : 'loading';}catch(e){return 'error';}})()"
@@ -139,19 +185,19 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
             DispatchQueue.main.async {
                 if let error {
                     Log.event("probe_result", "error=\(error.localizedDescription)")
-                    finish(false)
+                    finish(.unhealthy)
                     return
                 }
                 let value = (result as? String) ?? "unknown"
                 Log.event("probe_result", "value=\(value)")
-                finish(value == "ok" || value == "loading")
+                finish(value == "ok" || value == "loading" ? .healthy : .unhealthy)
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + probeTimeout) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
             if !settled {
                 Log.event("probe_result", "value=timeout")
-                finish(false)
+                finish(.timedOut)
             }
         }
     }
@@ -166,7 +212,8 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         Log.event("recovery_attempted", "reason=\(reason) attempt=\(recoveryAttempts)")
 
         // A terminated WebContent process cannot be revived by reload();
-        // it needs a fresh load request.
+        // it needs a fresh load request. The termination flag is intentionally
+        // NOT cleared here — it clears only after a verified healthy load.
         if webContentProcessTerminated {
             let target = isOwnedURL(webView.url) ? (webView.url ?? serverURL()) : serverURL()
             if let target {
@@ -176,7 +223,6 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
                 Log.event("recovery_failed", "reason=no_target_url")
                 recoveryInFlight = false
             }
-            webContentProcessTerminated = false
         } else {
             Log.event("recovery_load", "mode=reload url=\(describeURL(webView.url))")
             webView.reload()
@@ -197,11 +243,12 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         url?.absoluteString ?? "nil"
     }
 
-    // MARK: - WKNavigationDelegate
+    // MARK: - WKNavigationDelegate (observe, then forward to Capacitor)
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         webContentProcessTerminated = true
         Log.event("webcontent_terminated", "url=\(describeURL(webView.url))")
+        capacitorNavigationDelegate?.webViewWebContentProcessDidTerminate?(webView)
         // Only self-heal immediately if we are foreground; otherwise wait for
         // didBecomeActive so we never load off-screen in the background.
         if UIApplication.shared.applicationState == .active {
@@ -214,21 +261,42 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         isNavigating = true
         Log.event("navigation_started", "url=\(describeURL(webView.url))")
+        capacitorNavigationDelegate?.webView?(webView, didStartProvisionalNavigation: navigation)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         isNavigating = false
         Log.event("navigation_completed", "url=\(describeURL(webView.url))")
-        if recoveryInFlight {
-            recoveryInFlight = false
-            Log.event("recovery_succeeded", "url=\(describeURL(webView.url))")
-            recoveryAttempts = 0
+        capacitorNavigationDelegate?.webView?(webView, didFinish: navigation)
+
+        let firstParty = isOwnedURL(webView.url)
+        guard firstParty else {
+            if recoveryInFlight { recoveryInFlight = false }
+            return
+        }
+
+        // Confirm with the health probe before declaring recovery a success:
+        // only then reset the attempt counter and clear the termination flag.
+        probeWebViewHealth { [weak self] healthy in
+            guard let self else { return }
+            if healthy {
+                self.webContentProcessTerminated = false
+                self.recoveryAttempts = 0
+                if self.recoveryInFlight {
+                    self.recoveryInFlight = false
+                    Log.event("recovery_succeeded", "url=\(self.describeURL(webView.url))")
+                }
+            } else if self.recoveryInFlight {
+                self.recoveryInFlight = false
+                Log.event("recovery_failed", "reason=probe_failed_after_load")
+            }
         }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         isNavigating = false
         Log.event("navigation_failed", "error=\(error.localizedDescription)")
+        capacitorNavigationDelegate?.webView?(webView, didFail: navigation, withError: error)
         if recoveryInFlight {
             recoveryInFlight = false
             Log.event("recovery_failed", "error=\(error.localizedDescription)")
@@ -238,9 +306,37 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         isNavigating = false
         Log.event("navigation_failed", "phase=provisional error=\(error.localizedDescription)")
+        capacitorNavigationDelegate?.webView?(webView, didFailProvisionalNavigation: navigation, withError: error)
         if recoveryInFlight {
             recoveryInFlight = false
             Log.event("recovery_failed", "error=\(error.localizedDescription)")
         }
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        // Capacitor owns navigation policy (app-bound / external link handling).
+        if let delegate = capacitorNavigationDelegate,
+           delegate.responds(to: #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as (WKNavigationDelegate) -> ((WKWebView, WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?)) {
+            delegate.webView?(webView, decidePolicyFor: navigationAction, decisionHandler: decisionHandler)
+            return
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationResponse: WKNavigationResponse,
+        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
+    ) {
+        if let delegate = capacitorNavigationDelegate,
+           delegate.responds(to: #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as (WKNavigationDelegate) -> ((WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?)) {
+            delegate.webView?(webView, decidePolicyFor: navigationResponse, decisionHandler: decisionHandler)
+            return
+        }
+        decisionHandler(.allow)
     }
 }
