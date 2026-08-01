@@ -176,7 +176,6 @@ function ConsentPanel({
           <p className="font-medium">This connection will let {clientName}:</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
             <li>Read your basic UNVEIL profile</li>
-            <li>Read your UNVEIL Journey progress</li>
           </ul>
           <p className="mt-3 text-xs text-muted-foreground">
             This does not bypass UNVEIL's permissions or backend policies.
