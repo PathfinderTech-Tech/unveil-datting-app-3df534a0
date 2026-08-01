@@ -36,6 +36,10 @@ jobs:
         run: |
           test -f ios/App/App/capacitor.config.json
           test -f ios/App/App/UnveilBridgeViewController.swift
+          test -f ios/App/App/public/index.html
+          test -f ios/App/App/public/native-error.html
+          grep -q 'https://unveil.best' ios/App/App/capacitor.config.json
+          grep -q 'native-error.html' ios/App/App/capacitor.config.json
           grep -q 'UnveilBridgeViewController' ios/App/App/Base.lproj/Main.storyboard
 
       - name: Archive (unsigned validation build)
