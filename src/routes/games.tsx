@@ -1,10 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnveilNav } from "@/components/UnveilNav";
 import {
-  Sparkles,
   Heart,
-  Brain,
-  Map as MapIcon,
   Flag,
   Eye,
   Zap,
