@@ -27,14 +27,20 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function buildDeck(): Tile[] {
+// Deterministic order so the server and client render identical markup.
+// The real shuffle happens on the client after mount (see useEffect below).
+function orderedDeck(): Tile[] {
   const doubled = [...SYMBOLS, ...SYMBOLS];
-  return shuffle(doubled).map((symbol, id) => ({ id, symbol, matched: false }));
+  return doubled.map((symbol, id) => ({ id, symbol, matched: false }));
+}
+
+function buildDeck(): Tile[] {
+  return shuffle(orderedDeck().map(t => t.symbol)).map((symbol, id) => ({ id, symbol, matched: false }));
 }
 
 function LoveTilesRoute() {
   const [level, setLevel] = useState(1);
-  const [tiles, setTiles] = useState<Tile[]>(() => buildDeck());
+  const [tiles, setTiles] = useState<Tile[]>(() => orderedDeck());
   const [selected, setSelected] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [lovePoints, setLovePoints] = useState(0);
@@ -44,6 +50,11 @@ function LoveTilesRoute() {
   const [hintPair, setHintPair] = useState<number[]>([]);
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [paused, setPaused] = useState(false);
+
+  // Shuffle only in the browser, after hydration, to avoid SSR mismatch.
+  useEffect(() => {
+    setTiles(buildDeck());
+  }, []);
 
   const totalPairs = SYMBOLS.length;
   const matchedPairs = useMemo(() => tiles.filter(t => t.matched).length / 2, [tiles]);
