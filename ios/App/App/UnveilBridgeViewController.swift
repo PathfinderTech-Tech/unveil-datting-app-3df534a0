@@ -319,8 +319,8 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
         // Capacitor owns navigation policy (app-bound / external link handling).
-        if let delegate = capacitorNavigationDelegate,
-           delegate.responds(to: #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as (WKNavigationDelegate) -> ((WKWebView, WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?)) {
+        let selector = NSSelectorFromString("webView:decidePolicyForNavigationAction:decisionHandler:")
+        if let delegate = capacitorNavigationDelegate, delegate.responds(to: selector) {
             delegate.webView?(webView, decidePolicyFor: navigationAction, decisionHandler: decisionHandler)
             return
         }
@@ -332,8 +332,8 @@ final class UnveilBridgeViewController: CAPBridgeViewController, WKNavigationDel
         decidePolicyFor navigationResponse: WKNavigationResponse,
         decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
     ) {
-        if let delegate = capacitorNavigationDelegate,
-           delegate.responds(to: #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as (WKNavigationDelegate) -> ((WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?)) {
+        let selector = NSSelectorFromString("webView:decidePolicyForNavigationResponse:decisionHandler:")
+        if let delegate = capacitorNavigationDelegate, delegate.responds(to: selector) {
             delegate.webView?(webView, decidePolicyFor: navigationResponse, decisionHandler: decisionHandler)
             return
         }
