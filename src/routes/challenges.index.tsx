@@ -150,7 +150,7 @@ function Challenges() {
 
 function PublicChallenges() {
   const tiles = [
-    { to: "/challenges/solo-mind-games", icon: Sparkles, title: "Solo Mind Games", desc: "Enter Free Your Mind & Heart and other solo challenges in one place.", badge: "NEW" },
+    { to: "/love-tiles", icon: Sparkles, title: "UNVEIL Love Tiles", desc: "Match the symbols of love and earn chemistry for your Passport.", badge: "NEW" },
     { to: "/insights-ai", icon: Calendar, title: "Daily Personality Questions", desc: "One thoughtful prompt a day. Builds your Discovery Profile over time." },
     { to: "/spark", icon: MessageCircle, title: "Icebreakers & Reflections", desc: "Short prompts that shape your bio and unlock new conversation hooks." },
     { to: "/insights-ai", icon: Heart, title: "Community Reflections", desc: "See how your answers compare with the wider UNVEIL community." },
