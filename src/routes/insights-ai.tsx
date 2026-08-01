@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles, Heart, Users, Crown, RefreshCw, ArrowLeft, Trophy, ChevronRight, Lock, Calendar, Activity, Shield, MessageCircle, Gem } from "lucide-react";
 import { UnveilNav } from "@/components/UnveilNav";
@@ -58,7 +58,10 @@ function InsightsAiPage() {
         .eq("mutual_interest", true)
         .order("created_at", { ascending: false })
         .limit(20);
-      const peerIds = (data ?? []).map((m: any) => m.user_id === user.id ? m.matched_user_id : m.user_id);
+      // `matches` stores both directions of a pair, so the same peer can appear
+      // twice here. Dedupe by peer id (and drop self) before rendering cards.
+      const rawPeerIds = (data ?? []).map((m: any) => m.user_id === user.id ? m.matched_user_id : m.user_id);
+      const peerIds = Array.from(new Set(rawPeerIds.filter((id: string) => id && id !== user.id)));
       if (peerIds.length === 0) { if (alive) { setRows([]); setLoadingList(false); } return; }
       const { data: profs } = await (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds });
       if (!alive) return;
@@ -77,7 +80,12 @@ function InsightsAiPage() {
     }).catch(() => { /* noop */ });
   }, [entitlements.premium, fetchTop]);
 
+  const inFlight = useRef<Set<string>>(new Set());
+
   async function generateFor(peerId: string, force = false) {
+    // Guard against double submission (rapid Analyze/Refresh taps).
+    if (inFlight.current.has(peerId)) return;
+    inFlight.current.add(peerId);
     setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: true, error: undefined, errorCode: undefined } : r));
     try {
       const res = await fetchInsight({ data: { peerId, force } });
@@ -92,6 +100,8 @@ function InsightsAiPage() {
     } catch (e) {
       console.error("[insights-ai] generateFor failed", e);
       setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE"), errorCode: "AI_SERVICE_UNAVAILABLE" } : r));
+    } finally {
+      inFlight.current.delete(peerId);
     }
   }
 
