@@ -62,7 +62,7 @@ function InsightsAiPage() {
       // twice here. Dedupe by peer id (and drop self) before rendering cards.
       const rawPeerIds = (data ?? []).map((m: any) => m.user_id === user.id ? m.matched_user_id : m.user_id);
       const peerIds = Array.from(new Set(rawPeerIds.filter((id: string) => id && id !== user.id)));
-
+      if (peerIds.length === 0) { if (alive) { setRows([]); setLoadingList(false); } return; }
       const { data: profs } = await (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds });
       if (!alive) return;
       const profMap = new Map<string, any>((profs ?? []).map((p: any) => [p.id, p]));
