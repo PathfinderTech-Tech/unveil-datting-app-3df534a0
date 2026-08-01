@@ -98,6 +98,8 @@ function InsightsAiPage() {
     } catch (e) {
       console.error("[insights-ai] generateFor failed", e);
       setRows((rs) => rs.map((r) => r.peerId === peerId ? { ...r, loading: false, error: aiErrorMessage("AI_SERVICE_UNAVAILABLE"), errorCode: "AI_SERVICE_UNAVAILABLE" } : r));
+    } finally {
+      inFlight.current.delete(peerId);
     }
   }
 
