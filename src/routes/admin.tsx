@@ -2,12 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { UnveilNav } from "@/components/UnveilNav";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Users, AlertTriangle, Mail, Crown, ShieldCheck, CreditCard, Check, X, Loader2, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { AdminTrustPanel } from "@/components/AdminTrustPanel";
 import { sendTestPush } from "@/lib/push.functions";
+import {
+  adminReviewVerification,
+  adminReviewWaitlist,
+  checkIsAdmin,
+  loadAdminDashboard,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — UNVEIL" }] }),
@@ -18,6 +23,10 @@ type Tab = "waitlist" | "verifications" | "trust" | "payments" | "reports" | "fe
 
 function Admin() {
   const { user, loading } = useAuth();
+  const checkAdminFn = useServerFn(checkIsAdmin);
+  const loadDashboardFn = useServerFn(loadAdminDashboard);
+  const reviewWaitlistFn = useServerFn(adminReviewWaitlist);
+  const reviewVerificationFn = useServerFn(adminReviewVerification);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab>("waitlist");
   const [stats, setStats] = useState({
@@ -33,88 +42,45 @@ function Admin() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function refresh() {
-    const [u, wlt, wlp, wla, wlr, vp, r, p, v, pay, rep, wl, fb, mon] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
-      supabase.from("waitlist").select("id", { count: "exact", head: true }),
-      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "approved"),
-      supabase.from("waitlist").select("id", { count: "exact", head: true }).eq("status", "rejected"),
-      supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
-      supabase.from("reports").select("id", { count: "exact", head: true }),
-      supabase.from("subscriptions").select("id", { count: "exact", head: true }).neq("tier", "free"),
-      supabase.from("verification_requests").select("*").in("status", ["pending_review", "submitted", "approved", "rejected"]).order("submitted_at", { ascending: false }).limit(50),
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(50),
-      supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(20),
-      supabase.from("waitlist").select("*").order("created_at", { ascending: false }).limit(200),
-      supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(50),
-      (supabase as any).rpc("admin_monetization_stats"),
-    ]);
-    const m = Array.isArray(mon.data) ? mon.data[0] : mon.data;
-    setStats({
-      users: u.count || 0,
-      waitlistTotal: wlt.count || 0,
-      waitlistPending: wlp.count || 0,
-      approved: wla.count || 0,
-      rejected: wlr.count || 0,
-      pendingVerif: vp.count || 0,
-      premium: p.count || 0,
-      reports: r.count || 0,
-      messagesToday: Number(m?.messages_today ?? 0),
-      passesToday: Number(m?.daily_passes_today ?? 0),
-      activePasses: Number(m?.active_message_passes ?? 0),
-      verifiedBadges: Number(m?.verified_badges ?? 0),
-    });
-    setVerifications(v.data || []);
-    setPayments(pay.data || []);
-    setReports(rep.data || []);
-    setWaitlist(wl.data || []);
-    setFeedback(fb.data || []);
+    const data = await loadDashboardFn();
+    setStats(data.stats);
+    setVerifications(data.verifications || []);
+    setPayments(data.payments || []);
+    setReports(data.reports || []);
+    setWaitlist(data.waitlist || []);
+    setFeedback(data.feedback || []);
   }
 
   async function reviewWaitlist(id: string, status: "approved" | "rejected") {
     setBusyId(id);
-    const patch = {
-      status,
-      reviewed_at: new Date().toISOString(),
-      ...(status === "approved" ? { approved_at: new Date().toISOString() } : {}),
-    };
-    const { error } = await supabase.from("waitlist").update(patch).eq("id", id);
-    setBusyId(null);
-    if (error) return toast.error(error.message);
-    toast.success(status === "approved" ? "Approved." : "Rejected.");
-    await refresh();
+    try {
+      await reviewWaitlistFn({ data: { id, status } });
+      toast.success(status === "approved" ? "Approved." : "Rejected.");
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusyId(null);
+    }
   }
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
-      const admin = !!data;
-      setIsAdmin(admin);
-      if (admin) await refresh();
+      try {
+        const { isAdmin: admin } = await checkAdminFn();
+        setIsAdmin(admin);
+        if (admin) await refresh();
+      } catch {
+        setIsAdmin(false);
+      }
     })();
   }, [user]);
 
   async function review(id: string, userId: string, decision: "approved" | "rejected", notes?: string) {
     setBusyId(id);
     try {
-      const { error: vErr } = await supabase
-        .from("verification_requests")
-        .update({
-          status: decision,
-          reviewer_notes: notes ?? null,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", id);
-      if (vErr) throw vErr;
-
-      if (decision === "approved") {
-        const { error: pErr } = await supabase
-          .from("profiles")
-          .update({ verified: true, trust_score: 100, updated_at: new Date().toISOString() })
-          .eq("id", userId);
-        if (pErr) throw pErr;
-      }
+      await reviewVerificationFn({ data: { id, userId, decision, notes } });
       toast.success(decision === "approved" ? "Approved." : "Rejected.");
       await refresh();
     } catch (e) {
@@ -126,6 +92,7 @@ function Admin() {
 
   if (loading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   if (!user) return <Gate message="Sign in to continue." cta="Sign in" to="/login" />;
+  if (isAdmin === null) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Checking access…</div>;
   if (isAdmin === false) return <Gate message="This area is restricted to administrators." cta="Back home" to="/" />;
 
   return (
