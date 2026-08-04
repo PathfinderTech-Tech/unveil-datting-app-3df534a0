@@ -180,7 +180,15 @@ export const loadAdminTrustProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.userId);
-    const { data, error } = await (supabaseAdmin as any).rpc("admin_list_trust_profiles");
+    // Query via service role directly — do not call admin_list_trust_profiles RPC,
+    // which checks auth.uid() and fails when invoked with the service-role client.
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select(
+        "id, first_name, trust_level, location_risk_score, location_mismatch_count, travel_status, travel_expires_at, travel_warning_count, account_restricted, home_country_code, current_country_code, verified_country_code, verified",
+      )
+      .order("location_risk_score", { ascending: false, nullsFirst: false })
+      .limit(200);
     if (error) throw new Error(error.message);
     return { rows: (data ?? []) as Record<string, unknown>[] };
   });
