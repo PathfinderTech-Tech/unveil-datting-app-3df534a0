@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck, BadgeCheck, AlertTriangle, Plane } from "lucide-react";
-
 import { LocationTrustBadge } from "@/components/LocationTrustBadge";
+import { loadAdminLocationHistory, loadAdminTrustProfiles } from "@/lib/admin.functions";
 
 type Row = {
   id: string;
@@ -37,31 +37,39 @@ type VerifRow = {
 };
 
 export function AdminTrustPanel() {
+  const loadTrustFn = useServerFn(loadAdminTrustProfiles);
+  const loadHistoryFn = useServerFn(loadAdminLocationHistory);
   const [rows, setRows] = useState<Row[]>([]);
   const [history, setHistory] = useState<VerifRow[]>([]);
   const [selected, setSelected] = useState<Row | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any).rpc("admin_list_trust_profiles");
-      setRows((data ?? []) as Row[]);
-      setLoading(false);
+      try {
+        const { rows: data } = await loadTrustFn();
+        setRows((data ?? []) as Row[]);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load trust profiles");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
   async function openUser(r: Row) {
     setSelected(r);
-    const { data } = await supabase
-      .from("location_verifications")
-      .select("*")
-      .eq("user_id", r.id)
-      .order("verified_at", { ascending: false })
-      .limit(50);
-    setHistory((data ?? []) as VerifRow[]);
+    try {
+      const { rows: data } = await loadHistoryFn({ data: { userId: r.id } });
+      setHistory((data ?? []) as VerifRow[]);
+    } catch {
+      setHistory([]);
+    }
   }
 
   if (loading) return <div className="mt-6 text-sm text-muted-foreground">Loading trust signals…</div>;
+  if (error) return <div className="mt-6 text-sm text-amber-400">{error}</div>;
 
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-[1fr,1.3fr]">

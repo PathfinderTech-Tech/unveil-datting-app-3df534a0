@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertAdmin } from "@/lib/admin-auth.server";
 
 export type BetaStats = {
   totalUsers: number;
@@ -17,15 +18,7 @@ export type BetaStats = {
 export const getBetaStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<BetaStats> => {
-    const { userId } = context;
-    // Verify admin role
-    const { data: role } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!role) throw new Error("Forbidden");
+    await assertAdmin(context.userId);
 
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 

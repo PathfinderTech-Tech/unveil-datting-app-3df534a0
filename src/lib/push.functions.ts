@@ -15,6 +15,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdmin } from "@/lib/admin-auth.server";
 
 function b64url(input: ArrayBuffer | Uint8Array | string): string {
   let bytes: Uint8Array;
@@ -61,13 +62,7 @@ async function signAppleJwt(p8: string, keyId: string, teamId: string): Promise<
 export const sendTestPush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    // Admin gate
-    const { data: isAdmin, error: roleErr } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (roleErr) throw new Error(roleErr.message);
-    if (!isAdmin) throw new Error("Forbidden");
+    await assertAdmin(context.userId);
 
     const p8 = process.env.APNS_KEY_P8;
     const keyId = process.env.APNS_KEY_ID;
