@@ -35,12 +35,10 @@ import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManageSubscriptionRouteImport } from './routes/manage-subscription'
 import { Route as LoveTilesRouteImport } from './routes/love-tiles'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as InsightsAiRouteImport } from './routes/insights-ai'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as GiftsRouteImport } from './routes/gifts'
 import { Route as GamesRouteImport } from './routes/games'
-import { Route as GameRouteImport } from './routes/game'
 import { Route as DiscoverSummaryRouteImport } from './routes/discover-summary'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DeleteAccountRouteImport } from './routes/delete-account'
@@ -66,8 +64,6 @@ import { Route as PlayEscapeRouteImport } from './routes/play.escape'
 import { Route as PUserIdRouteImport } from './routes/p.$userId'
 import { Route as MatchUserIdRouteImport } from './routes/match.$userId'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
-import { Route as ChallengesSoloMindGamesRouteImport } from './routes/challenges.solo-mind-games'
-import { Route as ChallengesFreeYourMindHeartRouteImport } from './routes/challenges.free-your-mind-heart'
 import { Route as AdminBetaRouteImport } from './routes/admin.beta'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -209,11 +205,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JourneyRoute = JourneyRouteImport.update({
-  id: '/journey',
-  path: '/journey',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const InsightsAiRoute = InsightsAiRouteImport.update({
   id: '/insights-ai',
   path: '/insights-ai',
@@ -232,11 +223,6 @@ const GiftsRoute = GiftsRouteImport.update({
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GameRoute = GameRouteImport.update({
-  id: '/game',
-  path: '/game',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverSummaryRoute = DiscoverSummaryRouteImport.update({
@@ -364,17 +350,6 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
-const ChallengesSoloMindGamesRoute = ChallengesSoloMindGamesRouteImport.update({
-  id: '/challenges/solo-mind-games',
-  path: '/challenges/solo-mind-games',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChallengesFreeYourMindHeartRoute =
-  ChallengesFreeYourMindHeartRouteImport.update({
-    id: '/challenges/free-your-mind-heart',
-    path: '/challenges/free-your-mind-heart',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AdminBetaRoute = AdminBetaRouteImport.update({
   id: '/beta',
   path: '/beta',
@@ -446,12 +421,10 @@ export interface FileRoutesByFullPath {
   '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
-  '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
-  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -481,8 +454,6 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
-  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -517,12 +488,10 @@ export interface FileRoutesByTo {
   '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
-  '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
-  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -552,8 +521,6 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
-  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -589,12 +556,10 @@ export interface FileRoutesById {
   '/delete-account': typeof DeleteAccountRoute
   '/discover': typeof DiscoverRoute
   '/discover-summary': typeof DiscoverSummaryRoute
-  '/game': typeof GameRoute
   '/games': typeof GamesRoute
   '/gifts': typeof GiftsRoute
   '/insights': typeof InsightsRoute
   '/insights-ai': typeof InsightsAiRoute
-  '/journey': typeof JourneyRoute
   '/login': typeof LoginRoute
   '/love-tiles': typeof LoveTilesRoute
   '/manage-subscription': typeof ManageSubscriptionRoute
@@ -624,8 +589,6 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/beta': typeof AdminBetaRoute
-  '/challenges/free-your-mind-heart': typeof ChallengesFreeYourMindHeartRoute
-  '/challenges/solo-mind-games': typeof ChallengesSoloMindGamesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/match/$userId': typeof MatchUserIdRoute
   '/p/$userId': typeof PUserIdRoute
@@ -662,12 +625,10 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/discover'
     | '/discover-summary'
-    | '/game'
     | '/games'
     | '/gifts'
     | '/insights'
     | '/insights-ai'
-    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -697,8 +658,6 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
-    | '/challenges/free-your-mind-heart'
-    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -733,12 +692,10 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/discover'
     | '/discover-summary'
-    | '/game'
     | '/games'
     | '/gifts'
     | '/insights'
     | '/insights-ai'
-    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -768,8 +725,6 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
-    | '/challenges/free-your-mind-heart'
-    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -804,12 +759,10 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/discover'
     | '/discover-summary'
-    | '/game'
     | '/games'
     | '/gifts'
     | '/insights'
     | '/insights-ai'
-    | '/journey'
     | '/login'
     | '/love-tiles'
     | '/manage-subscription'
@@ -839,8 +792,6 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/beta'
-    | '/challenges/free-your-mind-heart'
-    | '/challenges/solo-mind-games'
     | '/checkout/return'
     | '/match/$userId'
     | '/p/$userId'
@@ -876,12 +827,10 @@ export interface RootRouteChildren {
   DeleteAccountRoute: typeof DeleteAccountRoute
   DiscoverRoute: typeof DiscoverRoute
   DiscoverSummaryRoute: typeof DiscoverSummaryRoute
-  GameRoute: typeof GameRoute
   GamesRoute: typeof GamesRoute
   GiftsRoute: typeof GiftsRoute
   InsightsRoute: typeof InsightsRoute
   InsightsAiRoute: typeof InsightsAiRoute
-  JourneyRoute: typeof JourneyRoute
   LoginRoute: typeof LoginRoute
   LoveTilesRoute: typeof LoveTilesRoute
   ManageSubscriptionRoute: typeof ManageSubscriptionRoute
@@ -910,8 +859,6 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  ChallengesFreeYourMindHeartRoute: typeof ChallengesFreeYourMindHeartRoute
-  ChallengesSoloMindGamesRoute: typeof ChallengesSoloMindGamesRoute
   MatchUserIdRoute: typeof MatchUserIdRoute
   PUserIdRoute: typeof PUserIdRoute
   PlayEscapeRoute: typeof PlayEscapeRoute
@@ -1115,13 +1062,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/journey': {
-      id: '/journey'
-      path: '/journey'
-      fullPath: '/journey'
-      preLoaderRoute: typeof JourneyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/insights-ai': {
       id: '/insights-ai'
       path: '/insights-ai'
@@ -1148,13 +1088,6 @@ declare module '@tanstack/react-router' {
       path: '/games'
       fullPath: '/games'
       preLoaderRoute: typeof GamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game': {
-      id: '/game'
-      path: '/game'
-      fullPath: '/game'
-      preLoaderRoute: typeof GameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover-summary': {
@@ -1332,20 +1265,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
-    '/challenges/solo-mind-games': {
-      id: '/challenges/solo-mind-games'
-      path: '/challenges/solo-mind-games'
-      fullPath: '/challenges/solo-mind-games'
-      preLoaderRoute: typeof ChallengesSoloMindGamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/challenges/free-your-mind-heart': {
-      id: '/challenges/free-your-mind-heart'
-      path: '/challenges/free-your-mind-heart'
-      fullPath: '/challenges/free-your-mind-heart'
-      preLoaderRoute: typeof ChallengesFreeYourMindHeartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/beta': {
       id: '/admin/beta'
       path: '/beta'
@@ -1456,12 +1375,10 @@ const rootRouteChildren: RootRouteChildren = {
   DeleteAccountRoute: DeleteAccountRoute,
   DiscoverRoute: DiscoverRoute,
   DiscoverSummaryRoute: DiscoverSummaryRoute,
-  GameRoute: GameRoute,
   GamesRoute: GamesRoute,
   GiftsRoute: GiftsRoute,
   InsightsRoute: InsightsRoute,
   InsightsAiRoute: InsightsAiRoute,
-  JourneyRoute: JourneyRoute,
   LoginRoute: LoginRoute,
   LoveTilesRoute: LoveTilesRoute,
   ManageSubscriptionRoute: ManageSubscriptionRoute,
@@ -1491,8 +1408,6 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
-  ChallengesFreeYourMindHeartRoute: ChallengesFreeYourMindHeartRoute,
-  ChallengesSoloMindGamesRoute: ChallengesSoloMindGamesRoute,
   MatchUserIdRoute: MatchUserIdRoute,
   PUserIdRoute: PUserIdRoute,
   PlayEscapeRoute: PlayEscapeRoute,

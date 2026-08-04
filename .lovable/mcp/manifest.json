@@ -31,29 +31,6 @@
           "properties": {}
         },
         "outputSchema": null
-      },
-      {
-        "name": "list_my_journeys",
-        "title": "List my UNVEIL Journeys",
-        "description": "List UNVEIL Journey walks the signed-in user is part of, with route, mode, progress, and status.",
-        "annotations": {
-          "readOnlyHint": true,
-          "idempotentHint": true,
-          "openWorldHint": false
-        },
-        "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
-          "type": "object",
-          "properties": {
-            "limit": {
-              "description": "Maximum number of journeys to return. Defaults to 20.",
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50
-            }
-          }
-        },
-        "outputSchema": null
       }
     ]
   }

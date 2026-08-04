@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "preview": "npm run build && npx nitro preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "ios:prearchive": "bash scripts/ios-prearchive.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -111,16 +112,21 @@
     "vite": "^7.3.1"
   },
   "overrides": {
-    "tar": "^7.5.19"
+    "tar": "^7.5.19",
+    "seroval": "^1.5.6",
+    "seroval-plugins": "^1.5.6"
   },
   "resolutions": {
-    "tar": "^7.5.19"
+    "tar": "^7.5.19",
+    "seroval": "^1.5.6",
+    "seroval-plugins": "^1.5.6"
   },
   "pnpm": {
     "overrides": {
       "entities": "4.5.0",
-      "tar": "^7.5.19"
+      "tar": "^7.5.19",
+      "seroval": "^1.5.6",
+      "seroval-plugins": "^1.5.6"
     }
   }
 }
-

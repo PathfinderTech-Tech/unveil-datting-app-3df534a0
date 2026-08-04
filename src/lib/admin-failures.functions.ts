@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertAdmin } from "@/lib/admin-auth.server";
 
 export type FailureRow = {
   id: string;
@@ -18,16 +19,6 @@ export type FailureStat = {
   count: number;
   lastAt: string;
 };
-
-async function assertAdmin(userId: string) {
-  const { data } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (!data) throw new Error("Forbidden");
-}
 
 export const getFailureStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
