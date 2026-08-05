@@ -76,6 +76,23 @@ async function urlToDataUrl(url: string | null): Promise<string | null> {
   }
 }
 
+/** Escape user text before splicing into SVG markup (download + preview blob). */
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/** Only allow safe image data URLs in SVG href attributes. */
+function safePhotoDataUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (!/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=\s]+$/i.test(url)) return null;
+  return url.replace(/\s+/g, "");
+}
+
 function buildSvg(
   d: CardData,
   badgeCount: number,
@@ -83,10 +100,15 @@ function buildSvg(
   photoDataUrl: string | null,
   crop: Crop,
 ): string {
-  const name = (d.first_name || "Your name").slice(0, 24);
-  const loc = [d.city, d.country].filter(Boolean).join(" · ").slice(0, 32) || "Somewhere on Earth";
-  const archetype = (d.archetype || "Signal").replace(/-/g, " ");
-  const score = d.readiness_score ?? 0;
+  const name = escapeXml((d.first_name || "Your name").slice(0, 24));
+  const loc = escapeXml(
+    [d.city, d.country].filter(Boolean).join(" · ").slice(0, 32) || "Somewhere on Earth",
+  );
+  const archetype = escapeXml((d.archetype || "Signal").replace(/-/g, " "));
+  const score = Number.isFinite(d.readiness_score) ? Math.max(0, Math.min(100, Math.round(d.readiness_score ?? 0))) : 0;
+  const badges = Number.isFinite(badgeCount) ? Math.max(0, Math.round(badgeCount)) : 0;
+  const badgesTotal = Number.isFinite(totalBadges) ? Math.max(0, Math.round(totalBadges)) : 0;
+  const safePhoto = safePhotoDataUrl(photoDataUrl);
 
   // Circle center (900, 220), radius 130. Image base box = 260x260.
   const cx = 900;
@@ -96,10 +118,10 @@ function buildSvg(
   const ix = cx - size / 2 + crop.x;
   const iy = cy - size / 2 + crop.y;
 
-  const photoBlock = photoDataUrl
+  const photoBlock = safePhoto
     ? `<defs><clipPath id="pclip"><circle cx="${cx}" cy="${cy}" r="130"/></clipPath></defs>
        <circle cx="${cx}" cy="${cy}" r="138" fill="none" stroke="#cf3ee3" stroke-width="3"/>
-       <image href="${photoDataUrl}" x="${ix}" y="${iy}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#pclip)"/>`
+       <image href="${safePhoto}" x="${ix}" y="${iy}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#pclip)"/>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350">
@@ -126,7 +148,7 @@ function buildSvg(
   <text x="60" y="900" fill="#d6badf" font-family="Inter, sans-serif" font-size="22">Relationship readiness</text>
   <text x="60" y="980" fill="#f7f0e2" font-family="Georgia, serif" font-size="110" font-weight="300">${score}<tspan fill="#d6badf" font-size="40">/100</tspan></text>
   <text x="60" y="1080" fill="#d6badf" font-family="Inter, sans-serif" font-size="22">Passport badges</text>
-  <text x="60" y="1140" fill="#f7f0e2" font-family="Georgia, serif" font-size="72" font-weight="300">${badgeCount}<tspan fill="#d6badf" font-size="32"> / ${totalBadges}</tspan></text>
+  <text x="60" y="1140" fill="#f7f0e2" font-family="Georgia, serif" font-size="72" font-weight="300">${badges}<tspan fill="#d6badf" font-size="32"> / ${badgesTotal}</tspan></text>
   <text x="60" y="1280" fill="#e877f0" font-family="monospace" font-size="18" letter-spacing="6">UNVEIL.BEST</text>
   <text x="1020" y="1280" fill="#e877f0" font-family="monospace" font-size="18" letter-spacing="4" text-anchor="end">SLOW LOVE · REAL CONNECTION</text>
 </svg>`;
@@ -289,10 +311,23 @@ export function ShareablePassportCard({
     }
   }
 
-  const svgPreview = useMemo(
+  const svgMarkup = useMemo(
     () => (data ? buildSvg(data, badgeCount, totalBadges, activePhoto, activeCrop) : ""),
     [data, badgeCount, totalBadges, activePhoto, activeCrop],
   );
+
+  // Render SVG as an image blob — avoids dangerouslySetInnerHTML / HTML injection.
+  const [svgPreviewUrl, setSvgPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!svgMarkup) {
+      setSvgPreviewUrl(null);
+      return;
+    }
+    const previewSvg = svgMarkup.replace('width="1080" height="1350"', 'width="100%" height="100%"');
+    const url = URL.createObjectURL(new Blob([previewSvg], { type: "image/svg+xml" }));
+    setSvgPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [svgMarkup]);
 
   const choices: { id: PhotoChoice; label: string; available: boolean }[] = [
     { id: "avatar", label: "Avatar", available: !!avatarData },
@@ -310,12 +345,11 @@ export function ShareablePassportCard({
         </DialogHeader>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-background">
-          {svgPreview ? (
-            <div
-              className="aspect-[4/5] w-full"
-              dangerouslySetInnerHTML={{
-                __html: svgPreview.replace('width="1080" height="1350"', 'width="100%" height="100%"'),
-              }}
+          {svgPreviewUrl ? (
+            <img
+              src={svgPreviewUrl}
+              alt="UNVEIL passport preview"
+              className="aspect-[4/5] w-full object-contain"
             />
           ) : (
             <div className="aspect-[4/5] w-full animate-pulse bg-surface" />
