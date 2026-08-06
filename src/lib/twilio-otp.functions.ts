@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 /**
@@ -21,9 +22,36 @@ import { z } from "zod";
 
 const e164Re = /^\+\d{6,15}$/;
 
+/** Rate limits (application-level; Twilio still has its own caps). */
+const LIMITS = {
+  sendPhoneCooldown: { max: 1, windowSec: 45 },
+  sendPhoneWindow: { max: 5, windowSec: 15 * 60 },
+  sendIpWindow: { max: 10, windowSec: 15 * 60 },
+  verifyPhoneWindow: { max: 8, windowSec: 15 * 60 },
+  verifyIpWindow: { max: 30, windowSec: 15 * 60 },
+} as const;
+
 function syntheticEmailFor(phone: string) {
   // Stable, deterministic, never sent to. Domain is non-routable.
   return `phone_${phone.replace(/\+/g, "")}@phone.unveil.local`;
+}
+
+function maskPhone(phone: string) {
+  if (phone.length < 6) return "***";
+  return `${phone.slice(0, 3)}***${phone.slice(-2)}`;
+}
+
+/** Strip E.164 / long digit runs from Twilio (or other) error strings before logging. */
+function redactPhoneInText(text: string | undefined | null): string | undefined {
+  if (!text) return undefined;
+  return text
+    .replace(/\+\d{6,15}/g, "[phone]")
+    .replace(/\b\d{10,15}\b/g, "[phone]");
+}
+
+function safeLogErrorMessage(message: unknown): string | undefined {
+  if (typeof message !== "string" || !message) return undefined;
+  return redactPhoneInText(message);
 }
 
 function twilioBasicAuth() {
@@ -41,6 +69,104 @@ function twilioBasicAuth() {
   };
 }
 
+async function sha256Hex(value: string): Promise<string> {
+  const data = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function clientIpFromRequest(): string {
+  try {
+    const request = getRequest();
+    const headers = request?.headers;
+    if (!headers) return "unknown";
+    const forwarded = headers.get("cf-connecting-ip")
+      || headers.get("x-real-ip")
+      || headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    return forwarded && forwarded.length > 0 ? forwarded : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+type RateLimitResult =
+  | { ok: true }
+  | { ok: false; error: string; retryAfterSeconds: number };
+
+async function enforceOtpRateLimit(
+  bucket: string,
+  rawKey: string,
+  max: number,
+  windowSec: number,
+): Promise<RateLimitResult> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const keyHash = await sha256Hex(`${bucket}:${rawKey}`);
+    const { data, error } = await (supabaseAdmin as any).rpc("consume_otp_rate_limit", {
+      _bucket: bucket,
+      _key_hash: keyHash,
+      _max_count: max,
+      _window_seconds: windowSec,
+    });
+
+    if (error) {
+      // Migration not applied yet — fail open so login isn't hard-broken,
+      // but log loudly so ops apply the migration.
+      console.warn("[twilio-otp] rate-limit RPC unavailable", {
+        bucket,
+        message: error.message,
+        code: error.code,
+      });
+      return { ok: true };
+    }
+
+    const row = (typeof data === "object" && data !== null ? data : {}) as {
+      allowed?: boolean;
+      retry_after_seconds?: number;
+      used?: number;
+    };
+
+    if (row.allowed === false) {
+      const retry = Math.max(1, Number(row.retry_after_seconds) || windowSec);
+      return {
+        ok: false,
+        retryAfterSeconds: retry,
+        error: `Too many attempts. Please wait ${retry} second${retry === 1 ? "" : "s"} and try again.`,
+      };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.warn("[twilio-otp] rate-limit check failed open", e);
+    return { ok: true };
+  }
+}
+
+async function gateSendOtp(phone: string, ip: string): Promise<RateLimitResult> {
+  // Sequential so a rejection does not burn other buckets.
+  for (const check of [
+    () => enforceOtpRateLimit("otp_send_phone_cd", phone, LIMITS.sendPhoneCooldown.max, LIMITS.sendPhoneCooldown.windowSec),
+    () => enforceOtpRateLimit("otp_send_phone", phone, LIMITS.sendPhoneWindow.max, LIMITS.sendPhoneWindow.windowSec),
+    () => enforceOtpRateLimit("otp_send_ip", ip, LIMITS.sendIpWindow.max, LIMITS.sendIpWindow.windowSec),
+  ]) {
+    const result = await check();
+    if (!result.ok) return result;
+  }
+  return { ok: true };
+}
+
+async function gateVerifyOtp(phone: string, ip: string): Promise<RateLimitResult> {
+  for (const check of [
+    () => enforceOtpRateLimit("otp_verify_phone", phone, LIMITS.verifyPhoneWindow.max, LIMITS.verifyPhoneWindow.windowSec),
+    () => enforceOtpRateLimit("otp_verify_ip", ip, LIMITS.verifyIpWindow.max, LIMITS.verifyIpWindow.windowSec),
+  ]) {
+    const result = await check();
+    if (!result.ok) return result;
+  }
+  return { ok: true };
+}
+
 export const sendPhoneOtp = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z
@@ -51,6 +177,22 @@ export const sendPhoneOtp = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    const ip = clientIpFromRequest();
+    const gate = await gateSendOtp(data.phone, ip);
+    if (!gate.ok) {
+      console.warn("[twilio-otp] send rate-limited", {
+        phone: maskPhone(data.phone),
+        retryAfterSeconds: gate.retryAfterSeconds,
+      });
+      return {
+        ok: false as const,
+        error: gate.error,
+        code: "rate_limited",
+        status: 429,
+        retryAfterSeconds: gate.retryAfterSeconds,
+      };
+    }
+
     const { auth, verifySid } = twilioBasicAuth();
     const url = `https://verify.twilio.com/v2/Services/${verifySid}/Verifications`;
     const body = new URLSearchParams({ To: data.phone, Channel: data.channel });
@@ -64,15 +206,12 @@ export const sendPhoneOtp = createServerFn({ method: "POST" })
     });
     const json: any = await res.json().catch(() => ({}));
     console.log("[twilio-otp] sendPhoneOtp", {
-      phone: data.phone,
+      phone: maskPhone(data.phone),
       channel: data.channel,
       httpStatus: res.status,
-      verificationSid: json?.sid,
-      verifyServiceSid: verifySid,
       verifyStatus: json?.status,
       errorCode: res.ok ? undefined : json?.code,
-      errorMessage: res.ok ? undefined : json?.message,
-      payload: json,
+      errorMessage: res.ok ? undefined : safeLogErrorMessage(json?.message),
     });
     if (!res.ok) {
       const msg = json?.message || `Twilio Verify error (${res.status})`;
@@ -97,6 +236,20 @@ export const verifyPhoneOtp = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    const ip = clientIpFromRequest();
+    const gate = await gateVerifyOtp(data.phone, ip);
+    if (!gate.ok) {
+      console.warn("[twilio-otp] verify rate-limited", {
+        phone: maskPhone(data.phone),
+        retryAfterSeconds: gate.retryAfterSeconds,
+      });
+      return {
+        ok: false as const,
+        error: gate.error,
+        retryAfterSeconds: gate.retryAfterSeconds,
+      };
+    }
+
     const { auth, verifySid } = twilioBasicAuth();
 
     // 1) Check the OTP with Twilio Verify.
@@ -111,15 +264,12 @@ export const verifyPhoneOtp = createServerFn({ method: "POST" })
     });
     const checkJson: any = await checkRes.json().catch(() => ({}));
     console.log("[twilio-otp] verifyPhoneOtp", {
-      phone: data.phone,
+      phone: maskPhone(data.phone),
       channel: checkJson?.channel,
       httpStatus: checkRes.status,
-      verificationSid: checkJson?.sid,
-      verifyServiceSid: verifySid,
       verifyStatus: checkJson?.status,
       errorCode: checkRes.ok ? undefined : checkJson?.code,
-      errorMessage: checkRes.ok ? undefined : checkJson?.message,
-      payload: checkJson,
+      errorMessage: checkRes.ok ? undefined : safeLogErrorMessage(checkJson?.message),
     });
     if (!checkRes.ok) {
       return {
