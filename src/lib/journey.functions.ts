@@ -1,7 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database, Json, Tables } from "@/integrations/supabase/types";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type Journey = Tables<"journeys">;
+type JourneyInvite = Tables<"journey_invites">;
+type PublicMatchProfile = Database["public"]["Functions"]["get_public_match_profiles"]["Returns"][number];
+type JourneyListItem = Journey & { completed_miles: number; my_role: string };
+type JourneyBrief = Pick<Journey, "id" | "from_city" | "to_city" | "total_miles">;
+type InvitableMatch = {
+  id: string;
+  first_name: string | null;
+  age: number | null;
+  city: string | null;
+  country: string | null;
+  verified: boolean;
+  bio: string | null;
+  photo_url: string | null;
+};
 
 export type LandmarkRow = {
   key: string;
@@ -92,7 +109,7 @@ export const listMyJourneys = createServerFn({ method: "GET" })
       .eq("user_id", userId);
     if (pe) throw new Error(pe.message);
     const ids = (parts ?? []).map((p) => p.journey_id);
-    if (ids.length === 0) return { journeys: [] as any[], invites: [] as any[] };
+    if (ids.length === 0) return { journeys: [] as JourneyListItem[], invites: [] as JourneyInvite[] };
 
     const { data: journeys, error: je } = await supabase
       .from("journeys")
@@ -118,7 +135,7 @@ export const listMyJourneys = createServerFn({ method: "GET" })
         completed_miles: +(totals.get(j.id) ?? 0).toFixed(2),
         my_role: parts?.find((p) => p.journey_id === j.id)?.role ?? "solo",
       })),
-      invites: [] as any[],
+      invites: [] as JourneyInvite[],
     };
   });
 
@@ -207,7 +224,7 @@ export const createSoloJourney = createServerFn({ method: "POST" })
         from_city: preset.from_city, from_country: preset.from_country, from_flag: preset.from_flag,
         to_city: preset.to_city, to_country: preset.to_country, to_flag: preset.to_flag,
         total_miles: preset.total_miles, total_km: preset.total_km,
-        landmarks: preset.landmarks as any,
+        landmarks: preset.landmarks as unknown as Json,
       })
       .select()
       .single();
@@ -255,7 +272,7 @@ export const createCoupleJourney = createServerFn({ method: "POST" })
         from_city: preset.from_city, from_country: preset.from_country, from_flag: preset.from_flag,
         to_city: preset.to_city, to_country: preset.to_country, to_flag: preset.to_flag,
         total_miles: preset.total_miles, total_km: preset.total_km,
-        landmarks: preset.landmarks as any,
+        landmarks: preset.landmarks as unknown as Json,
       })
       .select()
       .single();
@@ -295,10 +312,10 @@ export const listInvitableMatches = createServerFn({ method: "GET" })
         (matches ?? []).map((m) => (m.user_id === userId ? m.matched_user_id : m.user_id))
       )
     );
-    if (partnerIds.length === 0) return { matches: [] as any[] };
+    if (partnerIds.length === 0) return { matches: [] as InvitableMatch[] };
     const { data: profs } = await supabase.rpc("get_public_match_profiles", { _targets: partnerIds });
     return {
-      matches: (profs ?? []).map((p: any) => ({
+      matches: (profs ?? []).map((p) => ({
         id: p.id,
         first_name: p.first_name,
         age: p.age ?? null,
@@ -325,8 +342,8 @@ export const listMyInvites = createServerFn({ method: "GET" })
     const list = invites ?? [];
     const journeyIds = Array.from(new Set(list.map((i) => i.journey_id)));
     const userIds = Array.from(new Set(list.flatMap((i) => [i.from_user_id, i.to_user_id])));
-    let journeys: any[] = [];
-    let profiles: any[] = [];
+    let journeys: JourneyBrief[] = [];
+    let profiles: PublicMatchProfile[] = [];
     if (journeyIds.length > 0) {
       const { data } = await supabase.from("journeys").select("id, from_city, to_city, total_miles").in("id", journeyIds);
       journeys = data ?? [];
@@ -339,8 +356,8 @@ export const listMyInvites = createServerFn({ method: "GET" })
       invites: list.map((i) => ({
         ...i,
         journey: journeys.find((j) => j.id === i.journey_id) ?? null,
-        from_profile: profiles.find((p: any) => p.id === i.from_user_id) ?? null,
-        to_profile: profiles.find((p: any) => p.id === i.to_user_id) ?? null,
+        from_profile: profiles.find((p) => p.id === i.from_user_id) ?? null,
+        to_profile: profiles.find((p) => p.id === i.to_user_id) ?? null,
         direction: i.from_user_id === userId ? "sent" : "received",
       })),
     };

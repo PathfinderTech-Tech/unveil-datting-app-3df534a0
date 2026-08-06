@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
+type UnreadMessage = {
+  id: string;
+  sender_id: string;
+  conversation_id: string;
+};
+
+type MessageRead = {
+  message_id: string;
+};
+
 /**
  * Count of conversations with at least one unread message for the current user.
  */
@@ -25,14 +35,15 @@ export function useUnreadCount() {
         setCount(0);
         return;
       }
-      const convIds = convs.map((c: { id: string }) => c.id);
+      const convIds = convs.map((c) => c.id);
       const { data: msgs } = await supabase
         .from("messages")
         .select("id, sender_id, conversation_id")
         .in("conversation_id", convIds)
         .neq("sender_id", user!.id);
       if (!alive) return;
-      const messageIds = (msgs ?? []).map((m: any) => m.id);
+      const messageRows = (msgs ?? []) as UnreadMessage[];
+      const messageIds = messageRows.map((m) => m.id);
       if (!messageIds.length) {
         setCount(0);
         return;
@@ -42,11 +53,12 @@ export function useUnreadCount() {
         .select("message_id")
         .eq("user_id", user!.id)
         .in("message_id", messageIds);
-      const readSet = new Set((reads ?? []).map((r: any) => r.message_id));
+      const readRows = (reads ?? []) as MessageRead[];
+      const readSet = new Set(readRows.map((r) => r.message_id));
       const unreadConvs = new Set(
-        (msgs ?? [])
-          .filter((m: any) => !readSet.has(m.id))
-          .map((m: any) => m.conversation_id)
+        messageRows
+          .filter((m) => !readSet.has(m.id))
+          .map((m) => m.conversation_id)
       );
       setCount(unreadConvs.size);
     }
@@ -56,14 +68,14 @@ export function useUnreadCount() {
     const channel = supabase.channel(channelName);
     channel
       .on(
-        "postgres_changes" as any,
+        "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        refresh as any,
+        () => { void refresh(); },
       )
       .on(
-        "postgres_changes" as any,
+        "postgres_changes",
         { event: "INSERT", schema: "public", table: "message_reads" },
-        refresh as any,
+        () => { void refresh(); },
       )
       .subscribe();
 

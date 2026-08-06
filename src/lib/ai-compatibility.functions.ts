@@ -1,8 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { callOpenAI, checkAiRateLimit, AI_MODEL_DEFAULT, OpenAIError, type AiFeature } from "./openai.server";
 
 const CACHE_TTL_HOURS = 24;
+
+type AppSupabase = SupabaseClient<Database>;
+type PublicMatchProfile = Database["public"]["Functions"]["get_public_match_profiles"]["Returns"][number];
+type CompatRow = Database["public"]["Functions"]["compute_compatibility"]["Returns"][number];
+type ProfileSnippet = {
+  first_name?: string | null;
+  interests?: string[] | null;
+  archetype?: string | null;
+  relationship_intent?: string | null;
+  bio?: string | null;
+  values_top?: unknown;
+};
+type DateIdeaCandidate = { title?: unknown; reason?: unknown };
+type AnswerReflection = {
+  answer: string;
+  daily_questions: { prompt: string; category: string } | null;
+};
 
 export type CompatibilityInsight = {
   overallCompatibility: number;
@@ -51,8 +70,8 @@ function clamp(n: unknown, def = 50): number {
 function parseInsight(raw: string, fallbackName: string): Omit<CompatibilityInsight, "computedAt"> | null {
   const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
   try {
-    const j = JSON.parse(cleaned);
-    const ideas = Array.isArray(j.dateIdeas) ? j.dateIdeas.slice(0, 3) : [];
+    const j = JSON.parse(cleaned) as Record<string, unknown>;
+    const ideas = Array.isArray(j.dateIdeas) ? (j.dateIdeas as DateIdeaCandidate[]).slice(0, 3) : [];
     return {
       overallCompatibility: clamp(j.overallCompatibility, 60),
       romanticPotential: clamp(j.romanticPotential, 60),
@@ -65,8 +84,8 @@ function parseInsight(raw: string, fallbackName: string): Omit<CompatibilityInsi
       aiSummary: String(j.aiSummary ?? "").slice(0, 400),
       suggestedNextStep: String(j.suggestedNextStep ?? "").slice(0, 240),
       dateIdeas: ideas
-        .filter((d: any) => d && typeof d.title === "string")
-        .map((d: any) => ({
+        .filter((d): d is DateIdeaCandidate & { title: string } => !!d && typeof d.title === "string")
+        .map((d) => ({
           title: String(d.title).slice(0, 60),
           reason: String(d.reason ?? "").slice(0, 200),
         })),
@@ -78,7 +97,7 @@ function parseInsight(raw: string, fallbackName: string): Omit<CompatibilityInsi
 }
 
 async function computeInsight(args: {
-  supabase: any;
+  supabase: AppSupabase;
   userId: string;
   peerId: string;
 }): Promise<CompatibilityInsight> {
@@ -96,7 +115,9 @@ async function computeInsight(args: {
 
   const [me, them, compat, recentMsgs, mineAns, theirAns] = await Promise.all([
     supabase.from("profiles").select("first_name,interests,archetype,relationship_intent,bio,values_top").eq("id", userId).maybeSingle(),
-    (supabase as any).rpc("get_public_match_profiles", { _targets: [peerId] }).then((r: any) => ({ data: (r.data ?? [])[0] ?? null })),
+    supabase.rpc("get_public_match_profiles", { _targets: [peerId] }).then((r) => ({
+      data: ((r.data ?? [])[0] ?? null) as PublicMatchProfile | null,
+    })),
     supabase.rpc("compute_compatibility", { _a: userId, _b: peerId }).maybeSingle(),
     supabase.from("messages")
       .select("sender_id, content, created_at")
@@ -107,14 +128,17 @@ async function computeInsight(args: {
     supabase.from("daily_answers").select("answer, daily_questions(prompt,category)").eq("user_id", peerId).order("created_at", { ascending: false }).limit(5),
   ]);
 
-  const meP: any = me.data ?? {};
-  const themP: any = them.data ?? {};
-  const c: any = compat.data ?? {};
+  const meP: ProfileSnippet = (me.data as ProfileSnippet | null) ?? {};
+  const themP: Partial<PublicMatchProfile> = them.data ?? {};
+  const c: Partial<CompatRow> = (compat.data as CompatRow | null) ?? {};
   const themName = themP.first_name ?? "Your match";
-  const sharedInterests = ((meP.interests ?? []) as string[]).filter((i) => (themP.interests ?? []).includes(i));
+  const sharedInterests = (meP.interests ?? []).filter((i) => (themP.interests ?? []).includes(i));
 
-  const msgs = (recentMsgs.data ?? []) as { sender_id: string; content: string }[];
+  const msgs = recentMsgs.data ?? [];
   const msgSnippet = msgs.slice(0, 10).map((m) => `${m.sender_id === userId ? "Me" : themName}: ${String(m.content ?? "").slice(0, 120)}`).join("\n");
+
+  const mineReflections = (mineAns.data ?? []) as AnswerReflection[];
+  const theirReflections = (theirAns.data ?? []) as AnswerReflection[];
 
   const contextBlock = [
     `My name: ${meP.first_name ?? "user"}. Interests: ${(meP.interests ?? []).join(", ") || "—"}. Archetype: ${meP.archetype ?? "—"}. Intent: ${meP.relationship_intent ?? "—"}.`,
@@ -123,8 +147,8 @@ async function computeInsight(args: {
     themP.bio ? `Their bio: ${String(themP.bio).slice(0, 240)}` : "",
     sharedInterests.length ? `Shared interests: ${sharedInterests.join(", ")}.` : "No overlapping interests listed.",
     `Internal compatibility score ${c.overall ?? matchRow.compatibility_score ?? "n/a"}/100. Chemistry ${matchRow.chemistry_score ?? "n/a"}. Connection ${matchRow.connection_score ?? "n/a"}. Interactions ${matchRow.interaction_count ?? 0}.`,
-    mineAns.data?.length ? `My recent reflections: ${mineAns.data.map((r: any) => `${r.daily_questions?.category}:${r.answer}`).join(" | ")}` : "",
-    theirAns.data?.length ? `Their recent reflections: ${theirAns.data.map((r: any) => `${r.daily_questions?.category}:${r.answer}`).join(" | ")}` : "",
+    mineReflections.length ? `My recent reflections: ${mineReflections.map((r) => `${r.daily_questions?.category}:${r.answer}`).join(" | ")}` : "",
+    theirReflections.length ? `Their recent reflections: ${theirReflections.map((r) => `${r.daily_questions?.category}:${r.answer}`).join(" | ")}` : "",
     msgSnippet ? `Recent conversation (newest first):\n${msgSnippet}` : "No conversation history yet.",
   ].filter(Boolean).join("\n");
 
@@ -237,7 +261,7 @@ export const getTopAiMatches = createServerFn({ method: "POST" })
         .order("computed_at", { ascending: false })
         .limit(50);
 
-      const all = (rows ?? []).map((r: any) => r.payload as CompatibilityInsight);
+      const all = (rows ?? []).map((r) => r.payload as CompatibilityInsight);
       const byKey = (k: keyof CompatibilityInsight) =>
         all.slice().sort((a, b) => (b[k] as number) - (a[k] as number))[0] ?? null;
 

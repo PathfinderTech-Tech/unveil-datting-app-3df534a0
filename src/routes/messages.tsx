@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type LinkProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UnveilNav } from "@/components/UnveilNav";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -30,6 +30,53 @@ export const Route = createFileRoute("/messages")({
   ),
   component: MessagesPage,
 });
+
+type ConversationRow = {
+  id: string;
+  user_a: string;
+  user_b: string;
+  last_message_at: string | null;
+};
+
+type ThoughtRow = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+  delivered_as_message_id: string | null;
+};
+
+type MessageRow = {
+  id: string;
+  conversation_id: string;
+  content: string | null;
+  sender_id: string;
+  created_at: string;
+  message_type: string | null;
+};
+
+type MessageReadRow = {
+  message_id: string;
+};
+
+type PublicProfile = {
+  id: string;
+  first_name: string | null;
+  profile_photo_url: string | null;
+  photo_url: string | null;
+  avatar_url: string | null;
+  discovery_mode?: string | null;
+  verified?: boolean | null;
+};
+
+type MatchRow = {
+  user_id: string;
+  matched_user_id: string;
+  mutual_interest: boolean | null;
+  created_at: string;
+};
 
 type Row = {
   id: string;
@@ -80,14 +127,14 @@ function MessagesPage() {
           .from("conversations")
           .select("id, user_a, user_b, last_message_at")
           .order("last_message_at", { ascending: false, nullsFirst: false }),
-        (supabase as any)
+        supabase
           .from("thoughts")
           .select("id, sender_id, recipient_id, content, created_at, read_at, delivered_as_message_id")
           .eq("sender_id", user!.id)
           .is("delivered_as_message_id", null)
           .order("created_at", { ascending: false })
           .limit(50),
-        (supabase as any)
+        supabase
           .from("thoughts")
           .select("id, sender_id, recipient_id, content, created_at, read_at, delivered_as_message_id")
           .eq("recipient_id", user!.id)
@@ -96,18 +143,22 @@ function MessagesPage() {
           .limit(50),
       ]);
 
-      const convPeerIds = (convs ?? []).map((c: any) => (c.user_a === user!.id ? c.user_b : c.user_a));
+      const convList = (convs ?? []) as ConversationRow[];
+      const thoughtsSentList = (thoughtsSent ?? []) as ThoughtRow[];
+      const thoughtsRecvList = (thoughtsRecv ?? []) as ThoughtRow[];
+
+      const convPeerIds = convList.map((c) => (c.user_a === user!.id ? c.user_b : c.user_a));
       const thoughtPeerIds = [
-        ...((thoughtsSent ?? []) as any[]).map((t) => t.recipient_id),
-        ...((thoughtsRecv ?? []) as any[]).map((t) => t.sender_id),
+        ...thoughtsSentList.map((t) => t.recipient_id),
+        ...thoughtsRecvList.map((t) => t.sender_id),
       ];
       const peerIds = Array.from(new Set([...convPeerIds, ...thoughtPeerIds]));
-      const convIds = (convs ?? []).map((c: any) => c.id);
+      const convIds = convList.map((c) => c.id);
 
-      const [{ data: profs }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
+      const [{ data: profsRaw }, mediaRows, { data: msgs }, { data: reads }] = await Promise.all([
         peerIds.length
-          ? (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds })
-          : Promise.resolve({ data: [] as any[] } as any),
+          ? supabase.rpc("get_public_match_profiles", { _targets: peerIds })
+          : Promise.resolve({ data: [] as PublicProfile[], error: null }),
         peerIds.length ? getPrimaryProfileMedia({ data: { userIds: peerIds } }) : Promise.resolve([]),
         convIds.length
           ? supabase
@@ -115,31 +166,34 @@ function MessagesPage() {
               .select("id, conversation_id, content, sender_id, created_at, message_type")
               .in("conversation_id", convIds)
               .order("created_at", { ascending: false })
-          : Promise.resolve({ data: [] as any[] } as any),
+          : Promise.resolve({ data: [] as MessageRow[], error: null }),
         supabase.from("message_reads").select("message_id").eq("user_id", user!.id),
       ]);
 
-      const readSet = new Set((reads ?? []).map((r: any) => r.message_id));
-      const lastByConv = new Map<string, any>();
+      const profs = (profsRaw ?? []) as PublicProfile[];
+      const msgList = (msgs ?? []) as MessageRow[];
+      const readList = (reads ?? []) as MessageReadRow[];
+      const readSet = new Set(readList.map((r) => r.message_id));
+      const lastByConv = new Map<string, MessageRow>();
       const unreadByConv = new Map<string, number>();
-      for (const m of (msgs ?? []) as any[]) {
+      for (const m of msgList) {
         if (!lastByConv.has(m.conversation_id)) lastByConv.set(m.conversation_id, m);
         if (m.sender_id !== user!.id && !readSet.has(m.id)) {
           unreadByConv.set(m.conversation_id, (unreadByConv.get(m.conversation_id) ?? 0) + 1);
         }
       }
 
-      const profMap = new Map<string, any>();
-      for (const p of (profs ?? []) as any[]) profMap.set(p.id, p);
+      const profMap = new Map<string, PublicProfile>();
+      for (const p of profs) profMap.set(p.id, p);
       const mediaMap = new Map(mediaRows.map((m) => [m.id, m]));
 
-      const previewFor = (m: any): string => {
+      const previewFor = (m: MessageRow | undefined): string => {
         if (!m) return "Say hi";
         if (m.message_type === "voice") return "🎙️ Voice message";
         return m.content ?? "Say hi";
       };
 
-      const convRows: Row[] = (convs ?? []).map((c: any) => {
+      const convRows: Row[] = convList.map((c) => {
         const peerId = c.user_a === user!.id ? c.user_b : c.user_a;
         const peer = profMap.get(peerId);
         const media = mediaMap.get(peerId);
@@ -164,7 +218,7 @@ function MessagesPage() {
       const peersWithConv = new Set(convRows.map((r) => r.peer_id));
       const thoughtRows: Row[] = [];
       const seenPeers = new Set<string>();
-      for (const t of [...(thoughtsRecv ?? []), ...(thoughtsSent ?? [])] as any[]) {
+      for (const t of [...thoughtsRecvList, ...thoughtsSentList]) {
         const peerId = t.sender_id === user!.id ? t.recipient_id : t.sender_id;
         if (peersWithConv.has(peerId) || seenPeers.has(peerId)) continue;
         seenPeers.add(peerId);
@@ -230,10 +284,11 @@ function MessagesPage() {
           .order("created_at", { ascending: false })
           .limit(24);
 
+        const matchList = (matches ?? []) as MatchRow[];
         const peerIds = Array.from(
           new Set(
-            (matches ?? [])
-              .map((m: any) => (m.user_id === uid ? m.matched_user_id : m.user_id))
+            matchList
+              .map((m) => (m.user_id === uid ? m.matched_user_id : m.user_id))
               .filter((id: unknown): id is string => typeof id === "string"),
           ),
         ).slice(0, 6);
@@ -243,12 +298,14 @@ function MessagesPage() {
           return;
         }
 
-        const [{ data: profs }, mediaRows] = await Promise.all([
-          (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds }),
+        const [{ data: profsRaw }, mediaRows] = await Promise.all([
+          supabase.rpc("get_public_match_profiles", { _targets: peerIds }),
           getPrimaryProfileMedia({ data: { userIds: peerIds } }),
         ]);
 
-        const profMap = new Map<string, any>((profs ?? []).map((p: any) => [p.id, p]));
+        const profMap = new Map<string, PublicProfile>(
+          ((profsRaw ?? []) as PublicProfile[]).map((p) => [p.id, p]),
+        );
         const mediaMap = new Map(mediaRows.map((m) => [m.id, m]));
 
         const suggestions: SuggestedProfile[] = peerIds
@@ -429,13 +486,15 @@ function MessagesPage() {
               // Always route to the chat thread. Real conversations open via ?c=<id>.
               // Thought (pre-mutual) rows open the chat list so the user can reply there
               // — never redirect to a profile/passport page from the inbox.
-              const linkProps = isThought
-                ? ({ to: "/chat" } as const)
-                : ({ to: "/chat", search: { c: r.id } } as const);
+              const linkProps = (
+                isThought
+                  ? { to: "/chat" }
+                  : { to: "/chat", search: { c: r.id } }
+              ) as LinkProps;
               return (
               <li key={r.id}>
                 <Link
-                  {...(linkProps as any)}
+                  {...linkProps}
                   className={`flex items-center gap-3 p-4 transition-colors ${
                     r.unread > 0
                       ? "bg-primary/10 border-l-2 border-primary hover:bg-primary/15"
