@@ -10,6 +10,53 @@ import { getBlueprint, updateBlueprint, STYLE_OPTIONS } from "@/lib/blueprint.fu
 import { ContactExchangeCountdown, ContactExchangeReadyCard } from "@/components/ContactExchangeCountdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+type DailyQuestion = {
+  id: string;
+  category: string;
+  prompt: string;
+  options: string[] | unknown;
+};
+
+type TodayCard = {
+  category: string;
+  question: DailyQuestion | null;
+  answer: string | null;
+};
+
+type AnswerHistoryItem = {
+  id: string;
+  answer: string;
+  day_key: string;
+  question_id: string;
+  daily_questions: { prompt: string; category: string } | null;
+};
+
+type BlueprintUpdate = Partial<Record<keyof typeof STYLE_OPTIONS, string>>;
+
+type MatchRow = {
+  id: string;
+  user_id: string;
+  matched_user_id: string;
+  mutual_interest: boolean | null;
+  created_at: string;
+};
+
+type PeerProfile = {
+  id: string;
+  first_name: string | null;
+};
+
+type EnrichedMatch = MatchRow & {
+  peerId: string;
+  peer: PeerProfile | undefined;
+};
+
+type ConversationRow = {
+  id: string;
+  user_a: string;
+  user_b: string;
+};
+
 /**
  * Merged Insights hub tabs. Originally lived in /insights — now hosted inside
  * /insights-ai so users have a single unified Relationship Intelligence Hub.
@@ -35,14 +82,14 @@ function TodayTab() {
   const fetchBundle = useServerFn(getTodayBundle);
   const submit = useServerFn(saveDailyAnswer);
   const fetchHistory = useServerFn(getAnswerHistory);
-  const [cards, setCards] = useState<Array<{ category: string; question: any; answer: string | null }>>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [cards, setCards] = useState<TodayCard[]>([]);
+  const [history, setHistory] = useState<AnswerHistoryItem[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
     const [b, h] = await Promise.all([fetchBundle({}), fetchHistory({})]);
-    setCards(b.cards as any);
-    setHistory(h.history);
+    setCards(b.cards as TodayCard[]);
+    setHistory(h.history as AnswerHistoryItem[]);
   }
   useEffect(() => { load(); }, []);
 
@@ -98,14 +145,16 @@ function TodayTab() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {cards.map((c) => (
+        {cards.map((c) => {
+          const question = c.question;
+          return (
           <div key={c.category} className="rounded-2xl border border-border bg-surface/40 p-5">
             <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
               {c.category}
             </span>
-            {c.question ? (
+            {question ? (
               <>
-                <h2 className="mt-3 text-base font-medium">{c.question.prompt}</h2>
+                <h2 className="mt-3 text-base font-medium">{question.prompt}</h2>
                 {c.answer ? (
                   <div className="mt-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
                     <p className="text-xs text-muted-foreground">Your answer</p>
@@ -113,11 +162,11 @@ function TodayTab() {
                   </div>
                 ) : (
                   <div className="mt-3 grid gap-2">
-                    {(c.question.options as string[]).map((opt) => (
+                    {(question.options as string[]).map((opt) => (
                       <button
                         key={opt}
-                        disabled={busy === c.question.id}
-                        onClick={() => pick(c.question.id, opt, c.category)}
+                        disabled={busy === question.id}
+                        onClick={() => pick(question.id, opt, c.category)}
                         className="rounded-xl border border-border bg-background/60 px-3 py-2 text-left text-sm transition-colors hover:border-primary hover:bg-primary/10 disabled:opacity-50"
                       >
                         {opt}
@@ -130,7 +179,8 @@ function TodayTab() {
               <p className="mt-3 text-sm text-muted-foreground">No prompt today.</p>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {history.length > 0 && (
@@ -247,7 +297,7 @@ function BlueprintTab() {
   async function update(key: keyof typeof STYLE_OPTIONS, value: string) {
     setBusy(true);
     try {
-      await saveBp({ data: { [key]: value } as any });
+      await saveBp({ data: { [key]: value } as BlueprintUpdate });
       setBp((s) => ({ ...s, [key]: value }));
       toast.success("Saved");
     } catch (e) {
@@ -297,7 +347,7 @@ function BlueprintTab() {
 }
 
 function ConnectionTab({ userId }: { userId: string }) {
-  const [matches, setMatches] = useState<any[]>([]);
+  const [matches, setMatches] = useState<EnrichedMatch[]>([]);
   const [convByPeer, setConvByPeer] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -310,18 +360,18 @@ function ConnectionTab({ userId }: { userId: string }) {
           .eq("mutual_interest", true),
         supabase.from("conversations").select("id, user_a, user_b"),
       ]);
-      const list = data ?? [];
-      const peerIds = list.map((m: any) => (m.user_id === userId ? m.matched_user_id : m.user_id));
+      const list = (data ?? []) as MatchRow[];
+      const peerIds = list.map((m) => (m.user_id === userId ? m.matched_user_id : m.user_id));
       const { data: profs } = peerIds.length
-        ? await (supabase as any).rpc("get_public_match_profiles", { _targets: peerIds })
-        : { data: [] as any[] };
-      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+        ? await supabase.rpc("get_public_match_profiles", { _targets: peerIds })
+        : { data: [] as PeerProfile[] };
+      const profMap = new Map((profs ?? []).map((p) => [p.id, p as PeerProfile]));
       const convMap: Record<string, string> = {};
-      for (const c of (convs ?? []) as any[]) {
+      for (const c of (convs ?? []) as ConversationRow[]) {
         const peer = c.user_a === userId ? c.user_b : c.user_a;
         convMap[peer] = c.id;
       }
-      const enriched = list.map((m: any) => {
+      const enriched: EnrichedMatch[] = list.map((m) => {
         const peerId = m.user_id === userId ? m.matched_user_id : m.user_id;
         return { ...m, peerId, peer: profMap.get(peerId) };
       });

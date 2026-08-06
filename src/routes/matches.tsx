@@ -52,6 +52,25 @@ type ProfileState = {
   photosRemaining: number;
 };
 
+type ConversationRow = {
+  id: string;
+  user_a: string;
+  user_b: string;
+  last_message_at: string | null;
+};
+
+type MessageRow = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  created_at: string;
+  message_type: string | null;
+};
+
+type MessageReadRow = {
+  message_id: string;
+};
+
 const MATCHES_PROFILE_TIMEOUT_MS = 10000;
 const MATCHES_LIST_TIMEOUT_MS = 15000;
 
@@ -228,7 +247,8 @@ function Matches() {
         .select("id, user_a, user_b, last_message_at");
       if (!alive) return;
       if (!convs?.length) { setConvoStatus({}); return; }
-      const convIds = convs.map((c: any) => c.id);
+      const convList = convs as ConversationRow[];
+      const convIds = convList.map((c) => c.id);
       const [{ data: msgs }, { data: reads }] = await Promise.all([
         supabase
           .from("messages")
@@ -238,14 +258,14 @@ function Matches() {
         supabase.from("message_reads").select("message_id").eq("user_id", user!.id),
       ]);
       if (!alive) return;
-      const readSet = new Set((reads ?? []).map((r: any) => r.message_id));
-      const byConv = new Map<string, any[]>();
-      for (const m of (msgs ?? []) as any[]) {
+      const readSet = new Set(((reads ?? []) as MessageReadRow[]).map((r) => r.message_id));
+      const byConv = new Map<string, MessageRow[]>();
+      for (const m of (msgs ?? []) as MessageRow[]) {
         const arr = byConv.get(m.conversation_id) ?? [];
         arr.push(m); byConv.set(m.conversation_id, arr);
       }
       const next: Record<string, ConvoStatus> = {};
-      for (const c of convs as any[]) {
+      for (const c of convList) {
         const peerId = c.user_a === user!.id ? c.user_b : c.user_a;
         const arr = byConv.get(c.id) ?? [];
         let unreadText = 0, unreadVoice = 0;
@@ -269,8 +289,8 @@ function Matches() {
     }
     loadConvos();
     const ch = supabase.channel(`matches-convo-${user.id}`)
-      .on("postgres_changes" as any, { event: "*", schema: "public", table: "messages" }, loadConvos as any)
-      .on("postgres_changes" as any, { event: "*", schema: "public", table: "message_reads" }, loadConvos as any)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, loadConvos)
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reads" }, loadConvos)
       .subscribe();
     return () => { alive = false; supabase.removeChannel(ch); };
   }, [user]);
