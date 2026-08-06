@@ -281,6 +281,43 @@ function useLaunchState() {
   };
 }
 
+const CHUNK_RELOAD_FLAG = "unveil:chunk-reload-once";
+
+/** Only take over the whole UI for errors that require a full reload (stale chunks). */
+function isFatalRuntimeError(error: unknown): boolean {
+  const name = error instanceof Error ? error.name : "";
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return (
+    name === "ChunkLoadError" ||
+    /Loading chunk [\d]+ failed/i.test(message) ||
+    /Failed to fetch dynamically imported module/i.test(message) ||
+    /error loading dynamically imported module/i.test(message)
+  );
+}
+
+function persistRuntimeError(entry: Record<string, unknown>) {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem("unveil:startup-errors") || "[]");
+    if (!Array.isArray(stored)) return;
+    stored.push({ ...entry, at: Date.now() });
+    window.localStorage.setItem("unveil:startup-errors", JSON.stringify(stored.slice(-20)));
+  } catch {
+    /* noop */
+  }
+}
+
+/** One silent reload for stale deploy chunks; never loop. */
+function tryAutoReloadForChunkError(): boolean {
+  try {
+    if (window.sessionStorage.getItem(CHUNK_RELOAD_FLAG) === "1") return false;
+    window.sessionStorage.setItem(CHUNK_RELOAD_FLAG, "1");
+    window.location.reload();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
   const [fatalError, setFatalError] = useState<unknown | null>(null);
 
@@ -296,6 +333,8 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
       nativeStart: window.__UNVEIL_NATIVE_START__,
     });
     try {
+      // Successful boot clears the one-shot chunk reload guard.
+      window.sessionStorage.removeItem(CHUNK_RELOAD_FLAG);
       const previousStartupErrors = window.localStorage.getItem("unveil:startup-errors");
       if (previousStartupErrors) {
         console.info("[startup:previous-errors]", JSON.parse(previousStartupErrors));
@@ -305,14 +344,24 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
     }
 
     const onError = (event: ErrorEvent) => {
+      const error = event.error ?? event.message;
       console.error("[runtime:error]", {
         route: window.location.pathname,
         source: event.filename,
         line: event.lineno,
         column: event.colno,
-        error: event.error ?? event.message,
+        error,
       });
-      if (event.error) setFatalError(event.error);
+      persistRuntimeError({
+        type: "error",
+        message: event.message || String(error),
+        source: event.filename,
+      });
+      // After boot, ignore transient errors. Only stale chunks need recovery.
+      if (event.error && isFatalRuntimeError(event.error)) {
+        if (tryAutoReloadForChunkError()) return;
+        setFatalError(event.error);
+      }
     };
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
@@ -320,7 +369,14 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
         route: window.location.pathname,
         reason: event.reason,
       });
-      setFatalError(event.reason ?? new Error("Unhandled startup rejection"));
+      persistRuntimeError({
+        type: "unhandledrejection",
+        message: event.reason instanceof Error ? event.reason.message : String(event.reason ?? "rejection"),
+      });
+      if (isFatalRuntimeError(event.reason)) {
+        if (tryAutoReloadForChunkError()) return;
+        setFatalError(event.reason ?? new Error("Unhandled startup rejection"));
+      }
     };
 
     window.addEventListener("error", onError);
@@ -336,8 +392,8 @@ function AppRuntimeGuard({ children }: { children: React.ReactNode }) {
     const error = fatalError instanceof Error ? fatalError : new Error(String(fatalError));
     return (
       <FatalAppScreen
-        title="UNVEIL recovered from a startup error"
-        message="The app did not open cleanly, so this safety screen is shown instead of a blank page. Retry or return home."
+        title="UNVEIL needs a refresh"
+        message="A required app update failed to load. Retry to continue."
         primaryAction={
           <button
             type="button"
