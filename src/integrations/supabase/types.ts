@@ -1431,6 +1431,27 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_rate_events: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: number
+          key_hash: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: number
+          key_hash: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: number
+          key_hash?: string
+        }
+        Relationships: []
+      }
       personality_blueprint: {
         Row: {
           attachment_style: string | null
@@ -2437,6 +2458,15 @@ export type Database = {
         Returns: {
           unlocked: boolean
         }[]
+      }
+      consume_otp_rate_limit: {
+        Args: {
+          _bucket: string
+          _key_hash: string
+          _max_count: number
+          _window_seconds: number
+        }
+        Returns: Json
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }

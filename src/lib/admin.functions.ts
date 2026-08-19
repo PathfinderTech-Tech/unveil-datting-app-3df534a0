@@ -23,11 +23,11 @@ export type AdminDashboardStats = {
 
 export type AdminDashboardPayload = {
   stats: AdminDashboardStats;
-  verifications: Record<string, unknown>[];
-  payments: Record<string, unknown>[];
-  reports: Record<string, unknown>[];
-  waitlist: Record<string, unknown>[];
-  feedback: Record<string, unknown>[];
+  verifications: any[];
+  payments: any[];
+  reports: any[];
+  waitlist: any[];
+  feedback: any[];
 };
 
 /** UI gate helper — does not throw; returns false for non-admins. */
@@ -106,11 +106,11 @@ export const loadAdminDashboard = createServerFn({ method: "GET" })
         activePasses: Number(m?.active_message_passes ?? 0),
         verifiedBadges: Number(m?.verified_badges ?? 0),
       },
-      verifications: (v.data || []) as Record<string, unknown>[],
-      payments: (pay.data || []) as Record<string, unknown>[],
-      reports: (rep.data || []) as Record<string, unknown>[],
-      waitlist: (wl.data || []) as Record<string, unknown>[],
-      feedback: (fb.data || []) as Record<string, unknown>[],
+      verifications: (v.data || []) as any[],
+      payments: (pay.data || []) as any[],
+      reports: (rep.data || []) as any[],
+      waitlist: (wl.data || []) as any[],
+      feedback: (fb.data || []) as any[],
     };
   });
 
@@ -190,7 +190,7 @@ export const loadAdminTrustProfiles = createServerFn({ method: "GET" })
       .order("location_risk_score", { ascending: false, nullsFirst: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return { rows: (data ?? []) as Record<string, unknown>[] };
+    return { rows: (data ?? []) as any[] };
   });
 
 export const loadAdminLocationHistory = createServerFn({ method: "POST" })
@@ -205,5 +205,5 @@ export const loadAdminLocationHistory = createServerFn({ method: "POST" })
       .order("verified_at", { ascending: false })
       .limit(50);
     if (error) throw new Error(error.message);
-    return { rows: (rows ?? []) as Record<string, unknown>[] };
+    return { rows: (rows ?? []) as any[] };
   });
