@@ -61,9 +61,6 @@ Add these keys in Xcode → App target → Info tab.
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>UNVEIL uses your approximate city to find nearby compatible matches. Exact location is never stored.</string>
 
-<key>NSUserTrackingUsageDescription</key>
-<string>Used only to keep you signed in across app launches. UNVEIL does not track you across other apps.</string>
-
 <key>NSFaceIDUsageDescription</key>
 <string>UNVEIL can use Face ID to unlock private chats.</string>
 ```

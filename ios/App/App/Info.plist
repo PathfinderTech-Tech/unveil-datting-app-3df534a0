@@ -72,7 +72,5 @@
 	<string>UNVEIL uses your approximate city to find nearby compatible matches. Exact location is never stored.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>UNVEIL can use Face ID to unlock private chats.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Used only to keep you signed in across app launches. UNVEIL does not track you across other apps.</string>
 </dict>
 </plist>
