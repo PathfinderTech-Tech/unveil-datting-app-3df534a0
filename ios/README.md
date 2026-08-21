@@ -61,7 +61,6 @@ Add to `ios/App/App/Info.plist` (Xcode → Info tab) usage strings:
 - `NSPhotoLibraryUsageDescription` — "UNVEIL needs access to your photos to upload profile pictures."
 - `NSPhotoLibraryAddUsageDescription` — "UNVEIL can save shared images to your photo library."
 - `NSLocationWhenInUseUsageDescription` — "UNVEIL uses your approximate location to find nearby matches."
-- `NSUserTrackingUsageDescription` — "Used only to keep you signed in across app launches."
 
 ## Build & ship to TestFlight
 
